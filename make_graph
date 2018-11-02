@@ -1,0 +1,1 @@
+coqdep -Q . Termination -dumpgraph dependencies.dot *.v && dot -T pdf dependencies.dot > dependencies.pdf && rm dependencies.dot

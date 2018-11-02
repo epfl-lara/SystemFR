@@ -1,0 +1,614 @@
+Require Import Omega.
+
+Require Import Coq.Strings.String.
+Require Import Coq.Lists.List.
+
+Require Import Termination.Syntax.
+Require Import Termination.Typing.
+Require Import Termination.Tactics.
+Require Import Termination.AssocList.
+Require Import Termination.SmallStep.
+Require Import Termination.Sets.
+Require Import Termination.WFLemmas.
+Require Import Termination.ListUtils.
+Require Import Termination.TypeForm.
+
+Require Import Termination.WFLemmas.
+Require Import Termination.WFLemmasTyping.
+
+Require Import Termination.FVLemmas.
+Require Import Termination.FVLemmasTyping.
+
+Ltac direct_lookup G x X :=
+  match G with
+  | (?y,?Y) :: ?G2 => unify x y; unify X Y
+  | _ :: ?G2 => direct_lookup G2 x X
+  end.                               
+
+Ltac not_true p :=
+  tryif unify p ttrue then fail else idtac.
+
+Ltac find_derivation :=
+  match goal with
+  | _ => step || (progress unfold subset in *)
+  | _ => apply ITNat
+  | _ => apply ITType
+  | _ => apply ITUnit
+  | _ => apply ITBool
+  | _ => apply ITEqual
+  | _ => apply ITIntersection
+  | _ => apply ITSingleton
+  | _ => apply ICCons
+  | _ => apply ISRefl
+  | _ => apply ISIntersection1
+  | _ => apply ISIntersection2
+  | _ => apply HTSucc
+  | _ => apply HTZero
+  | _ => apply HTUnit
+  | _ => apply HTTrue
+  | _ => apply HTFalse
+  | _ => apply HTApp
+  | |- is_subtype _ ?T (T_refine ?T ?p) =>
+      not_true p;
+      apply ISTrans with (T_refine T ttrue)
+  | |- is_subtype ?G _ _ => apply ISRefine with (@support string term G)
+  | |- is_subtype ?G _ _ => apply ISArrow with (@support string term G)
+  | |- is_subtype ?G (T_singleton ?t ?T) _ =>
+      apply ISTrans with (T_refine T ttrue)
+  | |- has_type ?G (lambda _ _) (T_arrow _ _) => apply HTLambda with (@support string term G)
+  | |- has_type ?G (rec ?T _ _ _) _ => apply HTRec with (@support string term G)
+  | |- is_subtype ?G (T_let _ _ _) _ => apply ISLet with (@support string term G)
+  | |- is_type ?G (T_let _ _ _) => apply ITLet with (@support string term G)
+  | |- is_type ?G (T_refine _ _) => apply ITRefine with (@support string term G)
+  | |- is_type ?G (T_arrow _ _) => apply ITArrow with (@support string term G)
+  | |- has_type ?G (tlet _ _ _) _ => apply HTLet with (@support string term G)
+  | |- has_type ?G (fvar ?x) ?T => direct_lookup G x T; apply HTVar
+  | |- has_type ?G (fvar ?x) ?T => eapply HTSub; try apply HTVar; steps
+  | |- has_type ?G (succ ?x) ?T => apply HTSub with T_nat
+  | |- has_type ?G ttrue ?T => apply HTSub with T_bool
+  | |- has_type ?G uu ?T => apply HTSub with T_unit
+  | |- has_type ?G tfalse ?T => apply HTSub with T_bool
+  | |- has_type ?G (rec ?T ?tn _ _) _ => apply HTSub with (T_let tn T_nat T)
+  | H: has_type ?G ?t ?A |- has_type ?G ?t _ => apply HTSub with A
+  | |- is_subtype ?G _ (T_let ?v ?A ?B)
+                 => assert (is_value v);
+                   [ solve [ eauto with values ] | idtac ];
+                   apply ISTrans with (open 0 B v);
+                   [ idtac | apply ISLetOpen2 ]
+  | _ => apply ISRefine2
+  | _ => apply ISRefine3
+  end.
+
+                       
+Definition plus (n m: term): term :=
+  rec T_nat n m (succ (app (lvar 0) uu)).
+
+Lemma subtype0:
+  forall gamma n,
+    is_context gamma ->
+    has_type gamma n T_nat ->
+    is_subtype gamma (T_let n T_nat T_nat) T_nat.
+Proof.
+  steps.
+  repeat find_derivation || p_fv; eauto with bfv; eauto with bwf.
+Qed.
+
+Lemma subtype1:
+  forall gamma,
+    is_context gamma ->
+    is_subtype gamma (T_let uu T_unit T_nat) T_nat.
+Proof.
+  steps.
+  repeat find_derivation || p_fv; eauto with bfv; eauto with bwf.
+Qed.
+
+Lemma subtype2:
+  forall gamma n,
+    is_context gamma ->
+    has_type gamma n T_nat ->
+    is_subtype gamma (T_let n T_nat T_bool) T_bool.
+Proof.
+  steps.
+  repeat find_derivation || p_fv; eauto with bfv; eauto with bwf.
+Qed.
+
+Lemma subtype3:
+  forall gamma,
+    is_context gamma ->
+    is_subtype gamma (T_let uu T_unit T_bool) T_bool.
+Proof.
+  steps.
+  repeat find_derivation || p_fv; eauto with bfv; eauto with bwf.
+Qed.
+
+Hint Resolve subtype0: extra.    
+Hint Resolve subtype1: extra.
+Hint Resolve subtype2: extra.
+Hint Resolve subtype3: extra.
+
+Lemma context0:
+  forall gamma x1 A B x2 t,
+    is_context gamma ->
+    ~(x1 ∈ support gamma) ->
+    ~(x2 ∈ support gamma) ->
+    ~(x1 = x2) ->
+    (forall x, x ∈ fv t -> x ∈ support gamma \/ x2 = x) ->
+    wf t 0 ->
+    (forall g, is_context g -> is_type g A) ->
+    is_type gamma B ->
+    is_context
+      ((x1, T_arrow T_unit (T_intersection (T_singleton t) A)) :: (x2,B) :: gamma).
+Proof.
+  repeat find_derivation || p_fv || t_fv_open || t_listutils || rewrite open_one_too_late_type || apply_any;
+    eauto with bfv;
+    eauto with bwf step_tactic.
+  apply H3 in H10; steps; eauto.
+Qed.
+
+Lemma context1:
+  forall gamma n m y0 n0 n1 y,
+  is_context gamma ->
+  has_type gamma n T_nat ->
+  has_type gamma m T_nat ->
+  ~(y0 ∈ support gamma) ->
+  ~(n0 ∈ support gamma) ->
+  ~(y ∈ support gamma) ->
+  ~(n1 ∈ support gamma) ->
+  y0 <> y ->
+  y0 <> n1 ->
+  y0 <> n0 ->
+  n0 <> y ->
+  n0 <> n1 ->
+  n1 <> y ->
+   is_context
+   ((y0,
+    T_arrow T_unit
+      (T_intersection (T_singleton (rec T_bool (fvar n1) tfalse (app (lvar 0) uu))) T_bool))
+    :: (n1, T_nat)
+       :: (y,
+          T_arrow T_unit
+            (T_intersection
+               (T_singleton
+                  (rec T_bool (fvar n0) (rec T_bool m ttrue tfalse)
+                     (rec T_bool m tfalse (app (lvar 0) uu)))) T_bool)) :: 
+          (n0, T_nat) :: gamma).
+Proof.
+  repeat step || t_listutils || p_fv || apply context0 || find_derivation; eauto with bwf.
+Qed.
+
+Lemma context2:
+  forall y0 n1 y n0 x gamma,
+  is_context gamma ->
+  ~(y0 ∈ support gamma) ->
+  ~(n0 ∈ support gamma) ->
+  ~(y ∈ support gamma) ->
+  ~(n1 ∈ support gamma) ->
+  ~(x ∈ support gamma) ->
+  y0 <> y ->
+  y0 <> n1 ->
+  y0 <> n0 ->
+  n0 <> y ->
+  n0 <> n1 ->
+  n1 <> y ->
+  x <> y0 ->
+  x <> y ->
+  x <> n0 ->
+  x <> n1 ->
+ is_context
+   ((y0,
+    T_arrow T_unit
+      (T_intersection (T_singleton (rec T_bool (fvar n1) tfalse (app (lvar 0) uu))) T_bool))
+    :: (n1, T_nat)
+       :: (y,
+          T_arrow T_unit
+            (T_intersection
+               (T_singleton
+                  (rec T_bool (fvar n0) (rec T_bool (fvar x) ttrue tfalse)
+                     (rec T_bool (fvar x) tfalse (app (lvar 0) uu)))) T_bool))
+          :: (n0, T_nat) :: (x, T_nat) :: gamma).
+Proof.
+  repeat step || t_listutils || p_fv || apply context0 || find_derivation; eauto with bwf.
+Qed.
+  
+Lemma plus_well_typed:
+  forall gamma n m,
+    is_context gamma ->
+    has_type gamma n T_nat ->
+    has_type gamma m T_nat ->
+    has_type gamma (plus n m) T_nat.
+Proof.
+  unfold plus; steps.
+  find_derivation; eauto with extra.
+  find_derivation; steps; eauto.
+  - repeat find_derivation.
+  - repeat find_derivation.
+    apply HTSub with (T_let uu T_unit T_nat).
+    + apply subtype1.
+      apply context0;
+        repeat find_derivation || step || t_listutils || p_fv; eauto with bfv; eauto with bwf.
+    + find_derivation.
+      * repeat apply context0 || find_derivation || t_listutils || t_fv_open || p_fv; eauto 4 with bwf step_tactic.
+      * repeat apply context0 || find_derivation || t_listutils || t_fv_open || p_fv; eauto 4 with bwf step_tactic.
+Qed.
+
+(* m and m' are the same when they are locally closed *)
+Definition equal n m m': term :=
+  (rec T_bool
+     n
+     (rec T_bool m ttrue tfalse)
+     (rec T_bool m' tfalse (app (lvar 0) uu))
+     ).
+
+Lemma wf_fvar:
+  forall x, wf (fvar x) 0.
+Proof.
+  steps.
+Qed.
+
+Hint Resolve wf_fvar: bwf.
+
+Lemma wf0:
+  forall e x,
+    wf e 0 ->
+    wf (open 0 e (fvar x)) 0.
+Proof.
+  eauto with bwf.
+Qed.
+
+Lemma wf1:
+  forall e x,
+    wf e 0 ->
+    wf (open 1 e (fvar x)) 1.
+Proof.
+  eauto with bwf.
+Qed.
+  
+Lemma wf2:
+  forall e x,
+    wf e 0 ->
+    wf (open 2 e (fvar x)) 2.
+Proof.
+  eauto 7 with bwf.
+Qed.
+
+Hint Resolve wf0 wf1 wf2: bwf.
+(*
+Lemma fvs:
+  (forall T k, fv (open_fun k T (fun i : nat => lvar (S (S i)))) = fv T) /\
+  (forall m k, fv (open_fun k m (fun i : nat => lvar (S (S i)))) = fv m).
+Proof.
+  apply type_ind; steps.
+Qed.
+
+Definition fvs := proj2 fvs.
+
+Definition inc2 :=  (fun i : nat => lvar (S (S i))).
+Hint Unfold inc2.
+*)
+(*
+Lemma wf_open_fun:
+  (forall T k, wf T k -> wf (open_fun k T inc2) (S (S k))) /\ 
+  (forall t k, wf t k -> wf (open_fun k t inc2) (S (S k))). 
+Proof.
+  apply type_ind;
+    repeat match goal with
+           | H: _ |- _ => apply H
+           | _ => step || omega
+           end; eauto with bwf.
+Qed.
+
+Definition wf_open_fun_type := proj1 wf_open_fun.
+Definition wf_open_fun := proj2 wf_open_fun.
+
+Hint Resolve wf_open_type wf_open: bwf.
+
+Lemma wf4:
+  forall m x,
+    wf m 0 ->
+    wf (open 2 (open_fun 0 m (fun i : nat => lvar (S (S i)))) (fvar x)) 2.
+Proof.
+  intros.
+  apply wf_open; steps.
+  rewrite open_fun_late; repeat exact "" || unshelve eauto with bwf.
+Qed.
+
+Hint Resolve wf4: bwf.
+*)
+Lemma weakenTwice:
+  forall m gamma T x1 x2 T1 T2,
+    has_type gamma m T ->
+    is_type gamma T2 ->
+    is_type ((x2,T2) :: gamma) T1 ->
+    ~(x1 ∈ support gamma) ->
+    ~(x2 ∈ support gamma) ->
+    ~(x1 = x2) ->
+    has_type ((x1,T1) :: (x2,T2) :: gamma) m T.
+Proof.
+  repeat step || apply HTWeaken.
+Qed.
+  
+Lemma equal_well_typed:
+  forall gamma n m,
+    is_context gamma ->
+    has_type gamma n T_nat ->
+    has_type gamma m T_nat ->
+    has_type gamma (equal n m m) T_bool.
+Proof.
+  unfold equal; steps.
+  repeat
+    (apply subtype0) ||
+    (apply subtype1) ||
+    (apply subtype2) ||
+    (apply subtype3) ||
+    (rewrite (open_one_too_late n)) ||
+    (rewrite (open_one_too_late m)) ||
+    apply (HTWeaken _ _ _ n) ||
+    apply (HTWeaken _ _ _ m) ||
+    find_derivation || p_fv || t_listutils || t_fv_open; eauto 4 with bwf; eauto 2 with bfv.
+
+  - apply HTSub with (T_let uu T_unit T_bool).
+    + apply subtype3.
+      apply context0;
+        repeat find_derivation || step || t_listutils || p_fv || t_fv_open; eauto with bfv; eauto with bwf.
+    +  repeat apply context2 || apply context1 || apply context0 || find_derivation ||
+             t_listutils || exact "" || unshelve eauto with bwf.
+
+  Unshelve. all:exact "".
+Qed.
+
+(*
+Lemma plus_wf:
+  forall n m,
+  wf n 0 ->
+  wf m 0 ->
+  wf (plus n m) 0.
+Proof.
+  unfold equal; steps; try omega.
+Qed.
+
+*)  
+
+Definition plus_n_0 (n: term): term :=
+  rec
+     (T_refine T_unit (equal (plus (lvar 1) zero) (lvar 1) (lvar 3)))
+     n
+     uu
+     (app (lvar 0) uu).
+
+Arguments equal: simpl never.
+Arguments plus: simpl never.
+
+Lemma opening_plus:
+  forall k rep n m,
+    wf m 0 ->
+    open k (plus n m) rep = plus (open k n rep) (open k m rep).
+Proof.
+  unfold plus; steps.
+Qed.
+
+Opaque Nat.eq_dec.
+(*
+Lemma open2:
+  (forall T rep k i,
+      wf rep 0 ->
+     open (S (S k)) (open_fun i T inc2) rep =
+     open_fun i (open k T rep) inc2) /\
+  (forall t rep k i,
+      wf rep 0 ->
+     open (S (S k)) (open_fun i t inc2) rep =
+     open_fun i (open k t rep) inc2).
+Proof.
+  apply type_ind;
+    try solve [ repeat t_typeequality || tequality || step ||
+    rewrite (open_fun_late rep); eauto with bwf omega ].
+
+  repeat (intuition auto) || cbn || rewrite (open_fun_late rep).
+  step. step.
+  - (* case i = n *)
+    step. step. step. step. step.
+    + (* case k = n *)
+      repeat step || rewrite (open_fun_late rep); eauto with bwf omega.
+    + (* case k <> n *)
+      repeat step || rewrite (open_fun_late rep); eauto with bwf omega.
+  - (* case i <> n *)
+    step. step. step. step.
+    + (* case n = k + 2 *)
+      step. step.
+      repeat step || rewrite (open_fun_late rep); eauto with bwf omega.
+    step.
+      
+      * (* case k = n again *)
+        repeat step.
+
+  eauto with bwf omega.
+   repeat t_typeequality || tequality || step ||
+    rewrite (open_fun_late rep); eauto with bwf omega.
+Admitted.
+*)  
+Lemma opening_equal:
+  forall k rep n m m',
+    wf rep 0 ->
+    open k (equal n m m') rep =
+    equal
+      (open k n rep)
+      (open k m rep)
+      (open (S (S k)) m' rep).
+Proof.
+  unfold equal; repeat step || tequality || rewrite (open_one_too_late rep);
+    eauto with bwf omega.
+Qed.
+
+Lemma equal_wf:
+  forall n m m' k,
+    wf n k ->
+    wf m k ->
+    wf m' (S (S k)) ->
+    wf (equal n m m') k.
+Proof.
+  unfold equal; repeat step || exact "" || unshelve eauto with bwf omega.
+Qed.
+
+Lemma plus_wf:
+  forall n m k,
+    wf n k ->
+    wf m k ->
+    wf (plus n m) k.
+Proof.
+  unfold plus; repeat step || exact "" || unshelve eauto with bwf omega.
+Qed.
+  
+Lemma context3:
+  forall gamma y n0,
+    is_context gamma ->
+    y <> n0 ->
+    ~(y ∈ support gamma) ->
+    ~(n0 ∈ support gamma) ->
+    is_context ((y,
+     T_arrow T_unit
+       (T_intersection
+          (T_singleton
+             (rec (T_refine T_unit (equal (plus (lvar 1) zero) (lvar 1) (lvar 3))) 
+                (fvar n0) uu (app (lvar 0) uu)))
+          (T_refine T_unit (equal (plus (fvar n0) zero) (fvar n0) (fvar n0)))))
+     :: (n0, T_nat) :: gamma).
+Proof.
+   repeat
+     rewrite opening_equal in * ||
+     rewrite opening_plus in * ||
+     rewrite (open_one_too_late n) in * ||
+     apply equal_wf ||
+     apply plus_wf ||
+     apply equal_well_typed ||
+     apply plus_well_typed ||
+     apply (HTWeaken _ _ _ n) ||
+     find_derivation ||
+     t_listutils ||
+     step ||
+     p_fv; eauto 4 with bwf omega.
+Qed.
+
+Lemma context4:
+  forall gamma x y n0,
+    is_context gamma ->
+    y <> n0 ->
+    x <> n0 ->
+    y <> x ->
+    ~(y ∈ support gamma) ->
+    ~(n0 ∈ support gamma) ->
+    ~(x ∈ support gamma) ->
+    is_context
+      ((x, T_unit)
+     :: (y,
+        T_arrow T_unit
+          (T_intersection
+             (T_singleton
+                (rec (T_refine T_unit (equal (plus (lvar 1) zero) (lvar 1) (lvar 3))) 
+                   (fvar n0) uu (app (lvar 0) uu)))
+             (T_refine T_unit (equal (plus (fvar n0) zero) (fvar n0) (fvar n0)))))
+        :: (n0, T_nat) :: gamma).
+Proof.
+   repeat
+     rewrite opening_equal in * ||
+     rewrite opening_plus in * ||
+     rewrite (open_one_too_late n) in * ||
+     apply equal_wf ||
+     apply plus_wf ||
+     apply equal_well_typed ||
+     apply plus_well_typed ||
+     apply (HTWeaken _ _ _ n) ||
+     find_derivation ||
+     t_listutils ||
+     step ||
+     p_fv; eauto 4 with bwf omega.
+Qed.
+
+Lemma oracle1:
+  forall gamma x,
+  are_equal ((x, T_refine T_unit ttrue) :: gamma) (equal (plus zero zero) zero zero) ttrue T_bool.
+Proof.
+Admitted.
+
+Lemma oracle2:
+  forall gamma x y n0 x0,
+   are_equal
+   ((x0, T_refine T_unit (equal (plus (fvar n0) zero) (fvar n0) (fvar n0)))
+    :: (x, T_unit)
+       :: (y,
+          T_arrow T_unit
+            (T_intersection
+               (T_singleton
+                  (rec (T_refine T_unit (equal (plus (lvar 1) zero) (lvar 1) (lvar 3))) 
+                     (fvar n0) uu (app (lvar 0) uu)))
+               (T_refine T_unit (equal (plus (fvar n0) zero) (fvar n0) (fvar n0)))))
+          :: (n0, T_nat) :: gamma)
+   (equal (plus (succ (fvar n0)) zero) (succ (fvar n0)) (succ (fvar n0))) ttrue T_bool.
+Admitted.  
+
+Lemma plus_n_0_well_typed:
+  forall gamma n,
+    is_context gamma -> (* should be provable from below *)
+    has_type gamma n T_nat ->
+    has_type gamma (plus_n_0 n)
+             (T_let n T_nat (T_refine T_unit (equal (plus (lvar 1) zero) (lvar 1) (lvar 3)))).
+Proof.
+  unfold plus_n_0; steps.
+   repeat
+     rewrite opening_equal in * ||
+     rewrite opening_plus in * ||
+     rewrite (open_one_too_late n) in * ||
+     apply equal_well_typed ||
+     apply plus_well_typed ||
+     apply (HTWeaken _ _ _ n) ||
+     find_derivation ||
+     step ||
+     p_fv; eauto 4 with bwf omega.
+
+  - apply oracle1.
+  - apply HTSub with (T_let uu T_unit (T_refine T_unit (equal (plus (succ (fvar n0)) zero) (succ (fvar n0)) (succ (fvar n0))))).
+    + 
+    repeat
+      apply context3 ||
+      rewrite opening_equal in * ||
+      rewrite opening_plus in * ||
+      rewrite (open_one_too_late n) in * ||
+      apply equal_well_typed ||
+      apply plus_well_typed ||
+      apply (HTWeaken _ _ _ n) ||
+      find_derivation ||
+      step ||
+      p_fv; eauto 4 with bwf omega.
+  +
+    repeat
+      apply context3 ||
+      rewrite opening_equal in * ||
+      rewrite opening_plus in * ||
+      rewrite (open_one_too_late n) in * ||
+      apply equal_well_typed ||
+      apply plus_well_typed ||
+      apply equal_wf ||
+      apply plus_wf ||
+      apply (HTWeaken _ _ _ n) ||
+      find_derivation ||
+      t_listutils ||
+      step ||
+      p_fv; eauto 4 with bwf omega.
+
+    apply ISTrans with (T_refine T_unit (equal (plus (fvar n0) zero) (fvar n0) (fvar n0)));      
+    repeat
+      apply context4 ||
+      rewrite opening_equal in * ||
+      rewrite opening_plus in * ||
+      rewrite (open_one_too_late n) in * ||
+      apply equal_well_typed ||
+      apply plus_well_typed ||
+      apply equal_wf ||
+      apply plus_wf ||
+      apply (HTWeaken _ _ _ n) ||
+      find_derivation ||
+      t_listutils ||
+      step ||
+      p_fv; eauto 4 with bwf omega.
+
+    apply oracle2.
+Qed.
+*)

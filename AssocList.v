@@ -1,0 +1,264 @@
+Require Import Coq.Strings.String.
+Require Import Coq.Lists.List.
+
+Require Import Termination.Tactics.
+Require Import Termination.Sets.
+Require Import Termination.SetLemmas.
+
+Definition M X Y := list (X * Y).
+Definition decidable X := forall (x1 x2: X), { x1 = x2 } + { x1 <> x2 }.
+
+Fixpoint support {X Y} (m: M X Y): list X :=
+  match m with
+  | nil => nil
+  | (x,_) :: m' => x :: support m'
+  end.
+
+Fixpoint range {X Y} (m: M X Y): list Y :=
+  match m with
+  | nil => nil
+  | (_,y) :: m' => y :: range m'
+  end.
+
+Fixpoint lookup {X Y} (eq_dec: decidable X) (m: M X Y) (x: X): option Y :=
+  match m with
+  | nil => None
+  | (a,b) :: m' =>
+    if (eq_dec a x)
+    then Some b
+    else lookup eq_dec m' x
+  end.
+
+Fixpoint lookupRest {X Y} (eq_dec: decidable X) (m: M X Y) x: option (Y * M X Y) :=
+  match m with
+  | nil => None
+  | (y,tau) :: m' =>
+    if (eq_dec x y)
+    then Some ((tau,m'))
+    else lookupRest eq_dec m' x
+  end.
+
+Lemma lookupRestSuffix:
+  forall X Y eq_dec (m: M X Y) x (y: Y) suffix,
+    lookupRest eq_dec m x = Some (y,suffix) ->
+    exists m', m = (m' ++ suffix).
+Proof.
+  induction m; repeat step.
+  - exists ((x0,y) :: nil); repeat step.
+  - pose proof (IHm _ _ _ H); steps.
+    exists ((x0,y0) :: m'); steps.
+Qed.
+
+Hint Immediate lookupRestSuffix.
+
+Lemma lookupRestLookup:
+  forall X Y eq_dec (m: M X Y) x y suffix,
+    lookupRest eq_dec m x = Some (y,suffix) ->
+    lookup eq_dec m x = Some y.
+Proof.
+  induction m; repeat step; eauto.
+Qed.
+
+Hint Immediate lookupRestLookup.
+
+Lemma lookupLookupRest:
+  forall X Y eq_dec (m: M X Y) x y,
+    lookup eq_dec m x = Some y ->
+    exists suffix,
+      lookupRest eq_dec m x = Some (y,suffix).
+Proof.
+  induction m; repeat step; eauto.
+Qed.
+
+
+(* fresh s gamma holds if variable x does not appear in the context gamma *)
+Definition fresh { X Y } (m: M X Y) x := ~(x ∈ support m).
+Hint Unfold fresh.
+
+Lemma lookupSupport:
+  forall X Y eq_dec (m: M X Y) (x: X) (y: Y),
+    lookup eq_dec m x = Some y -> x ∈ support m.
+Proof.
+  induction m; steps; eauto.
+Qed.
+
+Lemma supportAppend:
+  forall X Y (m1 m2: M X Y),
+    support (m1 ++ m2) = support m1 ++ support m2.
+Proof.
+  induction m1; steps.
+Qed.
+
+Hint Rewrite supportAppend: blistutils.
+
+Fixpoint mapValues {X Y Z} (f: Y -> Z) (l: list (prod X Y)) :=
+  match l with
+  | nil => nil
+  | (x,T) :: l' => (x, f T) :: mapValues f l'
+  end.
+
+Lemma lookupNoneSupport: forall X Y eq_dec (m: M X Y) x,
+  ~(x ∈ support m) ->
+  lookup eq_dec m x = None.
+Proof.
+  induction m; repeat step.
+Qed.
+
+Hint Immediate lookupNoneSupport.
+
+Lemma lookupNoneSupport2:
+  forall X Y eq_dec (m: M X Y) x,
+    lookup eq_dec m x = None ->
+    x ∈ support m ->
+    False.
+Proof.
+  induction m; repeat step; eauto.
+Qed.
+
+Hint Immediate lookupNoneSupport2.
+
+Lemma lookupSomeSupport:
+  forall X Y eq_dec (m: M X Y) x A,
+    lookup eq_dec m x = Some A ->
+    x ∈ support m.
+Proof.
+  induction m; repeat step || unfold fv_context in * || set_solver; eauto.
+Qed.
+
+Hint Immediate lookupSomeSupport.
+
+Lemma lookupRange:
+  forall X Y eq_dec (m: M X Y) x y,
+    lookup eq_dec m x = Some y ->
+    y ∈ range m.
+Proof.
+  induction m; steps; eauto.
+Qed.
+
+Lemma lookupNoneAppend1:
+  forall X Y eq_dec (l1 l2: M X Y) x,
+    lookup eq_dec (l1 ++ l2) x = None ->
+    lookup eq_dec l1 x = None.
+Proof.
+  induction l1; steps; eauto.
+Qed.
+
+Lemma lookupNoneAppend2:
+  forall X Y eq_dec (l1 l2: M X Y) x,
+    lookup eq_dec (l1 ++ l2) x = None ->
+    lookup eq_dec l2 x = None.
+Proof.
+  induction l1; steps.
+Qed.
+
+Lemma lookupAppendNoDup:
+  forall X Y eq_dec (l1 l2: M X Y) x,
+    x ∈ support l2 ->
+    ~(x ∈ support l1) -> 
+    lookup eq_dec l2 x = lookup eq_dec (l1 ++ l2)%list x.
+Proof.
+  induction l1; repeat step || set_solver || unfold fv_context in *.
+Qed.
+
+Hint Resolve lookupAppendNoDup: blookup.
+
+Lemma lookupAppendOr:
+  forall X Y eq_dec (l1 l2: M X Y) x,
+    lookup eq_dec (l1 ++ l2) x = lookup eq_dec l1 x \/
+    (
+      lookup eq_dec l1 x = None /\
+      lookup eq_dec (l1 ++ l2) x = lookup eq_dec l2 x
+    ).
+Proof.
+  induction l1; steps.
+Qed.
+
+Lemma lookupWeaken:
+  forall X Y eq_dec (l1 l2: M X Y) x t,
+    lookup eq_dec l1 x = Some t ->
+    lookup eq_dec (l1 ++ l2) x = Some t.
+Proof.                               
+  induction l1; steps.
+Qed.  
+
+Hint Resolve lookupWeaken: blookup.
+
+Lemma lookupAppendNone:
+  forall X Y eq_dec (l1 l2: M X Y) x,
+    lookup eq_dec l1 x = None ->
+    lookup eq_dec l2 x = None ->
+    lookup eq_dec (l1 ++ l2) x = None.
+Proof.
+  induction l1; steps.
+Qed.
+
+Hint Resolve lookupAppendNone: blookup.
+
+Lemma lookupRight:
+  forall X Y eq_dec (l1 l2: M X Y) x,
+    lookup eq_dec l1 x = None ->
+    lookup eq_dec (l1 ++ l2) x = lookup eq_dec l2 x.
+Proof.
+  induction l1; steps.
+Qed.
+
+Hint Resolve lookupRight: blookup.
+
+ 
+Definition map X Y := list (X * Y).
+
+Lemma lookupMap:
+  forall X Y Z
+         (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
+         (m: map X Y) (f: Y -> Z) x,
+    lookup eq_dec (mapValues f m) x = option_map f (lookup eq_dec m x).
+Proof.
+  induction m; steps.
+Qed.
+
+Ltac t_lookup :=
+  match goal with
+  | H: lookup ?e ?g ?x = Some ?t |- _ =>
+    poseNew (Mark (g,x,t) "lookupSomeSupport");
+    poseNew (lookupSomeSupport _ _ e _ _ _ H)
+  | H: lookup ?e ?g ?x = Some ?t |- _ =>
+    poseNew (Mark (g,x,t) "lookupRange");
+    poseNew (lookupRange _ _ e _ _ _ H)
+  | H: lookup ?e ?g ?x = None |- _ =>
+    poseNew (Mark (g,x) "lookupNoneSupport2");
+    poseNew (lookupNoneSupport2 _ _ e _ _ H)
+  | H: lookup ?e (?l1 ++ ?l2)%list ?x = None |- _ =>
+    poseNew (Mark (l1,l2,x) "lookupNoneAppend1");
+    poseNew (lookupNoneAppend1 _ _ e _ _ H)
+  | H: lookup ?e (?l1 ++ ?l2)%list ?x = None |- _ =>
+    poseNew (Mark (l1,l2,x) "lookupNoneAppend2");
+    poseNew (lookupNoneAppend2 _ _ e _ _ _ H)
+  | H: lookup ?e (?l1 ++ ?l2)%list ?x = Some ?t |- _ =>
+    poseNew (Mark (l1,l2,x) "lookupAppendOr");
+    poseNew (lookupAppendOr l1 l2 x)
+  | H: context[lookup (mapValues _ _) _] |- _ => rewrite lookupMap in H
+  end.
+
+Lemma obvious_lookup:
+  forall X Y gamma1 (x: X) (U: Y) gamma2 dec,
+    ~(x ∈ support gamma1) -> 
+    lookup dec (gamma1 ++ (x,U) :: gamma2) x = Some U.
+Proof.
+  induction gamma1;
+    repeat match goal with
+           |  _ => step || step_inversion is_context || t_lookup
+           end.
+Qed.
+
+Hint Rewrite obvious_lookup using assumption: blookup.
+
+Lemma lookup_remove:
+  forall {A B} gamma1 (x y: A) U gamma2 y (T: B) dec,
+    lookup dec (gamma1 ++ (x, U) :: gamma2) y = Some T ->
+    x <> y ->
+    lookup dec (gamma1 ++ gamma2) y = Some T.
+Proof.
+  induction gamma1; steps; eauto.
+Qed.
+
+Hint Immediate lookup_remove: blookup.
