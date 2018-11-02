@@ -10,97 +10,18 @@ Require Import Termination.TermProperties.
 Require Import Termination.SmallStep.
 Require Import Termination.SizeLemmas.
 Require Import Termination.Equivalence.
-Require Import Termination.TermForm.
 Require Import Termination.StarInversions.
 Require Import Termination.TermList.
 Require Import Termination.TypeList.
 Require Import Termination.TypeErasure.
 
+Require Import Termination.ReducibilityMeasure.
 Require Import Termination.ReducibilityCandidate.
 
 Require Import Equations.Equations.
 Require Import Equations.Subterm.
 
 Require Import Omega.
-
-Definition index (T: tree): option tree :=
-  match T with
-  | _ => None
-  end.
-
-Program Fixpoint nat_value_to_nat (v: tree) (p: is_nat_value v) :=
-  match v with
-  | zero => 0
-  | succ v' => S (nat_value_to_nat v' _)
-  | _ => _
-  end.
-
-Solve Obligations with destruct v; repeat light || discriminate.
-
-Lemma nat_value_to_nat_fun:
-  forall v p1 p2, nat_value_to_nat v p1 = nat_value_to_nat v p2.
-Proof.
-  induction v; steps.
-Qed.
-
-Definition lt_index (i1 i2: option tree) :=
-  (exists n, i1 = Some n /\ i2 = None) \/
-  (exists n1 n2 v1 v2 (p1: is_nat_value v1) (p2: is_nat_value v2),
-     i1 = Some n1 /\
-     i2 = Some n2 /\
-     star small_step n1 v1 /\
-     star small_step n2 v2 /\
-     nat_value_to_nat v1 p1 < nat_value_to_nat v2 p2)
-.
-
-Ltac tlu :=
-  match goal with
-  | H: lt_index _ _ |- _ => unfold lt_index in H
-  end.
-
-Lemma acc_ind:
-  forall m n v (p: is_nat_value v),
-    nat_value_to_nat v p < m ->
-    star small_step n v ->
-    Acc lt_index (Some n).
-Proof.
-  induction m; destruct v; steps; try omega.
-  - apply Acc_intro; repeat step || tlu || t_deterministic_star; omega.
-  - apply Acc_intro; repeat step || tlu || t_deterministic_star.
-    apply IHm with v1 p1; steps.
-    rewrite (nat_value_to_nat_fun v p p2) in *; eauto with omega.
-Qed.
-
-Lemma acc_ind_some:
-  forall n, Acc lt_index (Some n).
-Proof.
-  intro; apply Acc_intro; repeat step || tlu; eauto using acc_ind.
-Qed.
-
-Lemma acc_ind_none:
-  Acc lt_index None.
-Proof.
-  apply Acc_intro; repeat step || tlu; eauto using acc_ind_some.
-Qed.
-
-Lemma wf_lt_index: well_founded lt_index.
-Proof.
-  unfold well_founded.
-  destruct a; repeat step; eauto using acc_ind_some, acc_ind_none.
-Qed.
-
-Instance wellfounded_lt_index :
-  WellFounded lt_index := wf_lt_index.
-
-Notation "p1 '<<' p2" := (lexprod nat (option tree) lt lt_index p1 p2) (at level 80).
-
-Opaque lt.
-
-Lemma lt_index_some_none:
-  forall i, lt_index (Some i) None.
-Proof.
-  unfold lt_index; steps; eauto.
-Qed.
 
 Definition reduces_to (P: tree -> Prop) (t: tree) :=
   pfv t term_var = nil /\
@@ -109,6 +30,15 @@ Definition reduces_to (P: tree -> Prop) (t: tree) :=
   exists t',
     star small_step t t' /\
     P t'.
+
+Lemma reduces_to_equiv:
+  forall (P P': tree -> Prop) t,
+    reduces_to P t ->
+    (forall v, P v -> P' v) ->
+    reduces_to P' t.
+Proof.
+  unfold reduces_to; repeat step || eexists; eauto.
+Qed.
 
 Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): Prop :=
   reducible_values theta v T by rec (size T, index T) (lexprod _ _ lt lt_index) :=
@@ -210,6 +140,23 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
       reducible_values theta a A /\
       reducible_values theta v (open 0 B a);
 
+  reducible_values theta v (T_rec n T) :=
+    is_erased_term n /\
+    is_erased_term v /\
+    is_value v /\
+    pfv v term_var = nil /\
+    wf v 0 /\ (
+      star small_step n zero \/
+      (exists n' v' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
+         v = tfold v' /\
+         ~(X ∈ pfv T type_var) /\
+         ~(X ∈ support theta) /\
+         reducible_values ((X, fun t => reducible_values theta t (T_rec n' T)) :: theta)
+                          v'
+                          (topen 0 T (fvar X type_var))
+      )
+    );
+
   reducible_values theta v T := False
 .
 
@@ -217,6 +164,21 @@ Ltac t_reducibility_definition :=
   repeat step || destruct_refinements || autorewrite with bsize; eauto using left_lex with omega.
 
 Solve Obligations with t_reducibility_definition.
+
+Next Obligation.
+  apply right_lex.
+  unfold lt_index; steps.
+  right.
+  exists n', n, n', (succ n'), p1, p1; steps.
+Qed.
+
+Next Obligation.
+  apply right_lex.
+  unfold lt_index; steps.
+  right.
+  exists n', n, n', (succ n'), p1, p1; steps.
+Qed.
+
 Fail Next Obligation.
 
 Definition reducible (theta: interpretation) t T: Prop :=
@@ -293,7 +255,10 @@ Ltac simp_red :=
     rewrite reducible_values_equation_40 in * ||
     rewrite reducible_values_equation_41 in * ||
     rewrite reducible_values_equation_42 in * ||
-    rewrite reducible_values_equation_43 in *
+    rewrite reducible_values_equation_43 in * ||
+    rewrite reducible_values_equation_44 in * ||
+    rewrite reducible_values_equation_45 in * ||
+    rewrite reducible_values_equation_46 in *
   ).
 
 Ltac top_level_unfold :=

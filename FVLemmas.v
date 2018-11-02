@@ -83,7 +83,7 @@ Lemma fv_in_open:
     x ∈ pfv t tag ->
     x ∈ pfv (open k t r) tag.
 Proof.
-  induction t; repeat step || t_listutils.
+  induction t; repeat light || t_listutils.
 Qed.
 
 Hint Resolve fv_in_open: bfv.
@@ -93,36 +93,10 @@ Lemma fv_in_topen:
     x ∈ pfv t tag ->
     x ∈ pfv (topen k t r) tag.
 Proof.
-  induction t; repeat step || t_listutils.
+  induction t; repeat light || t_listutils.
 Qed.
 
 Hint Resolve fv_in_topen: bfv.
-
-Lemma fv_open:
-  forall t rep k tag,
-    subset (pfv (open k t rep) tag) (pfv t tag ++ pfv rep tag).
-Proof.
-  induction t;
-    repeat match goal with
-           | H: _, H2: _ |- _ =>
-             apply (H _ _ _) in H2
-           | _ => step || t_listutils
-           | _ => unfold subset in *
-           end.
-Qed.
-
-Lemma fv_topen:
-  forall t rep k tag,
-    subset (pfv (topen k t rep) tag) (pfv t tag ++ pfv rep tag).
-Proof.
-  induction t;
-    repeat match goal with
-           | H: _, H2: _ |- _ =>
-             apply (H _ _ _) in H2
-           | _ => step || t_listutils
-           | _ => unfold subset in *
-           end.
-Qed.
 
 Lemma fv_open2:
   (forall t rep k y tag,
@@ -131,7 +105,7 @@ Lemma fv_open2:
 Proof.
   induction t;
     repeat match goal with
-           | H: _, H2: _ |- _ =>
+           | H: forall x, _, H2: _ ∈ _  |- _ =>
              apply (H _ _ _) in H2
            | _ => step || t_listutils
            end.
@@ -144,7 +118,7 @@ Lemma fv_topen2:
 Proof.
   induction t;
     repeat match goal with
-           | H: _, H2: _ |- _ =>
+           | H: forall x, _, H2: _ ∈ _  |- _ =>
              apply (H _ _ _) in H2
            | _ => step || t_listutils
            end.
@@ -155,6 +129,28 @@ Ltac t_fv_open :=
   | H: _ ∈ pfv (open _ _ _) _  |- _ => apply fv_open2 in H
   | H: _ ∈ pfv (topen _ _ _) _  |- _ => apply fv_topen2 in H
   end.
+
+Lemma fv_open:
+  forall t rep k tag,
+    subset (pfv (open k t rep) tag) (pfv t tag ++ pfv rep tag).
+Proof.
+  induction t;
+    repeat match goal with
+           | _ => step || t_listutils || t_fv_open
+           | _ => unfold subset in *
+           end.
+Qed.
+
+Lemma fv_topen:
+  forall t rep k tag,
+    subset (pfv (topen k t rep) tag) (pfv t tag ++ pfv rep tag).
+Proof.
+  induction t;
+    repeat match goal with
+           | _ => step || t_listutils || t_fv_open
+           | _ => unfold subset in *
+           end.
+Qed.
 
 Lemma fv_nils_open:
   forall t rep k tag,
@@ -193,7 +189,7 @@ Lemma fv_subst:
 Proof.
   induction t;
     repeat match goal with
-           | H: forall x, _, H2: _ |- _ => apply H in H2
+           | H: forall x, _, H2: _ ∈ _  |- _ => apply (H _ _ _) in H2
            | _ => step || t_listutils || unfold subset in *
            end; eauto with sets.
 Qed.
@@ -208,8 +204,7 @@ Proof.
   induction t;
     repeat match goal with
            | _ => progress (step || t_listutils || unfold subset in *)
-           | H: forall x, _, H2: _ |- _ =>
-              apply H in H2
+           | H: forall x, _, H2: _ ∈ _  |- _ => apply (H _ _ _) in H2
            end;
     eauto with sets;
     eauto with bfv.
@@ -336,7 +331,6 @@ Proof.
            | H1: forall x, x ∈ _ ++ ?l ++ _ -> _, H2: ?x ∈ ?l |- _ =>
              poseNew (Mark (x,l) "instance middle");
              unshelve epose proof (H1 x _)
-           | H: _ = nil |- _ => rewrite H
            | H: ?x ∈ pfv (psubstitute ?t ?l ?tag) ?tag |- _ =>
              poseNew (Mark (x,t,l) "fv subst");
              pose proof (in_subset _ _ x (fv_subst2 t l tag) H)
@@ -345,8 +339,8 @@ Proof.
            | _ => progress (unfold subset in *)
            end;
            eauto 2 with bfv;
-           eauto using closed_mapping_fv with falsity;
-           eauto using closed_mapping_fv2 with falsity.
+           eauto 2 using closed_mapping_fv with falsity;
+           eauto 2 using closed_mapping_fv2 with falsity.
 Qed.
 
 Hint Resolve fv_nils2: bfv.

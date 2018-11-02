@@ -24,10 +24,12 @@ Lemma well_typed_wf:
 Proof.
   apply mut_HT_IT_IC_IS_AE;
   repeat match goal with
-           | _ => step || (progress unfold set in *)
+           | _ => step || (progress unfold set in * )
            | _ => solve [ repeat (fresh_instantiations0; eauto 1 with omega) ||
                                 step; eauto with bwf ]
-           end; eauto with bwf bwft.
+           end;
+      eauto with bwf bwft;
+      eauto 3 with step_tactic bwf bwft.
 Qed.
 
 Definition has_type_wf_tt := proj1 well_typed_wf.

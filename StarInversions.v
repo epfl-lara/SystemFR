@@ -349,6 +349,33 @@ Proof.
     eauto using value_irred.
 Qed.
 
+Lemma star_smallstep_tunfold_inv:
+  forall t v,
+    star small_step t v ->
+    is_value v ->
+    forall t',
+      t = tunfold t' ->
+      star small_step t' (tfold v).
+Proof.
+  induction 1; repeat step || step_inversion is_value || t_invert_step;
+    eauto with smallstep values bsteplemmas.
+Qed.
+
+Lemma star_smallstep_tfold_inv:
+  forall t v,
+    star small_step t v ->
+    is_value v ->
+    forall t',
+      t = tfold t' ->
+      exists v',
+        v = tfold v' /\
+        is_value v' /\
+        star small_step t' v'.
+Proof.
+  induction 1; repeat step || step_inversion is_value || t_invert_step;
+    eauto with smallstep values bsteplemmas.
+Qed.
+
 Lemma star_smallstep_value:
   forall v1 v2,
     star small_step v1 v2 ->
@@ -433,6 +460,14 @@ Ltac t_invert_star :=
     H2: star small_step (succ _) ?v |- _ =>
     poseNew (Mark H2 "inv succ");
     unshelve epose proof (star_smallstep_succ_inv _ v H2 H1 _ eq_refl)
+  | H1: is_value ?v,
+    H2: star small_step (tfold _) ?v |- _ =>
+    poseNew (Mark H2 "inv fold");
+    unshelve epose proof (star_smallstep_tfold_inv _ v H2 H1 _ eq_refl)
+  | H1: is_value ?v,
+    H2: star small_step (tunfold _) ?v |- _ =>
+    poseNew (Mark H2 "inv unfold");
+    unshelve epose proof (star_smallstep_tunfold_inv _ v H2 H1 _ eq_refl)
   | H1: is_value ?v1,
     H2: is_value ?v2,
     H3: star small_step (notype_rec (succ ?v2) _ _) ?v1 |- _ =>

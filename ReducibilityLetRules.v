@@ -15,7 +15,6 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.ListUtils.
 Require Import Termination.Freshness.
-Require Import Termination.TermForm.
 Require Import Termination.AssocList.
 
 Require Import Termination.Equivalence.

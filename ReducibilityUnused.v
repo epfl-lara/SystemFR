@@ -7,7 +7,6 @@ Require Import Termination.Tactics.
 Require Import Termination.Sets.
 Require Import Termination.TermList.
 Require Import Termination.AssocList.
-Require Import Termination.TermForm.
 Require Import Termination.SizeLemmas.
 Require Import Termination.ListUtils.
 Require Import Termination.SmallStep.

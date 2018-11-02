@@ -17,7 +17,6 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.Freshness.
 Require Import Termination.ListUtils.
-Require Import Termination.TermForm.
 Require Import Termination.Trees.
 Require Import Termination.HasTypeAnnotated.
 Require Import Termination.TreeLists.
@@ -54,6 +53,7 @@ Require Import Termination.ReducibilitySplitMatchRule.
 Require Import Termination.ReducibilitySplitRecRule.
 Require Import Termination.ReducibilityPolymorphism.
 Require Import Termination.ReducibilityFixRules.
+Require Import Termination.ReducibilityRecRules.
 
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasTyping.
@@ -221,6 +221,8 @@ Proof.
   - apply open_reducible_refl; side_conditions.
   - apply open_reducible_forall with x (erase_type A); steps; side_conditions.
   - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
+  - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold; side_conditions.
+  - apply open_reducible_fold; side_conditions.
 
   (* subtyping *)
   - steps; choose_variables_subtype; side_conditions2.
@@ -248,6 +250,7 @@ Proof.
   - eapply reducible_subtype_exists; eauto.
 
   (* equality *)
+  - eapply reducible_values_rec_equivalent; eauto with berased.
   - eauto 2 with b_equiv.
   - apply reducibility_equivalent_weaken with theta (erase_context gamma) x (erase_type T); side_conditions.
   - eauto using equivalent_trans.
@@ -255,6 +258,8 @@ Proof.
   - apply equivalent_step; apply small_step_subst; eauto with values bwf.
   - eapply equivalent_pair_eta; eauto.
   - many_tactics.
+  - eauto with b_equiv.
+  - eauto with b_equiv.
   - eauto with b_equiv.
   - eauto with b_equiv.
   - eauto with b_equiv.

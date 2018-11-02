@@ -2,6 +2,11 @@ Require Import Termination.Tactics.
 
 Inductive fv_tag: Set := term_var | type_var.
 
+Ltac destruct_tag :=
+  match goal with
+  | tag: fv_tag |- _ => destruct tag
+  end.
+
 (* locally nameless representation *)
 Inductive tree: Set :=
   (* term or type variable *)
@@ -25,6 +30,7 @@ Inductive tree: Set :=
   | T_forall: tree -> tree -> tree
   | T_exists: tree -> tree -> tree
   | T_abs: tree -> tree
+  | T_rec: tree -> tree -> tree
 
   (* terms *)
   | err: tree
@@ -58,6 +64,9 @@ Inductive tree: Set :=
   | type_abs: tree -> tree
   | type_inst: tree -> tree -> tree
   | notype_inst: tree -> tree
+
+  | tfold: tree -> tree
+  | tunfold: tree -> tree
 
   | trefl: tree
 .
@@ -102,6 +111,10 @@ Fixpoint is_annotated_term t :=
 
   | tlet t1 A t2 => is_annotated_term t1 /\ is_annotated_type A /\ is_annotated_term t2
   | trefl => True
+
+  | tfold t => is_annotated_term t
+  | tunfold t => is_annotated_term t
+
   | _ => False
   end
 with is_annotated_type T :=
@@ -124,6 +137,7 @@ with is_annotated_type T :=
   | T_forall A B => is_annotated_type A /\ is_annotated_type B
   | T_exists A B => is_annotated_type A /\ is_annotated_type B
   | T_abs T => is_annotated_type T
+  | T_rec n T => is_annotated_term n /\ is_annotated_type T
   | _ => False
   end
 .
@@ -160,6 +174,10 @@ Fixpoint is_erased_term t :=
 
   | type_abs t => is_erased_term t
   | notype_inst t => is_erased_term t
+
+  | tfold t => is_erased_term t
+  | tunfold t => is_erased_term t
+
   | _ => False
   end.
 
@@ -183,6 +201,7 @@ Fixpoint is_erased_type T :=
   | T_forall A B => is_erased_type A /\ is_erased_type B
   | T_exists A B => is_erased_type A /\ is_erased_type B
   | T_abs A => is_erased_type A
+  | T_rec n T => is_erased_term n /\ is_erased_type T
   | _ => False
   end.
 
@@ -243,6 +262,9 @@ Fixpoint tree_size t :=
   | type_inst t T => 1 + tree_size t + tree_size T
   | notype_inst t => 1 + tree_size t
 
+  | tfold t => 1 + tree_size t
+  | tunfold t => 1 + tree_size t
+
   | T_unit => 0
   | T_bool => 0
   | T_nat => 0
@@ -259,6 +281,7 @@ Fixpoint tree_size t :=
   | T_forall A B => 1 + tree_size A + tree_size B
   | T_exists A B => 1 + tree_size A + tree_size B
   | T_abs T => 1 + tree_size T
+  | T_rec n T => 1 + tree_size n + tree_size T
   end.
 
 

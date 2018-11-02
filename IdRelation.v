@@ -2,9 +2,10 @@ Require Import Termination.Syntax.
 Require Import Termination.Sets.
 Require Import Termination.Tactics.
 Require Import Termination.SetLemmas.
-Require Import Termination.EquivalentWithRelation.
 Require Import Termination.AssocList.
 Require Import Termination.ListUtils.
+Require Import Termination.EqualWithRelation.
+Require Import Termination.EquivalentWithRelation.
 
 Require Import PeanoNat.
 
@@ -15,16 +16,6 @@ Fixpoint idrel (l: list nat) :=
   | nil => nil
   | x :: xs => (x,x) :: idrel xs
   end.
-
-Lemma equal_with_relation_refl2:
-  forall t rel,
-    (forall x, x ∈ pfv t type_var -> lookup Nat.eq_dec rel x = Some x) ->
-    (forall x, x ∈ pfv t type_var -> lookup Nat.eq_dec (swap rel) x = Some x) ->
-    equal_with_relation rel t t.
-Proof.
-  induction t; repeat step || t_listutils || eapply_any.
-Qed.
-
 
 Lemma idrel_lookup:
   forall l x,
@@ -89,8 +80,22 @@ Proof.
   induction l; steps.
 Qed.
 
+Lemma equivalent_rc_refl:
+  forall rc, equivalent_rc rc rc.
+Proof.
+  unfold equivalent_rc; steps.
+Qed.
+
+Lemma equivalent_rc_at_right:
+  forall x y theta t,
+    x <> y ->
+    equivalent_rc_at theta ((x,t) :: theta) y y.
+Proof.
+  unfold equivalent_rc_at; steps; eauto using equivalent_rc_refl.
+Qed.
+
 Lemma equivalent_with_idrel:
-  forall T l x theta (t: T),
+  forall l x theta t,
     (x ∈ l -> False) ->
     equivalent_with_relation (idrel l) theta ((x,t) :: theta).
 Proof.
@@ -101,11 +106,20 @@ Proof.
            rewrite range_idrel in * ||
            rewrite range_swap in * ||
            (rewrite idrel_lookup in * by auto) ||
-           (rewrite idrel_lookup_swap_fail in * by auto).
+           (rewrite idrel_lookup_swap_fail in * by auto) ||
+           apply equivalent_rc_at_right.
+Qed.
+
+Lemma equivalent_rc_at_left:
+  forall x y theta t,
+    x <> y ->
+    equivalent_rc_at ((x,t) :: theta) theta y y.
+Proof.
+  unfold equivalent_rc_at; steps; eauto using equivalent_rc_refl.
 Qed.
 
 Lemma equivalent_with_idrel2:
-  forall T l x theta (t: T),
+  forall l x theta t,
     (x ∈ l -> False) ->
     equivalent_with_relation (idrel l) ((x,t) :: theta) theta.
 Proof.
@@ -116,5 +130,6 @@ Proof.
            rewrite range_idrel in * ||
            rewrite range_swap in * ||
            (rewrite idrel_lookup in * by auto) ||
-           (rewrite idrel_lookup_swap_fail in * by auto).
+           (rewrite idrel_lookup_swap_fail in * by auto) ||
+           apply equivalent_rc_at_left.
 Qed.

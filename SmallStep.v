@@ -24,6 +24,10 @@ Inductive is_value: tree -> Prop :=
     is_value (fvar x term_var)
 | IVRefl:
     is_value trefl
+| IVFold:
+    forall v,
+      is_value v ->
+      is_value (tfold v)
 .
 
 Definition typed_is_value (t: erased_term) := is_value (proj1_sig t).
@@ -91,6 +95,10 @@ Inductive small_step: tree -> tree -> Prop :=
       (tmatch (succ v) t0 ts)
       (open 0 ts v)
 
+| SPBetaFold:
+    forall v, is_value v ->
+         small_step (tunfold (tfold v)) v
+
 (* reduction inside terms *)
 | SPTypeInst: forall t1 t2,
     small_step t1 t2 ->
@@ -132,6 +140,13 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPLet: forall t1 t1' t2,
     small_step t1 t1' ->
     small_step (notype_tlet t1 t2) (notype_tlet t1' t2)
+
+| SPFold: forall t1 t2,
+    small_step t1 t2 ->
+    small_step (tfold t1) (tfold t2)
+| SPUnfold: forall t1 t2,
+    small_step t1 t2 ->
+    small_step (tunfold t1) (tunfold t2)
 .
 
 Definition typed_small_step (t1 t2: erased_term) := small_step t1 t2.
@@ -148,6 +163,8 @@ Ltac t_invert_step :=
   | H: small_step (fvar _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_inst _) _ |- _ => inversion H; clear H
+  | H: small_step (tfold _) _ |- _ => inversion H; clear H
+  | H: small_step (tunfold _) _ |- _ => inversion H; clear H
   | H: small_step (type_abs _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_lambda _) _ |- _ => inversion H; clear H
@@ -215,6 +232,7 @@ Hint Resolve IVLambda: values.
 Hint Resolve IVTypeAbs: values.
 Hint Resolve IVVar: values.
 Hint Resolve IVRefl: values.
+Hint Resolve IVFold: values.
 
 Hint Resolve SPBetaProj1: smallstep.
 Hint Resolve SPBetaProj2: smallstep.
@@ -228,6 +246,7 @@ Hint Resolve SPBetaMatch0: smallstep.
 Hint Resolve SPBetaMatchS: smallstep.
 Hint Resolve SPBetaIte1: smallstep.
 Hint Resolve SPBetaIte2: smallstep.
+Hint Resolve SPBetaFold: smallstep.
 
 Hint Resolve SPTypeInst: smallstep.
 Hint Resolve SPAppLeft: smallstep.
@@ -241,6 +260,8 @@ Hint Resolve SPRec: smallstep.
 Hint Resolve SPMatch: smallstep.
 Hint Resolve SPIte: smallstep.
 Hint Resolve SPLet: smallstep.
+Hint Resolve SPFold: smallstep.
+Hint Resolve SPUnfold: smallstep.
 
 Lemma is_nat_value_value:
   forall v,

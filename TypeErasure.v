@@ -1,7 +1,6 @@
 Require Import Coq.Program.Tactics.
 
 Require Import Termination.Syntax.
-Require Import Termination.TermForm.
 Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 
@@ -39,6 +38,9 @@ Program Fixpoint erase_term (t: tree): tree :=
 
   | tfix T t => notype_tfix (erase_term t)
 
+  | tfold t' => tfold (erase_term t')
+  | tunfold t' => tunfold (erase_term t')
+
   | _ => uu
   end.
 
@@ -67,6 +69,7 @@ Program Fixpoint erase_type (T: tree): tree :=
   | T_forall A B => T_forall (erase_type A) (erase_type B)
   | T_exists A B => T_exists (erase_type A) (erase_type B)
   | T_abs T => T_abs (erase_type T)
+  | T_rec n T => T_rec (erase_term n) (erase_type T)
   | _ => T_unit
   end.
 

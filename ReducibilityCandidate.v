@@ -4,6 +4,7 @@ Require Import Termination.Tactics.
 Require Import Termination.SmallStep.
 Require Import Termination.AssocList.
 Require Import Termination.TypeErasureLemmas.
+Require Import Termination.ErasedTermLemmas.
 
 Require Import PeanoNat.
 

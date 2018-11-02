@@ -21,7 +21,6 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TermList.
 Require Import Termination.StarRelation.
 Require Import Termination.StarInversions.
-Require Import Termination.TermForm.
 Require Import Termination.SetLemmas.
 Require Import Termination.SubstitutionErase.
 

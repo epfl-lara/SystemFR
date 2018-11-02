@@ -11,7 +11,6 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TermList.
 Require Import Termination.StarLemmas.
 Require Import Termination.SetLemmas.
-Require Import Termination.TermForm.
 Require Import Termination.StarRelation.
 Require Import Termination.SmallStep.
 Require Import Termination.SubstitutionErase.
@@ -115,7 +114,7 @@ Proof.
   intros e1 e2 U V W H1 H2;
     unfold reducible in *;
     unfold reduces_to in *;
-    repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
+    repeat step || t_listutils || simp reducible_values in * || instantiate_any || unfold reduces_to in *.
 
   match goal with
   | H: forall a, _ |- _ => unshelve epose proof (H t' _); steps; eauto with berased

@@ -16,7 +16,6 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
-Require Import Termination.TermForm.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.

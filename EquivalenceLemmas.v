@@ -318,3 +318,31 @@ Proof.
 Qed.
 
 Hint Resolve equivalent_match_succ2: b_equiv.
+
+Lemma equivalent_tfold_congr:
+  forall t t',
+    equivalent t t' ->
+    equivalent (tfold t) (tfold t').
+Proof.
+  unfold equivalent in *; repeat step || t_invert_star;
+    eauto 7 using star_smallstep_trans with bsteplemmas smallstep.
+Qed.
+
+Hint Resolve equivalent_tfold_congr: b_equiv.
+
+Lemma equivalent_tunfold_congr:
+  forall t t',
+    equivalent t t' ->
+    equivalent (tunfold t) (tunfold t').
+Proof.
+  unfold equivalent in *; repeat step || t_invert_star.
+
+  - apply star_smallstep_trans with (tunfold (tfold v));
+      eauto with smallstep;
+      eauto with bsteplemmas values.
+  - apply star_smallstep_trans with (tunfold (tfold v));
+      eauto with smallstep;
+      eauto with bsteplemmas values.
+Qed.
+
+Hint Resolve equivalent_tunfold_congr: b_equiv.

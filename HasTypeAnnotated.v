@@ -100,15 +100,19 @@ Hint Extern 50 => apply annotated_topen_build: bannot.
 Ltac t_annotated_open :=
   match goal with
   | H: is_annotated_term (open ?k ?t ?rep) |- is_annotated_term ?t =>
+      poseNew (Mark 0 "once");
       apply annotated_open with k rep
   | H: is_annotated_term (open _ (open ?k ?t ?rep) _) |- is_annotated_term ?t =>
       poseNew (Mark 0 "once");
       apply annotated_open with k rep
   | H: is_annotated_type (open ?k ?t ?rep) |- is_annotated_type ?t =>
+      poseNew (Mark 0 "once");
       apply annotated_open with k rep
   | H: is_annotated_term (topen ?k ?t ?rep) |- is_annotated_term ?t =>
+      poseNew (Mark 0 "once");
       apply annotated_topen with k rep
   | H: is_annotated_type (topen ?k ?t ?rep) |- is_annotated_type ?t =>
+      poseNew (Mark 0 "once");
       apply annotated_topen with k rep
   end.
 
@@ -136,10 +140,9 @@ Lemma annotations:
 .
 Proof.
   apply mut_HT_IT_IC_IS_AE;
-    try solve [
-      repeat step || t_annotated_open || rewrite annotated_types_append in * ||
-      unshelve eauto with bannot
-    ].
+    repeat step || t_annotated_open || rewrite annotated_types_append in * ||
+      unshelve eauto with bannot ||
+      unshelve eauto 3 with bannot step_tactic.
 Qed.
 
 Ltac t_annotations :=

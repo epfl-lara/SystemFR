@@ -216,3 +216,23 @@ Proof.
 Qed.
 
 Hint Resolve star_smallstep_type_inst: bsteplemmas.
+
+Lemma star_smallstep_fold:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    star small_step (tfold t1) (tfold t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_fold: bsteplemmas.
+
+Lemma star_smallstep_unfold:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    star small_step (tunfold t1) (tunfold t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_unfold: bsteplemmas.

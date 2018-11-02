@@ -28,7 +28,8 @@ Proof.
                                 step; eauto with btwf ]
            end ||
          unshelve eauto with btwf ||
-         unshelve eauto with btwf2.
+         unshelve eauto with btwf2;
+    eauto 3 with step_tactic btwf.
 Qed.
 
 Definition has_type_twf_tt := proj1 well_typed_twf.

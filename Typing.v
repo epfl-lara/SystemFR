@@ -7,7 +7,6 @@ Require Import Termination.Sets.
 Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 Require Import Termination.SmallStep.
-Require Import Termination.TermForm.
 Require Import Termination.TypeErasure.
 
 Open Scope list_scope.
@@ -320,6 +319,28 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       ->
       has_type tvars gamma (tlet p (T_exists U V) t) T
 
+| HTUnfold:
+    forall tvars gamma t n T,
+      is_annotated_term n ->
+      wf n 0 ->
+      wf T 0 ->
+      twf T 1 ->
+      has_type tvars gamma t (T_rec (succ n) T) ->
+      has_type tvars gamma (tunfold t) (topen 0 T (T_rec n T))
+
+| HTFold:
+    forall tvars gamma t n T,
+      wf n 0 ->
+      twf n 0 ->
+      wf T 0 ->
+      twf T 1 ->
+      subset (fv n) (support gamma) ->
+      is_annotated_term n ->
+      is_annotated_type T ->
+      has_type tvars gamma n T_nat ->
+      has_type tvars gamma t (topen 0 T (T_rec n T)) ->
+      has_type tvars gamma (tfold t) (T_rec (succ n) T)
+
 with is_type: tvar_list -> context -> tree -> Prop :=
 | ITUnit:
     forall tvars gamma,
@@ -343,13 +364,6 @@ with is_type: tvar_list -> context -> tree -> Prop :=
       is_type tvars gamma T1 ->
       is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_type tvars gamma (T_prod T1 T2)
-
-(*
-| ITTerm:
-    forall tvars gamma T,
-      has_type tvars gamma T T_type ->
-      is_type tvars gamma T
-*)
 
 | ITArrow:
     forall tvars gamma T1 T2 x,
@@ -457,12 +471,16 @@ with is_type: tvar_list -> context -> tree -> Prop :=
       is_context tvars gamma ->
       is_type tvars gamma (type_fvar X)
 
-(*
-| ITType:
-    forall tvars gamma,
-      is_context tvars gamma ->
-      is_type tvars gamma T_type
-*)
+
+| ITRec:
+    forall tvars gamma n T X,
+      ~(X ∈ support gamma) ->
+      ~(X ∈ pfv T type_var) ->
+      ~(X ∈ tvars) ->
+      is_annotated_type T ->
+      has_type tvars gamma n T_nat ->
+      is_type (X :: tvars) gamma (topen 0 T (fvar X type_var)) ->
+      is_type tvars gamma (T_rec n T)
 
 with is_context: tvar_list -> context -> Prop :=
 | ICNil: forall tvars, is_context tvars nil
@@ -701,6 +719,15 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_subtype tvars gamma (T_let t T1 T2) (T_exists T1 T2)
 
+| ISRec:
+    forall tvars gamma n1 n2 T,
+      wf T 0 ->
+      twf T 1 ->
+      subset (fv T) (support gamma) ->
+      is_annotated_type T ->
+      are_equal tvars gamma n1 n2 ->
+      is_subtype tvars gamma (T_rec n1 T) (T_rec n2 T)
+
 with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,
     subset (fv t) (support gamma) ->
@@ -771,6 +798,14 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     are_equal tvars gamma u v ->
     are_equal tvars gamma u' v' ->
     are_equal tvars gamma (pp u u') (pp v v')
+
+| AEFold: forall tvars gamma u v,
+    are_equal tvars gamma u v ->
+    are_equal tvars gamma (tfold u) (tfold v)
+
+| AEUnfold: forall tvars gamma u v,
+    are_equal tvars gamma u v ->
+    are_equal tvars gamma (tunfold u) (tunfold v)
 
 | AEType: forall tvars gamma p t1 t2,
     has_type tvars gamma p (T_equal t1 t2) ->

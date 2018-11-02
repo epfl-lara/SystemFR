@@ -1,6 +1,5 @@
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
-Require Import Termination.TermForm.
 
 Require Import Omega.
 
@@ -23,6 +22,7 @@ Fixpoint size T: nat :=
   | T_forall A B => 3 + size A + size B
   | T_exists A B => 3 + size A + size B
   | T_abs T => 3 + size T
+  | T_rec _ T => 2 + size T
 
   | _ => 0
   end.

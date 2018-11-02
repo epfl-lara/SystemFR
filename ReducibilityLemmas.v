@@ -5,7 +5,6 @@ Require Import Termination.Tactics.
 Require Import Termination.Syntax.
 Require Import Termination.SmallStep.
 Require Import Termination.TermProperties.
-Require Import Termination.TermForm.
 Require Import Termination.SizeLemmas.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.SmallStepIrredLemmas.
@@ -19,6 +18,7 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.TypeErasure.
 Require Import Termination.TypeErasureLemmas.
+Require Import Termination.ErasedTermLemmas.
 
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
@@ -30,11 +30,6 @@ Require Import Termination.TypeErasure.
 Require Import Omega.
 
 Opaque reducible_values. (* workaround for rewriting speed *)
-
-Ltac destruct_tag :=
-  match goal with
-  | tag: fv_tag |- _ => destruct tag
-  end.
 
 Lemma reducible_erased_aux:
   forall n theta t T,
