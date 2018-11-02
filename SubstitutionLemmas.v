@@ -8,6 +8,7 @@ Require Import Termination.Tactics.
 Require Import Termination.Sets.
 Require Import Termination.SmallStep.
 Require Import Termination.WFLemmas.
+Require Import Termination.TWFLemmas.
 Require Import Termination.FVLemmas.
 
 Lemma substitute_nothing:
@@ -145,6 +146,19 @@ Qed.
 
 Hint Resolve substitute_open: bsubst.
 
+Lemma substitute_topen:
+  forall t, forall k rep l tag,
+     twfs l k ->
+     psubstitute (topen k t rep) l tag =
+     topen k (psubstitute t l tag) (psubstitute rep l tag).
+Proof.
+  induction t;
+    repeat match goal with
+           | |- ?t = topen ?k ?t ?rep => symmetry; apply topen_none
+           | _ => step || tequality
+           end; eauto with btwf.
+Qed.
+
 Lemma substitute_open2:
   forall t, forall k rep l tag,
       wfs l k ->
@@ -156,6 +170,16 @@ Proof.
 Qed.
 
 Hint Resolve substitute_open2: bsubst.
+
+Lemma substitute_topen2:
+  forall t, forall k rep l tag,
+      twfs l k ->
+      (forall x, x ∈ pfv rep tag -> x ∈ support l -> False) ->
+      topen k (psubstitute t l tag) rep = psubstitute (topen k t rep) l tag.
+Proof.
+  intros; rewrite <- (substitute_nothing rep l) at 1; steps; eauto.
+  symmetry; apply substitute_topen; steps.
+Qed.
 
 Lemma substitute_open3:
   forall t k x rep l tag,
@@ -170,7 +194,20 @@ Proof.
   rewrite substitute_nothing2; steps.
 Qed.
 
-Hint Rewrite substitute_open3: bsubst.
+Hint Resolve substitute_open3: bsubst.
+
+Lemma substitute_topen3:
+  forall t k x rep l tag,
+    twfs l k ->
+    twf rep k ->
+    (x ∈ pfv t tag -> False) ->
+    psubstitute (topen k t (fvar x tag)) ((x, rep) :: l) tag =
+    topen k (psubstitute t l tag) rep.
+Proof.
+  intros.
+  rewrite substitute_topen; steps.
+  rewrite substitute_nothing2; steps.
+Qed.
 
 Lemma same_support_substitute:
   forall gamma l tag,
@@ -220,12 +257,38 @@ Proof.
            end.
 Qed.
 
-Definition weak_equivalent_subst (vars: list nat) (l1 l2: list (nat * tree)): Prop :=
+Definition weak_equivalent_subst { T } (vars: list nat) (l1 l2: list (nat * T)): Prop :=
   forall s t,
     s ∈ vars -> (
       lookup Nat.eq_dec l1 s = Some t <->
       lookup Nat.eq_dec l2 s = Some t
     ).
+
+Lemma weaker_equivalent_subst:
+  forall {T} vars vars' (l1 l2: list (nat * T)),
+    (forall x, x ∈ vars' -> x ∈ vars) ->
+    weak_equivalent_subst vars l1 l2 ->
+    weak_equivalent_subst vars' l1 l2.
+Proof.
+  unfold weak_equivalent_subst; repeat step || apply_any.
+Qed.
+
+Lemma weaker_equivalent_subst2:
+  forall {T} vars vars' (l1 l2: list (nat * T)) y t,
+    (forall x, x ∈ vars' -> x ∈ vars \/ x = y) ->
+    weak_equivalent_subst vars l1 l2 ->
+    weak_equivalent_subst vars' ((y,t) :: l1) ((y,t) :: l2).
+Proof.
+  unfold weak_equivalent_subst; repeat step || instantiate_any || apply_any.
+Qed.
+
+Lemma weak_equivalent_subst_sym:
+  forall T vars (l1 l2: list (nat * T)),
+    weak_equivalent_subst vars l1 l2 ->
+    weak_equivalent_subst vars l2 l1.
+Proof.
+  unfold weak_equivalent_subst; repeat step || apply_any.
+Qed.
 
 Lemma weak_subst_permutation:
   forall t l1 l2 tag,

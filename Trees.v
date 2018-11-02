@@ -24,6 +24,7 @@ Inductive tree: Set :=
   | T_equal: tree -> tree -> tree
   | T_forall: tree -> tree -> tree
   | T_exists: tree -> tree -> tree
+  | T_abs: tree -> tree
 
   (* terms *)
   | err: tree
@@ -51,6 +52,10 @@ Inductive tree: Set :=
   | tlet: tree -> tree -> tree -> tree
   | notype_tlet: tree -> tree -> tree
 
+  | type_abs: tree -> tree
+  | type_inst: tree -> tree -> tree
+  | notype_inst: tree -> tree
+
   | trefl: tree
 .
 
@@ -70,6 +75,9 @@ Fixpoint is_annotated_term t :=
 
   | lambda T t' => is_annotated_type T /\ is_annotated_term t'
   | app t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
+
+  | type_abs t => is_annotated_term t
+  | type_inst t T => is_annotated_term t /\ is_annotated_type T
 
   | pp t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
   | pi1 t' => is_annotated_term t'
@@ -109,6 +117,7 @@ with is_annotated_type T :=
   | T_equal t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
   | T_forall A B => is_annotated_type A /\ is_annotated_type B
   | T_exists A B => is_annotated_type A /\ is_annotated_type B
+  | T_abs T => is_annotated_type T
   | _ => False
   end
 .
@@ -140,6 +149,9 @@ Fixpoint is_erased_term t :=
 
   | notype_tlet t1 t2 => is_erased_term t1 /\ is_erased_term t2
   | trefl => True
+
+  | type_abs t => is_erased_term t
+  | notype_inst t => is_erased_term t
   | _ => False
   end.
 
@@ -162,6 +174,7 @@ Fixpoint is_erased_type T :=
   | T_equal t1 t2 => is_erased_term t1 /\ is_erased_term t2
   | T_forall A B => is_erased_type A /\ is_erased_type B
   | T_exists A B => is_erased_type A /\ is_erased_type B
+  | T_abs A => is_erased_type A
   | _ => False
   end.
 
@@ -215,6 +228,10 @@ Fixpoint tree_size t :=
   | tlet t1 A t2 => 1 + tree_size t1 + tree_size A + tree_size t2
   | trefl => 0
 
+  | type_abs t => 1 + tree_size t
+  | type_inst t T => 1 + tree_size t + tree_size T
+  | notype_inst t => 1 + tree_size t
+
   | T_unit => 0
   | T_bool => 0
   | T_nat => 0
@@ -230,6 +247,7 @@ Fixpoint tree_size t :=
   | T_equal t1 t2 => 1 + tree_size t1 + tree_size t2
   | T_forall A B => 1 + tree_size A + tree_size B
   | T_exists A B => 1 + tree_size A + tree_size B
+  | T_abs T => 1 + tree_size T
   end.
 
 

@@ -7,17 +7,23 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
 Require Import Termination.AssocList.
-Require Import Termination.Parametricity.
 Require Import Termination.TypeErasure.
 Require Import Termination.FVLemmasLists.
+Require Import Termination.EquivalenceLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 
-Ltac t_rewrite := repeat step || t_listutils || t_fv_open || finisher;
-                  eauto with bwf; eauto with bfv;
-                  eauto with b_cmap bfv.
+Ltac t_rewrite :=
+  repeat step || t_listutils || t_fv_open || finisher;
+    eauto with bwf;
+    eauto with btwf;
+    eauto with bfv;
+    eauto with b_cmap bfv.
 
 Ltac tac1 :=
   repeat step || t_listutils || finisher || apply SatCons || simp_red ||
@@ -25,12 +31,15 @@ Ltac tac1 :=
          (rewrite fv_subst_different_tag by (steps; eauto with bfv)) ||
          (rewrite substitute_nothing2 in * by t_rewrite) ||
          (rewrite substitute_open3 in * by t_rewrite) ||
+         (rewrite substitute_topen3 in * by t_rewrite) ||
          (rewrite substitute_skip in * by t_rewrite) ||
          (rewrite substitute_open in * by t_rewrite) ||
+         (rewrite substitute_topen in * by t_rewrite) ||
              eauto with b_equiv;
              eauto with bwf bfv;
-             eauto 3 using NoDup_append with sets;
-             eauto with bparam.
+             eauto with btwf;
+             eauto with berased;
+             eauto 3 using NoDup_append with sets.
 
 Lemma instantiate_open_reducible:
   forall theta gamma t T lterms,

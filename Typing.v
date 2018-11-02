@@ -44,6 +44,26 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t2 U ->
       has_type tvars gamma (app t1 t2) (T_let t2 U V)
 
+| HTTypeLambda:
+    forall tvars gamma t T X,
+      ~(X ∈ pfv_context gamma term_var) ->
+      ~(X ∈ pfv_context gamma type_var) ->
+      ~(X ∈ pfv t term_var) ->
+      ~(X ∈ pfv T term_var) ->
+      ~(X ∈ pfv T type_var) ->
+      ~(X ∈ tvars) ->
+      has_type (X :: tvars)
+               gamma
+               (topen 0 t (type_fvar X))
+               (topen 0 T (type_fvar X)) ->
+      has_type tvars gamma (type_abs t) (T_abs T)
+
+| HTTypeInst:
+    forall tvars gamma t U V,
+      has_type tvars gamma t (T_abs U) ->
+      is_type tvars gamma V ->
+      has_type tvars gamma (type_inst t V) (topen 0 U V)
+
 | HTPair:
     forall tvars gamma A B t1 t2,
       has_type tvars gamma t1 A ->
@@ -332,6 +352,7 @@ with is_type: tvar_list -> context -> tree -> Prop :=
       is_context tvars gamma ->
       subset (fv t) (support gamma) ->
       wf t 0 ->
+      twf t 0 ->
       is_annotated_term t ->
       is_type tvars gamma (T_singleton t)
 
@@ -364,6 +385,8 @@ with is_type: tvar_list -> context -> tree -> Prop :=
       subset (fv t2) (support gamma) ->
       wf t1 0 ->
       wf t2 0 ->
+      twf t1 0 ->
+      twf t2 0 ->
       is_annotated_term t1 ->
       is_annotated_term t2 ->
       is_type tvars gamma (T_equal t1 t2)
@@ -385,6 +408,14 @@ with is_type: tvar_list -> context -> tree -> Prop :=
       is_type tvars gamma T1 ->
       is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_type tvars gamma (T_exists T1 T2)
+
+| ITAbs:
+    forall tvars gamma T X,
+      ~(X ∈ fv_context gamma) ->
+      ~(X ∈ fv T) ->
+      ~(X ∈ tvars) ->
+      is_type (X :: tvars) gamma (topen 0 T (type_fvar X)) ->
+      is_type tvars gamma (T_abs T)
 
 | ITVar:
     forall tvars gamma X,
@@ -640,6 +671,7 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,
     subset (fv t) (support gamma) ->
     wf t 0 ->
+    twf t 0 ->
     is_annotated_term t ->
     is_context tvars gamma ->
     are_equal tvars gamma t t
@@ -664,6 +696,8 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     subset (fv t2) (support gamma) ->
     wf t1 0 ->
     wf t2 0 ->
+    twf t1 0 ->
+    twf t2 0 ->
     is_annotated_term t1 ->
     is_annotated_term t2 ->
     is_context tvars gamma ->
@@ -864,6 +898,7 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     ~(x ∈ tvars) ->
     ~(y ∈ tvars) ->
     ~(v ∈ tvars) ->
+    is_annotated_term e2 ->
     NoDup (x :: y :: v :: nil) ->
 
     has_type tvars gamma2 n T_nat ->
@@ -908,6 +943,7 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     ~(x ∈ tvars) ->
     ~(y ∈ tvars) ->
     ~(v ∈ tvars) ->
+    is_annotated_term e2 ->
     NoDup (x :: y :: v :: nil) ->
 
     has_type tvars gamma2 n T_nat ->

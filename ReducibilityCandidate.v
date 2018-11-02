@@ -3,6 +3,7 @@ Require Import Termination.Sets.
 Require Import Termination.Tactics.
 Require Import Termination.SmallStep.
 Require Import Termination.AssocList.
+Require Import Termination.TypeErasureLemmas.
 
 Require Import PeanoNat.
 
@@ -13,8 +14,7 @@ Definition reducibility_candidate (P: tree -> Prop): Prop :=
        is_erased_term v /\
        is_value v /\
        wf v 0 /\
-       pfv v term_var = nil /\
-       pfv v type_var = nil.
+       pfv v term_var = nil.
 
 (* an interpretation for every type variable, as a reducibility candidate *)
 Definition interpretation: Type := list (nat * (tree -> Prop)).
@@ -25,25 +25,27 @@ Fixpoint valid_interpretation (theta: interpretation): Prop :=
   | (x,P) :: theta' => valid_interpretation theta' /\ reducibility_candidate P
   end.
 
+(*
 Lemma in_valid_interpretation_closed: forall theta v X P,
   valid_interpretation theta ->
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
-  (is_value v /\ wf v 0 /\ pfv v term_var = nil).
+  (is_value v /\ wf v 0 /\ twf v 0 /\ pfv v term_var = nil /\ pfv v type_var = nil).
 Proof.
   induction theta as [ | p theta' IH ]; repeat unfold reducibility_candidate in * || step;
     eauto;
     try solve [ apply_any; steps ];
     try solve [ eapply IH; steps; eauto ].
 Qed.
+*)
 
-Lemma in_valid_interpretation_fv: forall theta v X P tag,
+Lemma in_valid_interpretation_erased: forall theta v X P,
   valid_interpretation theta ->
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
-  pfv v tag = nil.
+  is_erased_term v.
 Proof.
-  induction theta; destruct tag; repeat step || eauto || apply_any.
+  induction theta; repeat step || eauto || apply_any.
 Qed.
 
 Lemma in_valid_interpretation_wf: forall theta v X P,
@@ -64,11 +66,38 @@ Proof.
   induction theta; repeat step || eauto || apply_any.
 Qed.
 
-Lemma in_valid_interpretation_erased: forall theta v X P,
+Lemma in_valid_interpretation_fv: forall theta v X P,
   valid_interpretation theta ->
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
-  is_erased_term v.
+  pfv v term_var = nil.
 Proof.
   induction theta; repeat step || eauto || apply_any.
+Qed.
+
+Lemma in_valid_interpretation_tfv: forall theta v X P,
+  valid_interpretation theta ->
+  lookup Nat.eq_dec theta X = Some P ->
+  P v ->
+  pfv v type_var = nil.
+Proof.
+  intros; eauto using is_erased_term_tfv, in_valid_interpretation_erased.
+Qed.
+
+Lemma in_valid_interpretation_pfv: forall theta v X P tag,
+  valid_interpretation theta ->
+  lookup Nat.eq_dec theta X = Some P ->
+  P v ->
+  pfv v tag = nil.
+Proof.
+  destruct tag; eauto using in_valid_interpretation_fv, in_valid_interpretation_tfv.
+Qed.
+
+Lemma in_valid_interpretation_twf: forall theta v X P,
+  valid_interpretation theta ->
+  lookup Nat.eq_dec theta X = Some P ->
+  P v ->
+  twf v 0.
+Proof.
+  eauto using is_erased_term_twf, in_valid_interpretation_erased.
 Qed.

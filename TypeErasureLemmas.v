@@ -8,6 +8,9 @@ Require Import Termination.TypeErasure.
 Require Import Termination.Sets.
 Require Import Termination.ListUtils.
 Require Import Termination.SmallStep.
+Require Import Termination.WFLemmas.
+Require Import Termination.TWFLemmas.
+Require Import Termination.StarRelation.
 
 Open Scope list_scope.
 
@@ -115,6 +118,35 @@ Qed.
 
 Hint Resolve erase_type_wf: bwf.
 
+Lemma erase_term_twf:
+  forall t k,
+    twf (erase_term t) k.
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Resolve erase_term_twf: btwf.
+
+Lemma is_erased_term_twf:
+  forall t k,
+    is_erased_term t ->
+    twf t k.
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Resolve is_erased_term_twf: btwf.
+
+Lemma erase_type_twf:
+  forall T k,
+    twf T k ->
+    twf (erase_type T) k.
+Proof.
+  induction T; steps; eauto using erase_term_twf.
+Qed.
+
+Hint Resolve erase_type_twf: btwf.
+
 Lemma pfv_erase_context_subst:
   forall S gamma tag,
     subset (pfv_context gamma tag) S ->
@@ -144,21 +176,23 @@ Ltac t_subset_erase :=
   apply pfv_erase_term_subst ||
   apply pfv_erase_type_subst.
 
+
 Lemma erase_term_open:
   forall t1 t2 k,
+    is_annotated_term t1 ->
     erase_term (open k t1 t2) = open k (erase_term t1) (erase_term t2).
 Proof.
-  induction t1; steps.
+  induction t1;
+    try solve [ repeat step || tequality ].
 Qed.
-
-Hint Rewrite erase_term_open: berased.
 
 Lemma erase_type_open:
   forall T t k,
     is_annotated_type T ->
+    is_annotated_term t ->
     erase_type (open k T t) = open k (erase_type T) (erase_term t).
 Proof.
-  induction T;
+  induction T; try destruct f;
     try solve [ repeat step || rewrite erase_term_open in * || tequality ].
 Qed.
 
@@ -173,9 +207,91 @@ Qed.
 
 Hint Resolve is_erased_open: berased.
 
+Lemma is_erased_type_open:
+  forall t k rep,
+    is_erased_type t ->
+    is_erased_term rep ->
+    is_erased_type (open k t rep).
+Proof.
+  induction t; steps; eauto with berased.
+Qed.
+
+Hint Resolve is_erased_type_open: berased.
+
+Lemma is_erased_type_topen:
+  forall t k rep,
+    is_erased_type t ->
+    is_erased_type rep ->
+    is_erased_type (topen k t rep).
+Proof.
+  induction t; repeat step || rewrite topen_none by eauto with btwf.
+Qed.
+
+Hint Resolve is_erased_type_topen: berased.
+
 Lemma is_erased_open2:
   forall t k rep,
     is_erased_term (open k t rep) ->
+    is_erased_term t.
+Proof.
+  induction t; steps; eauto.
+Qed.
+
+
+Lemma erase_term_topen:
+  forall t1 t2 k,
+    is_annotated_term t1 ->
+    erase_term (topen k t1 t2) = erase_term t1.
+Proof.
+  induction t1;
+    try solve [ repeat step || tequality ].
+Qed.
+
+
+Lemma is_erased_term_tfv:
+  forall t,
+    is_erased_term t ->
+    pfv t type_var = nil.
+Proof.
+  induction t; repeat step || t_listutils.
+Qed.
+
+Hint Resolve is_erased_term_tfv: bfv.
+
+
+Lemma topen_erase_term:
+  forall t1 t2 k,
+    topen k (erase_term t1) t2 = erase_term t1.
+Proof.
+  intros; rewrite topen_none; steps;
+    eauto using is_erased_term_twf, erase_term_erased with btwf.
+Qed.
+
+Lemma erase_type_topen:
+  forall T1 T2 k,
+    is_annotated_type T1 ->
+    is_annotated_type T2 ->
+    erase_type (topen k T1 T2) = topen k (erase_type T1) (erase_type T2).
+Proof.
+  induction T1;
+    repeat step || rewrite erase_term_topen in * || tequality || rewrite topen_erase_term in *.
+Qed.
+
+Lemma is_erased_topen:
+  forall t k rep,
+    is_erased_term t ->
+    is_erased_term rep ->
+    is_erased_term (topen k t rep).
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Resolve is_erased_topen: berased.
+
+Lemma is_erased_topen2:
+  forall t k rep,
+    is_annotated_term t ->
+    is_erased_term (topen k t rep) ->
     is_erased_term t.
 Proof.
   induction t; steps; eauto.
@@ -190,23 +306,15 @@ Proof.
   induction 1; steps; eauto 3 using is_erased_open with step_tactic.
 Qed.
 
-Hint Resolve erase_smallstep: berased.
+Hint Immediate erase_smallstep: berased.
 
-Lemma is_erased_term_tfv:
-  forall t,
-    is_erased_term t ->
-    pfv t type_var = nil.
+Lemma erase_star_smallstep:
+  forall t1 t2,
+    star small_step t1 t2 ->
+    is_erased_term t1 ->
+    is_erased_term t2.
 Proof.
-  induction t; repeat step || t_listutils.
+  induction 1; steps; eauto using erase_smallstep.
 Qed.
 
-Hint Resolve is_erased_term_tfv: bfv.
-
-(*
-Lemma erase_erased:
-  forall t,
-    is_erased_term t ->
-    t = erase_term t.
-Proof.
-  induction t; steps.
-*)
+Hint Immediate erase_star_smallstep: berased.

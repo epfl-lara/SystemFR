@@ -51,6 +51,7 @@ Lemma reducible_refine:
     ~(x ∈ fv A) ->
     ~(x ∈ fv_context gamma) ->
     ~(x = p) ->
+    is_erased_term b ->
     (forall theta l,
         valid_interpretation theta ->
         support theta = tvars ->
@@ -64,18 +65,17 @@ Proof.
     eauto with bwf; eauto with bfv.
 
   eexists; steps; eauto.
-  repeat step || simp_red; eauto with bwf.
+  repeat step || simp_red; eauto with bwf; eauto with berased.
 
-  unshelve epose proof (H11 theta ((p,trefl) :: (x,t') :: lterms) _ _ _); tac1;
+  unshelve epose proof (H12 theta ((p,trefl) :: (x,t') :: lterms) _ _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv;
     eauto using equivalent_true.
 Qed.
 
-Hint Resolve reducible_refine: breducible.
-
 Lemma reducible_refine_subtype:
   forall tvars theta (gamma : context) A B p q (x : nat) t l,
     wf q 1 ->
+    is_erased_term q ->
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv A) ->
     ~(x ∈ fv p) ->
@@ -93,9 +93,9 @@ Lemma reducible_refine_subtype:
     reducible_values theta t (T_refine (substitute A l) (substitute p l)) ->
     reducible_values theta t (T_refine (substitute B l) (substitute q l)).
 Proof.
-  repeat step || simp_red; eauto with bwf.
+  repeat step || simp_red; eauto with bwf; eauto with berased.
 
-  unshelve epose proof (H7 ((x,t) :: l) _); tac1;
+  unshelve epose proof (H8 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.
 Qed.
 
@@ -104,6 +104,7 @@ Lemma reducible_refine_subtype2:
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv T) ->
     ~(x ∈ fv p) ->
+    is_erased_term p ->
     wf p 1 ->
     valid_interpretation theta ->
     (forall l,
@@ -116,9 +117,9 @@ Lemma reducible_refine_subtype2:
       reducible_values theta t (substitute T l) ->
       reducible_values theta t (T_refine (substitute A l) (substitute p l)).
 Proof.
-  repeat step || simp_red; eauto with bwf.
+  repeat step || simp_red; eauto with bwf; eauto with berased.
 
-  unshelve epose proof (H4 ((x,t) :: l) _); tac1;
+  unshelve epose proof (H5 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.
 Qed.
 

@@ -26,7 +26,6 @@ Require Import Termination.SetLemmas.
 
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
-Require Import Termination.WFLemmasErasure.
 
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
@@ -113,6 +112,7 @@ Lemma open_reducible_ite:
     ~(x ∈ fv T) ->
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ tvars) ->
+    is_erased_term t1 ->
     is_erased_term t2 ->
     is_erased_term t3 ->
     open_reducible tvars gamma t1 T_bool ->
@@ -127,6 +127,6 @@ Proof.
     eauto using subset_same with bfv;
     eauto with berased.
 
-  - unshelve epose proof (H10 _ ((x,trefl) :: lterms) _ _ _); tac1.
   - unshelve epose proof (H11 _ ((x,trefl) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H12 _ ((x,trefl) :: lterms) _ _ _); tac1.
 Qed.

@@ -21,6 +21,7 @@ Lemma satisfies_insert:
     pfv t term_var = nil ->
     pfv t type_var = nil ->
     wf t 0 ->
+    twf t 0 ->
     P t (substitute T l2) ->
     support gamma1 = support l1 ->
     ~(x ∈ support gamma1) ->

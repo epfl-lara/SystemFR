@@ -27,7 +27,7 @@ Proof.
            | _ => step || (progress unfold set in *)
            | _ => solve [ repeat (fresh_instantiations0; eauto 1 with omega) ||
                                 step; eauto with bwf ]
-           end; eauto with bwf.
+           end; eauto with bwf bwft.
 Qed.
 
 Definition has_type_wf_tt := proj1 well_typed_wf.
@@ -39,40 +39,48 @@ Hint Resolve is_type_wf: bwf.
 (* Hint Resolve is_subtype_wf: bwf. *)
 
 Lemma has_type_wf_term:
-  forall tvars gamma t T, has_type tvars gamma t T -> wf t 0.
+  forall tvars gamma t T k, has_type tvars gamma t T -> wf t k.
 Proof.
-  apply has_type_wf_tt.
+  intros.
+  apply wf_monotone with 0; eauto with omega.
+  apply (proj1 (has_type_wf_tt tvars gamma t T H)); eauto.
 Qed.
 
 Lemma has_type_wf_type:
-  forall tvars gamma t T, has_type tvars gamma t T -> wf T 0.
+  forall tvars gamma t T k, has_type tvars gamma t T -> wf T k.
 Proof.
-  apply has_type_wf_tt.
+  intros.
+  apply wf_monotone with 0; eauto with omega.
+  apply (proj2 (has_type_wf_tt tvars gamma t T H)); eauto.
 Qed.
 
 Hint Resolve has_type_wf_term has_type_wf_type: bwf.
 
 Lemma are_equal_wf_left:
-  forall tvars gamma t1 t2, are_equal tvars gamma t1 t2 -> wf t1 0.
+  forall tvars gamma t1 t2 k, are_equal tvars gamma t1 t2 -> wf t1 k.
 Proof.
-  apply are_equal_wf.
+  intros.
+  apply wf_monotone with 0; eauto with omega.
+  apply (proj1 (are_equal_wf tvars gamma t1 t2 H)); eauto.
 Qed.
 
 Lemma are_equal_wf_right:
   forall tvars gamma t1 t2, are_equal tvars gamma t1 t2 -> wf t2 0.
 Proof.
-  apply are_equal_wf.
+  intros.
+  apply wf_monotone with 0; eauto with omega.
+  apply (proj2 (are_equal_wf tvars gamma t1 t2 H)); eauto.
 Qed.
 
 Hint Resolve are_equal_wf_left are_equal_wf_right: bwf.
 
 Lemma has_type_wfs:
-  forall tvars P gamma l,
+  forall tvars P gamma l k,
     satisfies P gamma l ->
     P = has_type tvars nil ->
-    wfs l 0.
+    wfs l k.
 Proof.
-  induction 1; steps; eauto using has_type_wf.
+  induction 1; steps; eauto using has_type_wf_term.
 Qed.
 
 Hint Resolve has_type_wfs: bwf.

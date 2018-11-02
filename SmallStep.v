@@ -18,6 +18,8 @@ Inductive is_value: tree -> Prop :=
       is_value (pp v1 v2)
 | IVLambda: forall t,
     is_value (notype_lambda t)
+| IVTypeAbs: forall t,
+    is_value (type_abs t)
 | IVVar: forall x,
     is_value (fvar x term_var)
 | IVRefl:
@@ -52,6 +54,9 @@ Inductive small_step: tree -> tree -> Prop :=
       (app (notype_lambda t) v)
       (open 0 t v)
 
+| SPBetaTypeInst: forall t,
+    small_step (notype_inst (type_abs t)) t
+
 | SPBetaLet: forall t v,
     is_value v ->
     small_step
@@ -84,6 +89,9 @@ Inductive small_step: tree -> tree -> Prop :=
       (open 0 ts v)
 
 (* reduction inside terms *)
+| SPTypeInst: forall t1 t2,
+    small_step t1 t2 ->
+    small_step (notype_inst t1) (notype_inst t2)
 | SPAppLeft: forall t1 t2 t,
     small_step t1 t2 ->
     small_step (app t1 t) (app t2 t)
@@ -136,6 +144,8 @@ Ltac t_invert_step :=
   | H: small_step (succ _) _ |- _ => inversion H; clear H
   | H: small_step (fvar _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
+  | H: small_step (notype_inst _) _ |- _ => inversion H; clear H
+  | H: small_step (type_abs _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_lambda _) _ |- _ => inversion H; clear H
   | H: small_step (lambda _ _) _ |- _ => inversion H; clear H
@@ -182,6 +192,16 @@ Proof.
   induction 1; steps.
 Qed.
 
+Lemma evaluate_step4:
+  forall t t',
+    small_step t t' ->
+    forall e,
+      t = type_abs e ->
+      False.
+Proof.
+  induction 1; steps.
+Qed.
+
 Hint Resolve IVUnit: values.
 Hint Resolve IVZero: values.
 Hint Resolve IVSucc: values.
@@ -189,12 +209,14 @@ Hint Resolve IVFalse: values.
 Hint Resolve IVTrue: values.
 Hint Resolve IVPair: values.
 Hint Resolve IVLambda: values.
+Hint Resolve IVTypeAbs: values.
 Hint Resolve IVVar: values.
 Hint Resolve IVRefl: values.
 
 Hint Resolve SPBetaProj1: smallstep.
 Hint Resolve SPBetaProj2: smallstep.
 Hint Resolve SPBetaApp: smallstep.
+Hint Resolve SPBetaTypeInst: smallstep.
 Hint Resolve SPBetaLet: smallstep.
 Hint Resolve SPBetaRec0: smallstep.
 Hint Resolve SPBetaRecS: smallstep.
@@ -203,6 +225,7 @@ Hint Resolve SPBetaMatchS: smallstep.
 Hint Resolve SPBetaIte1: smallstep.
 Hint Resolve SPBetaIte2: smallstep.
 
+Hint Resolve SPTypeInst: smallstep.
 Hint Resolve SPAppLeft: smallstep.
 Hint Resolve SPAppRight: smallstep.
 Hint Resolve SPPairL: smallstep.
@@ -246,6 +269,8 @@ Ltac t_nostep :=
     apply False_ind; apply evaluate_step with v t; eauto 2 with values
   | H: small_step (notype_lambda ?e) ?t2 |- _ =>
     apply False_ind; apply evaluate_step3 with (notype_lambda e) t2 e; auto with values
+  | H: small_step (type_abs ?e) ?t2 |- _ =>
+    apply False_ind; apply evaluate_step4 with (type_abs e) t2 e
   | H1: is_value ?v1,
     H2: is_value ?v2,
     H3: small_step (pp ?v1 ?v2) ?t |- _ =>

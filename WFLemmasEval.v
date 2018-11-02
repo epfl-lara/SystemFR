@@ -36,3 +36,11 @@ Proof.
 Qed.
 
 Hint Resolve wf_nat_value: bwf.
+
+Lemma twf_nat_value:
+  forall v, is_nat_value v -> twf v 0.
+Proof.
+  induction v; steps.
+Qed.
+
+Hint Resolve twf_nat_value: btwf.

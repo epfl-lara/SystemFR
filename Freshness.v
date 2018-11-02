@@ -29,14 +29,14 @@ Ltac t_list_smaller :=
 Lemma freshMakeFresh: forall {T} (gamma: list (nat * T)),
     fresh gamma (succ_max (support gamma)).
 Proof.
-  unfold succ_max; 
+  unfold succ_max;
   repeat step || t_list_smaller; omega.
 Qed.
 
 Lemma freshMakeFresh2: forall (l: list nat),
     succ_max l ∈ l -> False.
 Proof.
-  unfold succ_max; 
+  unfold succ_max;
   repeat step || t_list_smaller; omega.
 Qed.
 
@@ -77,7 +77,7 @@ Lemma eq_makeFresh:
 Proof.
   intros.
   apply length_makeFresh in H; steps; eauto with omega.
-Qed.  
+Qed.
 
 Ltac finisher :=
   match goal with
@@ -87,7 +87,7 @@ Ltac finisher :=
                                          apply (eq_makeFresh LL S); cbn; intuition auto ]
   | H: makeFresh ?LL = ?S |- _ => solve [ apply False_ind;
                                          apply (eq_makeFresh LL S); cbn; intuition auto ]
-  end.     
+  end.
 
 
 
@@ -148,5 +148,3 @@ Ltac fresh_instantiations1 :=
   | x: nat, H: _ |- _ => apply (instantiate3 (x :: nil)) in H
   | x: nat, H: _ |- _ => apply (instantiate4 (x :: nil)) in H
   end.
-
-

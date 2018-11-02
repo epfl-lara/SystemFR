@@ -145,11 +145,12 @@ Lemma reducible_values_refine_subtype:
   forall theta A p q v,
     wf p 1 ->
     wf q 1 ->
+    is_erased_term q ->
     star small_step (open 0 q v) ttrue ->
     reducible_values theta v (T_refine A p) ->
     reducible_values theta v (T_refine A q).
 Proof.
-  repeat step || simp reducible_values in *; eauto using denote_values_refine_subtype.
+  repeat step || simp reducible_values in *.
 Qed.
 
 Lemma reducible_values_arrow_subtype:
@@ -167,8 +168,10 @@ Proof.
     eauto with bwf;
     eauto with bfv;
     eauto with berased.
-  unshelve epose proof (H8 a _);
-    repeat step || unfold reduces_to in *; eauto.
+    match goal with
+    | H: forall a, _ |- _ =>
+      unshelve epose proof (H a _); repeat step || unfold reduces_to in *; eauto
+    end.
 Qed.
 
 Lemma reducible_arrow_subtype_subst:

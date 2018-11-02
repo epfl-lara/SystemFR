@@ -5,6 +5,8 @@ Require Import Termination.Tactics.
 Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
 
+Require Import PeanoNat.
+
 Definition M X Y := list (X * Y).
 Definition decidable X := forall (x1 x2: X), { x1 = x2 } + { x1 <> x2 }.
 
@@ -154,7 +156,7 @@ Qed.
 Lemma lookupAppendNoDup:
   forall X Y eq_dec (l1 l2: M X Y) x,
     x ∈ support l2 ->
-    ~(x ∈ support l1) -> 
+    ~(x ∈ support l1) ->
     lookup eq_dec l2 x = lookup eq_dec (l1 ++ l2)%list x.
 Proof.
   induction l1; repeat step || set_solver || unfold fv_context in *.
@@ -177,9 +179,9 @@ Lemma lookupWeaken:
   forall X Y eq_dec (l1 l2: M X Y) x t,
     lookup eq_dec l1 x = Some t ->
     lookup eq_dec (l1 ++ l2) x = Some t.
-Proof.                               
+Proof.
   induction l1; steps.
-Qed.  
+Qed.
 
 Hint Resolve lookupWeaken: blookup.
 
@@ -259,7 +261,7 @@ Ltac t_lookupor :=
 
 Lemma obvious_lookup:
   forall X Y gamma1 (x: X) (U: Y) gamma2 dec,
-    ~(x ∈ support gamma1) -> 
+    ~(x ∈ support gamma1) ->
     lookup dec (gamma1 ++ (x,U) :: gamma2) x = Some U.
 Proof.
   induction gamma1;
@@ -287,4 +289,61 @@ Lemma lookup_remove2:
     @lookup A B dec (gamma1 ++ (x, U) :: gamma2) y = @lookup A B dec (gamma1 ++ gamma2) y.
 Proof.
   induction gamma1; steps; eauto.
+Qed.
+
+Fixpoint remove_support (l: list (nat * nat)) x :=
+  match l with
+  | nil => nil
+  | (a,b) :: ls =>
+    if Nat.eq_dec a x
+    then remove_support ls x
+    else (a,b) :: remove_support ls x
+  end.
+
+Lemma in_remove_support:
+  forall l x, x ∈ support (remove_support l x) -> False.
+Proof.
+  induction l; steps; eauto.
+Qed.
+
+Lemma in_remove_support2:
+  forall l x y, x ∈ support (remove_support l y) -> x ∈ support l.
+Proof.
+  induction l; steps; eauto.
+Qed.
+
+Lemma nodup_remove_support:
+  forall l x, NoDup (support l) -> NoDup (support (remove_support l x)).
+Proof.
+  induction l; repeat step || step_inversion NoDup; eauto using in_remove_support2.
+Qed.
+
+Lemma in_remove_support_range:
+  forall l x y, x ∈ range (remove_support l y) -> x ∈ range l.
+Proof.
+  induction l; steps; eauto.
+Qed.
+
+Lemma nodup_remove_support_range:
+  forall l x, NoDup (range l) -> NoDup (range (remove_support l x)).
+Proof.
+  induction l; repeat step || step_inversion NoDup; eauto using in_remove_support_range.
+Qed.
+
+Fixpoint swap (l: list (nat * nat)) :=
+  match l with
+  | nil => nil
+  | (x,y) :: l' => (y,x) :: swap l'
+  end.
+
+Lemma range_swap:
+  forall l, range (swap l) = support l.
+Proof.
+  induction l; steps.
+Qed.
+
+Lemma swap_twice:
+  forall l, swap (swap l) = l.
+Proof.
+  induction l; steps.
 Qed.

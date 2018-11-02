@@ -34,6 +34,9 @@ Program Fixpoint erase_term (t: tree): tree :=
   | tlet t1 A t2 => notype_tlet (erase_term t1) (erase_term t2)
   | trefl => trefl
 
+  | type_abs t => type_abs (erase_term t)
+  | type_inst t T => notype_inst (erase_term t)
+
   | _ => uu
   end.
 
@@ -45,6 +48,7 @@ Fail Next Obligation.
 Program Fixpoint erase_type (T: tree): tree :=
   match T with
   | fvar _ type_var => T
+  | lvar _ type_var => T
   | T_unit => T
   | T_bool => T
   | T_nat => T
@@ -60,6 +64,7 @@ Program Fixpoint erase_type (T: tree): tree :=
   | T_equal t1 t2 => T_equal (erase_term t1) (erase_term t2)
   | T_forall A B => T_forall (erase_type A) (erase_type B)
   | T_exists A B => T_exists (erase_type A) (erase_type B)
+  | T_abs T => T_abs (erase_type T)
   | _ => T_unit
   end.
 

@@ -44,6 +44,14 @@ Proof.
   unfold subset; repeat step || slow_instantiations; eauto with bfv.
 Qed.
 
+Lemma subset_topen:
+  forall t rep k S tag,
+    subset (pfv (topen k t rep) tag) S ->
+    subset (pfv t tag) S.
+Proof.
+  unfold subset; repeat step || slow_instantiations; eauto with bfv.
+Qed.
+
 Lemma subset_open2:
   forall t rep k S tag,
     subset (pfv t tag) S ->
@@ -52,6 +60,16 @@ Lemma subset_open2:
 Proof.
   unfold subset; repeat step.
   apply fv_open2 in H1; repeat step || t_listutils.
+Qed.
+
+Lemma subset_topen2:
+  forall t rep k S tag,
+    subset (pfv t tag) S ->
+    subset (pfv rep tag) S ->
+    subset (pfv (topen k t rep) tag) S.
+Proof.
+  unfold subset; repeat step.
+  apply fv_topen2 in H1; repeat step || t_listutils.
 Qed.
 
 Lemma in_middle:
@@ -228,6 +246,8 @@ Ltac t_subset_open :=
   match goal with
   | H: subset (pfv (open _ _ _) _) _ |- _ =>
     apply subset_open in H
+  | H: subset (pfv (topen _ _ _) _) _ |- _ =>
+    apply subset_topen in H
   end.
 
 Lemma defined_FV:
@@ -263,7 +283,7 @@ Proof.
   apply mut_HT_IT_IC_IS_AE;
     repeat match goal with
     | _ => t_subset_open
-    | _ => step || apply subset_open2 || t_listutils
+    | _ => step || apply subset_open2 || apply subset_topen2 || t_listutils
     | _ => progress rewrite subset_add
     | _ => progress rewrite supportAppend, fv_context_append in *
     | _ => progress rewrite <- subset_union3 in *

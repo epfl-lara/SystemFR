@@ -20,6 +20,7 @@ Require Import Termination.TermForm.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
+Require Import Termination.TypeErasureLemmas.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
@@ -97,7 +98,8 @@ Proof.
   unfold reducible, reduces_to in H; steps.
   eapply star_backstep_reducible;
     eauto with bsteplemmas;
-    eauto using reducible_values_pi1.
+    eauto using reducible_values_pi1;
+    eauto using is_erased_term_tfv.
 Qed.
 
 Lemma open_reducible_pi1:
@@ -121,8 +123,9 @@ Proof.
     eauto using reducible_value_expr;
     eauto with berased.
 
-  apply reducible_let_backstep_expr with a;
-    eauto with smallstep.
+  apply reducible_let_backstep_expr with a; steps;
+    eauto with smallstep;
+    eauto with berased.
 
   apply reducible_let; eauto using reducible_value_expr.
 Qed.

@@ -68,7 +68,7 @@ Lemma reducible_val_let2:
     reducible_values theta b (T_let a A B) ->
     reducible_values theta b (open 0 B a).
 Proof.
-  repeat step || simp reducible_values in * || simp denote_values in * || t_values_info2 || t_invert_star.
+  repeat step || simp reducible_values in * || t_values_info2 || t_invert_star.
 Qed.
 
 Lemma reducible_let2:
@@ -110,9 +110,8 @@ Lemma reducible_let_smallstep_values:
     reducible_values theta v (T_let t1 A B) ->
     reducible_values theta v (T_let t2 A B).
 Proof.
-  repeat step || simp reducible_values in * || simp denote_values in *.
-  eexists; eexists; auto.
-  repeat step || simp reducible_values in * || simp denote_values in *.
+  repeat step || simp reducible_values in *.
+  exists a'; steps; eauto with berased.
   eauto using value_irred, star_many_steps.
 Qed.
 
@@ -129,19 +128,20 @@ Qed.
 Lemma reducible_let_backstep_values:
   forall theta t1 t2 A B v,
     valid_interpretation theta ->
+    is_erased_term t1 ->
     star small_step t1 t2 ->
     reducible_values theta v (T_let t2 A B) ->
     reducible_values theta v (T_let t1 A B).
 Proof.
-  repeat step || simp reducible_values in * || simp denote_values in *.
-  eexists.
-  repeat step || simp reducible_values in * || simp denote_values in *.
+  repeat step || simp reducible_values in *.
+  eexists; steps; eauto.
   eauto using star_smallstep_trans.
 Qed.
 
 Lemma reducible_let_backstep_expr:
   forall theta t1 t2 A B t,
     valid_interpretation theta ->
+    is_erased_term t1 ->
     star small_step t1 t2 ->
     reducible theta t (T_let t2 A B) ->
     reducible theta t (T_let t1 A B).

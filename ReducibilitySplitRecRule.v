@@ -108,5 +108,6 @@ Proof.
   - unshelve epose proof (H31 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _);
       clear H30; clear H31;
       repeat tac1 || step_inversion NoDup;
-      eauto 2 using satisfies_drop.
+      eauto 2 using satisfies_drop;
+      eauto 6 with berased step_tactic.
 Qed.

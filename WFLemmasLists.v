@@ -5,31 +5,41 @@ Require Import Termination.TypeList.
 Require Import Termination.WFLemmas.
 
 Lemma satisfies_wfs:
-  forall p lterms gamma,
+  forall p lterms gamma k,
     satisfies p gamma lterms ->
-    wfs lterms 0.
+    wfs lterms k.
 Proof.
-  induction lterms; repeat step || step_inversion satisfies; eauto with bwf.
+  induction lterms; repeat step || step_inversion satisfies; eauto with bwf omega.
 Qed.
 
 Hint Resolve satisfies_wfs: bwf.
 
-Lemma satisfies_wfs_1:
-  forall p lterms gamma,
+Lemma satisfies_twfs:
+  forall p lterms gamma k,
     satisfies p gamma lterms ->
-    wfs lterms 1.
+    twfs lterms k.
 Proof.
-  steps; eauto with bwf.
+  induction lterms; repeat step || step_inversion satisfies; eauto with btwf omega.
 Qed.
 
-Hint Resolve satisfies_wfs_1: bwf.
+Hint Resolve satisfies_twfs: btwf.
 
 Lemma closed_types_wfs:
-  forall l,
+  forall l k,
     closed_terms l ->
-    wfs l 0.
+    wfs l k.
 Proof.
-  induction l; steps; eauto with bwf.
+  induction l; steps; eauto with bwf omega.
 Qed.
 
 Hint Resolve closed_types_wfs: bwf.
+
+Lemma closed_types_twfs:
+  forall l k,
+    closed_terms l ->
+    twfs l k.
+Proof.
+  induction l; steps; eauto with btwf omega.
+Qed.
+
+Hint Resolve closed_types_twfs: btwf.

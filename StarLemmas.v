@@ -4,6 +4,7 @@ Require Import Termination.TermProperties.
 Require Import Termination.Tactics.
 Require Import Termination.WFLemmas.
 Require Import Termination.StarRelation.
+Require Import Termination.ListUtils.
 
 Lemma value_irred:
   forall v,
@@ -15,12 +16,14 @@ Qed.
 
 Lemma values_normalizing:
   forall v,
+    is_value v ->
     fv v = nil ->
     wf v 0 ->
-    is_value v ->
     normalizing v.
 Proof.
-  unfold normalizing; steps; eauto with bwf step_tactic smallstep.
+  repeat
+    unfold normalizing in * || steps;
+    eauto with smallstep.
 Qed.
 
 Hint Resolve values_normalizing: norm.
@@ -31,7 +34,7 @@ Lemma lambda_normalizing:
     pfv t term_var = nil ->
     normalizing (notype_lambda t).
 Proof.
-  steps; eauto 6 using values_normalizing with step_tactic blistutils values.
+  repeat step || t_listutils || apply values_normalizing || unfold closed_value, closed_term.
 Qed.
 
 Hint Resolve lambda_normalizing: bsteplemmas.
@@ -203,3 +206,13 @@ Proof.
 Qed.
 
 Hint Resolve star_smallstep_let: bsteplemmas.
+
+Lemma star_smallstep_type_inst:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    star small_step (notype_inst t1) (notype_inst t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_type_inst: bsteplemmas.

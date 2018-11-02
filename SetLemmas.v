@@ -197,3 +197,12 @@ Proof.
 Qed.
 
 Hint Resolve subset_same: sets.
+
+Lemma subset_singleton:
+  forall A (x: A) l,
+    subset (singleton x) l ->
+    (x ∈ l -> False) ->
+    False.
+Proof.
+  unfold subset; steps.
+Qed.

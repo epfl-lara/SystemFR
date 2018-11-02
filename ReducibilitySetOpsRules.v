@@ -72,6 +72,7 @@ Qed.
 Lemma reducible_singleton:
   forall theta t1 t2 T,
     valid_interpretation theta ->
+    is_erased_term t2 ->
     equivalent t1 t2 ->
     reducible theta t1 T ->
     reducible theta t1 (T_singleton t2).
@@ -85,14 +86,15 @@ Qed.
 Lemma open_reducible_singleton:
   forall tvars (gamma : context) t1 t2 T,
     open_reducible tvars gamma t1 T ->
+    is_erased_term t2 ->
     (forall l theta,
        valid_interpretation theta ->
        support theta = tvars ->
        satisfies (reducible_values theta) gamma l -> equivalent (substitute t1 l) (substitute t2 l)) ->
     open_reducible tvars gamma t1 (T_singleton t2).
 Proof.
-  unfold open_reducible; repeat step;
-    eauto using reducible_singleton.
+  unfold open_reducible; repeat step.
+  eapply reducible_singleton; eauto with berased.
 Qed.
 
 Lemma open_reducible_union_elim:

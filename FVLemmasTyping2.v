@@ -27,6 +27,16 @@ Qed.
 
 Hint Resolve defined_FV_HT_1_open: bfv2.
 
+Lemma defined_FV_HT_1_topen:
+  forall tvars gamma t T k rep,
+    has_type tvars gamma (topen k t rep) T ->
+    subset (pfv t term_var) (support gamma).
+Proof.
+  repeat step || p_fv || t_subset_open.
+Qed.
+
+Hint Resolve defined_FV_HT_1_topen: bfv2.
+
 Lemma defined_FV_HT_2_open:
   forall tvars gamma t T k rep,
     has_type tvars gamma t (open k T rep) ->
@@ -36,6 +46,16 @@ Proof.
 Qed.
 
 Hint Resolve defined_FV_HT_2_open: bfv2.
+
+Lemma defined_FV_HT_2_topen:
+  forall tvars gamma t T k rep,
+    has_type tvars gamma t (topen k T rep) ->
+    subset (pfv T term_var) (support gamma).
+Proof.
+  repeat step || p_fv || t_subset_open.
+Qed.
+
+Hint Resolve defined_FV_HT_2_topen: bfv2.
 
 Lemma defined_FV_HT_1_open_3_2:
   forall tvars gamma t T i j x y z X Y Z rep1 rep2,

@@ -39,19 +39,6 @@ Proof.
     repeat step || f_equal; eauto with omega; eauto with bwf.
 Qed.
 
-(*
-Lemma open_fun_late:
-  (forall T k rep, wf T k -> open_fun k T rep = T) /\
-  (forall t k rep, wf t k -> open_fun k t rep = t).
-Proof.
-  apply type_ind;
-    repeat step || tequality || t_typeequality; eauto with omega; eauto with bwf.
-Qed.
-
-Definition open_fun_late_type := proj1 open_fun_late.
-Definition open_fun_late := proj2 open_fun_late.
-*)
-
 Lemma wfs_lookup:
   forall gamma x T k,
     wfs gamma k ->
@@ -86,22 +73,36 @@ Hint Resolve wfs_append: bwf.
 Lemma wf_open_rev:
   forall t rep k, wf (open k t rep) k -> wf t (S k).
 Proof.
-  induction t; repeat step; eauto.
+  induction t;
+    try solve [ repeat step; eauto ].
 Qed.
 
 Hint Resolve wf_open_rev: bwf.
 
+Lemma wf_topen_rev:
+  forall t rep i k, wf (topen i t rep) k -> wf t k.
+Proof.
+  induction t;
+    try solve [ repeat step; eauto].
+Qed.
+
+Hint Resolve wf_topen_rev: bwft.
+
 Lemma wf_open:
   forall t rep k, wf t (S k) -> wf rep k -> wf (open k t rep) k.
 Proof.
-  induction t;
-    repeat match goal with
-           | H: _ |- _ => apply H
-           | _ => step || omega
-           end; eauto with bwf.
+  induction t; repeat step || apply_any || omega; eauto with bwf.
 Qed.
 
 Hint Resolve wf_open: bwf.
+
+Lemma wf_topen:
+  forall t rep i k, wf t k -> wf rep k -> wf (topen i t rep) k.
+Proof.
+  induction t; repeat step || apply_any || omega; eauto with bwf.
+Qed.
+
+Hint Resolve wf_topen: bwft.
 
 Lemma wf_subst:
   forall t l k tag,
@@ -109,7 +110,7 @@ Lemma wf_subst:
     wfs l k ->
     wf (psubstitute t l tag) k.
 Proof.
-  induction t; steps; eauto with bwf.
+  induction t; repeat steps; eauto with bwf.
 Qed.
 
 Hint Resolve wf_subst: bwf.

@@ -94,8 +94,9 @@ Proof.
   unfold reducible, reduces_to in *;
     repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
 
-  unshelve epose proof (H17 t' _); steps;
-    eauto with berased.
+  match goal with
+  | H: forall a, _ |- _ => unshelve epose proof (H t' _); steps; eauto with berased
+  end.
   exists t'1; repeat step || simp reducible_values in *;
     eauto using star_smallstep_trans with bsteplemmas values.
   unshelve exists t';
@@ -116,7 +117,10 @@ Proof.
     unfold reduces_to in *;
     repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
 
-  unshelve epose proof (H18 t' _); steps; eauto with berased.
+  match goal with
+  | H: forall a, _ |- _ => unshelve epose proof (H t' _); steps; eauto with berased
+  end.
+
   rewrite open_none in *; auto.
   eexists; steps; eauto;
     eauto using star_smallstep_trans with bsteplemmas values.

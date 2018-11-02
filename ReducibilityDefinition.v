@@ -104,7 +104,6 @@ Qed.
 
 Definition reduces_to (P: tree -> Prop) (t: tree) :=
   pfv t term_var = nil /\
-  pfv t type_var = nil /\
   wf t 0 /\
   is_erased_term t /\
   exists t',
@@ -126,11 +125,23 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 
   reducible_values theta v T_nat := is_nat_value v;
 
+  reducible_values theta v (T_abs T) :=
+    is_erased_term v /\
+    is_value v /\
+    pfv v term_var = nil /\
+    wf v 0 /\
+    exists X,
+      ~(X ∈ support theta) /\
+      ~(X ∈ pfv T type_var) /\
+      forall RC,
+        reducibility_candidate RC ->
+        reduces_to (fun t => reducible_values ((X,RC) :: theta) t (topen 0 T (type_fvar X)))
+                   (notype_inst v);
+
   reducible_values theta v (T_arrow A B) :=
     is_erased_term v /\
     is_value v /\
     pfv v term_var = nil /\
-    pfv v type_var = nil /\
     wf v 0 /\
     forall (a: erased_term),
       reducible_values theta a A ->
@@ -144,20 +155,22 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 
   reducible_values theta v (T_refine T p) :=
     reducible_values theta v T /\
+    is_erased_term p /\
     wf p 1 /\
     star small_step (open 0 p v) ttrue;
 
   reducible_values theta v (T_let a A B) :=
     exists (a': erased_term),
+      is_erased_term a /\
       is_value a' /\
       star small_step a a' /\
       reducible_values theta v (open 0 B a');
 
   reducible_values theta v (T_singleton t) :=
+    is_erased_term t /\
     is_erased_term v /\
     is_value v /\
     pfv v term_var = nil /\
-    pfv v type_var = nil /\
     wf v 0 /\
     star small_step t v;
 
@@ -173,12 +186,13 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
     is_erased_term v /\
     is_value v /\
     pfv v term_var = nil /\
-    pfv v type_var = nil /\
     wf v 0;
 
   reducible_values theta v T_bot := False;
 
   reducible_values theta v (T_equal t1 t2) :=
+    is_erased_term t1 /\
+    is_erased_term t2 /\
     v = trefl /\
     equivalent t1 t2;
 
@@ -186,7 +200,6 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
     is_erased_term v /\
     is_value v /\
     pfv v term_var = nil /\
-    pfv v type_var = nil /\
     wf v 0 /\
     forall (a: erased_term),
       reducible_values theta a A ->
@@ -270,7 +283,15 @@ Ltac simp_red :=
     rewrite reducible_values_equation_30 in * ||
     rewrite reducible_values_equation_31 in * ||
     rewrite reducible_values_equation_32 in * ||
-    rewrite reducible_values_equation_33 in *
+    rewrite reducible_values_equation_33 in * ||
+    rewrite reducible_values_equation_34 in * ||
+    rewrite reducible_values_equation_35 in * ||
+    rewrite reducible_values_equation_36 in * ||
+    rewrite reducible_values_equation_37 in * ||
+    rewrite reducible_values_equation_38 in * ||
+    rewrite reducible_values_equation_39 in * ||
+    rewrite reducible_values_equation_40 in * ||
+    rewrite reducible_values_equation_41 in *
   ).
 
 Ltac top_level_unfold :=

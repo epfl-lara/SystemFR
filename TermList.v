@@ -23,6 +23,7 @@ Inductive satisfies (P: tree -> tree -> Prop):
       pfv t term_var = nil ->
       pfv t type_var = nil ->
       wf t 0 ->
+      twf t 0 ->
       P t (substitute T lterms) ->
       satisfies P gamma lterms ->
       satisfies P ((x,T) :: gamma) ((x,t) :: lterms).
@@ -170,8 +171,11 @@ Proof.
   - exists nil, nil; steps.
   - exists nil, ((n,t) :: lterms);
       repeat step || t_termlist || apply SatCons || f_equal_cons;  eauto with btermlist.
-  - pose proof (IHgamma1 _ _ H12); steps.
-    exists ((n,t) :: l1), l2; repeat step.
+  -  match goal with
+     | H: forall gamma2 lterms, _, H2: satisfies _ _ _ |- _ =>
+       pose proof (H _ _ H2); steps
+     end.
+     exists ((n,t) :: l1), l2; repeat step.
 Qed.
 
 Ltac t_sat_cut :=

@@ -113,6 +113,8 @@ Qed.
 
 Lemma open_reducible_refl:
   forall tvars (gamma : context) t1 t2,
+    is_erased_term t1 ->
+    is_erased_term t2 ->
     (forall l theta,
       valid_interpretation theta ->
       support theta = tvars ->
@@ -124,5 +126,6 @@ Proof.
     repeat step || t_termlist || simp_red || eexists;
     eauto with smallstep;
     eauto using equivalence_def;
-    eauto using equivalence_def2.
+    eauto using equivalence_def2;
+    eauto with berased.
 Qed.

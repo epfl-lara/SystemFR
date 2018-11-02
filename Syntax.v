@@ -31,6 +31,10 @@ Fixpoint pfv t tag: set nat :=
   | lambda T t' => pfv T tag ++ pfv t' tag
   | app t1 t2 => pfv t1 tag ++ pfv t2 tag
 
+  | type_abs t => pfv t tag
+  | type_inst t T => pfv t tag ++ pfv T tag
+  | notype_inst t => pfv t tag
+
   | pp t1 t2 => pfv t1 tag ++ pfv t2 tag
   | pi1 t' => pfv t' tag
   | pi2 t' => pfv t' tag
@@ -64,6 +68,7 @@ Fixpoint pfv t tag: set nat :=
   | T_equal t1 t2 => pfv t1 tag ++ pfv t2 tag
   | T_forall A B => pfv A tag ++ pfv B tag
   | T_exists A B => pfv A tag ++ pfv B tag
+  | T_abs T => pfv T tag
   end.
 
 Definition fv t := pfv t term_var.
@@ -135,6 +140,10 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | lambda T t' => lambda (psubstitute T l tag) (psubstitute t' l tag)
   | app t1 t2 => app (psubstitute t1 l tag) (psubstitute t2 l tag)
 
+  | type_abs t' => type_abs (psubstitute t' l tag)
+  | type_inst t' T => type_inst (psubstitute t' l tag) (psubstitute T l tag)
+  | notype_inst t'=> notype_inst (psubstitute t' l tag)
+
   | pp t1 t2 => pp (psubstitute t1 l tag) (psubstitute t2 l tag)
   | pi1 t' => pi1 (psubstitute t' l tag)
   | pi2 t' => pi2 (psubstitute t' l tag)
@@ -171,6 +180,7 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | T_equal t1 t2 => T_equal (psubstitute t1 l tag) (psubstitute t2 l tag)
   | T_forall T1 T2 => T_forall (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_exists T1 T2 => T_exists (psubstitute T1 l tag) (psubstitute T2 l tag)
+  | T_abs T => T_abs (psubstitute T l tag)
   end.
 
 Definition substitute t l := psubstitute t l term_var.
@@ -198,6 +208,10 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | notype_lambda t' => notype_lambda (open (S k) t' rep)
   | lambda T t' => lambda (open k T rep) (open (S k) t' rep)
   | app t1 t2 => app (open k t1 rep) (open k t2 rep)
+
+  | type_abs t => type_abs (open k t rep)
+  | type_inst t T => type_inst (open k t rep) (open k T rep)
+  | notype_inst t => notype_inst (open k t rep)
 
   | uu => t
 
@@ -247,6 +261,73 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | T_equal t1 t2 => T_equal (open k t1 rep) (open k t2 rep)
   | T_forall T1 T2 => T_forall (open k T1 rep) (open (S k) T2 rep)
   | T_exists T1 T2 => T_exists (open k T1 rep) (open (S k) T2 rep)
+  | T_abs T => T_abs (open k T rep)
+  end.
+
+Fixpoint topen (k: nat) (t rep: tree) :=
+  match t with
+  | fvar _ _ => t
+  | lvar i type_var => if (Nat.eq_dec k i) then rep else t
+  | lvar i term_var => t
+  | err => t
+
+  | notype_lambda t' => notype_lambda (topen k t' rep)
+  | lambda T t' => lambda (topen k T rep) (topen k t' rep)
+  | app t1 t2 => app (topen k t1 rep) (topen k t2 rep)
+
+  | type_abs t => type_abs (topen (S k) t rep)
+  | type_inst t T => type_inst (topen k t rep) (topen k T rep)
+  | notype_inst t => notype_inst (topen k t rep)
+
+  | uu => t
+
+  | pp t1 t2 => pp (topen k t1 rep) (topen k t2 rep)
+  | pi1 t => pi1 (topen k t rep)
+  | pi2 t => pi2 (topen k t rep)
+
+  | ttrue => t
+  | tfalse => t
+  | ite t1 t2 t3 => ite (topen k t1 rep) (topen k t2 rep) (topen k t3 rep)
+
+  | zero => t
+  | succ t' => succ (topen k t' rep)
+  | notype_rec t' t1 t2 =>
+      notype_rec (topen k t' rep)
+                 (topen k t1 rep)
+                 (topen k t2 rep)
+  | rec T t' t1 t2 =>
+      rec (topen k T rep)
+          (topen k t' rep)
+          (topen k t1 rep)
+          (topen k t2 rep)
+  | tmatch t' t1 t2 =>
+      tmatch
+          (topen k t' rep)
+          (topen k t1 rep)
+          (topen k t2 rep)
+
+  | notype_tlet t1 t2 =>
+      notype_tlet (topen k t1 rep) (topen k t2 rep)
+  | tlet t1 T t2 =>
+      tlet (topen k t1 rep) (topen k T rep) (topen k t2 rep)
+  | trefl => t
+
+  | T_unit => t
+  | T_bool => t
+  | T_nat => t
+  | T_prod T1 T2 => T_prod (topen k T1 rep) (topen k T2 rep)
+  | T_arrow T1 T2 => T_arrow (topen k T1 rep) (topen k T2 rep)
+  | T_refine T p => T_refine (topen k T rep) (topen k p rep)
+  | T_let t A B => T_let (topen k t rep) (topen k A rep) (topen k B rep)
+  | T_singleton t => T_singleton (topen k t rep)
+  | T_intersection T1 T2 => T_intersection (topen k T1 rep) (topen k T2 rep)
+  | T_union T1 T2 => T_union (topen k T1 rep) (topen k T2 rep)
+  | T_top => t
+  | T_bot => t
+  | T_equal t1 t2 => T_equal (topen k t1 rep) (topen k t2 rep)
+  | T_forall T1 T2 => T_forall (topen k T1 rep) (topen k T2 rep)
+  | T_exists T1 T2 => T_exists (topen k T1 rep) (topen k T2 rep)
+  | T_abs T => T_abs (topen (S k) T rep)
   end.
 
 Fixpoint wf t k :=
@@ -261,6 +342,10 @@ Fixpoint wf t k :=
   | notype_lambda t' => wf t' (S k)
   | lambda T t' => wf T k /\ wf t' (S k)
   | app t1 t2 => wf t1 k /\ wf t2 k
+
+  | type_abs t => wf t k
+  | type_inst t T => wf t k /\ wf T k
+  | notype_inst t => wf t k
 
   | pp t1 t2 => wf t1 k /\ wf t2 k
   | pi1 t => wf t k
@@ -305,12 +390,82 @@ Fixpoint wf t k :=
   | T_equal t1 t2 => wf t1 k /\ wf t2 k
   | T_forall T1 T2 => wf T1 k /\ wf T2 (S k)
   | T_exists T1 T2 => wf T1 k /\ wf T2 (S k)
+  | T_abs T => wf T k
+  end.
+
+Fixpoint twf t k :=
+  match t with
+  | fvar _ _ => True
+  | lvar i type_var => i < k
+  | lvar i term_var => True
+  | err => True
+
+  | uu => True
+
+  | notype_lambda t' => twf t' k
+  | lambda T t' => twf T k /\ twf t' k
+  | app t1 t2 => twf t1 k /\ twf t2 k
+
+  | type_abs t => twf t (S k)
+  | type_inst t T => twf t k /\ twf T k
+  | notype_inst t => twf t k
+
+  | pp t1 t2 => twf t1 k /\ twf t2 k
+  | pi1 t => twf t k
+  | pi2 t => twf t k
+
+  | ttrue => True
+  | tfalse => True
+  | ite t1 t2 t3 => twf t1 k /\ twf t2 k /\ twf t3 k
+
+  | zero => True
+  | succ t' => twf t' k
+  | notype_rec t' t1 t2 =>
+      twf t' k /\
+      twf t1 k /\
+      twf t2 k
+  | rec T t' t1 t2 =>
+      twf T k /\
+      twf t' k /\
+      twf t1 k /\
+      twf t2 k
+  | tmatch t' t1 t2 =>
+      twf t' k /\
+      twf t1 k /\
+      twf t2 k
+
+  | notype_tlet t1 t2 => twf t1 k /\ twf t2 k
+  | tlet t1 T t2 => twf t1 k /\ twf T k /\ twf t2 k
+  | trefl => True
+
+  | T_unit => True
+  | T_bool => True
+  | T_nat => True
+  | T_prod T1 T2 => twf T1 k /\ twf T2 k
+  | T_arrow T1 T2 => twf T1 k /\ twf T2 k
+  | T_refine T p => twf T k /\ twf p k
+  | T_let t A B => twf t k /\ twf A k /\ twf B k
+  | T_singleton t => twf t k
+  | T_intersection T1 T2 => twf T1 k /\ twf T2 k
+  | T_union T1 T2 => twf T1 k /\ twf T2 k
+  | T_top => True
+  | T_bot => True
+  | T_equal t1 t2 => twf t1 k /\ twf t2 k
+  | T_forall T1 T2 => twf T1 k /\ twf T2 k
+  | T_exists T1 T2 => twf T1 k /\ twf T2 k
+  | T_abs T => twf T (S k)
   end.
 
 Fixpoint wfs (gamma: list (nat * tree)) k :=
   match gamma with
   | nil => True
   | (x,A) :: gamma' => wf A k /\ wfs gamma' k
+  end.
+
+Fixpoint twfs (gamma: list (nat * tree)) k :=
+  match gamma with
+  | nil => True
+  | (x,A) :: gamma' => twf A k /\ twfs gamma' k
   end.
 
 Ltac tequality :=
@@ -328,6 +483,9 @@ Ltac tequality :=
   | |- tmatch _ _ _ = tmatch _ _ _ => f_equal
   | |- tlet _ _ _ = tlet _ _ _ => f_equal
   | |- notype_tlet _ _ = notype_tlet _ _ => f_equal
+  | |- type_abs _ = type_abs _ => f_equal
+  | |- type_inst _ _ = type_inst _ _ => f_equal
+  | |- notype_inst _ = notype_inst _ => f_equal
 
   | |- T_refine _ _ = T_refine _ _ => f_equal
   | |- T_prod _ _ = T_prod _ _ => f_equal
@@ -339,6 +497,7 @@ Ltac tequality :=
   | |- T_equal _ _ = T_equal _ _ => f_equal
   | |- T_forall _ _ = T_forall _ _ => f_equal
   | |- T_exists _ _ = T_exists _ _ => f_equal
+  | |- T_abs _ = T_abs _ => f_equal
  end.
 
 Lemma fold_open_arrow:
@@ -361,6 +520,7 @@ Fixpoint closed_terms (ltypes: list (nat * tree)): Prop :=
   | (_, t) :: ts =>
     closed_terms ts /\
     wf t 0 /\
+    twf t 0 /\
     pfv t term_var = nil /\
     pfv t type_var = nil
   end.

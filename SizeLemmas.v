@@ -22,6 +22,7 @@ Fixpoint size T: nat :=
   | T_equal _ _ => 0
   | T_forall A B => 3 + size A + size B
   | T_exists A B => 3 + size A + size B
+  | T_abs T => 3 + size T
 
   | _ => 0
   end.
@@ -41,3 +42,19 @@ Proof.
 Qed.
 
 Hint Rewrite size_opening: bsize.
+
+Lemma size_opening_var:
+  forall T k X, size (open k T (fvar X type_var)) = size T.
+Proof.
+  induction T; steps.
+Qed.
+
+Hint Rewrite size_opening_var: bsize.
+
+Lemma size_topening_var:
+  forall T k X, size (topen k T (fvar X type_var)) = size T.
+Proof.
+  induction T; steps.
+Qed.
+
+Hint Rewrite size_topening_var: bsize.
