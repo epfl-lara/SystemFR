@@ -6,6 +6,26 @@ Require Import Termination.StarRelation.
 Require Import Termination.SmallStep.
 Require Import Termination.StarLemmas.
 
+Lemma equivalence_def:
+  forall t1 t2 v,
+    is_value v ->
+    equivalent t1 t2 ->
+    star small_step t1 v ->
+    star small_step t2 v.
+Proof.
+  unfold equivalent; steps; eauto.
+Qed.
+
+Lemma equivalence_def2:
+  forall t1 t2 v,
+    is_value v ->
+    equivalent t1 t2 ->
+    star small_step t2 v ->
+    star small_step t1 v.
+Proof.
+  unfold equivalent; steps; eauto.
+Qed.
+  
 Lemma not_equivalent:
   equivalent tfalse ttrue -> False.
 Proof.

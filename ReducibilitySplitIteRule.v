@@ -19,10 +19,10 @@ Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
 
 Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTermList.
+Require Import Termination.FVLemmasLists.
 
 Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasTermList.
+Require Import Termination.WFLemmasLists.
 
 Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
@@ -38,8 +38,10 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma equivalent_split_ite:
-  forall (gamma1 gamma2 : context) (b e1 e2 t t' e : term) (x y : nat) l,
-    open_reducible gamma2 b T_bool ->
+  forall tvars theta (gamma1 gamma2 : context) (b e1 e2 t t' e : term) (x y : nat) l,
+    open_reducible tvars gamma2 b T_bool ->
+    valid_interpretation theta ->
+    support theta = tvars ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e1 -> False) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e2 -> False) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e -> False) ->
@@ -63,21 +65,21 @@ Lemma equivalent_split_ite:
     wf e1 0 ->
     wf e2 0 ->
     (forall l : list (nat * term),
-       satisfies reducible_values (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal b ttrue) :: gamma2) l ->
+       satisfies (reducible_values theta) (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal b ttrue) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
     (forall l : list (nat * term),
-       satisfies reducible_values (gamma1 ++ (x, T_equal e2 e) :: (y, T_equal b tfalse) :: gamma2) l ->
+       satisfies (reducible_values theta) (gamma1 ++ (x, T_equal e2 e) :: (y, T_equal b tfalse) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
-    satisfies reducible_values (gamma1 ++ (x, T_equal (ite b e1 e2) e) :: gamma2) l ->
+    satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (ite b e1 e2) e) :: gamma2) l ->
     equivalent (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
-    repeat step || t_listutils || t_sat_cut || tt || tlist || step_inversion satisfies ||
+    repeat step || t_listutils || t_sat_cut || t_instantiate_sat3 || t_termlist || step_inversion satisfies ||
            simp_red.
   
-    - unshelve epose proof (H22 (l1 ++ (x,trefl) :: (y,trefl) :: l) _); tac1;
+    - unshelve epose proof (H24 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _); tac1;
         eauto 2 using satisfies_drop.
-    - unshelve epose proof (H23 (l1 ++ (x,trefl) :: (y,trefl) :: l) _); tac1;
+    - unshelve epose proof (H25 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _); tac1;
         eauto 2 using satisfies_drop.
 Qed.
 

@@ -12,7 +12,7 @@ Require Import Termination.SetLemmas.
 
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasTyping.
-Require Import Termination.FVLemmasTermList.
+Require Import Termination.FVLemmasLists.
 
 Ltac pp :=
   repeat
@@ -21,17 +21,19 @@ Ltac pp :=
     fresh_instantiations1 ||
     unfold subset in *; eauto 1 with omega.
 
-
+(*
 Lemma defined_FV_open:
-  forall gamma A t T L,
-    (forall x, ~(x ∈ L) -> has_type ((x,A) :: gamma) (open 0 t (fvar x)) T) ->
+  forall tvars gamma A t T L,
+    (forall x, ~(x ∈ L) -> has_type tvars ((x,A) :: gamma) (open 0 t (fvar x)) T) ->
     subset (fv t) (support gamma).
 Proof.
   pp; eauto 2 with bfv.
 Qed.
 
 Hint Resolve defined_FV_open: bfv.
+*)
 
+(*
 Lemma defined_FV_open2:
   forall gamma A t T L,
     (forall x, ~(x ∈ L) -> has_type ((x,A) :: gamma) (open 0 t (fvar x)) (open 0 T (fvar x))) ->
@@ -41,7 +43,9 @@ Proof.
 Qed.
 
 Hint Resolve defined_FV_open2: bfv.
+*)
 
+(*
 Lemma defined_FV_open3:
   forall gamma A t T L,
     (forall x, ~(x ∈ L) -> has_type ((x,A) :: gamma) t (open 0 T (fvar x))) ->
@@ -52,7 +56,9 @@ Proof.
 Qed.
 
 Hint Resolve defined_FV_open3: bfv.
+*)
 
+(*
 Lemma defined_FV_open4:
   forall gamma A t T V L,
     (forall x y, ~(x ∈ L) ->
@@ -65,7 +71,8 @@ Proof.
 Qed.
 
 Hint Resolve defined_FV_open4: bfv.
-
+*)
+(*
 Lemma defined_FV_open_type:
   forall gamma A T L,
     (forall x, ~(x ∈ L) -> is_type ((x,A) :: gamma) (open 0 T (fvar x))) ->
@@ -122,3 +129,4 @@ Proof.
 Qed.
 
 Hint Resolve fv_nils_double_open: bfv.
+*)

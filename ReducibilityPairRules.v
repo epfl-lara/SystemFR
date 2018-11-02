@@ -16,16 +16,16 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
-Require Import Termination.TypeForm.
+Require Import Termination.TermForm.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
 
 Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTermList.
+Require Import Termination.FVLemmasLists.
 
 Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasTermList.
+Require Import Termination.WFLemmasLists.
 
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
@@ -36,20 +36,22 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_values_pp:
-  forall v1 v2 T1 T2,
-    reducible_values v1 T1 ->
-    reducible_values v2 (open 0 T2 v1) ->
-    reducible_values (pp v1 v2) (T_prod T1 T2).
+  forall theta v1 v2 T1 T2,
+    valid_interpretation theta ->
+    reducible_values theta v1 T1 ->
+    reducible_values theta v2 (open 0 T2 v1) ->
+    reducible_values theta (pp v1 v2) (T_prod T1 T2).
 Proof.
   repeat step || simp reducible_values || rewrite reducibility_rewrite;
     eauto with btf step_tactic.
 Qed.
 
 Lemma reducible_pp:
-  forall U V t1 t2,
-    reducible t1 U ->
-    reducible t2 (T_let t1 U V) ->
-    reducible (pp t1 t2) (T_prod U V).
+  forall theta U V t1 t2,
+    valid_interpretation theta ->
+    reducible theta t1 U ->
+    reducible theta t2 (T_let t1 U V) ->
+    reducible theta (pp t1 t2) (T_prod U V).
 Proof.
   unfold reducible, reduces_to; repeat step || t_listutils.
   exists (pp t'0 t'); repeat step || simp_red || t_values_info2 || t_deterministic_star;
@@ -57,18 +59,19 @@ Proof.
 Qed.
 
 Lemma open_reducible_pp:
-  forall gamma U V t1 t2,
-    open_reducible gamma t1 U ->
-    open_reducible gamma t2 (T_let t1 U V) ->
-    open_reducible gamma (pp t1 t2) (T_prod U V).
+  forall tvars gamma U V t1 t2,
+    open_reducible tvars gamma t1 U ->
+    open_reducible tvars gamma t2 (T_let t1 U V) ->
+    open_reducible tvars gamma (pp t1 t2) (T_prod U V).
 Proof.
   unfold open_reducible in *; steps; eauto using reducible_pp.
 Qed.
 
 Lemma reducible_values_pi1:
-  forall U V t,
-    reducible_values t (T_prod U V) ->
-    reducible (pi1 t) U.
+  forall theta U V t,
+    valid_interpretation theta ->
+    reducible_values theta t (T_prod U V) ->
+    reducible theta (pi1 t) U.
 Proof.
   repeat step || t_values_info2 || simp reducible_values in *.
   eapply backstep_reducible; repeat step || t_listutils;
@@ -78,11 +81,12 @@ Proof.
 Qed.
 
 Lemma reducible_pi1:
-  forall U V t,
-    reducible t (T_prod U V) ->
-    reducible (pi1 t) U.
+  forall theta U V t,
+    valid_interpretation theta ->
+    reducible theta t (T_prod U V) ->
+    reducible theta (pi1 t) U.
 Proof.
-  intros U V t H.
+  intros theta U V t HV H.
   unfold reducible, reduces_to in H; steps.
   eapply star_backstep_reducible;
     eauto with bsteplemmas;
@@ -90,17 +94,18 @@ Proof.
 Qed.
 
 Lemma open_reducible_pi1:
-  forall gamma U V t,
-    open_reducible gamma t (T_prod U V) ->
-    open_reducible gamma (pi1 t) U.
+  forall tvars gamma U V t,
+    open_reducible tvars gamma t (T_prod U V) ->
+    open_reducible tvars gamma (pi1 t) U.
 Proof.
   unfold open_reducible in *; steps; eauto using reducible_pi1.
 Qed.
 
 Lemma reducible_values_pi2:
-  forall U V t,
-    reducible_values t (T_prod U V) ->
-    reducible (pi2 t) (T_let (pi1 t) U V).
+  forall theta U V t,
+    valid_interpretation theta ->
+    reducible_values theta t (T_prod U V) ->
+    reducible theta (pi2 t) (T_let (pi1 t) U V).
 Proof.  
   repeat step || t_values_info2 || simp reducible_values in *.
   eapply backstep_reducible; repeat step || t_listutils || simp reducible_values in *;
@@ -115,11 +120,12 @@ Proof.
 Qed.
 
 Lemma reducible_pi2:
-  forall U V t,
-    reducible t (T_prod U V) ->
-    reducible (pi2 t) (T_let (pi1 t) U V).
+  forall theta U V t,
+    valid_interpretation theta ->
+    reducible theta t (T_prod U V) ->
+    reducible theta (pi2 t) (T_let (pi1 t) U V).
 Proof.
-  intros U V t H.
+  intros theta U V t HV H.
   unfold reducible, reduces_to in H; steps.
   eapply star_backstep_reducible; eauto with bsteplemmas.
   eapply reducible_let_backstep_expr; eauto with bsteplemmas.
@@ -127,23 +133,23 @@ Proof.
 Qed.
 
 Lemma open_reducible_pi2:
-  forall gamma U V t,
-    open_reducible gamma t (T_prod U V) ->
-    open_reducible gamma (pi2 t) (T_let (pi1 t) U V).
+  forall tvars gamma U V t,
+    open_reducible tvars gamma t (T_prod U V) ->
+    open_reducible tvars gamma (pi2 t) (T_let (pi1 t) U V).
 Proof.
   unfold open_reducible in *; steps; eauto using reducible_pi2.
 Qed.
 
 Lemma reducible_unit:
-  reducible uu T_unit.
+  forall theta, reducible theta uu T_unit.
 Proof.
-  unfold reducible, reduces_to;
-    repeat step; eauto with step_tactic smallstep.
+  repeat step || simp_red || unfold reducible, reduces_to || eexists;
+    eauto with smallstep step_tactic.
 Qed.
 
 Lemma open_reducible_unit:
-  forall gamma,
-    open_reducible gamma uu T_unit.
+  forall theta gamma,
+    open_reducible theta gamma uu T_unit.
 Proof.
   unfold open_reducible in *; repeat step;
     auto using reducible_unit.

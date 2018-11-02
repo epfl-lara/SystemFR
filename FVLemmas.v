@@ -39,7 +39,8 @@ Lemma fv_lookup:
     lookup Nat.eq_dec gamma x = Some T ->
     subset (fv T) (fv_context gamma).
 Proof.
-  induction gamma; repeat step || t_sets || unfold subset in * || t_listutils; eauto.
+  induction gamma;
+    try solve [ repeat step || unfold subset in * || t_listutils; eauto ].
 Qed.
 
 Lemma fv_lookup2:
@@ -157,9 +158,9 @@ Hint Resolve fv_subst2: bfv.
 
 Lemma fv_subst3:
   forall t x rep y,
-      y <> x ->
-      y ∈ fv t ->
-      y ∈ fv (substitute t ((x,rep) :: nil)).
+    y <> x ->
+    y ∈ fv t ->
+    y ∈ fv (substitute t ((x,rep) :: nil)).
 Proof.
   induction t;
     repeat match goal with

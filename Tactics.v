@@ -17,12 +17,13 @@ Ltac light :=
   (autounfold in *)
 .
 
-Ltac light2 :=
+Ltac basic_rewrites :=
   (autorewrite with list in *; eauto; fail) ||
   (autorewrite with list in *; eauto; [ idtac ]) ||
   (autorewrite with core in *; eauto; fail) ||
-  (autorewrite with core in *; eauto; [ idtac ]) ||
-  (firstorder).
+  (autorewrite with core in *; eauto; [ idtac ]).
+
+Ltac light2 := basic_rewrites || firstorder.
 
 Ltac is_construct t :=
   let x := fresh in
@@ -161,8 +162,6 @@ Ltac createHypothesis := match goal with
 
 Ltac createHypotheses := repeat createHypothesis.
 
-Hint Extern 50 => steps: step_tactic.
-
 Ltac define m t :=
   let M := fresh "M" in
   pose t as m;
@@ -189,6 +188,16 @@ Ltac apply_any :=
   | H: _ |- _ => apply H
   end.
 
+Ltac rewrite_any :=
+  match goal with
+  | H: _ |- _ => rewrite H in *
+  end.
+
+Ltac rewrite_back_any :=
+  match goal with
+  | H: _ |- _ => rewrite <- H in *
+  end.
+
 Ltac eapply_any :=
   match goal with
   | H: _ |- _ => eapply H
@@ -200,3 +209,7 @@ Ltac instantiate_any :=
     poseNew (Mark (H1,H2) "instantiation");
     pose proof (H1 _ H2)
   end.
+   
+Hint Extern 50 => apply_any: bapply_any.
+Hint Extern 50 => congruence: bcongruence.
+Hint Extern 50 => steps: step_tactic.

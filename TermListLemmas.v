@@ -11,8 +11,7 @@ Require Import Termination.ListUtils.
 Require Import Termination.SubstitutionLemmas.
 
 Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTermList.
-
+Require Import Termination.FVLemmasLists.
 
 
 Lemma satisfies_insert:

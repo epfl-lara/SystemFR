@@ -19,10 +19,10 @@ Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
 
 Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTermList.
+Require Import Termination.FVLemmasLists.
 
 Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasTermList.
+Require Import Termination.WFLemmasLists.
 
 Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
@@ -38,8 +38,10 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma equivalent_split_match:
-  forall (gamma1 gamma2 : context) (n t t' : term) (e1 e2 e : term) (x y v: nat) l,
-    open_reducible gamma2 n T_nat ->
+  forall tvars theta (gamma1 gamma2 : context) (n t t' : term) (e1 e2 e : term) (x y v: nat) l,
+    open_reducible tvars gamma2 n T_nat ->
+    valid_interpretation theta ->
+    support theta = tvars ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e1 -> False) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e2 -> False) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e -> False) ->
@@ -68,30 +70,33 @@ Lemma equivalent_split_match:
     subset (fv n ++ fv e1 ++ fv e2) (support gamma2) ->
     subset (fv e) (support gamma2) ->
     (forall l,
-          satisfies reducible_values (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal n zero) :: gamma2) l ->
+          satisfies (reducible_values theta)
+                    (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal n zero) :: gamma2)
+                    l ->
           equivalent (substitute t l) (substitute t' l)) ->
     (forall l,
-          satisfies reducible_values
+          satisfies (reducible_values theta)
                     (gamma1 ++
                             (x, T_equal (open 0 e2 (fvar v)) e)
                             :: (y, T_equal n (succ (fvar v))) :: (v, T_nat) :: gamma2) l ->
           equivalent (substitute t l) (substitute t' l)) ->
-    satisfies reducible_values (gamma1 ++ (x, T_equal (tmatch n e1 e2) e) :: gamma2) l ->
+    satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (tmatch n e1 e2) e) :: gamma2) l ->
     wf n 0 ->
     wf e1 0 ->
     wf e2 1 ->
     equivalent (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
-    repeat step || t_listutils || t_sat_cut || tt || tlist || step_inversion satisfies ||
+    repeat step || t_listutils || t_sat_cut || t_instantiate_sat3 ||
+           t_termlist || step_inversion satisfies ||
            simp_red.
 
   destruct t'0; steps.
   
-  - unshelve epose proof (H27 (l1 ++ (x,trefl) :: (y,trefl) :: l) _);
+  - unshelve epose proof (H29 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _);
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
-  - unshelve epose proof (H28 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: l) _);
-      clear H28; repeat tac1 || step_inversion NoDup;
+  - unshelve epose proof (H30 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _);
+      clear H29; clear H30; repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
 Qed.

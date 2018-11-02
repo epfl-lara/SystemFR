@@ -15,15 +15,16 @@ Require Import Termination.TermList.
 Require Import Termination.Freshness.
 Require Import Termination.TermList.
 Require Import Termination.SubstitutionLemmas.
+Require Import Termination.SetLemmas.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
 
 Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasTermList.
+Require Import Termination.WFLemmasLists.
 
 Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTermList.
+Require Import Termination.FVLemmasLists.
 
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
@@ -33,14 +34,15 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_value_let:
-  forall v t A B,
+  forall theta v t A B,
     wf t 1 ->
     fv t = nil ->
     wf A 0 ->
     fv A = nil ->
-    reducible_values v A ->
-    reducible (open 0 t v) B ->
-    reducible (tlet v A t) B.
+    valid_interpretation theta ->
+    reducible_values theta v A ->
+    reducible theta (open 0 t v) B ->
+    reducible theta (tlet v A t) B.
 Proof.
   steps.
   eapply backstep_reducible; eauto using red_is_val with smallstep;
@@ -50,17 +52,18 @@ Proof.
 Qed.
 
 Lemma reducible_let_rule:
-  forall t1 t2 A B,
+  forall theta t1 t2 A B,
     wf t2 1 ->
     fv t2 = nil ->
     wf A 0 ->
     fv A = nil ->
-    reducible t1 A ->
+    valid_interpretation theta ->
+    reducible theta t1 A ->
     (forall v,
         is_value v ->
         star small_step t1 v ->
-        reducible (open 0 t2 v) B) ->
-    reducible (tlet t1 A t2) B.
+        reducible theta (open 0 t2 v) B) ->
+    reducible theta (tlet t1 A t2) B.
 Proof.  
   unfold reducible, reduces_to; repeat step || t_listutils.
   createHypothesis;
@@ -72,7 +75,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_let:
-  forall gamma t1 t2 A B x p,
+  forall tvars gamma t1 t2 A B x p,
     ~(p ∈ fv_context gamma) ->
     ~(p ∈ fv A) ->
     ~(p ∈ fv B) ->
@@ -87,15 +90,15 @@ Lemma open_reducible_let:
     wf t2 1 ->
     subset (fv A) (support gamma) ->
     subset (fv t2) (support gamma) ->
-    open_reducible gamma t1 A ->
-    open_reducible ((p, T_equal (fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (fvar x)) B ->
-    open_reducible gamma (tlet t1 A t2) B.
+    open_reducible tvars gamma t1 A ->
+    open_reducible tvars ((p, T_equal (fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (fvar x)) B ->
+    open_reducible tvars gamma (tlet t1 A t2) B.
 Proof.
   unfold open_reducible; steps.
 
   eapply reducible_let_rule;
-   repeat step || tt || top_level_unfold || t_values_info2 || t_deterministic_star;
-      eauto with bwf; eauto with bfv.
-    unshelve epose proof (H15 ((p,trefl) :: (x,t') :: l) _); tac1;
+   repeat step || top_level_unfold || t_values_info2 || t_deterministic_star || t_termlist || t_instantiate_sat4;
+      eauto with bwf; eauto using subset_same with bfv.
+  - unshelve epose proof (H15 theta ((p,trefl) :: (x,t') :: lterms) _ _); tac1;
       eauto 3 using equivalent_sym with b_equiv.
 Qed.

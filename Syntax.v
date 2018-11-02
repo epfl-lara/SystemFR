@@ -10,10 +10,11 @@ Require Import PeanoNat.
 
 (* locally nameless representation *)
 Inductive term: Set :=
-  (* type *)
-  | T_type: term
+  (* term or type variable *)
+  | fvar: nat -> term
               
   (* types *)
+  | T_var: nat -> term
   | T_nat: term
   | T_unit: term
   | T_bool: term
@@ -31,7 +32,6 @@ Inductive term: Set :=
   | T_exists: term -> term -> term
 
   (* terms *)
-  | fvar: nat -> term
   | lvar: nat -> term
   | err: term
 
@@ -57,6 +57,7 @@ Inductive term: Set :=
 
   | trefl: term
 .
+
 
 Fixpoint fv (t: term): set nat :=
   match t with
@@ -85,7 +86,7 @@ Fixpoint fv (t: term): set nat :=
   | tlet t1 A t2 => fv t1 ++ fv A ++  fv t2
   | trefl => empty
 
-  | T_type => nil
+  | T_var y => nil
   | T_unit => nil
   | T_bool => nil
   | T_nat => nil
@@ -103,7 +104,7 @@ Fixpoint fv (t: term): set nat :=
   | T_exists A B => fv A ++ fv B
   end.
 
-
+Definition tvar_list := list nat.
 Definition context: Type := list (nat * term).
 
 Fixpoint fv_context gamma :=
@@ -121,13 +122,7 @@ Qed.
   
 Hint Rewrite fv_context_append: blistutils.
 
-Fixpoint fv_mapping (m: list (nat * term)): set nat :=
-  match m with
-  | nil => empty
-  | (x,t) :: m' => x :: fv t ++ fv_mapping m'
-  end.
-
-Fixpoint fv_range (m: list (nat * term)): set nat :=
+Fixpoint fv_range (m: list (nat * term)) :=
   match m with
   | nil => empty
   | (x,t) :: m' => fv t ++ fv_range m'
@@ -146,6 +141,10 @@ Fixpoint substitute t (l: list (nat * term)): term :=
     | None => t
     | Some e => e
     end
+
+  (* substitution is only for term variables *)
+  | T_var _ => t
+
   | lvar _ => t
   | err => t
 
@@ -170,7 +169,6 @@ Fixpoint substitute t (l: list (nat * term)): term :=
   | tlet t1 T t2 => tlet (substitute t1 l) (substitute T l) (substitute t2 l)
   | trefl => t
               
-  | T_type => t
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -232,7 +230,7 @@ Fixpoint open (k: nat) (t rep: term) :=
          (open (S k) t2 rep)
   | trefl => t
               
-  | T_type => t
+  | T_var _ => t
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -252,7 +250,7 @@ Fixpoint open (k: nat) (t rep: term) :=
 
 Fixpoint wf t k :=
   match t with
-  | fvar y => True
+  | fvar _ => True
   | lvar i => i < k
   | err => True
 
@@ -284,7 +282,7 @@ Fixpoint wf t k :=
   | tlet t1 T t2 => wf t1 k /\ wf T k /\ wf t2 (S k)
   | trefl => True
 
-  | T_type => True
+  | T_var _ => True
   | T_unit => True
   | T_bool => True
   | T_nat => True

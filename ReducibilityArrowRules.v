@@ -11,7 +11,7 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TermList.
 Require Import Termination.StarLemmas.
 Require Import Termination.SetLemmas.
-Require Import Termination.TypeForm.
+Require Import Termination.TermForm.
 Require Import Termination.StarRelation.
 Require Import Termination.SmallStep.
 
@@ -21,22 +21,23 @@ Require Import Termination.ReducibilityLetRules.
 Require Import Termination.RedTactics.
 
 Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasTermList.
+Require Import Termination.WFLemmasLists.
 
 Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTermList.
+Require Import Termination.FVLemmasLists.
 
 Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_lambda:
-  forall t U V,
+  forall theta t U V,
     wf U 0 ->
     wf t 1 ->
     fv U = nil ->
     fv t = nil ->
-    (forall u, reducible_values u U -> reducible (open 0 t u) (T_let u U V)) ->
-    reducible_values (lambda U t) (T_arrow U V).
+    valid_interpretation theta ->
+    (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (T_let u U V)) ->
+    reducible_values theta (lambda U t) (T_arrow U V).
 Proof.
   repeat step || t_listutils || simp reducible_values in * || rewrite reducibility_rewrite;
     eauto 2 with bsteplemmas.
@@ -49,7 +50,7 @@ Proof.
 Qed.
   
 Lemma open_reducible_lambda:
-  forall gamma x t U V,
+  forall tvars gamma x t U V,
     wf U 0 ->
     wf t 1 ->
     subset (fv_context gamma) (support gamma) -> 
@@ -58,50 +59,52 @@ Lemma open_reducible_lambda:
     ~(x ∈ support gamma) ->
     ~(x ∈ fv t) ->
     ~(x ∈ fv V) ->
-    open_reducible ((x, U) :: gamma) (open 0 t (fvar x)) (open 0 V (fvar x)) ->
-    open_reducible gamma (lambda U t) (T_arrow U V).
+    open_reducible tvars ((x, U) :: gamma) (open 0 t (fvar x)) (open 0 V (fvar x)) ->
+    open_reducible tvars gamma (lambda U t) (T_arrow U V).
 Proof.
   unfold open_reducible in *; steps.
 
-  apply reducible_value_expr.
+  apply reducible_value_expr; steps.
   apply reducible_lambda; steps;
     eauto with bwf;
     eauto with bfv sets btermlist;
     eauto 2 with btf.
   
-  - unshelve epose proof (H7 ((x,u) :: l) _); repeat tac1 || t_sets; eauto.
-    eauto using reducible_let with btf.    
+  - unshelve epose proof (H7 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
+      eauto using reducible_let with btf.
 Qed.
 
 Lemma reducible_app:
-  forall U V t1 t2,
-    reducible t1 (T_arrow U V) ->
-    reducible t2 U ->
-    reducible (app t1 t2) (T_let t2 U V).
+  forall theta U V t1 t2,
+    valid_interpretation theta ->
+    reducible theta t1 (T_arrow U V) ->
+    reducible theta t2 U ->
+    reducible theta (app t1 t2) (T_let t2 U V).
 Proof.
   intros U V t1 t2 H1 H2.
   unfold reducible, reduces_to in *;
     repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
 
-  unshelve epose proof (H10 t' _); steps; eauto with btf.
+  unshelve epose proof (H12 t' _); steps; eauto with btf.
   exists t'1; repeat step || simp reducible_values in *;
     eauto using star_smallstep_trans with bsteplemmas values.
   exists t'; repeat step || simp reducible_values in *; eauto using red_is_val; eauto with btf.
 Qed.      
   
 Lemma reducible_app2:
-  forall e1 e2 U V,
+  forall theta e1 e2 U V,
     wf V 0 ->
-    reducible e1 (T_arrow U V) ->
-    reducible e2 U ->
-    reducible (app e1 e2) V.
+    valid_interpretation theta ->
+    reducible theta e1 (T_arrow U V) ->
+    reducible theta e2 U ->
+    reducible theta (app e1 e2) V.
 Proof.
   intros e1 e2 U V W H1 H2;
     unfold reducible in *;
     unfold reduces_to in *;
     repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
 
-  unshelve epose proof (H10 t' _ _); steps; eauto with btf.
+  unshelve epose proof (H12 t' _ _); steps; eauto with btf.
   rewrite open_none in *; auto.
   eexists; steps; eauto;
     eauto using star_smallstep_trans with bsteplemmas values.
@@ -109,21 +112,22 @@ Qed.
 
 
 Lemma open_reducible_app:
-  forall gamma U V t1 t2,
-    open_reducible gamma t1 (T_arrow U V) ->
-    open_reducible gamma t2 U ->
-    open_reducible gamma (app t1 t2) (T_let t2 U V).
+  forall tvars gamma U V t1 t2,
+    open_reducible tvars gamma t1 (T_arrow U V) ->
+    open_reducible tvars gamma t2 U ->
+    open_reducible tvars gamma (app t1 t2) (T_let t2 U V).
 Proof.
   unfold open_reducible in *; steps;
     eauto using reducible_app.
 Qed.
 
 Lemma reducible_app_sem:
-  forall e u U V T,
-    reducible e (T_arrow U V) ->
-    reducible_values u U ->
+  forall theta e u U V T,
+    valid_interpretation theta ->
+    reducible theta e (T_arrow U V) ->
+    reducible_values theta u U ->
     T = open 0 V u ->
-    reducible (app e u) T.
+    reducible theta (app e u) T.
 Proof.
   steps.
   eauto using reducible_let2, reducible_app, reducible_value_expr, red_is_val.

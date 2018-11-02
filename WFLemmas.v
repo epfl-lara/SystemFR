@@ -72,6 +72,17 @@ Qed.
 
 Hint Resolve wfs_next: bwf.
 
+Lemma wfs_append:
+  forall l1 l2 k,
+    wfs l1 k ->
+    wfs l2 k ->
+    wfs (l1 ++ l2) k. 
+Proof.
+  induction l1; steps; eauto.
+Qed.
+
+Hint Resolve wfs_append: bwf.
+
 Lemma wf_open_rev:
   forall t rep k, wf (open k t rep) k -> wf t (S k).
 Proof.

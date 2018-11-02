@@ -2,12 +2,15 @@
 
 The requirements can be installed using `opam`.
 
-* Coq 8.8.1
-* Coq-Equations 8.8.dev
+* Coq 8.8.2
+* Coq-Equations 1.1+8.8
 
 # Compiling the Proofs
 
-Run `make` or `make -j4` to compile the proofs (takes around 9 minutes of user time).
+```bash
+./configure
+make -j4     # takes around 6 minutes
+```
 
 # Overview
 

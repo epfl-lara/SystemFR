@@ -26,10 +26,10 @@ Qed.
 Hint Resolve subset_singleton_support: b_sub_open.
 
 Lemma subset_range_context:
-  forall (gamma : context) (x : nat) T,
-    subset (fv_context gamma) (support gamma) ->
+  forall (gamma : context) (x : nat) T S,
+    subset (fv_context gamma) S ->
     lookup Nat.eq_dec gamma x = Some T ->
-    subset (fv T) (support gamma).
+    subset (fv T) S.
 Proof.
   eauto using subset_transitive, fv_lookup.
 Qed.
@@ -61,6 +61,23 @@ Qed.
 
 Hint Immediate in_middle: b_sub_open.
 
+Lemma subset_left:
+  forall A (s1 s2 s3: set A),
+    subset s1 s2 ->
+    subset s1 (s2 ++ s3).
+Proof.
+  eauto with sets.
+Qed.
+
+Lemma in_middle2:
+  forall A (x: A) (s1 s2 s3: list A),
+    x ∈ (s1 ++ x :: s2) ++ s3.
+Proof.
+  induction s1; steps.
+Qed.
+
+Hint Immediate in_middle2: b_sub_open.
+
 Lemma subset_middle:
   forall A (x: A) (s s1 s2: list A),
     ~(x ∈ s) ->
@@ -83,7 +100,6 @@ Proof.
   unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
 Qed.
 
-
 Lemma subset_middle3:
   forall A (x y: A) (s s1 s2: list A),
     ~(y ∈ s) ->
@@ -99,6 +115,36 @@ Lemma subset_middle4:
     ~(z ∈ s) ->
     subset s (s1 ++ x :: y :: z :: s2) ->
     subset s (s1 ++ x :: s2).
+Proof.
+  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+Qed.
+
+Lemma subset_middle5:
+  forall A (x: A) (s s1 s2 s3: list A),
+    ~(x ∈ s) ->
+    subset s ((s1 ++ x :: s2) ++ s3) ->
+    subset s ((s1 ++ s2) ++ s3).
+Proof.
+  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+Qed.
+
+Lemma subset_middle6:
+  forall A (x y: A) (s s1 s2 s3: list A),
+    ~(x ∈ s) ->
+    ~(y ∈ s) ->
+    subset s ((s1 ++ x :: y :: s2) ++ s3) ->
+    subset s ((s1 ++ s2) ++ s3).
+Proof.
+  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+Qed.
+
+Hint Immediate subset_middle5: b_sub_open.
+
+Lemma subset_middle7:
+  forall A (x y: A) (s s1 s2 s3: list A),
+    ~(y ∈ s) ->
+    subset s ((s1 ++ x :: y :: s2) ++ s3) ->
+    subset s ((s1 ++ x :: s2) ++ s3).
 Proof.
   unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
 Qed.
@@ -137,63 +183,99 @@ Proof.
   eauto with sets.
 Qed.
 
+Lemma subset_right3:
+  forall A x (s1 s2 s3 s4: set A),
+    subset s1 s3 ->
+    subset s1 ((s2 ++ x :: s3) ++ s4).
+Proof.
+  eauto using subset_left with sets.
+Qed.
+
+Lemma subset_right4:
+  forall A x (s1 s2 s3 s4: set A),
+    subset s1 (s3 ++ s4) ->
+    subset s1 ((s2 ++ x :: s3) ++ s4).
+Proof.
+  repeat step || t_listutils || unfold subset in * || instantiate_any.
+Qed.
+
+Lemma subset_right5:
+  forall A x (s1 s2: set A),
+    subset s1 s2 ->
+    subset s1 (x :: s2).
+Proof.
+  eauto with sets.
+Qed.
+
+Lemma subset_right6:
+  forall A (s s1 s2 s3: set A),
+    subset s (s2 ++ s3) ->
+    subset s ((s1 ++ s2) ++ s3).
+Proof.
+  repeat step || t_listutils || unfold subset in * || instantiate_any.
+Qed.
+
 Hint Immediate subset_right: b_sub_open.
 Hint Immediate subset_right2: b_sub_open.
+Hint Immediate subset_right3: b_sub_open.
+Hint Immediate subset_right4: b_sub_open.
+Hint Immediate subset_right5: b_sub_open.
+Hint Immediate subset_right6: b_sub_open.
 
 Ltac t_subset_open :=
   match goal with
   | H: subset (fv (open _ _ _)) ?S |- _ =>
     apply subset_open in H 
-  | H: subset (fv (open _ _ _)) ?S |- _ =>
-    apply subset_open_type in H 
   end.
 
 Lemma defined_FV:
-  (forall gamma t T,
-    has_type gamma t T ->
+  (forall tvars gamma t T,
+    has_type tvars gamma t T ->
       subset (fv t) (support gamma) /\
       subset (fv T) (support gamma)  /\
       subset (fv_context gamma) (support gamma)
   ) /\
-  (forall gamma T,
-    is_type gamma T ->
+  (forall tvars gamma T,
+    is_type tvars gamma T ->
       subset (fv T) (support gamma) /\
       subset (fv_context gamma) (support gamma)
   ) /\
-  (forall gamma,
-    is_context gamma ->
+  (forall tvars gamma,
+    is_context tvars gamma ->
       subset (fv_context gamma) (support gamma)
   ) /\
-  (forall gamma T1 T2,
-    is_subtype gamma T1 T2 ->
+  (forall tvars gamma T1 T2,
+    is_subtype tvars gamma T1 T2 ->
       subset (fv T1) (support gamma) /\
       subset (fv T2) (support gamma) /\ 
       subset (fv_context gamma) (support gamma) 
   ) /\
-  (forall gamma t1 t2,
-    are_equal gamma t1 t2 ->
+  (forall tvars gamma t1 t2,
+    are_equal tvars gamma t1 t2 ->
       subset (fv t1) (support gamma) /\
       subset (fv t2) (support gamma) /\
       subset (fv_context gamma) (support gamma) 
   ).
+
 Proof.
   apply mut_HT_IT_IC_IS_AE;
     repeat match goal with
-    | _ => t_subset_open
+    | _ => t_subset_open 
+    | _ => solve [ apply subset_left; eauto 2 with b_sub_open; eauto 2 with bfv ]
+    | _ => solve [ eauto 2 with b_sub_open ]
+    | _ => solve [ eauto 2 with sets ]
+    | _ => solve [ eauto 2 with bfv ]
+    | _ => solve [ eauto 2 using subset_middle2 ]
+    | _ => solve [ eauto 2 using subset_middle3 ]
+    | _ => solve [ eauto 2 using subset_middle4 ]
+    | _ => solve [ eauto 2 using subset_middle5 ]
+    | _ => solve [ eauto 2 using subset_middle6 ]
+    | _ => solve [ eauto 2 using subset_middle7 ]
+    | _ => step
+    | _ => progress rewrite subset_add
+    | _ => progress rewrite <- subset_union3 in *
     | _ => progress rewrite supportAppend, fv_context_append in *
-    | _ => progress rewrite subset_add in * 
-    | _ => step || step_inversion NoDup || apply subset_union2
-    | _ => solve [
-            eauto 2 with bfv;
-            eauto 2 with b_sub_open;
-            eauto 2 with sets;
-            eauto 2 using subset_open;
-            eauto 2 using subset_middle2;
-            eauto 2 using subset_middle3;
-            eauto 2 using subset_middle4
-          ]
-    | _ => progress rewrite <- subset_union3 in *  (* time-consuming step *)
-   end.
+    end.
 Qed.
 
 Definition defined_FV_HT := proj1 defined_FV.
@@ -203,64 +285,64 @@ Definition defined_FV_IS := proj1 (proj2 (proj2 (proj2 defined_FV))).
 Definition defined_FV_AE := proj2 (proj2 (proj2 (proj2 defined_FV))).
 
 Lemma defined_FV_IT_1:
-  forall gamma T,
-    is_type gamma T ->
+  forall tvars gamma T,
+    is_type tvars gamma T ->
     subset (fv T) (support gamma).
 Proof.
   apply defined_FV_IT.
 Qed.
 
 Lemma defined_FV_HT_1:
-  forall gamma t T,
-    has_type gamma t T ->
+  forall tvars gamma t T,
+    has_type tvars gamma t T ->
     subset (fv t) (support gamma).
 Proof.
   apply defined_FV_HT.
 Qed.
 
 Lemma defined_FV_HT_2:
-  forall gamma t T,
-    has_type gamma t T ->
+  forall tvars gamma t T,
+    has_type tvars gamma t T ->
     subset (fv T) (support gamma).
 Proof.
   apply defined_FV_HT.
 Qed.
 
 Lemma defined_FV_HT_3:
-  forall gamma t T,
-    has_type gamma t T ->
+  forall tvars gamma t T,
+    has_type tvars gamma t T ->
     subset (fv_context gamma) (support gamma).
 Proof.
   apply defined_FV_HT.
 Qed.
 
 Lemma defined_FV_IS_1:
-  forall gamma T1 T2,
-    is_subtype gamma T1 T2 ->
+  forall tvars gamma T1 T2,
+    is_subtype tvars gamma T1 T2 ->
     subset (fv T1) (support gamma).
 Proof.
   apply defined_FV_IS.
 Qed.
 
 Lemma defined_FV_IS_2:
-  forall gamma T1 T2,
-    is_subtype gamma T1 T2 ->
+  forall tvars gamma T1 T2,
+    is_subtype tvars gamma T1 T2 ->
     subset (fv T2) (support gamma).
 Proof.
   apply defined_FV_IS.
 Qed.
 
 Lemma defined_FV_AE_1:
-  forall gamma t1 t2,
-    are_equal gamma t1 t2 ->
+  forall tvars gamma t1 t2,
+    are_equal tvars gamma t1 t2 ->
     subset (fv t1) (support gamma).
 Proof.
   apply defined_FV_AE.
 Qed.
 
 Lemma defined_FV_AE_2:
-  forall gamma t1 t2,
-    are_equal gamma t1 t2 ->
+  forall tvars gamma t1 t2,
+    are_equal tvars gamma t1 t2 ->
     subset (fv t2) (support gamma).
 Proof.
   apply defined_FV_AE.
@@ -285,17 +367,17 @@ Ltac p_fv :=
   | H: lookup _ ?G ?x = Some ?T |- _ =>
     poseNew (Mark (G,x,T) "fv_lookup");
     poseNew (fv_lookup _ _ _ H)
-  | H: has_type ?G ?t ?T |- _ =>
-    poseNew (Mark (G,t,T) "definedFV_HT");
-    poseNew (defined_FV_HT _ _ _ H)
-  | H: is_type ?G ?T |- _ =>
-    poseNew (Mark (G,T) "definedFV_IT");
-    poseNew (defined_FV_IT _ _ H)
+  | H: has_type ?tvars ?G ?t ?T |- _ =>
+    poseNew (Mark (tvars,G,t,T) "definedFV_HT");
+    poseNew (defined_FV_HT _ _ _ _ H)
+  | H: is_type ?tvars ?G ?T |- _ =>
+    poseNew (Mark (tvars,G,T) "definedFV_IT");
+    poseNew (defined_FV_IT _ _ _ H)
   end.
 
 Ltac p_sub_fv :=
   match goal with
-  | H: is_subtype ?G ?T1 ?T2 |- _ =>
-    poseNew (Mark (G,T1,T2) "definedFV_HT");
-    poseNew (defined_FV_IS _ _ _ H)
+  | H: is_subtype ?tvars ?G ?T1 ?T2 |- _ =>
+    poseNew (Mark (tvars,G,T1,T2) "definedFV_HT");
+    poseNew (defined_FV_IS _ _ _ _ H)
   end.

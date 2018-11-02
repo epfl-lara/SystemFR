@@ -9,13 +9,15 @@ Require Import Termination.Sets.
 Require Import Termination.AssocList.
 Require Import Termination.FVLemmas.
 Require Import Termination.TermList.
+Require Import Termination.TypeList.
+Require Import Termination.ListUtils.
 
 Lemma satisfies_closed_mapping:
-  forall P l gamma,
-    satisfies P gamma l ->
-    closed_mapping l.
+  forall P lterms gamma,
+    satisfies P gamma lterms ->
+    closed_mapping lterms.
 Proof.
-  induction l; repeat step || step_inversion satisfies; eauto.
+  induction lterms; repeat step || step_inversion satisfies; eauto.
 Qed.
 
 Hint Resolve satisfies_closed_mapping: bfv.
@@ -39,11 +41,32 @@ Qed.
 Hint Resolve closed_mapping_append1: b_cmap.
 Hint Resolve closed_mapping_append2: b_cmap.
 
+Lemma closed_mapping_append:
+  forall l1 l2,
+    closed_mapping l1 ->
+    closed_mapping l2 ->
+    closed_mapping (l1 ++ l2).
+Proof.
+  induction l1; steps.
+Qed.
+
+Hint Resolve closed_mapping_append: b_cmap.
+
+Lemma closed_types_fvs:
+  forall ltypes,
+    closed_types ltypes ->
+    closed_mapping ltypes.
+Proof.
+  induction ltypes; steps.
+Qed.
+
+Hint Resolve closed_types_fvs: b_cmap.
+
 Lemma satisfies_fv_nil:
-  forall P gamma l,
-    satisfies P gamma l ->
+  forall P gamma lterms,
+    satisfies P gamma lterms ->
     forall t,
-      t ∈ range l ->
+      t ∈ range lterms ->
       fv t = nil.  
 Proof.
   steps; eauto with bfv.
@@ -52,12 +75,13 @@ Qed.
 Hint Resolve satisfies_fv_nil: bfv.
 
 Lemma fv_satisfies_nil:
-  forall P gamma l t,
-    satisfies P gamma l ->
+  forall P gamma lterms t,
+    satisfies P gamma lterms ->
     subset (fv t) (support gamma) ->
-    fv (substitute t l) = nil.
+    fv (substitute t lterms) = nil.
 Proof.
-  repeat step || tlist; eauto 4 with sets bfv.
+  repeat step || t_termlist || t_listutils || apply fv_nils2 || rewrite_any;
+    eauto with bfv b_cmap.
 Qed.
 
 Hint Resolve fv_satisfies_nil: bfv.

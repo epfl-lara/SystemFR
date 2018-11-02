@@ -204,13 +204,27 @@ Qed.
 
 Hint Resolve lookupRight: blookup.
 
- 
-Definition map X Y := list (X * Y).
+Lemma lookupRight2:
+  forall X Y eq_dec (l1 l2: M X Y) x r,
+    lookup eq_dec l1 x = None ->
+    lookup eq_dec l2 x = r ->
+    lookup eq_dec (l1 ++ l2) x = r.
+Proof.
+  induction l1; steps.
+Qed.
+
+Lemma lookupNil: forall X Y eq_dec (m: M X Y) x,
+  @lookup X Y eq_dec nil x = None.
+Proof.
+  steps.
+Qed.
+
+Hint Rewrite lookupNil: blookup.
 
 Lemma lookupMap:
   forall X Y Z
          (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
-         (m: map X Y) (f: Y -> Z) x,
+         (m: M X Y) (f: Y -> Z) x,
     lookup eq_dec (mapValues f m) x = option_map f (lookup eq_dec m x).
 Proof.
   induction m; steps.
@@ -233,10 +247,14 @@ Ltac t_lookup :=
   | H: lookup ?e (?l1 ++ ?l2)%list ?x = None |- _ =>
     poseNew (Mark (l1,l2,x) "lookupNoneAppend2");
     poseNew (lookupNoneAppend2 _ _ e _ _ _ H)
+  | H: context[lookup (mapValues _ _) _] |- _ => rewrite lookupMap in H
+  end.
+
+Ltac t_lookupor :=
+  match goal with
   | H: lookup ?e (?l1 ++ ?l2)%list ?x = Some ?t |- _ =>
     poseNew (Mark (l1,l2,x) "lookupAppendOr");
-    poseNew (lookupAppendOr l1 l2 x)
-  | H: context[lookup (mapValues _ _) _] |- _ => rewrite lookupMap in H
+    poseNew (lookupAppendOr _ _ e l1 l2 x)
   end.
 
 Lemma obvious_lookup:
@@ -262,3 +280,11 @@ Proof.
 Qed.
 
 Hint Immediate lookup_remove: blookup.
+
+Lemma lookup_remove2:
+  forall {A B} gamma1 (x y: A) U gamma2 y dec,
+    x <> y ->
+    @lookup A B dec (gamma1 ++ (x, U) :: gamma2) y = @lookup A B dec (gamma1 ++ gamma2) y.
+Proof.
+  induction gamma1; steps; eauto.
+Qed.

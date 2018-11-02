@@ -86,7 +86,7 @@ Definition plus (n m: term): term :=
 Lemma subtype0:
   forall gamma n,
     is_context gamma ->
-    has_type gamma n T_nat ->
+    has_type tvars gamma n T_nat ->
     is_subtype gamma (T_let n T_nat T_nat) T_nat.
 Proof.
   steps.
@@ -105,7 +105,7 @@ Qed.
 Lemma subtype2:
   forall gamma n,
     is_context gamma ->
-    has_type gamma n T_nat ->
+    has_type tvars gamma n T_nat ->
     is_subtype gamma (T_let n T_nat T_bool) T_bool.
 Proof.
   steps.
@@ -148,8 +148,8 @@ Qed.
 Lemma context1:
   forall gamma n m y0 n0 n1 y,
   is_context gamma ->
-  has_type gamma n T_nat ->
-  has_type gamma m T_nat ->
+  has_type tvars gamma n T_nat ->
+  has_type tvars gamma m T_nat ->
   ~(y0 ∈ support gamma) ->
   ~(n0 ∈ support gamma) ->
   ~(y ∈ support gamma) ->
@@ -213,9 +213,9 @@ Qed.
 Lemma plus_well_typed:
   forall gamma n m,
     is_context gamma ->
-    has_type gamma n T_nat ->
-    has_type gamma m T_nat ->
-    has_type gamma (plus n m) T_nat.
+    has_type tvars gamma n T_nat ->
+    has_type tvars gamma m T_nat ->
+    has_type tvars gamma (plus n m) T_nat.
 Proof.
   unfold plus; steps.
   find_derivation; eauto with extra.
@@ -316,7 +316,7 @@ Hint Resolve wf4: bwf.
 *)
 Lemma weakenTwice:
   forall m gamma T x1 x2 T1 T2,
-    has_type gamma m T ->
+    has_type tvars gamma m T ->
     is_type gamma T2 ->
     is_type ((x2,T2) :: gamma) T1 ->
     ~(x1 ∈ support gamma) ->
@@ -330,9 +330,9 @@ Qed.
 Lemma equal_well_typed:
   forall gamma n m,
     is_context gamma ->
-    has_type gamma n T_nat ->
-    has_type gamma m T_nat ->
-    has_type gamma (equal n m m) T_bool.
+    has_type tvars gamma n T_nat ->
+    has_type tvars gamma m T_nat ->
+    has_type tvars gamma (equal n m m) T_bool.
 Proof.
   unfold equal; steps.
   repeat
@@ -547,8 +547,8 @@ Admitted.
 Lemma plus_n_0_well_typed:
   forall gamma n,
     is_context gamma -> (* should be provable from below *)
-    has_type gamma n T_nat ->
-    has_type gamma (plus_n_0 n)
+    has_type tvars gamma n T_nat ->
+    has_type tvars gamma (plus_n_0 n)
              (T_let n T_nat (T_refine T_unit (equal (plus (lvar 1) zero) (lvar 1) (lvar 3)))).
 Proof.
   unfold plus_n_0; steps.

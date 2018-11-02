@@ -183,6 +183,10 @@ Hint Rewrite <- (@subset_union3 nat): t_simp_set.
 Hint Rewrite (@subset_add nat): t_simp_set.
 Hint Rewrite (@singleton_subset nat): t_simp_set.
 
+Ltac t_sets2 :=
+  repeat autorewrite with t_simp_set in * || step ||
+         t_listutils || unfold subset in * || instantiate_any.
+
 Lemma subset_same:
   forall T (A B C: set T),
     subset A B ->

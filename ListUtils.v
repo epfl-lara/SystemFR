@@ -86,7 +86,6 @@ Proof.
   steps.
 Qed.
 
-
 Lemma NoDup_append:
   forall A (l1 l2: list A) x,
     NoDup (l1 ++ l2) ->
@@ -96,7 +95,6 @@ Lemma NoDup_append:
 Proof.
   induction l1; repeat step || step_inversion NoDup || t_listutils; eauto.
 Qed.
-
 
 Lemma cons_append:
   forall A (l1 l2: list A) x,

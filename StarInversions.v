@@ -277,7 +277,6 @@ Proof.
     eauto using value_irred, star_one_step with values.
 Qed.
 
-
 Lemma star_smallstep_match_succ:
   forall t v v0 tn t0 ts : term,
     is_value v ->
@@ -387,6 +386,7 @@ Ltac t_deterministic_star :=
     match goal with
     | H1: star small_step ?t ?v1,
       H2: star small_step ?t ?v2 |- _ =>
+      poseNew (Mark (v1,v2) "equality");
       unshelve epose proof (star_smallstep_deterministic _ _ H1 _ _ _ H2)
     end; eauto with values.
 

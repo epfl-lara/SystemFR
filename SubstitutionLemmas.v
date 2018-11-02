@@ -5,8 +5,8 @@ Require Import Termination.Syntax.
 Require Import Termination.ListUtils.
 Require Import Termination.AssocList.
 Require Import Termination.Tactics.
-Require Import Termination.SmallStep.
 Require Import Termination.Sets.
+Require Import Termination.SmallStep.
 Require Import Termination.WFLemmas.
 Require Import Termination.FVLemmas.
 
@@ -18,12 +18,13 @@ Proof.
   induction t;
     repeat match goal with
            | _ => progress (
-                      step ||
-                      t_lookup ||
-                      (rewrite in_app_iff in *) ||
-                      tequality
+                   step ||
+                   t_listutils ||
+                   (rewrite in_app_iff in *) ||
+                   unfold fv in * ||
+                   tequality ||
+                   apply_any
                   )
-           | H: _ |- _ => apply H
            | x: nat, H: _ |- _ => apply H with x
            end; eauto with falsity.
 Qed.
@@ -34,7 +35,7 @@ Lemma substitute_nothing2:
     substitute t ((x,e) :: l) = substitute t l.
 Proof.
   induction t;
-    repeat step || (rewrite in_app_iff in *) || tequality.
+    repeat step || unfold fv in * || (rewrite in_app_iff in *) || tequality || apply_any.
 Qed.
                     
 Lemma substitute_nothing3:
@@ -101,6 +102,20 @@ Proof.
   induction t; steps.
 Qed.
 
+Lemma substitute_append:
+  forall l1 l2 t,
+    NoDup (l1 ++ l2) ->
+    closed_mapping l1 ->
+    substitute t (l1 ++ l2) = substitute (substitute t l1) l2.
+Proof.
+  induction l1;
+    repeat match goal with
+           | |- context[substitute ?t ((?x,?rep) :: ?l)] =>
+             noUnify l (@nil (nat * term)); rewrite (substitute_cons t x l rep)
+           | _ => step || step_inversion NoDup || autorewrite with bsubst
+           end.
+Qed.  
+
 Lemma substitute_cons_context:
   forall gamma x l rep,
     fv rep = nil ->
@@ -110,19 +125,6 @@ Proof.
   induction gamma; repeat step.
   f_equal; repeat step || rewrite substitute_cons; eauto.
 Qed.
-
-Lemma substitute_skip:
-  forall l1 l2 t x e,
-    ~(x ∈ fv t) ->
-    closed_mapping l1 ->
-    substitute t (l1 ++ (x,e) :: l2) = substitute t (l1 ++ l2).
-Proof.
-  induction l1; repeat step; eauto using substitute_nothing2.
-  rewrite (substitute_cons t); steps.
-  rewrite (substitute_cons t _ (l1 ++ l2)); steps.
-  apply_any; steps.
-  apply fv_subst in H0; repeat step || t_listutils.
-Qed.  
 
 Lemma substitute_open:
   forall t, forall k rep l, 
@@ -211,6 +213,41 @@ Proof.
            end.
 Qed.
 
+Definition weak_equivalent_subst (vars: list nat) (l1 l2: list (nat * term)): Prop :=
+  forall s t,
+    s ∈ vars -> (
+      lookup Nat.eq_dec l1 s = Some t <->
+      lookup Nat.eq_dec l2 s = Some t
+    ).
+
+Lemma weak_subst_permutation:
+  forall t l1 l2, weak_equivalent_subst (fv t) l1 l2 -> substitute t l1 = substitute t l2.
+Proof.
+  unfold weak_equivalent_subst, fv; induction t;
+    repeat match goal with
+           | _ => step || tequality || t_listutils
+           | _ => solve [ rewrite_any; steps ]
+           | _ => solve [ rewrite_back_any; steps ]
+           | _ => solve [
+                   apply_any; repeat step || t_listutils;
+                   apply_any; repeat step || t_listutils;
+                    eauto with step_tactic blistutils
+                 ]
+           end.
+Qed.
+    
+Lemma substitute_skip:
+  forall l1 l2 t x e,
+    ~(x ∈ fv t) ->
+    substitute t (l1 ++ (x,e) :: l2) = substitute t (l1 ++ l2).
+Proof.
+  intros.
+  apply weak_subst_permutation.
+  unfold weak_equivalent_subst; steps.
+  - erewrite lookup_remove2 in H1; steps; eauto.
+  - erewrite lookup_remove2; steps; eauto.
+Qed.
+
 Lemma obvious_equivalence:
   forall l1 x e l2,
     ~(x ∈ support l1) ->
@@ -237,4 +274,18 @@ Proof.
            | _ => progress (step || autorewrite with blookup in *)
            | H: _ |- _ => apply H
            end; eauto with blookup.
+Qed.
+
+Opaque lookup.
+
+Lemma equivalent_append:
+  forall l1 l2 l,
+    (forall z, z ∈ support l1 <-> z ∈ support l2) ->
+    equivalent_subst l1 l2 ->
+    equivalent_subst (l1 ++ l) (l2 ++ l).
+Proof.
+  unfold equivalent_subst;
+    repeat step || t_lookup || t_lookupor || t_listutils;  
+    auto using lookupWeaken with bcongruence bapply_any;  
+    auto 6 using lookupRight2, lookupNoneSupport with bapply_any step_tactic.
 Qed.
