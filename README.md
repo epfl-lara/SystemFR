@@ -7,7 +7,7 @@ The requirements can be installed using `opam`.
 
 # Compiling the Proofs
 
-```bash
+```
 ./configure
 make -j4     # takes around 6 minutes
 ```
