@@ -66,95 +66,6 @@ Qed.
 
 Hint Resolve are_equal_wf_left are_equal_wf_right: bwf.
 
-
-Lemma wf_coquant:
-  forall tvars L U gamma t T,
-    (forall x, (x ∈ L -> False) -> has_type tvars ((x, U) :: gamma) (open 0 t (fvar x)) T) ->
-    wf t 1.
-Proof.
-  steps; eauto with bwf.
-Qed.
-
-Lemma wf_coquant2:
-  forall tvars L U gamma t T,
-    (forall x, (x ∈ L -> False) -> has_type tvars ((x, U) :: gamma) (open 0 t (fvar x)) (open 0 T (fvar x))) ->
-    wf t 1.
-Proof.
-  steps; eauto with bwf.
-Qed.
-
-Lemma wf_coquant3:
-  forall tvars L gamma t T A,
-    (forall x y,
-        (x ∈ L -> False) ->
-        (y ∈ L -> False) ->
-        (x = y -> False) ->
-        has_type tvars
-                 ((x, open 0 T (fvar y)) :: (y, A) :: gamma)
-                 (open 0 (open 1 t (fvar y)) (fvar x))
-                 (open 0 T (succ (fvar y)))) ->
-
-    wf t 2.
-Proof.
-  repeat step || fresh_instantiations L; eauto with bwf.
-Qed.
-
-Lemma wf_coquant6:
-  forall tvars L gamma t A F B,
-    (forall x y,
-        (x ∈ L -> False) ->
-        (y ∈ L -> False) ->
-        (x = y -> False) ->
-        has_type tvars
-                 ((x, F y) :: (y, A) :: gamma)
-                 (open 0 (open 1 t (fvar y)) (fvar x))
-                 (B y)) ->
-
-    wf t 2.
-Proof.
-  repeat step || fresh_instantiations L; eauto with bwf.
-Qed.
-
-Lemma wf_coquant7:
-  forall tvars L gamma t A F B,
-    (forall x y,
-        (x ∈ L -> False) ->
-        (y ∈ L -> False) ->
-        (x = y -> False) ->
-        has_type tvars
-                 ((x, F y) :: (y, A) :: gamma)
-                 (open 0 t (fvar y))
-                 (B y)) ->
-
-    wf t 1.
-Proof.
-  repeat step || fresh_instantiations L; eauto with bwf.
-Qed.
-
-Lemma wf_coquant4:
-  forall tvars L U gamma T,
-    (forall x,
-        (x ∈ L -> False) ->
-        is_type tvars ((x, U) :: gamma) (open 0 T (fvar x))) ->
-    wf T 1.
-Proof.
-  steps; eauto with bwf.
-Qed.
-
-Lemma wf_coquant5:
-  forall tvars L U gamma t T,
-    (forall x, (x ∈ L -> False) -> has_type tvars ((x, U) :: gamma) t T) ->
-    wf t 0.
-Proof.
-  steps; eauto with bwf.
-Qed.
-
-Hint Immediate wf_coquant: bwf.
-Hint Immediate wf_coquant2: bwf.
-Hint Immediate wf_coquant3: bwf.
-Hint Immediate wf_coquant4: bwf.
-Hint Immediate wf_coquant5: bwf.
-
 Lemma has_type_wfs:
   forall tvars P gamma l,
     satisfies P gamma l ->
@@ -165,7 +76,6 @@ Proof.
 Qed.
 
 Hint Resolve has_type_wfs: bwf.
-
 
 Ltac t_wf_info :=
   match goal with
