@@ -10,7 +10,7 @@ Require Import PeanoNat.
 
 (* locally nameless representation *)
 Inductive term: Set :=
-  (* term or type variable *)
+  (* term variable *)
   | fvar: nat -> term
 
   (* types *)
