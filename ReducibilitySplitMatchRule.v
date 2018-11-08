@@ -14,6 +14,11 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.Freshness.
 Require Import Termination.ListUtils.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
@@ -39,7 +44,7 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma equivalent_split_match:
-  forall tvars theta (gamma1 gamma2 : context) (n t t' : term) (e1 e2 e : term) (x y v: nat) l,
+  forall tvars theta (gamma1 gamma2 : context) n t t' e1 e2 e (x y v: nat) l,
     open_reducible tvars gamma2 n T_nat ->
     valid_interpretation theta ->
     support theta = tvars ->

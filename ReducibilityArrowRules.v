@@ -14,6 +14,8 @@ Require Import Termination.SetLemmas.
 Require Import Termination.TermForm.
 Require Import Termination.StarRelation.
 Require Import Termination.SmallStep.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
@@ -30,17 +32,22 @@ Require Import Termination.FVLemmasLists.
 Opaque reducible_values.
 Opaque makeFresh.
 
+Set Program Mode.
+
 Lemma reducible_lambda:
   forall theta t U V,
+    is_erased_term t ->
     wf U 0 ->
     wf t 1 ->
-    fv U = nil ->
-    fv t = nil ->
+    pfv U term_var = nil ->
+    pfv t term_var = nil ->
+    pfv t type_var = nil ->
     valid_interpretation theta ->
     (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (T_let u U V)) ->
-    reducible_values theta (lambda U t) (T_arrow U V).
+    reducible_values theta (notype_lambda t) (T_arrow U V).
 Proof.
-  repeat step || t_listutils || simp reducible_values in * || rewrite reducibility_rewrite;
+  repeat step || t_listutils || simp reducible_values in * ||
+         rewrite reducibility_rewrite || destruct_refinements;
     eauto 2 with bsteplemmas.
 
   apply backstep_reducible with (open 0 t a); repeat step || t_listutils;
@@ -60,19 +67,20 @@ Lemma open_reducible_lambda:
     ~(x ∈ support gamma) ->
     ~(x ∈ fv t) ->
     ~(x ∈ fv V) ->
+    is_erased_term t ->
     open_reducible tvars ((x, U) :: gamma) (open 0 t (term_fvar x)) (open 0 V (term_fvar x)) ->
-    open_reducible tvars gamma (lambda U t) (T_arrow U V).
+    open_reducible tvars gamma (notype_lambda t) (T_arrow U V).
 Proof.
   unfold open_reducible in *; steps.
 
-  apply reducible_value_expr; steps.
-  apply reducible_lambda; steps;
+  apply reducible_value_expr; repeat step || destruct_refinements.
+  apply reducible_lambda; tac1;
     eauto with bwf;
-    eauto with bfv sets btermlist;
-    eauto 2 with btf.
+    eauto with bfv;
+    eauto with berased.
 
-  - unshelve epose proof (H7 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
-      eauto using reducible_let with btf.
+  - unshelve epose proof (H8 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
+      eauto using reducible_let.
 Qed.
 
 Lemma reducible_app:
@@ -82,14 +90,17 @@ Lemma reducible_app:
     reducible theta t2 U ->
     reducible theta (app t1 t2) (T_let t2 U V).
 Proof.
-  intros U V t1 t2 H1 H2.
+  intros theta U V t1 t2 H1 H2.
   unfold reducible, reduces_to in *;
     repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
 
-  unshelve epose proof (H12 t' _); steps; eauto with btf.
+  unshelve epose proof (H17 t' _); steps;
+    eauto with berased.
   exists t'1; repeat step || simp reducible_values in *;
     eauto using star_smallstep_trans with bsteplemmas values.
-  exists t'; repeat step || simp reducible_values in *; eauto using red_is_val; eauto with btf.
+  unshelve exists t';
+    repeat step || simp reducible_values in *;
+      eauto using red_is_val; eauto with berased.
 Qed.
 
 Lemma reducible_app2:
@@ -105,7 +116,7 @@ Proof.
     unfold reduces_to in *;
     repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
 
-  unshelve epose proof (H12 t' _ _); steps; eauto with btf.
+  unshelve epose proof (H18 t' _); steps; eauto with berased.
   rewrite open_none in *; auto.
   eexists; steps; eauto;
     eauto using star_smallstep_trans with bsteplemmas values.

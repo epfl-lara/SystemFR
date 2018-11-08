@@ -113,7 +113,7 @@ Proof.
   induction l1;
     repeat match goal with
            | |- context[psubstitute ?t ((?x,?rep) :: ?l) ?tag] =>
-             noUnify l (@nil (nat * term)); rewrite (substitute_cons t x l rep tag)
+             noUnify l (@nil (nat * tree)); rewrite (substitute_cons t x l rep tag)
            | _ => step || step_inversion NoDup || autorewrite with bsubst
            end.
 Qed.
@@ -202,7 +202,7 @@ Qed.
 
 Hint Immediate lookup_subst2: bsubst.
 
-Definition equivalent_subst (l1 l2: list (nat * term)): Prop :=
+Definition equivalent_subst (l1 l2: list (nat * tree)): Prop :=
   forall s t,
     lookup Nat.eq_dec l1 s = Some t <->
     lookup Nat.eq_dec l2 s = Some t.
@@ -220,7 +220,7 @@ Proof.
            end.
 Qed.
 
-Definition weak_equivalent_subst (vars: list nat) (l1 l2: list (nat * term)): Prop :=
+Definition weak_equivalent_subst (vars: list nat) (l1 l2: list (nat * tree)): Prop :=
   forall s t,
     s ∈ vars -> (
       lookup Nat.eq_dec l1 s = Some t <->

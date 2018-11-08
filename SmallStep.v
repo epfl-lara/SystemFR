@@ -1,7 +1,8 @@
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
+Require Import Termination.TypeErasure.
 
-Inductive is_value: term -> Prop :=
+Inductive is_value: tree -> Prop :=
 | IVUnit: is_value uu
 | IVZero: is_value zero
 | IVSucc:
@@ -15,22 +16,26 @@ Inductive is_value: term -> Prop :=
       is_value v1 ->
       is_value v2 ->
       is_value (pp v1 v2)
-| IVLambda: forall T t,
-    is_value (lambda T t)
+| IVLambda: forall t,
+    is_value (notype_lambda t)
 | IVVar: forall x,
     is_value (fvar x term_var)
 | IVRefl:
     is_value trefl
 .
 
-Fixpoint is_nat_value (t: term): Prop :=
+Definition typed_is_value (t: erased_term) := is_value (proj1_sig t).
+
+Hint Unfold typed_is_value.
+
+Fixpoint is_nat_value (t: tree): Prop :=
   match t with
   | zero => True
   | succ t' => is_nat_value t'
   | _ => False
   end.
 
-Inductive small_step: term -> term -> Prop :=
+Inductive small_step: tree -> tree -> Prop :=
 (* beta reduction *)
 | SPBetaProj1: forall v1 v2,
     is_value v1 ->
@@ -41,16 +46,16 @@ Inductive small_step: term -> term -> Prop :=
     is_value v2 ->
     small_step (pi2 (pp v1 v2)) v2
 
-| SPBetaApp: forall T t v,
+| SPBetaApp: forall t v,
     is_value v ->
     small_step
-      (app (lambda T t) v)
+      (app (notype_lambda t) v)
       (open 0 t v)
 
-| SPBetaLet: forall t T v,
+| SPBetaLet: forall t v,
     is_value v ->
     small_step
-      (tlet v T t)
+      (notype_tlet v t)
       (open 0 t v)
 
 | SPBetaIte1: forall t1 t2,
@@ -58,15 +63,15 @@ Inductive small_step: term -> term -> Prop :=
 | SPBetaIte2: forall t1 t2,
     small_step (ite tfalse t1 t2) t2
 
-| SPBetaRec0: forall T t0 ts,
+| SPBetaRec0: forall t0 ts,
     small_step
-      (rec T zero t0 ts)
+      (notype_rec zero t0 ts)
       t0
-| SPBetaRecS: forall T v t0 ts,
+| SPBetaRecS: forall v t0 ts,
     is_value v ->
     small_step
-      (rec T (succ v) t0 ts)
-      (open 0 (open 1 ts v) (lambda T_unit (rec T v t0 ts)))
+      (notype_rec (succ v) t0 ts)
+      (open 0 (open 1 ts v) (notype_lambda (notype_rec v t0 ts)))
 
 | SPBetaMatch0: forall t0 ts,
     small_step
@@ -99,22 +104,28 @@ Inductive small_step: term -> term -> Prop :=
 | SPProj2: forall t1 t2,
     small_step t1 t2 ->
     small_step (pi2 t1) (pi2 t2)
+
 | SPSucc: forall t1 t2,
     small_step t1 t2 ->
     small_step (succ t1) (succ t2)
-| SPRec: forall T t1 t2 t0 ts,
+| SPRec: forall t1 t2 t0 ts,
     small_step t1 t2 ->
-    small_step (rec T t1 t0 ts) (rec T t2 t0 ts)
+    small_step (notype_rec t1 t0 ts) (notype_rec t2 t0 ts)
 | SPMatch: forall t1 t2 t0 ts,
     small_step t1 t2 ->
     small_step (tmatch t1 t0 ts) (tmatch t2 t0 ts)
+
 | SPIte: forall t1 t1' t2 t3,
     small_step t1 t1' ->
     small_step (ite t1 t2 t3) (ite t1' t2 t3)
-| SPLet: forall t1 t1' T t2,
+| SPLet: forall t1 t1' t2,
     small_step t1 t1' ->
-    small_step (tlet t1 T t2) (tlet t1' T t2)
+    small_step (notype_tlet t1 t2) (notype_tlet t1' t2)
 .
+
+Definition typed_small_step (t1 t2: erased_term) := small_step t1 t2.
+
+Hint Unfold typed_small_step.
 
 Ltac t_invert_step :=
   match goal with
@@ -126,9 +137,12 @@ Ltac t_invert_step :=
   | H: small_step (fvar _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H
+  | H: small_step (notype_lambda _) _ |- _ => inversion H; clear H
   | H: small_step (lambda _ _) _ |- _ => inversion H; clear H
+  | H: small_step (notype_rec _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (rec _ _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pp _ _) _ |- _ => inversion H; clear H
+  | H: small_step (notype_tlet _ _) _ |- _ => inversion H; clear H
   | H: small_step (tlet _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pi1 _) _ |- _ => inversion H; clear H
   | H: small_step (pi2 _) _ |- _ => inversion H; clear H
@@ -143,7 +157,10 @@ Lemma evaluate_step:
       small_step v t ->
       False.
 Proof.
-  induction 1; repeat step || step_inversion (small_step,is_value) || t_invert_step || firstorder.
+  induction 1;
+    repeat
+      step || step_inversion small_step || step_inversion is_value || t_invert_step;
+    eauto.
 Qed.
 
 Lemma evaluate_step2:
@@ -158,8 +175,8 @@ Qed.
 Lemma evaluate_step3:
   forall t t',
     small_step t t' ->
-    forall T e,
-      t = lambda T e ->
+    forall e,
+      t = notype_lambda e ->
       False.
 Proof.
   induction 1; steps.
@@ -208,6 +225,16 @@ Qed.
 
 Hint Resolve is_nat_value_value: values.
 
+Lemma is_nat_value_erased:
+  forall v,
+    is_nat_value v ->
+    is_erased_term v.
+Proof.
+  induction v; steps.
+Qed.
+
+Hint Resolve is_nat_value_erased: berased.
+
 Ltac t_nostep :=
   match goal with
   | H: is_value err |- _ => inversion H
@@ -217,8 +244,8 @@ Ltac t_nostep :=
   | H1: is_nat_value ?v,
     H2: small_step ?v ?t |- _ =>
     apply False_ind; apply evaluate_step with v t; eauto 2 with values
-  | H: small_step (lambda ?T ?e) ?t2 |- _ =>
-    apply False_ind; apply evaluate_step3 with (lambda T e) t2 T e; auto with values
+  | H: small_step (notype_lambda ?e) ?t2 |- _ =>
+    apply False_ind; apply evaluate_step3 with (notype_lambda e) t2 e; auto with values
   | H1: is_value ?v1,
     H2: is_value ?v2,
     H3: small_step (pp ?v1 ?v2) ?t |- _ =>

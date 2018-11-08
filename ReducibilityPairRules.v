@@ -17,6 +17,9 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.TermForm.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
@@ -36,6 +39,8 @@ Require Import Termination.RedTactics.
 Opaque reducible_values.
 Opaque makeFresh.
 
+Set Program Mode.
+
 Lemma reducible_values_pp:
   forall theta v1 v2 T1 T2,
     valid_interpretation theta ->
@@ -43,8 +48,8 @@ Lemma reducible_values_pp:
     reducible_values theta v2 (open 0 T2 v1) ->
     reducible_values theta (pp v1 v2) (T_prod T1 T2).
 Proof.
-  repeat step || simp reducible_values || rewrite reducibility_rewrite;
-    eauto with btf step_tactic.
+  repeat step || simp reducible_values || rewrite reducibility_rewrite || unshelve exists v1, v2;
+    eauto with berased.
 Qed.
 
 Lemma reducible_pp:
@@ -78,7 +83,8 @@ Proof.
   eapply backstep_reducible; repeat step || t_listutils;
     eauto with smallstep;
     eauto with bfv bwf;
-    eauto using reducible_value_expr.
+    eauto using reducible_value_expr;
+    eauto with berased.
 Qed.
 
 Lemma reducible_pi1:
@@ -112,7 +118,8 @@ Proof.
   eapply backstep_reducible; repeat step || t_listutils || simp reducible_values in *;
     eauto with smallstep;
     eauto with bfv bwf;
-    eauto using reducible_value_expr.
+    eauto using reducible_value_expr;
+    eauto with berased.
 
   apply reducible_let_backstep_expr with a;
     eauto with smallstep.

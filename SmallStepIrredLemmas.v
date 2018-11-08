@@ -10,12 +10,12 @@ Lemma star_smallstep_let_inv_irred:
   forall t v,
     star small_step t v ->
     irred v ->
-    forall t1 T t2,
-      t = tlet t1 T t2 ->
+    forall t1 t2,
+      t = notype_tlet t1 t2 ->
       exists v1,
         irred v1 /\
         star small_step t1 v1 /\
-        star small_step (tlet v1 T t2) v.
+        star small_step (notype_tlet v1 t2) v.
 Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
@@ -28,8 +28,8 @@ Lemma star_smallstep_let_inv_irred2:
   forall t v,
     star small_step t v ->
     irred v ->
-    forall w T e,
-      t = tlet w T e ->
+    forall w e,
+      t = notype_tlet w e ->
       is_value w ->
       star small_step (open 0 e w) v.
 Proof.
@@ -52,7 +52,7 @@ Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
   - inversion H; repeat step.
-    + exists (lambda T t); repeat step || unshelve eauto with smallstep.
+    + exists (notype_lambda t); repeat step || unshelve eauto with smallstep.
     + exists v1; steps; repeat step || unshelve eauto with smallstep.
     + exists t0; steps; repeat step || unshelve eauto with smallstep.
 Qed.
@@ -61,8 +61,8 @@ Lemma star_smallstep_app_inv_irred2:
   forall t v,
     star small_step t v ->
     irred v ->
-    forall T e t2,
-      t = app (lambda T e) t2 ->
+    forall e t2,
+      t = app (notype_lambda e) t2 ->
       exists v2,
         irred v2 /\
         star small_step t2 v2.
@@ -77,8 +77,8 @@ Lemma star_smallstep_app_inv_irred3:
   forall t v,
     star small_step t v ->
     irred v ->
-    forall T e t2 v2,
-      t = app (lambda T e) t2 ->
+    forall e t2 v2,
+      t = app (notype_lambda e) t2 ->
       star small_step t2 v2 ->
       is_value v2 ->
       star small_step (open 0 e v2) v.
@@ -101,7 +101,7 @@ Lemma star_smallstep_pp_inv_irred:
         irred v1 /\
         star small_step t1 v1.
 Proof.
-  induction 1; unfold irred; repeat step || t_invert_step; eauto with smallstep step_tactic. 
+  induction 1; unfold irred; repeat step || t_invert_step; eauto with smallstep step_tactic.
 Qed.
 
 Lemma star_smallstep_pp_inv_irred2:
@@ -249,7 +249,7 @@ Lemma star_smallstep_ite_true_irred:
       star small_step t2 v.
 Proof.
   induction 1; unfold irred; repeat step || t_invert_step; eauto with falsity smallstep.
-Qed.    
+Qed.
 
 Lemma star_smallstep_ite_false_irred:
   forall t v,
@@ -260,18 +260,18 @@ Lemma star_smallstep_ite_false_irred:
       star small_step t3 v.
 Proof.
   induction 1; unfold irred; repeat step || t_invert_step; eauto with falsity smallstep.
-Qed.    
+Qed.
 
 Lemma star_smallstep_rec_inv_irred:
   forall t v,
     star small_step t v ->
     irred v ->
-    forall T t1 t2 t3,
-      t = rec T t1 t2 t3 ->
+    forall t1 t2 t3,
+      t = notype_rec t1 t2 t3 ->
       exists v1,
         irred v1 /\
         star small_step t1 v1 /\
-        star small_step (rec T v1 t2 t3) v.
+        star small_step (notype_rec v1 t2 t3) v.
 Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
@@ -325,7 +325,7 @@ Lemma star_smallstep_irred2:
 Proof.
   eauto using value_irred, star_smallstep_irred.
 Qed.
-  
+
 
 Ltac t_invert_irred :=
   match goal with
@@ -338,7 +338,7 @@ Ltac t_invert_irred :=
   | H1: star small_step ?t ?t1,
     H2: star small_step ?t ?t2,
     H3: irred ?t1,
-    H4: is_value ?t2 |- _ => 
+    H4: is_value ?t2 |- _ =>
     poseNew (Mark (t1,t2) "equality");
     pose proof (star_smallstep_irred2 _ _ H1 _ H2 H3 H4)
   | H1: irred ?v,
@@ -362,15 +362,15 @@ Ltac t_invert_irred :=
     pose proof (star_smallstep_app_inv_irred _ v H2 H1 t1 t2 eq_refl)
 
  | H1: irred ?v,
-    H2: star small_step (tlet ?t1 ?T ?t2) ?v |- _ =>
+    H2: star small_step (notype_tlet ?t1 ?t2) ?v |- _ =>
     poseNew (Mark H2 "inv tlet");
-    pose proof (star_smallstep_let_inv_irred _ v H2 H1 t1 T t2 eq_refl)
+    pose proof (star_smallstep_let_inv_irred _ v H2 H1 t1 t2 eq_refl)
 
  | H1: irred ?v,
-    H2: star small_step (rec ?T ?t1 ?t2 ?t3) ?v |- _ =>
+    H2: star small_step (notype_rec ?t1 ?t2 ?t3) ?v |- _ =>
     (t_not_hyp_irred t1);
     poseNew (Mark H2 "inv rec");
-    pose proof (star_smallstep_rec_inv_irred _ v H2 H1 T t1 t2 t3 eq_refl)
+    pose proof (star_smallstep_rec_inv_irred _ v H2 H1 t1 t2 t3 eq_refl)
 
  | H1: irred ?v,
     H2: star small_step (tmatch ?t1 ?t2 ?t3) ?v |- _ =>

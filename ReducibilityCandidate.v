@@ -8,11 +8,16 @@ Require Import PeanoNat.
 
 Open Scope list_scope.
 
-Definition reducibility_candidate (P: term -> Prop): Prop :=
-  forall v, P v -> is_value v /\ wf v 0 /\ pfv v term_var = nil.
+Definition reducibility_candidate (P: tree -> Prop): Prop :=
+  forall v, P v ->
+       is_erased_term v /\
+       is_value v /\
+       wf v 0 /\
+       pfv v term_var = nil /\
+       pfv v type_var = nil.
 
 (* an interpretation for every type variable, as a reducibility candidate *)
-Definition interpretation: Type := list (nat * (term -> Prop)).
+Definition interpretation: Type := list (nat * (tree -> Prop)).
 
 Fixpoint valid_interpretation (theta: interpretation): Prop :=
   match theta with
@@ -32,13 +37,13 @@ Proof.
     try solve [ eapply IH; steps; eauto ].
 Qed.
 
-Lemma in_valid_interpretation_fv: forall theta v X P,
+Lemma in_valid_interpretation_fv: forall theta v X P tag,
   valid_interpretation theta ->
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
-  pfv v term_var = nil.
+  pfv v tag = nil.
 Proof.
-  induction theta; repeat step || eauto || apply_any.
+  induction theta; destruct tag; repeat step || eauto || apply_any.
 Qed.
 
 Lemma in_valid_interpretation_wf: forall theta v X P,
@@ -55,6 +60,15 @@ Lemma in_valid_interpretation_value: forall theta v X P,
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
   is_value v.
+Proof.
+  induction theta; repeat step || eauto || apply_any.
+Qed.
+
+Lemma in_valid_interpretation_erased: forall theta v X P,
+  valid_interpretation theta ->
+  lookup Nat.eq_dec theta X = Some P ->
+  P v ->
+  is_erased_term v.
 Proof.
   induction theta; repeat step || eauto || apply_any.
 Qed.

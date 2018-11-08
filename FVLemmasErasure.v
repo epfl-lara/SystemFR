@@ -5,6 +5,7 @@ Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
 Require Import Termination.ListUtils.
 
+(*
 Lemma fv_erase:
   forall t, subset (fv (erase t)) (fv t).
 Proof.
@@ -22,3 +23,4 @@ Proof.
 Qed.
 
 Hint Resolve fv_erase2: bfv.
+*)

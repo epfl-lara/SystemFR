@@ -18,6 +18,14 @@ Require Import Termination.StarInversions.
 Require Import Termination.Freshness.
 Require Import Termination.ListUtils.
 Require Import Termination.TermForm.
+Require Import Termination.Trees.
+Require Import Termination.HasTypeAnnotated.
+Require Import Termination.TreeLists.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
@@ -31,17 +39,17 @@ Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityRules.
 Require Import Termination.ReducibilityLetRules.
-Require Import Termination.ReducibilityRefineRules.
-Require Import Termination.ReducibilityPairRules.
 Require Import Termination.ReducibilityArrowRules.
+Require Import Termination.ReducibilityPairRules.
 Require Import Termination.ReducibilityBoolRules.
+Require Import Termination.ReducibilityNatRules.
 Require Import Termination.ReducibilityLetTermRules.
+Require Import Termination.ReducibilityRefineRules.
 Require Import Termination.ReducibilitySetOpsRules.
 Require Import Termination.ReducibilityQuantRules.
 Require Import Termination.ReducibilityEqualRules.
 Require Import Termination.ReducibilitySubtypeRules.
 Require Import Termination.ReducibilitySplitIteRule.
-Require Import Termination.ReducibilityNatRules.
 Require Import Termination.ReducibilitySplitMatchRule.
 Require Import Termination.ReducibilitySplitRecRule.
 
@@ -73,19 +81,24 @@ Ltac unfold_all :=
 Ltac unfold_reduce :=
   unfold open_reducible, reducible, reduces_to in *.
 
-Ltac side_conditions := try eassumption; eauto with bwf; eauto with bfv; eauto 5 with bfv2.
+Ltac side_conditions :=
+  repeat step ||
+         (progress t_subset_erase) ||
+         (progress autorewrite with berased in *) ||
+         (progress t_fv_erase) ||
+         (progress rewrite erase_type_open in * by (eauto with bannot; eauto 2 with bannot step_tactic));
+    try eassumption; eauto with bwf; eauto with bfv bfv2; eauto with berased.
+
+Ltac side_conditions2 := side_conditions; side_conditions.
 
 Ltac choose_variables :=
   match goal with
   | H: NoDup (?n :: ?y :: ?p :: nil) |- _ => apply open_reducible_rec with n y p
   | H: ?n = ?p -> False |- _ => apply open_reducible_match with n p
   | H: ?x = ?p -> False |- _ => apply reducible_refine with x p
-  | H: ?x = ?p -> False |- _ => apply open_reducible_let with x p
-  end.
-
-Ltac choose_variables_exists_elim :=
-  match goal with
-  | H: ?x = ?p -> False |- _ => apply open_reducible_exists_elim with x p
+  | H2: has_type _ _ ?t ?A, H: ?x = ?p -> False |- _ =>
+      is_var t;
+      apply open_reducible_let with (erase_type A) x p
   end.
 
 Ltac choose_variables_subtype :=
@@ -99,24 +112,36 @@ Ltac choose_variables_subtype :=
 
 Ltac slow_side_conditions :=
   try eassumption;
-  repeat step || t_wf_info || p_fv || t_sets || t_context_fv || t_listutils;
+  repeat step || t_wf_info || p_fv || t_sets || t_context_fv || t_listutils || side_conditions ||
+         t_context_annotations;
+    try solve [ eapply subset_add3; eauto ];
     eauto 3 with bwf;
-    eauto 3 with bfv2.
+    eauto 3 with bfv2;
+    eauto 3 with berased.
+
+Ltac t_invert_star2 :=
+  match goal with
+  | H1: is_value ?v,
+    H2: star small_step (psubstitute ?v ?l ?tag) ?v2 |- _ =>
+    unshelve epose proof (star_smallstep_value (psubstitute v l tag) v2 H2 _); clear H2
+  end.
 
 Ltac many_tactics :=
   repeat simp_red || unfold_all || step || t_instantiate_sat3 || t_deterministic_star || t_invert_star ||
-         rewrite substitute_open || t_values_info2 || t_values_info3 ||
-         t_context_right || step_inversion is_context.
+         (progress rewrite erase_type_open in * by (eauto with bannot; eauto 2 with bannot step_tactic)) ||
+         t_invert_star2 || apply is_value_subst ||
+         rewrite substitute_open || t_values_info2 ||
+         t_context_right || step_inversion is_context;
+    try solve [ eapply reducible_values_list; eauto 2 ].
 
 Ltac split_tactic :=
   repeat step || t_wf_info_IT || t_context_fv || t_context_right || t_listutils ||
     step_inversion is_context || p_fv || t_sets.
 
-
 Theorem reducibility_lemma:
   (forall tvars gamma t T,
     has_type tvars gamma t T ->
-    open_reducible tvars gamma t T) /\
+    open_reducible tvars (erase_context gamma) (erase_term t) (erase_type T)) /\
   (forall tvars gamma T,
     is_type tvars gamma T -> True) /\
   (forall tvars gamma,
@@ -125,27 +150,27 @@ Theorem reducibility_lemma:
     is_subtype tvars gamma T1 T2 ->
      forall theta l,
       valid_interpretation theta ->
-      satisfies (reducible_values theta) gamma l ->
+      satisfies (reducible_values theta) (erase_context gamma) l ->
       support theta = tvars ->
       forall t,
-        reducible_values theta t (substitute T1 l) ->
-        reducible_values theta t (substitute T2 l)
+        reducible_values theta t (substitute (erase_type T1) l) ->
+        reducible_values theta t (substitute (erase_type T2) l)
   ) /\
   (forall tvars gamma t1 t2,
     are_equal tvars gamma t1 t2 ->
     (forall theta l,
        valid_interpretation theta ->
-       satisfies (reducible_values theta) gamma l ->
+       satisfies (reducible_values theta) (erase_context gamma) l ->
        support theta = tvars ->
-       equivalent (substitute t1 l) (substitute t2 l))
+       equivalent (substitute (erase_term t1) l) (substitute (erase_term t2) l))
   ).
 Proof.
   apply mut_HT_IT_IC_IS_AE; steps.
 
   (* typing *)
-  - apply open_reducible_var; auto.
+  - apply open_reducible_var; auto using in_erased_context.
   - apply open_reducible_weaken; side_conditions.
-  - eapply open_reducible_lambda; steps; side_conditions.
+  - apply open_reducible_lambda with x; side_conditions.
   - apply open_reducible_app; auto.
   - eapply open_reducible_pp; auto.
   - eapply open_reducible_pi1; eauto.
@@ -153,41 +178,41 @@ Proof.
   - apply open_reducible_unit.
   - apply open_reducible_ttrue.
   - apply open_reducible_tfalse.
-  - eapply open_reducible_ite; steps; side_conditions.
+  - eapply open_reducible_ite; side_conditions.
   - unfold_open; repeat step || t_instantiate_sat3;  auto 3 using not_equivalent with falsity.
   - apply open_reducible_zero.
   - apply open_reducible_succ; auto.
-  - choose_variables; steps; side_conditions.
-  - choose_variables; steps; side_conditions.
-  - choose_variables; steps; side_conditions.
-  - unfold_open; eauto using reducible_values_exprs.
-  - choose_variables; steps; side_conditions.
+  - choose_variables; side_conditions.
+  - choose_variables; side_conditions.
+  - choose_variables; side_conditions.
+  - unfold_open; tac1; eauto using reducible_values_exprs.
+  - choose_variables; side_conditions.
   - eapply open_reducible_singleton; steps; eauto.
   - eapply open_reducible_equal; steps; side_conditions.
   - apply open_reducible_intersection; steps; side_conditions.
-  - eapply open_reducible_union_elim; slow_side_conditions.
+  - apply open_reducible_union_elim with (erase_type T1) (erase_type T2) z; slow_side_conditions.
   - apply open_reducible_refl; steps; eauto.
   - eapply open_reducible_forall; steps; side_conditions.
-  - choose_variables_exists_elim; slow_side_conditions.
+  - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
 
   (* subtyping *)
-  - steps; choose_variables_subtype; steps; side_conditions.
-  - eapply subtype_arrow2 with _ x f _ T; steps; side_conditions.
-  - eapply subtypeExpand; steps; side_conditions.
-  - eapply reducible_prod_subtype_subst with A1 A2 x gamma; steps; side_conditions.
-  - apply subtype_prod2 with (support theta) gamma T x; steps; side_conditions.
-  - apply reducible_refine_subtype with (support theta) gamma A p x; steps; side_conditions.
+  - steps; choose_variables_subtype; side_conditions2. (* ?? *)
+  - eapply subtype_arrow2 with _ x f _ (erase_type T); steps; side_conditions; side_conditions.
+  - eapply subtypeExpand; side_conditions; side_conditions.
+  - apply reducible_prod_subtype_subst with (erase_type A1) (erase_type A2) x (erase_context gamma); side_conditions.
+  - apply subtype_prod2 with (support theta) (erase_context gamma) (erase_type T) x; side_conditions.
+  - apply reducible_refine_subtype with (support theta) (erase_context gamma) (erase_type A) (erase_term p) x; side_conditions.
   - simp_red; steps; eauto.
   - simp_red; steps; eauto.
-  - apply reducible_refine_subtype2 with gamma T x; steps; side_conditions.
-  - apply reducible_refine_subtype3 with (support theta) gamma A b x p; repeat t_subset_open || slow_side_conditions.
+  - apply reducible_refine_subtype2 with (erase_context gamma) (erase_type T) x; steps; side_conditions.
+  - apply reducible_refine_subtype3 with (support theta) (erase_context gamma) (erase_type A) (erase_term b) x p; repeat t_subset_open || slow_side_conditions.
   - unfold_all; repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star.
-  - apply reducible_subtype_let_left with (support theta) gamma t A B x p; steps; side_conditions.
+  - apply reducible_subtype_let_left with (support theta) (erase_context gamma) (erase_term t) (erase_type A) (erase_type B) x p; side_conditions.
   - simp_red; unfold_reduce; repeat step || t_termlist || eexists; eauto using equivalence_def.
   - many_tactics; eauto with bwf.
-  - eapply reducible_subtype_let_open2; eauto.
+  - eapply reducible_subtype_let_open2; eauto; many_tactics.
   - simp_red; steps.
-  - simp_red; steps; eauto with bwf bfv values.
+  - simp_red; steps; eauto with bwf bfv values berased.
   - simp_red; steps.
   - simp_red; steps.
   - simp_red; steps.
@@ -197,10 +222,10 @@ Proof.
 
   (* equality *)
   - eauto 2 with b_equiv.
-  - eapply reducibility_equivalent_weaken; steps; eauto with bfv.
+  - eapply reducibility_equivalent_weaken; side_conditions2.
   - eauto using equivalent_trans.
   - apply equivalent_sym; eauto.
-  - repeat step || t_smallstep_subst; eauto with values bwf b_equiv.
+  - apply equivalent_step; apply small_step_subst; eauto with values bwf.
   - eapply equivalent_pair_eta; eauto.
   - many_tactics.
   - eauto with b_equiv.
@@ -211,14 +236,15 @@ Proof.
   - eauto with b_equiv.
   - many_tactics.
   - many_tactics.
-  - eapply reducible_equivalent_ite; slow_side_conditions.
-  - eapply reducible_equivalent_match with (support theta) theta _ n p; steps; side_conditions.
-  - eapply reducible_equivalent_rec with (support theta) theta  _ n p; steps; side_conditions.
-  - repeat step || eapply_any; apply reducible_satisfies_weaker with T; steps; eauto with bfv btermlist.
-  - apply equivalent_split_bool with (support theta) theta gamma1 gamma2 b x; steps; side_conditions.
-  - apply equivalent_split_nat with (support theta) theta gamma1 gamma2 n x y; steps; side_conditions.
+  - apply reducible_equivalent_ite with theta (support theta) (erase_context gamma) x; slow_side_conditions.
+  - apply reducible_equivalent_match with (support theta) theta (erase_context gamma) n p; steps; side_conditions.
+  - apply reducible_equivalent_rec with (support theta) theta (erase_context gamma) n p; steps; side_conditions.
+  - repeat step || eapply_any || rewrite erase_context_append in *.
+      apply reducible_satisfies_weaker with (erase_type T); side_conditions; eauto with btermlist.
+  - apply equivalent_split_bool with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term b) x; side_conditions.
+  - apply equivalent_split_nat with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) x y; steps; side_conditions.
   - eauto using equivalent_error with step_tactic falsity.
-  - apply equivalent_split_ite with (support theta) theta gamma1 gamma2 b e1 e2 e x y; split_tactic; eauto.
-  - apply equivalent_split_match with (support theta) theta gamma1 gamma2 n e1 e2 e x y v; split_tactic; eauto.
-  - apply equivalent_split_rec with (support theta) theta gamma1 gamma2 n e1 e2 e x y v T; split_tactic; eauto.
+  - apply equivalent_split_ite with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term b) (erase_term e1) (erase_term e2) (erase_term e) x y; repeat side_conditions || split_tactic; eauto.
+  - apply equivalent_split_match with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) (erase_term e1) (erase_term e2) (erase_term e) x y v; repeat side_conditions || split_tactic; eauto.
+  - apply equivalent_split_rec with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) (erase_term e1) (erase_term e2) (erase_term e) x y v; repeat side_conditions || split_tactic; eauto.
 Qed.

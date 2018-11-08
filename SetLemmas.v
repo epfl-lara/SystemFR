@@ -39,7 +39,7 @@ Lemma union_right1:
 Proof.
   induction l1; unfold subset in *; steps.
 Qed.
-  
+
 Lemma union_right2:
   forall {T} (l1 l2: list T),
     subset l2 (l1 ++ l2).
@@ -76,7 +76,7 @@ Lemma subset_union:
     subset (A1 ++ A2) (B1 ++ B2).
 Proof.
   eauto with sets.
-Qed.                        
+Qed.
 
 Hint Immediate subset_union: sets.
 
@@ -161,7 +161,7 @@ Lemma subset_insert:
     subset A (B1 ++ x :: B2).
 Proof.
   induction B1;
-    repeat step || t_listutils || unfold subset in * || instantiate_any.  
+    repeat step || t_listutils || unfold subset in * || instantiate_any.
 Qed.
 
 Hint Resolve subset_insert: sets.

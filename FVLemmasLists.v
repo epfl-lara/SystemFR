@@ -13,13 +13,13 @@ Require Import Termination.TypeList.
 Require Import Termination.ListUtils.
 
 Lemma satisfies_closed_mapping:
-  forall P lterms gamma,
+  forall P lterms gamma tag,
     satisfies P gamma lterms ->
-    pclosed_mapping lterms term_var.
+    pclosed_mapping lterms tag.
 Proof.
-  induction lterms;
+  induction lterms; destruct tag;
     repeat step || step_inversion satisfies ||
-           unfold closed_term in * || destruct tag; eauto.
+           unfold closed_term in *; eauto.
 Qed.
 
 Hint Extern 50 => eapply satisfies_closed_mapping: bfv.
@@ -55,11 +55,11 @@ Qed.
 Hint Extern 50 => eapply closed_mapping_append: b_cmap.
 
 Lemma closed_fvs:
-  forall l,
+  forall l tag,
     closed_terms l ->
-    pclosed_mapping l term_var.
+    pclosed_mapping l tag.
 Proof.
-  induction l; repeat step || unfold closed_term in * || destruct tag.
+  induction l; destruct tag; repeat step || unfold closed_term in * || destruct tag.
 Qed.
 
 Hint Extern 50 => eapply closed_fvs: b_cmap.
@@ -100,7 +100,7 @@ Proof.
 Qed.
 
 Lemma fv2_nil:
-  forall (gamma : M nat term) (t : term) P lterms ltypes,
+  forall gamma t P lterms ltypes,
     subset (pfv t term_var) (support gamma) ->
     closed_terms ltypes ->
     satisfies P gamma lterms ->
@@ -111,18 +111,17 @@ Qed.
 
 Hint Resolve fv2_nil: bfv.
 
-(*
 Lemma fv2_nil2:
-  forall (gamma : M nat term) (t2 : term) P (theta: M nat (term -> Prop)) lterms ltypes,
-    subset (pfv t2 type_var) (support theta) ->
+  forall T gamma t P (theta: M nat T) lterms ltypes,
+    subset (pfv t type_var) (support theta) ->
+    support ltypes = support theta ->
     closed_terms ltypes ->
     satisfies P gamma lterms ->
-    support theta = support ltypes ->
-    pfv (psubstitute (psubstitute t2 lterms term_var) ltypes type_var) type_var = nil.
+    pfv (psubstitute (psubstitute t lterms term_var) ltypes type_var) type_var = nil.
 Proof.
-  repeat step || apply fv_nils2 || rewrite fv_subst_different_tag;
-    eauto with b_cmap sets bfv.
+  intros.
+  apply fv_nils2; steps; eauto with b_cmap bfv.
+  rewrite fv_subst_different_tag; steps; eauto with b_cmap; eauto with sets bfv.
 Qed.
 
 Hint Resolve fv2_nil2: bfv.
-*)

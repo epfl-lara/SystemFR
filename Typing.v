@@ -8,11 +8,12 @@ Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 Require Import Termination.SmallStep.
 Require Import Termination.TermForm.
+Require Import Termination.TypeErasure.
 
 Open Scope list_scope.
 
-Inductive has_type: list nat -> context -> term -> term -> Prop :=
-| HTVar: forall tvars (gamma: context) x (T: term),
+Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
+| HTVar: forall tvars (gamma: context) x T,
     is_context tvars gamma ->
     lookup Nat.eq_dec gamma x = Some T ->
     has_type tvars gamma (term_fvar x) T
@@ -265,7 +266,7 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ->
       has_type tvars gamma (tlet p (T_exists U V) t) T
 
-with is_type: tvar_list -> context -> term -> Prop :=
+with is_type: tvar_list -> context -> tree -> Prop :=
 | ITUnit:
     forall tvars gamma,
       is_context tvars gamma ->
@@ -331,6 +332,7 @@ with is_type: tvar_list -> context -> term -> Prop :=
       is_context tvars gamma ->
       subset (fv t) (support gamma) ->
       wf t 0 ->
+      is_annotated_term t ->
       is_type tvars gamma (T_singleton t)
 
 | ITIntersection:
@@ -362,6 +364,8 @@ with is_type: tvar_list -> context -> term -> Prop :=
       subset (fv t2) (support gamma) ->
       wf t1 0 ->
       wf t2 0 ->
+      is_annotated_term t1 ->
+      is_annotated_term t2 ->
       is_type tvars gamma (T_equal t1 t2)
 
 | ITForall:
@@ -405,7 +409,7 @@ with is_context: tvar_list -> context -> Prop :=
       is_type tvars gamma T ->
       is_context tvars ((x,T) :: gamma)
 
-with is_subtype: tvar_list -> context -> term -> term -> Prop :=
+with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
 | ISRefl:
     forall tvars gamma A,
       is_type tvars gamma A ->
@@ -566,7 +570,7 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
 
 | ISLetOpen:
     forall tvars gamma v A B,
-      is_value v ->
+      is_value (erase_term v) ->
       has_type tvars gamma v A ->
       is_type tvars gamma (T_let v A B) ->
       is_type tvars gamma (open 0 B v) ->
@@ -574,7 +578,7 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
 
 | ISLetOpen2:
     forall tvars gamma v A B,
-      is_value v ->
+      is_value (erase_term v) ->
       has_type tvars gamma v A ->
       is_type tvars gamma (T_let v A B) ->
       is_type tvars gamma (open 0 B v) ->
@@ -632,10 +636,11 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_subtype tvars gamma (T_let t T1 T2) (T_exists T1 T2)
 
-with are_equal: tvar_list -> context -> term -> term -> Prop :=
+with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,
     subset (fv t) (support gamma) ->
     wf t 0 ->
+    is_annotated_term t ->
     is_context tvars gamma ->
     are_equal tvars gamma t t
 
@@ -654,11 +659,15 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
     are_equal tvars gamma t1 t2 ->
     are_equal tvars gamma t2 t1
 
-| AEStep: forall tvars gamma t1 t2,
+| AEStep: forall tvars gamma (t1 t2: term),
     subset (fv t1) (support gamma) ->
+    subset (fv t2) (support gamma) ->
     wf t1 0 ->
+    wf t2 0 ->
+    is_annotated_term t1 ->
+    is_annotated_term t2 ->
     is_context tvars gamma ->
-    small_step t1 t2 ->
+    small_step (erase_term t1) (erase_term t2) ->
     are_equal tvars gamma t1 t2
 
 | AEPairExt: forall tvars gamma t A B,
@@ -753,6 +762,7 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
       ~(n = p) ->
       ~(n ∈ tvars) ->
       ~(p ∈ tvars) ->
+      is_annotated_term ts ->
       has_type tvars gamma tn T_nat ->
       is_type tvars ((n,T_nat) :: gamma) (open 0 T (term_fvar n)) ->
       are_equal tvars ((p, T_equal tn zero) :: gamma) t0 t ->

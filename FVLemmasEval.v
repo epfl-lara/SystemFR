@@ -37,7 +37,7 @@ Proof.
     eauto with bfv blistutils.
 Qed.
 
-Hint Resolve fv_smallstep: bfv.                       
+Hint Resolve fv_smallstep: bfv.
 
 Lemma fv_smallstep_subset:
   forall t t' tag,
@@ -47,7 +47,7 @@ Proof.
   unfold subset; intros; eauto using fv_smallstep.
 Qed.
 
-Hint Resolve fv_smallstep_subset: bfv.                       
+Hint Resolve fv_smallstep_subset: bfv.
 
 Lemma fv_smallstep_subset2:
   forall t t' S tag,
@@ -58,7 +58,7 @@ Proof.
   intros; eauto using subset_transitive with bfv.
 Qed.
 
-Hint Resolve fv_smallstep_subset2: bfv.                       
+Hint Resolve fv_smallstep_subset2: bfv.
 
 Lemma fv_smallstep_nil:
   forall t t' tag,

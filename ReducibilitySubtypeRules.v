@@ -18,6 +18,11 @@ Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.Equivalence.
 Require Import Termination.TermForm.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
@@ -52,6 +57,8 @@ Proof.
     repeat tac1 || t_values_info2 || t_invert_star.
 Qed.
 
+Set Program Mode.
+
 Lemma subtype_arrow2:
   forall tvars theta x f gamma l A B T v,
     ~(x ∈ fv_context gamma) ->
@@ -74,18 +81,18 @@ Lemma subtype_arrow2:
 Proof.
   repeat step || simp_red || rewrite reducibility_rewrite ;
     eauto using red_is_val, values_normalizing with bwf bfv;
-    eauto 2 with btf.
+    eauto 2 with berased.
   unfold open_reducible in *.
   unshelve epose proof (H8 theta ((x,a) :: (f,v) :: l) _ _ _); tac1.
 Qed.
 
 Lemma reducible_ext_pair:
-  forall theta A B (v : term),
+  forall theta A B v,
     is_value v ->
     valid_interpretation theta ->
     reducible theta (pi1 v) A ->
     reducible theta (pi2 v) (T_let (pi1 v) A B) ->
-    exists a b : term,
+    exists a b,
       v = pp a b /\
       reducible_values theta a A /\
       reducible_values theta b (open 0 B a).
@@ -130,8 +137,8 @@ Proof.
   unshelve epose proof (H5 theta ((x,v) :: l) _ _ _) as HP1;
   unshelve epose proof (H6 theta ((x,v) :: l) _ _ _) as HP2;
     tac1.
-  unshelve epose proof reducible_ext_pair _ _ _ _ _ _ HP1 HP2; steps; eauto with values;
-    eauto 7 using reducible_ext_pair with values btf.
+  unshelve epose proof reducible_ext_pair _ _ _ _ _ _ HP1 HP2; steps; eauto with values.
+  unshelve exists a, b; steps; eauto with berased.
 Qed.
 
 Lemma reducible_values_refine_subtype:
@@ -157,8 +164,10 @@ Lemma reducible_values_arrow_subtype:
    reducible_values theta t (T_arrow B1 B2).
 Proof.
   repeat step || simp reducible_values in * || unfold reduces_to || t_listutils;
-    eauto with bwf; eauto with bfv.
-  unshelve epose proof (H6 a _ _);
+    eauto with bwf;
+    eauto with bfv;
+    eauto with berased.
+  unshelve epose proof (H8 a _);
     repeat step || unfold reduces_to in *; eauto.
 Qed.
 
@@ -170,7 +179,7 @@ Lemma reducible_arrow_subtype_subst:
     ~(x ∈ fv B2) ->
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
-    (forall (t : term) (l : list (nat * term)),
+    (forall t l,
        satisfies (reducible_values theta) ((x, B1) :: gamma) l ->
        reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
        reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
@@ -180,7 +189,7 @@ Lemma reducible_arrow_subtype_subst:
 Proof.
   intros.
   apply reducible_values_arrow_subtype with (substitute A1 l) (substitute A2 l);
-      steps; eauto with btf.
+      steps; eauto with berased.
   unshelve epose proof (H5 t0 ((x,a) :: l) _ _); tac1.
 Qed.
 
@@ -209,7 +218,7 @@ Lemma reducible_prod_subtype_subst:
     ~(x ∈ fv B2) ->
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
-    (forall (t : term) (l : list (nat * term)),
+    (forall t l,
        satisfies (reducible_values theta) ((x, A1) :: gamma) l ->
        reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
        reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
@@ -219,6 +228,6 @@ Lemma reducible_prod_subtype_subst:
 Proof.
   intros.
   apply reducible_values_prod_subtype with (substitute A1 l) (substitute A2 l);
-      steps; eauto with btf.
+      steps; eauto with berased.
   unshelve epose proof (H6 t0 ((x,a) :: l) _ _); tac1.
 Qed.

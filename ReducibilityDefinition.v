@@ -23,19 +23,12 @@ Require Import Equations.Subterm.
 
 Require Import Omega.
 
-Definition reduces_to (P: term -> Prop) (t: term) :=
-  fv t = nil /\
-  wf t 0 /\
-  exists t',
-    star small_step t t' /\
-    P t'.
-
-Definition index (T: term): option term :=
+Definition index (T: tree): option tree :=
   match T with
   | _ => None
   end.
 
-Program Fixpoint nat_value_to_nat (v: term) (p: is_nat_value v) :=
+Program Fixpoint nat_value_to_nat (v: tree) (p: is_nat_value v) :=
   match v with
   | zero => 0
   | succ v' => S (nat_value_to_nat v' _)
@@ -50,7 +43,7 @@ Proof.
   induction v; steps.
 Qed.
 
-Definition lt_index (i1 i2: option term) :=
+Definition lt_index (i1 i2: option tree) :=
   (exists n, i1 = Some n /\ i2 = None) \/
   (exists n1 n2 v1 v2 (p1: is_nat_value v1) (p2: is_nat_value v2),
      i1 = Some n1 /\
@@ -99,7 +92,7 @@ Qed.
 Instance wellfounded_lt_index :
   WellFounded lt_index := wf_lt_index.
 
-Notation "p1 '<<' p2" := (lexprod nat (option term) lt lt_index p1 p2) (at level 80).
+Notation "p1 '<<' p2" := (lexprod nat (option tree) lt lt_index p1 p2) (at level 80).
 
 Opaque lt.
 
@@ -109,17 +102,23 @@ Proof.
   unfold lt_index; steps; eauto.
 Qed.
 
-Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): Prop :=
+Definition reduces_to (P: tree -> Prop) (t: tree) :=
+  pfv t term_var = nil /\
+  pfv t type_var = nil /\
+  wf t 0 /\
+  is_erased_term t /\
+  exists t',
+    star small_step t t' /\
+    P t'.
+
+Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): Prop :=
   reducible_values theta v T by rec (size T, index T) (lexprod _ _ lt lt_index) :=
 
-  reducible_values theta v (fvar X tag) :=
-    if (tag_eq_dec tag type_var)
-    then
-      match lookup Nat.eq_dec theta X with
-      | None => False
-      | Some P => P v
-      end
-    else False;
+  reducible_values theta v (fvar X type_var) :=
+    match lookup Nat.eq_dec theta X with
+    | None => False
+    | Some P => P v
+    end;
 
   reducible_values theta v T_unit := v = uu;
 
@@ -128,15 +127,17 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
   reducible_values theta v T_nat := is_nat_value v;
 
   reducible_values theta v (T_arrow A B) :=
+    is_erased_term v /\
     is_value v /\
-    fv v = nil /\
+    pfv v term_var = nil /\
+    pfv v type_var = nil /\
     wf v 0 /\
-    forall a (p: term_form a),
+    forall (a: erased_term),
       reducible_values theta a A ->
       reduces_to (fun t => reducible_values theta t (open 0 B a)) (app v a);
 
   reducible_values theta v (T_prod A B) :=
-     exists a b (p: term_form a),
+     exists (a: erased_term) b,
        v = pp a b /\
        reducible_values theta a A /\
        reducible_values theta b (open 0 B a);
@@ -147,14 +148,16 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
     star small_step (open 0 p v) ttrue;
 
   reducible_values theta v (T_let a A B) :=
-    exists a' (p: term_form a'),
+    exists (a': erased_term),
       is_value a' /\
       star small_step a a' /\
       reducible_values theta v (open 0 B a');
 
   reducible_values theta v (T_singleton t) :=
+    is_erased_term v /\
     is_value v /\
-    fv v = nil /\
+    pfv v term_var = nil /\
+    pfv v type_var = nil /\
     wf v 0 /\
     star small_step t v;
 
@@ -167,8 +170,10 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
     reducible_values theta v B;
 
   reducible_values theta v T_top :=
+    is_erased_term v /\
     is_value v /\
-    fv v = nil /\
+    pfv v term_var = nil /\
+    pfv v type_var = nil /\
     wf v 0;
 
   reducible_values theta v T_bot := False;
@@ -178,21 +183,30 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
     equivalent t1 t2;
 
   reducible_values theta v (T_forall A B) :=
+    is_erased_term v /\
     is_value v /\
-    fv v = nil /\
+    pfv v term_var = nil /\
+    pfv v type_var = nil /\
     wf v 0 /\
-    forall a (p: term_form a), reducible_values theta a A -> reducible_values theta v (open 0 B a);
+    forall (a: erased_term),
+      reducible_values theta a A ->
+      reducible_values theta v (open 0 B a);
 
   reducible_values theta v (T_exists A B) :=
-    exists a (p: term_form a), reducible_values theta a A /\ reducible_values theta v (open 0 B a);
+    exists (a: erased_term),
+      reducible_values theta a A /\
+      reducible_values theta v (open 0 B a);
 
   reducible_values theta v T := False
 .
 
-Solve Obligations with (repeat step || autorewrite with bsize; eauto using left_lex with omega).
+Ltac t_reducibility_definition :=
+  repeat step || destruct_refinements || autorewrite with bsize; eauto using left_lex with omega.
+
+Solve Obligations with t_reducibility_definition.
 Fail Next Obligation.
 
-Definition reducible (theta: interpretation) (t: term) (T: term): Prop :=
+Definition reducible (theta: interpretation) t T: Prop :=
   reduces_to (fun t => reducible_values theta t T) t.
 
 Definition open_reducible (tvars: tvar_list) (gamma: context) t T: Prop :=

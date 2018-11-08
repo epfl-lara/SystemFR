@@ -50,7 +50,7 @@ Lemma equivalent_trans:
   forall t1 t2 t3,
     equivalent t1 t2 ->
     equivalent t2 t3 ->
-    equivalent t1 t3 
+    equivalent t1 t3
 .
 Proof.
   unfold equivalent; steps.
@@ -85,7 +85,7 @@ Qed.
 Hint Resolve equivalent_refl: b_equiv.
 
 Lemma equivalent_app_congr:
-  forall (t1 t2 t1' t2' : term),
+  forall t1 t2 t1' t2',
     equivalent t1' t2' ->
     equivalent t1 t2 ->
     equivalent (app t1 t1') (app t2 t2').
@@ -119,7 +119,7 @@ Qed.
 Hint Resolve equivalent_pi2_congr: b_equiv.
 
 Lemma equivalent_pp_congr:
-  forall (t1 t2 t1' t2' : term),
+  forall t1 t2 t1' t2',
     equivalent t1' t2' ->
     equivalent t1 t2 ->
     equivalent (pp t1 t1') (pp t2 t2').
@@ -131,7 +131,7 @@ Qed.
 Hint Resolve equivalent_pp_congr: b_equiv.
 
 Lemma equivalent_ite:
-  forall (t1 t2 t3 t : term),
+  forall t1 t2 t3 t,
     (star small_step t1 ttrue \/ star small_step t1 tfalse) ->
     (star small_step t1 ttrue -> equivalent t2 t) ->
     (star small_step t1 tfalse -> equivalent t3 t) ->
@@ -148,7 +148,7 @@ Lemma equivalent_match:
     is_nat_value v ->
     star small_step tn v ->
     (v = zero -> equivalent t0 t) ->
-    (forall v', v = succ v' -> equivalent (open 0 ts v') t) -> 
+    (forall v', v = succ v' -> equivalent (open 0 ts v') t) ->
     equivalent (tmatch tn t0 ts) t.
 Proof.
   unfold equivalent in *; intros; destruct v; repeat step || t_invert_star;
@@ -161,14 +161,14 @@ Qed.
 Hint Resolve equivalent_match: b_equiv.
 
 Lemma equivalent_rec:
-  forall t v T tn t0 ts,
+  forall t v tn t0 ts,
     is_nat_value v ->
     star small_step tn v ->
     (v = zero -> equivalent t0 t) ->
     (forall v', v = succ v' ->
-           equivalent (open 0 (open 1 ts v') (lambda T_unit (rec T v' t0 ts)))
-                      t) -> 
-    equivalent (rec T tn t0 ts) t.
+           equivalent (open 0 (open 1 ts v') (notype_lambda (notype_rec v' t0 ts)))
+                      t) ->
+    equivalent (notype_rec tn t0 ts) t.
 Proof.
   unfold equivalent in *; intros; destruct v; repeat step || t_invert_star;
     eauto using star_smallstep_trans with bsteplemmas smallstep;

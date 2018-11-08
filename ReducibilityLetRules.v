@@ -45,9 +45,9 @@ Lemma reducible_val_let:
     reducible_values theta b (T_let a A B).
 Proof.
   repeat step || simp reducible_values in *.
-  eexists; eexists; steps; eauto with smallstep;
+  unshelve eexists (exist _ a _); steps; eauto with smallstep;
     eauto using red_is_val;
-    eauto with btf.
+    eauto with berased.
 Qed.
 
 Lemma reducible_let:
@@ -60,7 +60,7 @@ Proof.
   steps.
   eauto using reducible_val_let, reducible_values_exprs.
 Qed.
-    
+
 Lemma reducible_val_let2:
   forall theta A B a b,
     valid_interpretation theta ->
@@ -115,7 +115,7 @@ Proof.
   repeat step || simp reducible_values in * || simp denote_values in *.
   eauto using value_irred, star_many_steps.
 Qed.
-  
+
 Lemma reducible_let_smallstep_expr:
   forall theta t1 t2 A B t,
     valid_interpretation theta ->
@@ -138,7 +138,7 @@ Proof.
   repeat step || simp reducible_values in * || simp denote_values in *.
   eauto using star_smallstep_trans.
 Qed.
-  
+
 Lemma reducible_let_backstep_expr:
   forall theta t1 t2 A B t,
     valid_interpretation theta ->
@@ -151,7 +151,7 @@ Qed.
 
 
 Lemma reducible_subtype_let_left:
-  forall tvars theta (gamma : context) (t : term) A B T x p v l,
+  forall tvars theta (gamma : context) t A B T x p v l,
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv A) ->
     ~(x ∈ fv B) ->
@@ -166,7 +166,7 @@ Lemma reducible_subtype_let_left:
     open_reducible tvars gamma t A ->
     valid_interpretation theta ->
     support theta = tvars ->
-    (forall (v : term) (l : list (nat * term)),
+    (forall v l,
        satisfies (reducible_values theta) ((p, T_equal (term_fvar x) t) :: (x, A) :: gamma) l ->
        reducible_values theta v (substitute (open 0 B (term_fvar x)) l) ->
        reducible_values theta v (substitute T l)) ->
@@ -174,13 +174,14 @@ Lemma reducible_subtype_let_left:
     reducible_values theta v (T_let (substitute t l) (substitute A l) (substitute B l)) ->
     reducible_values theta v (substitute T l).
 Proof.
-  unfold open_reducible, reducible, reduces_to; repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star.
-  unshelve epose proof (H13 v ((p,trefl) :: (x,t') :: l) _ _); tac1;
+  unfold open_reducible, reducible, reduces_to;
+    repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star || destruct_refinements.
+  unshelve epose proof (H13 v ((p,trefl) :: (x,a') :: l) _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv.
 Qed.
 
 Lemma reducible_subtype_let_open:
-  forall theta (gamma : context) (v : term) A B (t : term) (l : list (nat * term)),
+  forall theta (gamma : context) v A B t l,
     is_value v ->
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
@@ -193,12 +194,12 @@ Proof.
 Qed.
 
 Lemma reducible_subtype_let_open2:
-  forall tvars theta (gamma : context) (v : term) A B,
+  forall tvars theta (gamma : context) v A B,
     is_value v ->
     open_reducible tvars gamma v A ->
     valid_interpretation theta ->
     support theta = tvars ->
-    forall (t : term) (l : list (nat * term)),
+    forall t l,
       satisfies (reducible_values theta) gamma l ->
       reducible_values theta t (substitute (open 0 B v) l) ->
       reducible_values theta t (T_let (substitute v l) (substitute A l) (substitute B l)).

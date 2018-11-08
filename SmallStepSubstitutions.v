@@ -7,7 +7,7 @@ Require Import Termination.SmallStep.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.AssocList.
 
-Fixpoint are_values (l: list (nat * term)) :=
+Fixpoint are_values (l: list (nat * tree)) :=
   match l with
   | nil => True
   | (x,v) :: l' => is_value v /\ are_values l'
@@ -20,7 +20,7 @@ Lemma lookup_value:
 Proof.
   induction l; steps; eauto.
 Qed.
-  
+
 Lemma is_value_subst:
   forall v,
     is_value v ->
@@ -30,7 +30,7 @@ Lemma is_value_subst:
 Proof.
   induction 1; steps; eauto with values; eauto using lookup_value.
 Qed.
-  
+
 Hint Resolve is_value_subst: values.
 
 Lemma small_step_subst:

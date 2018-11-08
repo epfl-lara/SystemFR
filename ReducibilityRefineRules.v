@@ -74,7 +74,7 @@ Qed.
 Hint Resolve reducible_refine: breducible.
 
 Lemma reducible_refine_subtype:
-  forall tvars theta (gamma : context) A B (p q : term) (x : nat) t l,
+  forall tvars theta (gamma : context) A B p q (x : nat) t l,
     wf q 1 ->
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv A) ->
@@ -83,10 +83,10 @@ Lemma reducible_refine_subtype:
     open_reducible tvars ((x, B) :: gamma) (open 0 q (term_fvar x)) T_bool ->
     valid_interpretation theta ->
     support theta = tvars ->
-    (forall l : list (nat * term),
+    (forall l,
         satisfies (reducible_values theta) ((x, T_refine A p) :: gamma) l ->
         equivalent (substitute (open 0 q (term_fvar x)) l) ttrue) ->
-    (forall (t : term) (l : list (nat * term)),
+    (forall t l,
         satisfies (reducible_values theta) gamma l ->
         reducible_values theta t (substitute A l) -> reducible_values theta t (substitute B l)) ->
     satisfies (reducible_values theta) gamma l ->
@@ -100,16 +100,16 @@ Proof.
 Qed.
 
 Lemma reducible_refine_subtype2:
-  forall theta (gamma : context) T A (p : term) (x : nat) t l,
+  forall theta (gamma : context) T A p (x : nat) t l,
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv T) ->
     ~(x ∈ fv p) ->
     wf p 1 ->
     valid_interpretation theta ->
-    (forall l : list (nat * term),
+    (forall l,
         satisfies (reducible_values theta) ((x, T) :: gamma) l ->
         equivalent (substitute (open 0 p (term_fvar x)) l) ttrue) ->
-    (forall (t : term) (l : list (nat * term)),
+    (forall t l,
         satisfies (reducible_values theta) gamma l ->
         reducible_values theta t (substitute T l) -> reducible_values theta t (substitute A l)) ->
       satisfies (reducible_values theta) gamma l ->
@@ -123,7 +123,7 @@ Proof.
 Qed.
 
 Lemma reducible_refine_subtype3:
-  forall tvars theta gamma T A (b : term) (x p : nat) t l,
+  forall tvars theta gamma T A b (x p : nat) t l,
     ~(p ∈ fv_context gamma) ->
     ~(p ∈ fv A) ->
     ~(p ∈ fv T) ->

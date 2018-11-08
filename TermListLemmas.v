@@ -15,18 +15,19 @@ Require Import Termination.FVLemmasLists.
 
 
 Lemma satisfies_insert:
-  forall (p: term -> term -> Prop) gamma1 gamma2 l1 l2 t T x,
+  forall (P: tree -> tree -> Prop) gamma1 gamma2 l1 l2 t T x,
     ~(x ∈ fv T) ->
     ~(x ∈ fv_context gamma2) ->
-    fv t = nil ->
+    pfv t term_var = nil ->
+    pfv t type_var = nil ->
     wf t 0 ->
-    p t (substitute T l2) ->
+    P t (substitute T l2) ->
     support gamma1 = support l1 ->
     ~(x ∈ support gamma1) ->
     ~(x ∈ fv_context gamma1) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv T -> False) ->
-    satisfies p (gamma1 ++ gamma2) (l1 ++ l2) ->
-    satisfies p (gamma1 ++ (x,T) :: gamma2) (l1 ++ (x,t) :: l2).
+    satisfies P (gamma1 ++ gamma2) (l1 ++ l2) ->
+    satisfies P (gamma1 ++ (x,T) :: gamma2) (l1 ++ (x,t) :: l2).
 Proof.
   induction gamma1; destruct l1;
     repeat step || step_inversion satisfies || apply SatCons || t_listutils ||
@@ -35,11 +36,11 @@ Qed.
 
 
 Lemma satisfies_drop:
-  forall (p: term -> term -> Prop) gamma1 gamma2 l1 l2 t T x,
+  forall (P: tree -> tree -> Prop) gamma1 gamma2 l1 l2 t T x,
     support gamma1 = support l1 ->
     ~(x ∈ fv_context gamma1) ->
-    satisfies p (gamma1 ++ (x,T) :: gamma2) (l1 ++ (x,t) :: l2) ->
-    satisfies p (gamma1 ++ gamma2) (l1 ++ l2).
+    satisfies P (gamma1 ++ (x,T) :: gamma2) (l1 ++ (x,t) :: l2) ->
+    satisfies P (gamma1 ++ gamma2) (l1 ++ l2).
 Proof.
   induction gamma1; destruct l1;
     repeat step || step_inversion satisfies || apply SatCons || t_listutils ||

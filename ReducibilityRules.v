@@ -16,6 +16,9 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
@@ -29,15 +32,13 @@ Require Import Termination.WFLemmasLists.
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
-Require Import Termination.ReducibilityLetRules.
-Require Import Termination.ReducibilityLetTermRules.
 Require Import Termination.RedTactics.
 
 Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma open_reducible_weaken:
-  forall theta (gamma : context) (x : nat) T (u : term) U,
+  forall theta (gamma : context) (x : nat) T u U,
     open_reducible theta gamma u U ->
     ~(x ∈ support gamma) ->
     ~(x ∈ fv u) ->
@@ -49,7 +50,7 @@ Qed.
 
 Lemma reducible_satisfies_weaker:
   forall theta gamma1 gamma2 x T T' l,
-    (forall (t : term) (l : list (nat * term)),
+    (forall t l,
       satisfies (reducible_values theta) gamma2 l ->
       reducible_values theta t (substitute T l) ->
       reducible_values theta t (substitute T' l)) ->
@@ -77,10 +78,12 @@ Proof.
 Qed.
 
 Lemma reducible_equal:
-  forall theta (t1 t2 : term) T,
+  forall theta t1 t2 T,
     equivalent t1 t2 ->
     wf t2 0 ->
-    fv t2 = nil ->
+    pfv t2 term_var = nil ->
+    pfv t2 type_var = nil ->
+    is_erased_term t2 ->
     valid_interpretation theta ->
     reducible theta t1 T ->
     reducible theta t2 T.
@@ -90,9 +93,10 @@ Proof.
 Qed.
 
 Lemma open_reducible_equal:
-  forall tvars (gamma : context) (t1 t2 : term) T,
+  forall tvars gamma t1 t2 T,
+    is_erased_term t2 ->
     open_reducible tvars gamma t1 T ->
-    (forall (l : list (nat * term)) theta,
+    (forall l theta,
       valid_interpretation theta ->
       support theta = tvars ->
       satisfies (reducible_values theta) gamma l ->
@@ -101,13 +105,15 @@ Lemma open_reducible_equal:
     subset (fv t2) (support gamma) ->
     open_reducible tvars gamma t2 T.
 Proof.
-  unfold open_reducible; repeat step || t_instantiate_sat3;
-    eauto 6 using reducible_equal with bwf bfv.
+  unfold open_reducible;
+    repeat tac1 || t_instantiate_sat3 ||
+           apply reducible_equal with (psubstitute t1 lterms term_var);
+    eauto with bwf bfv berased.
 Qed.
 
 Lemma open_reducible_refl:
-  forall tvars (gamma : context) (t1 t2 : term),
-    (forall (l : list (nat * term)) theta,
+  forall tvars (gamma : context) t1 t2,
+    (forall l theta,
       valid_interpretation theta ->
       support theta = tvars ->
       satisfies (reducible_values theta) gamma l ->

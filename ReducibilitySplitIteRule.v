@@ -14,6 +14,11 @@ Require Import Termination.StarInversions.
 Require Import Termination.Freshness.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.SmallStepSubstitutions.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
@@ -39,7 +44,7 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma equivalent_split_ite:
-  forall tvars theta (gamma1 gamma2 : context) (b e1 e2 t t' e : term) (x y : nat) l,
+  forall tvars theta (gamma1 gamma2 : context) b e1 e2 t t' e (x y : nat) l,
     open_reducible tvars gamma2 b T_bool ->
     valid_interpretation theta ->
     support theta = tvars ->
@@ -65,10 +70,10 @@ Lemma equivalent_split_ite:
     wf b 0 ->
     wf e1 0 ->
     wf e2 0 ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal b ttrue) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal e2 e) :: (y, T_equal b tfalse) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (ite b e1 e2) e) :: gamma2) l ->

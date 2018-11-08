@@ -26,12 +26,10 @@ Qed.
 Hint Resolve values_normalizing: norm.
 
 Lemma lambda_normalizing:
-  forall T t,
-    wf T 0 ->
+  forall t,
     wf t 1 ->
-    fv T = nil ->
-    fv t = nil ->
-    normalizing (lambda T t).
+    pfv t term_var = nil ->
+    normalizing (notype_lambda t).
 Proof.
   steps; eauto 6 using values_normalizing with step_tactic blistutils values.
 Qed.
@@ -93,7 +91,7 @@ Lemma star_smallstep_pp_r:
       is_value v ->
       star small_step (pp v t1) (pp v t2).
 Proof.
-  induction 1; steps; eauto with smallstep step_tactic bwf.
+  induction 1; steps; eauto with smallstep.
 Qed.
 
 Lemma star_smallstep_err:
@@ -103,7 +101,7 @@ Lemma star_smallstep_err:
     is_value v ->
     False.
 Proof.
-  inversion 1; repeat step || step_inversion (is_value, small_step).
+  inversion 1; repeat step || destruct_refinements || step_inversion (is_value, small_step).
 Qed.
 
 Ltac error_to_value :=
@@ -128,7 +126,7 @@ Lemma star_smallstep_pp:
     star small_step t2 t2' ->
     star small_step (pp t1 t2) (pp v t2').
 Proof.
-  steps; eauto using star_smallstep_trans with bsteplemmas bwf.
+  steps; eauto using star_smallstep_trans with bsteplemmas.
 Qed.
 
 Hint Resolve star_smallstep_pp: bsteplemmas.
@@ -167,8 +165,8 @@ Hint Resolve star_smallstep_ite_cond: bsteplemmas.
 Lemma star_smallstep_rec:
   forall t1 t2,
     star small_step t1 t2 ->
-    forall T tt te,
-      star small_step (rec T t1 tt te) (rec T t2 tt te).
+    forall tt te,
+      star small_step (notype_rec t1 tt te) (notype_rec t2 tt te).
 Proof.
   induction 1; steps; eauto with smallstep bwf step_tactic.
 Qed.
@@ -197,9 +195,9 @@ Qed.
 Hint Resolve star_smallstep_succ: bsteplemmas.
 
 Lemma star_smallstep_let:
-  forall t1 t1' T t2,
+  forall t1 t1' t2,
     star small_step t1 t1' ->
-    star small_step (tlet t1 T t2) (tlet t1' T t2).
+    star small_step (notype_tlet t1 t2) (notype_tlet t1' t2).
 Proof.
   induction 1; steps; eauto with smallstep.
 Qed.

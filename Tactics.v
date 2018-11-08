@@ -7,8 +7,8 @@ Open Scope string.
 Hint Extern 50 => omega: omega.
 Hint Extern 50 => cbn: cbn.
 Hint Extern 50 => cbn; intuition auto: cbn_intuition.
-  
-Ltac light := 
+
+Ltac light :=
   (intros) ||
   (intuition auto) ||
   (congruence) ||
@@ -41,8 +41,8 @@ Ltac inList x ls :=
   end.
 
 (** Taken from Cpdt **)
-Ltac step_inversion predicates := 
-  let invert H F := 
+Ltac step_inversion predicates :=
+  let invert H F :=
     inList F predicates;
       (inversion H; fail) ||
       (inversion H; [ idtac ]; clear H)
@@ -63,13 +63,13 @@ Ltac containsExistential := match goal with
 Ltac noExistential := tryif containsExistential then fail else idtac.
 
 Ltac removeDuplicateProps := match goal with
-  | [ H1: ?P, H2: ?P |- _ ] => 
+  | [ H1: ?P, H2: ?P |- _ ] =>
     match type of P with
     | Prop => idtac
     end;  clear H2
   end.
 
-Ltac isThere P := match goal with 
+Ltac isThere P := match goal with
   | H: ?Q |- _ => unify P Q
 (*  | |- ?Q => unify P Q *)
   end.
@@ -83,7 +83,7 @@ Lemma strong_and:
 Proof.
   eauto.
 Qed.
-  
+
 Ltac step_gen := match goal with
   | _ => progress light
   | _ => apply strong_and
@@ -92,7 +92,7 @@ Ltac step_gen := match goal with
     destruct H as [ x' ]
   | [ p: ?A*?B |- _ ] => destruct p
   | [ H: (_,_) = (_,_) |- _ ] => inversion H; clear H
-  | [ H: context[Nat.eq_dec ?U ?V] |- _ ] => destruct (Nat.eq_dec U V) 
+  | [ H: context[Nat.eq_dec ?U ?V] |- _ ] => destruct (Nat.eq_dec U V)
   | [ H: ?F _ = ?F _ |- _ ] => is_construct F; inversion H; clear H
   | [ H: ?F _ _ = ?F _ _ |- _ ] => is_construct F; inversion H; clear H
   | [ H: ?F _ _ _ = ?F _ _ _ |- _ ] => is_construct F; inversion H; clear H
@@ -102,11 +102,11 @@ Ltac step_gen := match goal with
   | H: forall a b c, _ -> _ |- _ => pose proof (H _ _ _ eq_refl); clear H
   | H: forall a b c d, _ -> _ |- _ => pose proof (H _ _ _ _ eq_refl); clear H
   | H: forall a b c d e, _ -> _ |- _ => pose proof (H _ _ _ _ _ eq_refl); clear H
-  | [ |- context[match ?t with _ => _ end]] => 
+  | [ |- context[match ?t with _ => _ end]] =>
       let matched := fresh "matched" in
       destruct t eqn:matched
-  | [ H: context[match ?t with _ => _ end] |- _ ] => 
-      let matched := fresh "matched" in 
+  | [ H: context[match ?t with _ => _ end] |- _ ] =>
+      let matched := fresh "matched" in
       destruct t eqn:matched
   | _ => removeDuplicateProps
   | H := _: ?T |- _ => noUnify T string; clearbody H
@@ -117,7 +117,7 @@ Ltac step_gen := match goal with
 Ltac step := step_gen || step_inversion (List.Forall, List.In).
 Ltac steps := repeat step.
 
-Ltac termNotThere p := 
+Ltac termNotThere p :=
   let P := type of p in
     tryif (isThere P) then fail else idtac.
 
@@ -209,7 +209,8 @@ Ltac instantiate_any :=
     poseNew (Mark (H1,H2) "instantiation");
     pose proof (H1 _ H2)
   end.
-   
+
 Hint Extern 50 => apply_any: bapply_any.
+Hint Extern 50 => eapply_any: beapply_any.
 Hint Extern 50 => congruence: bcongruence.
 Hint Extern 50 => steps: step_tactic.

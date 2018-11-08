@@ -16,6 +16,9 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
@@ -67,7 +70,7 @@ Proof.
 Qed.
 
 Lemma reducible_singleton:
-  forall theta (t1 t2 : term) T,
+  forall theta t1 t2 T,
     valid_interpretation theta ->
     equivalent t1 t2 ->
     reducible theta t1 T ->
@@ -75,13 +78,14 @@ Lemma reducible_singleton:
 Proof.
   unfold reducible, reduces_to, equivalent; repeat step || eauto || eexists || simp_red;
     eauto with bwf bfv;
-    eauto with values.
+    eauto with values;
+    eauto with berased.
 Qed.
 
 Lemma open_reducible_singleton:
-  forall tvars (gamma : context) (t1 t2 : term) T,
+  forall tvars (gamma : context) t1 t2 T,
     open_reducible tvars gamma t1 T ->
-    (forall (l : list (nat * term)) theta,
+    (forall l theta,
        valid_interpretation theta ->
        support theta = tvars ->
        satisfies (reducible_values theta) gamma l -> equivalent (substitute t1 l) (substitute t2 l)) ->
@@ -92,7 +96,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_union_elim:
-  forall tvars (gamma : context) (t t' : term) T1 T2 T z,
+  forall tvars (gamma : context) t t' T1 T2 T z,
     subset (fv t') (support gamma) ->
     subset (fv T1) (support gamma) ->
     subset (fv T2) (support gamma) ->
@@ -104,16 +108,20 @@ Lemma open_reducible_union_elim:
     ~(z ∈ fv T) ->
     ~(z ∈ fv T1) ->
     ~(z ∈ fv T2) ->
+    is_erased_term t' ->
     open_reducible tvars gamma t (T_union T1 T2) ->
     open_reducible tvars ((z, T1) :: gamma) (open 0 t' (term_fvar z)) T ->
     open_reducible tvars ((z, T2) :: gamma) (open 0 t' (term_fvar z)) T ->
-    open_reducible tvars gamma (tlet t (T_union T1 T2) t') T.
+    open_reducible tvars gamma (notype_tlet t t') T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold || simp_red.
 
-  - unshelve epose proof (H11 theta ((z,t'0) :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star || apply reducible_let_rule.
-
   - unshelve epose proof (H12 theta ((z,t'0) :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star || apply reducible_let_rule.
+      repeat tac1 || t_values_info2 || t_deterministic_star ||
+             apply reducible_let_rule with (psubstitute (T_union T1 T2) lterms term_var);
+      eauto with berased.
+  - unshelve epose proof (H13 theta ((z,t'0) :: lterms) _ _ _);
+      repeat tac1 || t_values_info2 || t_deterministic_star ||
+             apply reducible_let_rule with (psubstitute (T_union T1 T2) lterms term_var);
+      eauto with berased.
 Qed.

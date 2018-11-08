@@ -28,7 +28,7 @@ Proof.
   unfold irred; induction 1; repeat step || apply_any;
     eauto using star_one_step.
 Qed.
-  
+
 Lemma star_smallstep_pi1_val:
   forall t v,
     star small_step t v ->
@@ -81,7 +81,7 @@ Lemma star_smallstep_app_inv:
 Proof.
   induction 1; repeat step || step_inversion is_value; eauto with smallstep.
   inversion H; repeat step || t_listutils; eauto 3 with bsteplemmas smallstep values.
-  - exists (lambda T t), t4; repeat step;
+  - exists (notype_lambda t), t4; repeat step;
       eauto 4 with smallstep bsteplemmas values bwf.
   - exists v1, v2; steps; eauto with smallstep.
   - exists v1, v2; steps; eauto with smallstep.
@@ -172,15 +172,15 @@ Lemma star_smallstep_rec_inv:
   forall t v,
     star small_step t v ->
     is_value v ->
-    forall T tn t0 ts,
-      t = rec T tn t0 ts ->
+    forall tn t0 ts,
+      t = notype_rec tn t0 ts ->
         (star small_step tn zero /\ star small_step t0 v) \/
         exists v',
           star small_step tn (succ v') /\
           is_value v' /\
           is_value (succ v') /\
           star small_step
-            (open 0 (open 1 ts v') (lambda T_unit (rec T v' t0 ts)))
+            (open 0 (open 1 ts v') (notype_lambda (notype_rec v' t0 ts)))
              v.
 Proof.
   induction 1;
@@ -201,7 +201,7 @@ Lemma star_smallstep_rec_inv2:
       t = rec T tn t0 ts ->
       exists v',
         star small_step tn v' /\
-        star small_step (rec T v' t0 ts) v /\
+        star small_step (notype_rec v' t0 ts) v /\
         is_value v'.
 Proof.
   induction 1;
@@ -220,8 +220,8 @@ Lemma star_smallstep_rec_zero:
   forall t v,
     star small_step t v ->
     is_value v ->
-    forall T t0 ts,
-      t = rec T zero t0 ts ->
+    forall t0 ts,
+      t = notype_rec zero t0 ts ->
       star small_step t0 v.
 Proof.
   induction 1;
@@ -236,11 +236,11 @@ Lemma star_smallstep_rec_succ:
   forall t v,
     star small_step t v ->
     is_value v ->
-    forall T v' t0 ts,
+    forall v' t0 ts,
       is_value v' ->
-      t = rec T (succ v') t0 ts ->
+      t = notype_rec (succ v') t0 ts ->
       star small_step
-           (open 0 (open 1 ts v') (lambda T_unit (rec T v' t0 ts)))
+           (open 0 (open 1 ts v') (notype_lambda (notype_rec v' t0 ts)))
            v.
 Proof.
   induction 1;
@@ -248,7 +248,7 @@ Proof.
            | _ => step || step_inversion is_value || t_invert_step
            end; eauto 2 with smallstep.
 Qed.
-  
+
 Hint Resolve normalizing_pair: bsteplemmas.
 
 Lemma smallstep_succ_zero:
@@ -261,7 +261,7 @@ Lemma smallstep_succ_zero:
 Proof.
   induction 1; repeat step || step_inversion small_step.
 Qed.
-  
+
 Lemma star_smallstep_match_zero:
   forall t v,
     star small_step t v ->
@@ -278,7 +278,7 @@ Proof.
 Qed.
 
 Lemma star_smallstep_match_succ:
-  forall t v v0 tn t0 ts : term,
+  forall t v v0 tn t0 ts,
     is_value v ->
     is_value v0 ->
     star small_step tn (succ v) ->
@@ -290,9 +290,9 @@ Proof.
   eapply star_smallstep_trans; eauto.
   eapply star_smallstep_trans; eauto with bsteplemmas; eauto with smallstep.
 Qed.
-      
+
 Lemma star_smallstep_match_inv_succ:
-  forall v v0 tn t0 ts : term,
+  forall v v0 tn t0 ts,
     is_value v ->
     is_value v0 ->
     star small_step tn (succ v) ->
@@ -310,8 +310,8 @@ Lemma star_smallstep_rec_zero2:
   forall t v,
     star small_step t v ->
     is_value v ->
-    forall T tn t0 ts,
-      t = rec T tn t0 ts ->
+    forall tn t0 ts,
+      t = notype_rec tn t0 ts ->
       star small_step tn zero ->
       star small_step t0 v.
 Proof.
@@ -321,26 +321,26 @@ Proof.
 Qed.
 
 Lemma star_smallstep_rec_succ2:
-  forall t v v0 tn t0 ts T,
+  forall t v v0 tn t0 ts,
     is_value v ->
     is_value v0 ->
     star small_step tn (succ v) ->
     star small_step t v0 ->
-    star small_step (open 0 (open 1 ts v) (lambda T_unit (rec T v t0 ts))) v0 ->
-    star small_step (rec T tn t0 ts) v0.
+    star small_step (open 0 (open 1 ts v) (notype_lambda (notype_rec v t0 ts))) v0 ->
+    star small_step (notype_rec tn t0 ts) v0.
 Proof.
   intros.
   eapply star_smallstep_trans; eauto.
   eapply star_smallstep_trans; eauto with bsteplemmas; eauto with smallstep.
 Qed.
-      
+
 Lemma star_smallstep_rec_inv_succ2:
-  forall v v0 tn t0 ts T,
+  forall v v0 tn t0 ts,
     is_value v ->
     is_value v0 ->
     star small_step tn (succ v) ->
-    star small_step (rec T tn t0 ts) v0 ->
-    star small_step (open 0 (open 1 ts v) (lambda T_unit (rec T v t0 ts))) v0.
+    star small_step (notype_rec tn t0 ts) v0 ->
+    star small_step (open 0 (open 1 ts v) (notype_lambda (notype_rec v t0 ts))) v0.
 Proof.
   intros.
   eapply star_many_steps;
@@ -372,8 +372,8 @@ Proof.
 Qed.
 
 Lemma star_smallstep_app_onestep:
-  forall T t v1 v2,
-    star small_step (app (lambda T t) v1) v2 ->
+  forall t v1 v2,
+    star small_step (app (notype_lambda t) v1) v2 ->
     is_value v1 ->
     is_value v2 ->
     star small_step (open 0 t v1) v2.
@@ -435,13 +435,13 @@ Ltac t_invert_star :=
     unshelve epose proof (star_smallstep_succ_inv _ v H2 H1 _ eq_refl)
   | H1: is_value ?v1,
     H2: is_value ?v2,
-    H3: star small_step (rec _ (succ ?v2) _ _) ?v1 |- _ =>
+    H3: star small_step (notype_rec (succ ?v2) _ _) ?v1 |- _ =>
     poseNew (Mark H3 "inv rec succ");
-    unshelve epose proof (star_smallstep_rec_succ _ _ H3 H1 _ _ _ _ H2 eq_refl)
+    unshelve epose proof (star_smallstep_rec_succ _ _ H3 H1 _ _ _ H2 eq_refl)
   | H1: is_value ?v,
-    H2: star small_step (rec _ zero _ _) ?v |- _ =>
+    H2: star small_step (notype_rec zero _ _) ?v |- _ =>
     poseNew (Mark H2 "inv rec zero");
-    unshelve epose proof (star_smallstep_rec_zero _ v H2 H1 _ _ _ eq_refl)
+    unshelve epose proof (star_smallstep_rec_zero _ v H2 H1 _ _ eq_refl)
   | H: star small_step (lambda _ _) _ |- _ => inversion H; clear H
   | H: star small_step err _ |- _ => inversion H; clear H
   | _ => t_invert_step

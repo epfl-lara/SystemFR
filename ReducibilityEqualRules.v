@@ -17,6 +17,11 @@ Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
@@ -36,10 +41,10 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducibility_equivalent_weaken:
-  forall theta (gamma : context) (x : nat) T (u v : term) l,
+  forall theta (gamma : context) (x : nat) T u v l,
     subset (fv u) (support gamma) ->
     subset (fv v) (support gamma) ->
-    (forall l : list (nat * term),
+    (forall l,
         satisfies (reducible_values theta) gamma l -> equivalent (substitute u l) (substitute v l)) ->
     satisfies (reducible_values theta) ((x, T) :: gamma) l ->
     equivalent (substitute u l) (substitute v l).
@@ -62,7 +67,7 @@ Proof.
 Qed.
 
 Lemma equivalent_split_bool:
-  forall tvars theta (gamma1 gamma2 : context) (b t t' : term) x l,
+  forall tvars theta (gamma1 gamma2 : context) b t t' x l,
     ~(x ∈ fv b) ->
     ~(x ∈ fv t) ->
     ~(x ∈ fv t') ->
@@ -72,10 +77,10 @@ Lemma equivalent_split_bool:
     open_reducible tvars gamma2 b T_bool ->
     valid_interpretation theta ->
     support theta = tvars ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal b ttrue) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal b tfalse) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ gamma2) l ->
@@ -87,7 +92,7 @@ Proof.
 Qed.
 
 Lemma equivalent_split_nat:
-  forall tvars theta (gamma1 gamma2 : context) (n t t' : term) x y l,
+  forall tvars theta (gamma1 gamma2 : context) n t t' x y l,
     ~(x ∈ fv_context gamma1) ->
     ~(x ∈ fv_context gamma2) ->
     ~(x ∈ fv n) ->
@@ -103,10 +108,10 @@ Lemma equivalent_split_nat:
     open_reducible tvars gamma2 n T_nat ->
     valid_interpretation theta ->
     support theta = tvars ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal n zero) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta)
                  (gamma1 ++ (x, T_equal n (succ (fvar y term_var))) :: (y, T_nat) :: gamma2)
                  l ->
@@ -114,7 +119,8 @@ Lemma equivalent_split_nat:
     satisfies (reducible_values theta) (gamma1 ++ gamma2) l ->
     equivalent (substitute t l) (substitute t' l).
 Proof.
-  unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
+  unfold open_reducible, reducible, reduces_to;
+    repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
   destruct t'0; steps.
 
   - unshelve epose proof (H14 (l1 ++ (x,trefl) :: l2) _); tac1.
@@ -122,7 +128,7 @@ Proof.
 Qed.
 
 Lemma equivalent_pair_eta:
-  forall tvars theta (gamma : context) (t : term) A B l,
+  forall tvars theta (gamma : context) t A B l,
     valid_interpretation theta ->
     open_reducible tvars gamma t (T_prod A B) ->
     support theta = tvars ->
@@ -138,7 +144,7 @@ Proof.
 Qed.
 
 Lemma reducible_equivalent_ite:
-  forall theta tvars (gamma : context) (t1 t2 t3 t : term) x l,
+  forall theta tvars (gamma : context) t1 t2 t3 t x l,
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv t1) ->
     ~(x ∈ fv t2) ->
@@ -148,10 +154,10 @@ Lemma reducible_equivalent_ite:
     open_reducible tvars gamma t1 T_bool ->
     satisfies (reducible_values theta) gamma l ->
     support theta = tvars ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) ((x, T_equal t1 ttrue) :: gamma) l ->
        equivalent (substitute t2 l) (substitute t l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) ((x, T_equal t1 tfalse) :: gamma) l ->
        equivalent (substitute t3 l) (substitute t l)) ->
     equivalent (ite (substitute t1 l) (substitute t2 l) (substitute t3 l)) (substitute t l).
@@ -165,7 +171,7 @@ Lemma reducible_equivalent_ite:
 Qed.
 
 Lemma reducible_equivalent_match:
-  forall tvars theta (gamma : context) (tn t0 ts t : term) n p l,
+  forall tvars theta (gamma : context) tn t0 ts t n p l,
     ~(p ∈ fv_context gamma) ->
     ~(p ∈ fv tn) ->
     ~(p ∈ fv ts) ->
@@ -179,10 +185,10 @@ Lemma reducible_equivalent_match:
     open_reducible tvars gamma tn T_nat ->
     valid_interpretation theta ->
     support theta = tvars ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) ((p, T_equal tn zero) :: gamma) l ->
        equivalent (substitute t0 l) (substitute t l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta)
                  ((p, T_equal tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma)
                  l ->
@@ -198,40 +204,40 @@ Proof.
 Qed.
 
 Lemma reducible_equivalent_rec:
-  forall tvars theta (gamma : context) (tn t0 ts t : term) T n p l,
+  forall tvars theta (gamma : context) tn t0 ts t n p l,
     ~(p ∈ fv_context gamma) ->
     ~(p ∈ fv tn) ->
     ~(p ∈ fv ts) ->
     ~(p ∈ fv t0) ->
     ~(p ∈ fv t) ->
-    ~(p ∈ fv T) ->
     ~(n ∈ fv_context gamma) ->
     ~(n ∈ fv ts) ->
     ~(n ∈ fv tn) ->
     ~(n ∈ fv t0) ->
     ~(n ∈ fv t) ->
-    ~(n ∈ fv T) ->
     ~(n = p) ->
     open_reducible tvars gamma tn T_nat ->
     valid_interpretation theta ->
     support theta = tvars ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta) ((p, T_equal tn zero) :: gamma) l ->
        equivalent (substitute t0 l) (substitute t l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta)
                  ((p, T_equal tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma) l ->
        equivalent
          (substitute
-            (open 0 (open 1 ts (fvar n term_var)) (lambda T_unit (rec T (fvar n term_var) t0 ts))) l)
+            (open 0
+                  (open 1 ts (fvar n term_var))
+                  (notype_lambda (notype_rec (fvar n term_var) t0 ts))) l)
          (substitute t l)) ->
     satisfies (reducible_values theta) gamma l ->
-    equivalent (rec (substitute T l) (substitute tn l) (substitute t0 l) (substitute ts l))
+    equivalent (notype_rec (substitute tn l) (substitute t0 l) (substitute ts l))
                (substitute t l).
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_rec; eauto; steps.
 
-  - unshelve epose proof (H15 ((p,trefl) :: l) _); tac1.
-  - unshelve epose proof (H16 ((p,trefl) :: (n,v') :: l) _); tac1.
+  - unshelve epose proof (H13 ((p,trefl) :: l) _); tac1.
+  - unshelve epose proof (H14 ((p,trefl) :: (n,v') :: l) _); tac1.
 Qed.

@@ -17,6 +17,8 @@ Require Import Termination.FVLemmasEval.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
@@ -25,15 +27,58 @@ Require Import Omega.
 
 Opaque reducible_values. (* workaround for rewriting speed *)
 
-Lemma reducible_val_fv_aux:
+Ltac destruct_tag :=
+  match goal with
+  | tag: fv_tag |- _ => destruct tag
+  end.
+
+Lemma reducible_erased_aux:
   forall n theta t T,
     size T < n ->
     valid_interpretation theta ->
     reducible_values theta t T ->
-    pfv t term_var = nil.
+    is_erased_term t.
 Proof.
   induction n; destruct T;
-    repeat step || t_listutils || simp reducible_values in *;
+    repeat step || t_listutils || simp reducible_values in * || destruct_tag || destruct_refinements;
+    eauto using in_valid_interpretation_erased with bfv;
+    eauto using is_nat_value_erased;
+    eauto with omega;
+    try solve [ eapply IHn; eauto; omega ];
+    try solve [ eapply IHn; eauto; repeat step || autorewrite with bsize in *; omega ].
+Qed.
+
+Lemma reducible_values_erased:
+  forall theta t T,
+    valid_interpretation theta ->
+    reducible_values theta t T ->
+    is_erased_term t.
+Proof.
+  eauto using reducible_erased_aux.
+Qed.
+
+Hint Resolve reducible_values_erased: berased.
+
+Lemma reducible_erased:
+  forall theta t T,
+    valid_interpretation theta ->
+    reducible theta t T ->
+    is_erased_term t.
+Proof.
+  unfold reducible, reduces_to; steps.
+Qed.
+
+Hint Resolve reducible_erased: berased.
+
+Lemma reducible_val_fv_aux:
+  forall n theta t T tag,
+    size T < n ->
+    valid_interpretation theta ->
+    reducible_values theta t T ->
+    pfv t tag = nil.
+Proof.
+  induction n; destruct T; destruct tag;
+    repeat step || t_listutils || simp reducible_values in * || destruct_tag || destruct_refinements;
     eauto using in_valid_interpretation_fv with bfv;
     eauto with omega;
     try solve [ eapply IHn; eauto; omega ];
@@ -41,10 +86,10 @@ Proof.
 Qed.
 
 Lemma reducible_val_fv:
-  forall theta t T,
+  forall theta t T tag,
     valid_interpretation theta ->
     reducible_values theta t T ->
-    pfv t term_var = nil.
+    pfv t tag = nil.
 Proof.
   eauto using reducible_val_fv_aux.
 Qed.
@@ -59,7 +104,7 @@ Lemma reducible_val_wf_aux:
     wf t 0.
 Proof.
   induction n; destruct T;
-    repeat step || t_listutils || simp reducible_values in *;
+    repeat step || t_listutils || simp reducible_values in * || destruct_tag || destruct_refinements;
     eauto using in_valid_interpretation_wf with bwf;
     eauto with omega;
     try solve [ eapply IHn; eauto; omega ];
@@ -85,7 +130,7 @@ Lemma red_is_val_aux:
     is_value v.
 Proof.
   unfold normalizing; induction n; destruct T;
-    repeat step || t_termlist || t_listutils || simp reducible_values in *;
+    repeat step || t_listutils || simp reducible_values in * || destruct_tag || destruct_refinements;
     eauto using in_valid_interpretation_value with values smallstep;
     eauto with omega;
     try solve [ eapply IHn; eauto; omega ];
@@ -94,7 +139,7 @@ Proof.
 Qed.
 
 Lemma red_is_val:
-  forall theta v T,
+  forall theta (v: tree) T,
     valid_interpretation theta ->
     reducible_values theta v T ->
     is_value v.
@@ -195,7 +240,8 @@ Proof.
   unfold reducible; unfold reduces_to;
     steps;
     eauto 2 with bwf;
-    eauto 2 with bfv.
+    eauto 2 with bfv;
+    eauto with berased.
 
   repeat match goal with
          | H: star small_step _ ?t |- _ => exists t
@@ -206,7 +252,8 @@ Proof.
            H2: small_step ?v ?t |- _ =>
               apply False_ind; apply evaluate_step with v t; eauto 4 with values
          | _ => step || t_deterministic_step
-         end; eauto using red_is_val.
+         end;
+    eauto using red_is_val.
 Qed.
 
 Lemma smallstep_reducible:
@@ -236,8 +283,10 @@ Lemma backstep_reducible_aux:
     valid_interpretation theta ->
     reducible theta t' T ->
     forall t,
-      fv t = nil ->
+      pfv t term_var = nil ->
+      pfv t type_var = nil ->
       wf t 0 ->
+      is_erased_term t ->
       small_step t t' ->
       reducible theta t T.
 Proof.
@@ -248,8 +297,10 @@ Lemma backstep_reducible:
   forall theta t t' T,
     valid_interpretation theta ->
     small_step t t' ->
-    fv t = nil ->
+    pfv t term_var = nil ->
+    pfv t type_var = nil ->
     wf t 0 ->
+    is_erased_term t ->
     reducible theta t' T ->
     reducible theta t T.
 Proof.
@@ -260,13 +311,15 @@ Lemma star_backstep_reducible:
   forall t t' theta,
     star small_step t t' ->
     valid_interpretation theta ->
-    fv t = nil ->
+    pfv t term_var = nil ->
+    pfv t type_var = nil ->
     wf t 0 ->
+    is_erased_term t ->
     forall T,
       reducible theta t' T ->
       reducible theta t T.
 Proof.
-  induction 1; steps; eauto using backstep_reducible with bfv bwf.
+  induction 1; steps; eauto 7 using backstep_reducible with bfv bwf berased.
 Qed.
 
 Hint Resolve smallstep_reducible: heavy_red.
@@ -339,9 +392,9 @@ Qed.
 Hint Resolve reducible_wf: bwf.
 
 Lemma reducible_fv:
-  forall theta t T, reducible theta t T -> fv t = nil.
+  forall theta t T tag, reducible theta t T -> pfv t tag = nil.
 Proof.
-  unfold reducible, reduces_to; steps.
+  destruct tag; unfold reducible, reduces_to; steps.
 Qed.
 
 Hint Resolve reducible_fv: bfv.
@@ -355,7 +408,8 @@ Proof.
   unfold reducible, reduces_to; steps;
     eauto with bwf;
     eauto with bfv;
-    eauto with smallstep.
+    eauto with smallstep;
+    eauto with berased.
 Qed.
 
 Ltac t_values_info3 :=
@@ -366,20 +420,24 @@ Ltac t_values_info3 :=
     unshelve epose proof (is_value_subst _ H l _); eauto 2 using reducible_values_list
   end.
 
+(*
 Lemma value_term_form:
-  forall v, is_value v -> term_form v.
+  forall (v: tree), is_value v -> is_erased_term v.
 Proof.
-  inversion 1; steps.
+  induction 1; steps.
 Qed.
+*)
 
-Lemma reducible_term_form:
+(*
+Lemma reducible_erased:
   forall theta v T,
     valid_interpretation theta ->
     reducible_values theta v T ->
-    term_form v.
+    is_erased_term v.
 Proof.
-  eauto using value_term_form, red_is_val.
+  eauto using red_is_val.
 Qed.
 
-Hint Resolve value_term_form: btf.
+(* Hint Resolve value_term_form: btf. *)
 Hint Resolve reducible_term_form: btf.
+*)

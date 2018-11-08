@@ -15,6 +15,11 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.Freshness.
 Require Import Termination.ListUtils.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
@@ -42,7 +47,7 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma equivalent_split_rec:
-  forall tvars theta (gamma1 gamma2 : context) (n t t' e1 e2 e : term) (x y v: nat) l T,
+  forall tvars theta (gamma1 gamma2 : context) n t t' e1 e2 e (x y v: nat) l,
     open_reducible tvars gamma2 n T_nat ->
     valid_interpretation theta ->
     support theta = tvars ->
@@ -50,7 +55,6 @@ Lemma equivalent_split_rec:
     (forall z, z ∈ support gamma1 -> z ∈ fv e2 -> False) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv e -> False) ->
     (forall z, z ∈ support gamma1 -> z ∈ fv n -> False) ->
-    (forall z, z ∈ support gamma1 -> z ∈ fv T -> False) ->
     ~(x ∈ fv_context gamma1) ->
     ~(x ∈ fv_context gamma2) ->
     ~(x ∈ fv t) ->
@@ -61,7 +65,6 @@ Lemma equivalent_split_rec:
     ~(y ∈ fv n) ->
     ~(y ∈ fv t) ->
     ~(y ∈ fv t') ->
-    ~(y ∈ fv T) ->
     ~(y ∈ fv_context gamma1) ->
     ~(y ∈ fv_context gamma2) ->
     ~(v ∈ fv e) ->
@@ -70,26 +73,25 @@ Lemma equivalent_split_rec:
     ~(v ∈ fv n) ->
     ~(v ∈ fv t) ->
     ~(v ∈ fv t') ->
-    ~(v ∈ fv T) ->
     ~(v ∈ fv_context gamma1) ->
     ~(v ∈ fv_context gamma2) ->
     NoDup (x :: y :: v :: nil) ->
     subset (fv n ++ fv e1 ++ fv e2) (support gamma2) ->
     subset (fv e) (support gamma2) ->
-    wf (rec T n e1 e2) 0 ->
-    (forall l : list (nat * term),
+    wf (notype_rec n e1 e2) 0 ->
+    (forall l,
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal n zero) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
-    (forall l : list (nat * term),
+    (forall l,
        satisfies (reducible_values theta)
                     (gamma1 ++
                             (x, T_equal
                                    (open 0 (open 1 e2 (term_fvar v))
-                                     (lambda T_unit (rec T (term_fvar v) e1 e2)))
+                                     (notype_lambda (notype_rec (term_fvar v) e1 e2)))
                                  e)
                             :: (y, T_equal n (succ (term_fvar v))) :: (v, T_nat) :: gamma2) l ->
           equivalent (substitute t l) (substitute t' l)) ->
-    satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (rec T n e1 e2) e) :: gamma2) l ->
+    satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (notype_rec n e1 e2) e) :: gamma2) l ->
     equivalent (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
@@ -99,12 +101,12 @@ Proof.
 
   destruct t'0; steps.
 
-  - unshelve epose proof (H33 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _);
+  - unshelve epose proof (H30 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _);
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
 
-  - unshelve epose proof (H34 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _);
-      clear H33; clear H34;
+  - unshelve epose proof (H31 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _);
+      clear H30; clear H31;
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
 Qed.

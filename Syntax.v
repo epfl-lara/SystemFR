@@ -1,69 +1,13 @@
-Require Import Termination.ListUtils.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
-Require Import Termination.Tactics.
-
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
 Require Import PeanoNat.
 
-Inductive fv_tag: Set := term_var | type_var.
-
-(* locally nameless representation *)
-Inductive term: Set :=
-  (* term or type variable *)
-  | fvar: nat -> fv_tag -> term
-
-  (* types *)
-  | T_nat: term
-  | T_unit: term
-  | T_bool: term
-  | T_arrow: term -> term -> term
-  | T_prod: term -> term -> term
-  | T_refine: term -> term -> term
-  | T_let: term -> term -> term -> term
-  | T_singleton: term -> term
-  | T_intersection: term -> term -> term
-  | T_union: term -> term -> term
-  | T_top: term
-  | T_bot: term
-  | T_equal: term -> term -> term
-  | T_forall: term -> term -> term
-  | T_exists: term -> term -> term
-
-  (* terms *)
-  | lvar: nat -> term
-  | err: term
-
-  | uu: term
-
-  | lambda: term -> term -> term
-  | app: term -> term -> term
-
-  | pp: term -> term -> term
-  | pi1: term -> term
-  | pi2: term -> term
-
-  | ttrue: term
-  | tfalse: term
-  | ite: term -> term -> term -> term
-
-  | zero: term
-  | succ: term -> term
-  | rec: term -> term -> term -> term -> term
-  | tmatch: term -> term -> term -> term
-
-  | tlet: term -> term -> term -> term
-
-  | trefl: term
-.
-
-Definition term_fvar s := fvar s term_var.
-Definition type_fvar s := fvar s type_var.
-
-Hint Unfold term_fvar.
-Hint Unfold type_fvar.
+Require Import Termination.ListUtils.
+Require Import Termination.AssocList.
+Require Import Termination.Tactics.
+Require Export Termination.Trees.
+Require Import Termination.Sets.
 
 Lemma tag_eq_dec:
   forall tag1 tag2: fv_tag, { tag1 = tag2 } + { tag1 <> tag2 }.
@@ -72,7 +16,7 @@ Proof.
   decide equality.
 Qed.
 
-Fixpoint pfv (t: term) tag: set nat :=
+Fixpoint pfv t tag: set nat :=
   match t with
   | fvar y tag' =>
     if (tag_eq_dec tag tag')
@@ -83,6 +27,7 @@ Fixpoint pfv (t: term) tag: set nat :=
 
   | uu => nil
 
+  | notype_lambda t' => pfv t' tag
   | lambda T t' => pfv T tag ++ pfv t' tag
   | app t1 t2 => pfv t1 tag ++ pfv t2 tag
 
@@ -96,9 +41,11 @@ Fixpoint pfv (t: term) tag: set nat :=
 
   | zero => nil
   | succ t' => pfv t' tag
+  | notype_rec t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
   | rec T t' t0 ts => pfv T tag ++ pfv t' tag ++ pfv t0 tag ++ pfv ts tag
   | tmatch t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
 
+  | notype_tlet t1 t2 => pfv t1 tag ++  pfv t2 tag
   | tlet t1 A t2 => pfv t1 tag ++ pfv A tag ++  pfv t2 tag
   | trefl => nil
 
@@ -127,7 +74,7 @@ Hint Unfold tfv.
 
 Definition tvar_list := list nat.
 
-Definition context: Type := list (nat * term).
+Definition context: Type := list (nat * tree).
 
 Fixpoint pfv_context gamma tag :=
   match gamma with
@@ -148,27 +95,27 @@ Qed.
 
 Hint Rewrite fv_context_append: blistutils.
 
-Fixpoint pfv_range (m: list (nat * term)) tag :=
+Fixpoint pfv_range (m: list (nat * tree)) tag :=
   match m with
   | nil => nil
   | (x,t) :: m' => pfv t tag ++ pfv_range m' tag
   end.
 
-Definition fv_range (m: list (nat * term)) := pfv_range m term_var.
+Definition fv_range (m: list (nat * tree)) := pfv_range m term_var.
 
 Hint Unfold fv_range.
 
-Fixpoint pclosed_mapping (m: list (nat * term)) tag: Prop :=
+Fixpoint pclosed_mapping (m: list (nat * tree)) tag: Prop :=
   match m with
   | nil => True
   | (x,t) :: m' => pfv t tag = nil /\ pclosed_mapping m' tag
   end.
 
-Definition closed_mapping (m: list (nat * term)): Prop := pclosed_mapping m term_var.
+Definition closed_mapping (m: list (nat * tree)): Prop := pclosed_mapping m term_var.
 
 Hint Unfold closed_mapping.
 
-Fixpoint psubstitute t (l: list (nat * term)) (tag: fv_tag): term :=
+Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   match t with
   | fvar x tag' =>
     match lookup Nat.eq_dec l x with
@@ -184,6 +131,7 @@ Fixpoint psubstitute t (l: list (nat * term)) (tag: fv_tag): term :=
 
   | uu => t
 
+  | notype_lambda t' => notype_lambda (psubstitute t' l tag)
   | lambda T t' => lambda (psubstitute T l tag) (psubstitute t' l tag)
   | app t1 t2 => app (psubstitute t1 l tag) (psubstitute t2 l tag)
 
@@ -197,11 +145,14 @@ Fixpoint psubstitute t (l: list (nat * term)) (tag: fv_tag): term :=
 
   | zero => t
   | succ t' => succ (psubstitute t' l tag)
+  | notype_rec t' t1 t2 =>
+      notype_rec (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
   | rec T t' t1 t2 =>
       rec (psubstitute T l tag) (psubstitute t' l tag)
           (psubstitute t1 l tag) (psubstitute t2 l tag)
   | tmatch t' t1 t2 => tmatch (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
 
+  | notype_tlet t1 t2 => notype_tlet (psubstitute t1 l tag) (psubstitute t2 l tag)
   | tlet t1 T t2 => tlet (psubstitute t1 l tag) (psubstitute T l tag) (psubstitute t2 l tag)
   | trefl => t
 
@@ -228,21 +179,22 @@ Definition substitute_type_vars t l := psubstitute t l type_var.
 Hint Unfold substitute.
 Hint Unfold substitute_type_vars.
 
-Fixpoint psubstitute_context (gamma: context) (l: list (nat * term)) tag: context :=
+Fixpoint psubstitute_context (gamma: context) (l: list (nat * tree)) tag: context :=
   match gamma with
   | nil => nil
   | (x,T) :: gamma' => (x, psubstitute T l tag) :: psubstitute_context gamma' l tag
   end.
 
-Definition substitute_context (gamma: context) (l: list (nat * term)): context :=
+Definition substitute_context (gamma: context) (l: list (nat * tree)): context :=
   psubstitute_context gamma l term_var.
 
-Fixpoint open (k: nat) (t rep: term) :=
+Fixpoint open (k: nat) (t rep: tree) :=
   match t with
   | fvar _ _ => t
   | lvar i => if (Nat.eq_dec k i) then rep else t
   | err => t
 
+  | notype_lambda t' => notype_lambda (open (S k) t' rep)
   | lambda T t' => lambda (open k T rep) (open (S k) t' rep)
   | app t1 t2 => app (open k t1 rep) (open k t2 rep)
 
@@ -258,21 +210,25 @@ Fixpoint open (k: nat) (t rep: term) :=
 
   | zero => t
   | succ t' => succ (open k t' rep)
+  | notype_rec t' t1 t2 =>
+      notype_rec (open k t' rep)
+                 (open k t1 rep)
+                 (open (S (S k)) t2 rep)
   | rec T t' t1 t2 =>
-    rec (open (S k) T rep)
-        (open k t' rep)
-        (open k t1 rep)
-        (open (S (S k)) t2 rep)
+      rec (open (S k) T rep)
+          (open k t' rep)
+          (open k t1 rep)
+          (open (S (S k)) t2 rep)
   | tmatch t' t1 t2 =>
-    tmatch
-        (open k t' rep)
-        (open k t1 rep)
-        (open (S k) t2 rep)
+      tmatch
+          (open k t' rep)
+          (open k t1 rep)
+          (open (S k) t2 rep)
 
+  | notype_tlet t1 t2 =>
+      notype_tlet (open k t1 rep) (open (S k) t2 rep)
   | tlet t1 T t2 =>
-    tlet (open k t1 rep)
-         (open k T rep)
-         (open (S k) t2 rep)
+      tlet (open k t1 rep) (open k T rep) (open (S k) t2 rep)
   | trefl => t
 
   | T_unit => t
@@ -300,6 +256,7 @@ Fixpoint wf t k :=
 
   | uu => True
 
+  | notype_lambda t' => wf t' (S k)
   | lambda T t' => wf T k /\ wf t' (S k)
   | app t1 t2 => wf t1 k /\ wf t2 k
 
@@ -313,6 +270,10 @@ Fixpoint wf t k :=
 
   | zero => True
   | succ t' => wf t' k
+  | notype_rec t' t1 t2 =>
+      wf t' k /\
+      wf t1 k /\
+      wf t2 (S (S k))
   | rec T t' t1 t2 =>
       wf T (S k) /\
       wf t' k /\
@@ -323,6 +284,7 @@ Fixpoint wf t k :=
       wf t1 k /\
       wf t2 (S k)
 
+  | notype_tlet t1 t2 => wf t1 k /\ wf t2 (S k)
   | tlet t1 T t2 => wf t1 k /\ wf T k /\ wf t2 (S k)
   | trefl => True
 
@@ -343,7 +305,7 @@ Fixpoint wf t k :=
   | T_exists T1 T2 => wf T1 k /\ wf T2 (S k)
   end.
 
-Fixpoint wfs (gamma: list (nat * term)) k :=
+Fixpoint wfs (gamma: list (nat * tree)) k :=
   match gamma with
   | nil => True
   | (x,A) :: gamma' => wf A k /\ wfs gamma' k
@@ -354,13 +316,16 @@ Ltac tequality :=
   | |- app _ _ = app _ _ => f_equal
   | |- pp _ _ = pp _ _ => f_equal
   | |- lambda _ _ = lambda _ _ => f_equal
+  | |- notype_lambda _ = notype_lambda _ => f_equal
   | |- pi1 _ = pi1 _ => f_equal
   | |- pi2 _ = pi2 _ => f_equal
   | |- succ _ = succ _ => f_equal
   | |- ite _ _ _ = ite _ _ _ => f_equal
   | |- rec _ _ _ _ = rec _ _ _ _ => f_equal
+  | |- notype_rec _ _ _ = notype_rec _ _ _ => f_equal
   | |- tmatch _ _ _ = tmatch _ _ _ => f_equal
   | |- tlet _ _ _ = tlet _ _ _ => f_equal
+  | |- notype_tlet _ _ = notype_tlet _ _ => f_equal
 
   | |- T_refine _ _ = T_refine _ _ => f_equal
   | |- T_prod _ _ = T_prod _ _ => f_equal
@@ -388,8 +353,12 @@ Proof.
   reflexivity.
 Qed.
 
-Fixpoint closed_terms (ltypes: list (nat * term)): Prop :=
+Fixpoint closed_terms (ltypes: list (nat * tree)): Prop :=
   match ltypes with
   | nil => True
-  | (_, t) :: ts => closed_terms ts /\ wf t 0 /\ fv t = nil
+  | (_, t) :: ts =>
+    closed_terms ts /\
+    wf t 0 /\
+    pfv t term_var = nil /\
+    pfv t type_var = nil
   end.

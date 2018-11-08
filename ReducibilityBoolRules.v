@@ -17,6 +17,9 @@ Require Import Termination.TermList.
 Require Import Termination.TypeList.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TypeErasure.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
@@ -68,8 +71,10 @@ Lemma reducible_ite:
   forall theta T t1 t2 t3,
     wf t2 0 ->
     wf t3 0 ->
-    fv t2 = nil ->
-    fv t3 = nil ->
+    pfv t2 term_var = nil ->
+    pfv t3 term_var = nil ->
+    is_erased_term t2 ->
+    is_erased_term t3 ->
     valid_interpretation theta ->
     reducible theta t1 T_bool ->
     (equivalent t1 ttrue -> reducible theta t2 T) ->
@@ -77,7 +82,10 @@ Lemma reducible_ite:
     reducible theta (ite t1 t2 t3) T.
 Proof.
   intros theta T t1 t2 t3 WF2 WF3 FV2 FV3 H0 H1 H2 H3.
-  unfold reducible, reduces_to in H1; repeat step || simp reducible_values in *.
+  match goal with
+  | H: reducible _ _ T_bool |- _ =>
+    unfold reducible, reduces_to in H
+  end; repeat step || simp reducible_values in *.
 
   - apply star_backstep_reducible with (ite ttrue t2 t3); repeat step || t_listutils;
       auto with bsteplemmas; eauto with bfv; eauto with bwf.
@@ -105,6 +113,8 @@ Lemma open_reducible_ite:
     ~(x ∈ fv T) ->
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ tvars) ->
+    is_erased_term t2 ->
+    is_erased_term t3 ->
     open_reducible tvars gamma t1 T_bool ->
     open_reducible tvars ((x, T_equal t1 ttrue) :: gamma) t2 T ->
     open_reducible tvars ((x, T_equal t1 tfalse) :: gamma) t3 T ->
@@ -114,8 +124,9 @@ Proof.
 
   unfold open_reducible in *; apply reducible_ite; repeat step || t_termlist;
     eauto with bwf;
-    eauto using subset_same with bfv.
+    eauto using subset_same with bfv;
+    eauto with berased.
 
-  - unshelve epose proof (H8 _ ((x,trefl) :: lterms) _ _ _); tac1.
-  - unshelve epose proof (H9 _ ((x,trefl) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H10 _ ((x,trefl) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H11 _ ((x,trefl) :: lterms) _ _ _); tac1.
 Qed.

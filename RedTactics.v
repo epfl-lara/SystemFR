@@ -9,6 +9,7 @@ Require Import Termination.TermListLemmas.
 Require Import Termination.AssocList.
 Require Import Termination.Parametricity.
 Require Import Termination.TypeErasure.
+Require Import Termination.FVLemmasLists.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
@@ -21,6 +22,7 @@ Ltac t_rewrite := repeat step || t_listutils || t_fv_open || finisher;
 Ltac tac1 :=
   repeat step || t_listutils || finisher || apply SatCons || simp_red ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
+         (rewrite fv_subst_different_tag by (steps; eauto with bfv)) ||
          (rewrite substitute_nothing2 in * by t_rewrite) ||
          (rewrite substitute_open3 in * by t_rewrite) ||
          (rewrite substitute_skip in * by t_rewrite) ||

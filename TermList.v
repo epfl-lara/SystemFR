@@ -11,16 +11,17 @@ Require Import Termination.SubstitutionLemmas.
 
 Open Scope list_scope.
 
-Inductive satisfies (P: term -> term -> Prop):
-  list (nat * term) -> (* gamma *)
-  list (nat * term) -> (* lterms *)
+Inductive satisfies (P: tree -> tree -> Prop):
+  list (nat * tree) -> (* gamma *)
+  list (nat * tree) -> (* lterms *)
   Prop :=
 | SatNil: satisfies P nil nil
 | SatCons:
     forall x t T gamma lterms,
       ~(x ∈ fv T) ->
       ~(x ∈ fv_context gamma) ->
-      fv t = nil ->
+      pfv t term_var = nil ->
+      pfv t type_var = nil ->
       wf t 0 ->
       P t (substitute T lterms) ->
       satisfies P gamma lterms ->
@@ -169,7 +170,7 @@ Proof.
   - exists nil, nil; steps.
   - exists nil, ((n,t) :: lterms);
       repeat step || t_termlist || apply SatCons || f_equal_cons;  eauto with btermlist.
-  - pose proof (IHgamma1 _ _ H11); steps.
+  - pose proof (IHgamma1 _ _ H12); steps.
     exists ((n,t) :: l1), l2; repeat step.
 Qed.
 

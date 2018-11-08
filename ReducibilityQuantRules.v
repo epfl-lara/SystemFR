@@ -17,6 +17,11 @@ Require Import Termination.SmallStep.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.StarInversions.
 Require Import Termination.TermForm.
+Require Import Termination.TypeErasure.
+Require Import Termination.TypeErasureLemmas.
+Require Import Termination.SubstitutionErase.
+Require Import Termination.TreeLists.
+Require Import Termination.TermListReducible.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
@@ -51,7 +56,7 @@ Proof.
     eauto using red_is_val.
 
   exists t'; repeat step || simp_red || t_deterministic_star || instantiate_any;
-    eauto using red_is_val; eauto with bwf bfv.
+    eauto using red_is_val; eauto with bwf bfv berased.
 Qed.
 
 Lemma open_reducible_forall:
@@ -73,12 +78,12 @@ Proof.
     eauto with bwf;
     eauto with bfv sets btermlist;
     eauto with values;
-    eauto with btf.
+    eauto with berased.
   unshelve epose proof (H7 theta ((x,u) :: lterms) _ _ _); tac1.
 Qed.
 
 Lemma open_reducible_exists_elim:
-  forall tvars (gamma : context) (p : term) U V (t : term) T u v,
+  forall tvars (gamma : context) p U V t T u v,
     ~(u ∈ fv_context gamma) ->
     ~(u ∈ fv t) ->
     ~(u ∈ fv U) ->
@@ -93,6 +98,7 @@ Lemma open_reducible_exists_elim:
     wf U 0 ->
     wf V 1 ->
     wf t 1 ->
+    is_erased_term t ->
     subset (fv U) (support gamma) ->
     subset (fv V) (support gamma) ->
     subset (fv t) (support gamma) ->
@@ -100,19 +106,25 @@ Lemma open_reducible_exists_elim:
     open_reducible tvars
                    ((v, open 0 V (term_fvar u)) :: (u, U) :: gamma)
                    (open 0 t (term_fvar v)) T ->
-    open_reducible tvars gamma (tlet p (T_exists U V) t) T.
+    open_reducible tvars gamma (notype_tlet p t) T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
   pose proof H5 as Copy.
   unfold reducible, reduces_to in H5.
-  repeat step || t_instantiate_sat3 || t_listutils || simp_red || t_deterministic_star || apply reducible_let_rule;
-    eauto with bwf; eauto with bfv.
+  repeat step || t_instantiate_sat3 || t_listutils || simp_red || t_deterministic_star ||
+         destruct_refinements || apply reducible_let_rule with
+             (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var));
+    eauto with bwf;
+    eauto with bfv;
+    eauto with berased.
 
-  unshelve epose proof (H17 theta ((v,v0) :: (u,a) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H18 theta ((v,v0) :: (u,a) :: lterms) _ _ _); tac1.
 Qed.
 
+Set Program Mode.
+
 Lemma reducible_subtype_forall:
-  forall tvars theta (gamma : context) (t : term) T1 T2 t0 l,
+  forall tvars theta (gamma : context) t T1 T2 t0 l,
     open_reducible tvars gamma t T1 ->
     valid_interpretation theta ->
     support theta = tvars ->
@@ -120,12 +132,14 @@ Lemma reducible_subtype_forall:
     reducible_values theta t0 (T_forall (substitute T1 l) (substitute T2 l)) ->
     reducible_values theta t0 (T_let (substitute t l) (substitute T1 l) (substitute T2 l)).
 Proof.
-  unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red;
-    eauto 9 using red_is_val with btf.
+  unfold open_reducible, reducible, reduces_to;
+    repeat step || t_instantiate_sat3 || simp_red.
+
+  unshelve exists t'; steps; eauto using red_is_val; eauto with berased.
 Qed.
 
 Lemma reducible_subtype_exists:
-  forall tvars theta (gamma : context) (t : term) T1 T2 t0 l,
+  forall tvars theta (gamma : context) t T1 T2 t0 l,
     open_reducible tvars gamma t T1 ->
     valid_interpretation theta ->
     support theta = tvars ->

@@ -27,19 +27,15 @@ Fixpoint size T: nat :=
   end.
 
 Lemma size_term_form:
-  forall t, term_form t -> size t = 0.
+  forall t, is_erased_term t -> size t = 0.
 Proof.
   destruct t; steps.
 Qed.
 
 Lemma size_opening:
-  forall T k rep, term_form rep -> size (open k T rep) = size T.
+  forall T k rep, is_erased_term rep -> size (open k T rep) = size T.
 Proof.
-  induction T;
-    repeat match goal with
-           | H: forall x, _ |- _ => rewrite H by auto
-           | _ => step
-           end;
+  induction T; repeat step || rewrite_any;
     eauto with omega;
     eauto using size_term_form.
 Qed.
