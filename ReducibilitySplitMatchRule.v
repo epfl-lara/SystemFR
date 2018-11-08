@@ -92,7 +92,7 @@ Proof.
            simp_red.
 
   destruct t'0; steps.
-  
+
   - unshelve epose proof (H29 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _);
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
