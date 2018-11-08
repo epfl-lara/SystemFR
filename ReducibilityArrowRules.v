@@ -46,14 +46,14 @@ Proof.
     eauto 2 with bfv;
     eauto 2 with bwf;
     eauto using red_is_val with smallstep.
-  eauto using reducible_let2, red_is_val.  
+  eauto using reducible_let2, red_is_val.
 Qed.
-  
+
 Lemma open_reducible_lambda:
   forall tvars gamma x t U V,
     wf U 0 ->
     wf t 1 ->
-    subset (fv_context gamma) (support gamma) -> 
+    subset (fv_context gamma) (support gamma) ->
     subset (fv U) (support gamma) ->
     subset (fv t) (support gamma) ->
     ~(x ∈ support gamma) ->
@@ -69,7 +69,7 @@ Proof.
     eauto with bwf;
     eauto with bfv sets btermlist;
     eauto 2 with btf.
-  
+
   - unshelve epose proof (H7 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
       eauto using reducible_let with btf.
 Qed.
@@ -89,8 +89,8 @@ Proof.
   exists t'1; repeat step || simp reducible_values in *;
     eauto using star_smallstep_trans with bsteplemmas values.
   exists t'; repeat step || simp reducible_values in *; eauto using red_is_val; eauto with btf.
-Qed.      
-  
+Qed.
+
 Lemma reducible_app2:
   forall theta e1 e2 U V,
     wf V 0 ->
