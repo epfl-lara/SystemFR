@@ -39,7 +39,7 @@ Inductive small_step: term -> term -> Prop :=
 | SPBetaProj2: forall v1 v2,
     is_value v1 ->
     is_value v2 ->
-    small_step (pi2 (pp v1 v2)) v2 
+    small_step (pi2 (pp v1 v2)) v2
 
 | SPBetaApp: forall T t v,
     is_value v ->
@@ -57,7 +57,7 @@ Inductive small_step: term -> term -> Prop :=
     small_step (ite ttrue t1 t2) t1
 | SPBetaIte2: forall t1 t2,
     small_step (ite tfalse t1 t2) t2
-      
+
 | SPBetaRec0: forall T t0 ts,
     small_step
       (rec T zero t0 ts)
@@ -220,10 +220,10 @@ Ltac t_nostep :=
   | H: small_step (lambda ?T ?e) ?t2 |- _ =>
     apply False_ind; apply evaluate_step3 with (lambda T e) t2 T e; auto with values
   | H1: is_value ?v1,
-    H2: is_value ?v2,    
+    H2: is_value ?v2,
     H3: small_step (pp ?v1 ?v2) ?t |- _ =>
-    apply False_ind; apply evaluate_step with (pp v1 v2) t; auto with values 
-  | H1: is_value ?v, 
+    apply False_ind; apply evaluate_step with (pp v1 v2) t; auto with values
+  | H1: is_value ?v,
     H3: small_step (succ ?v) ?t |- _ =>
     apply False_ind; apply evaluate_step with (succ v) t; auto with values
   end.
@@ -241,7 +241,7 @@ Proof.
   induction t1; inversion 1; inversion 1; repeat steps || tequality;
     eauto 3 with step_tactic values smallstep.
 Qed.
-        
+
 Ltac t_deterministic_step :=
   match goal with
   | H1: small_step ?t1 ?t2,
