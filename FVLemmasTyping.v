@@ -44,14 +44,6 @@ Proof.
   unfold subset; repeat step || slow_instantiations; eauto 2 with bfv.
 Qed.
 
-Lemma subset_open_type:
-  forall T rep k S,
-    subset (fv (open k T rep)) S ->
-    subset (fv T) S.
-Proof.
-  unfold subset; repeat step || slow_instantiations; eauto 2 with bfv.
-Qed.
-
 Lemma in_middle:
   forall A (x: A) (s1 s2: list A),
     x ∈ s1 ++ x :: s2.
@@ -261,6 +253,7 @@ Proof.
   apply mut_HT_IT_IC_IS_AE;
     repeat match goal with
     | _ => t_subset_open 
+    | _ => step
     | _ => solve [ apply subset_left; eauto 2 with b_sub_open; eauto 2 with bfv ]
     | _ => solve [ eauto 2 with b_sub_open ]
     | _ => solve [ eauto 2 with sets ]
@@ -271,10 +264,10 @@ Proof.
     | _ => solve [ eauto 2 using subset_middle5 ]
     | _ => solve [ eauto 2 using subset_middle6 ]
     | _ => solve [ eauto 2 using subset_middle7 ]
-    | _ => step
     | _ => progress rewrite subset_add
     | _ => progress rewrite <- subset_union3 in *
     | _ => progress rewrite supportAppend, fv_context_append in *
+    | _ => solve [ eapply subset_transitive; eauto using fv_open; repeat step || t_sets ]
     end.
 Qed.
 
