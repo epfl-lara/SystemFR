@@ -12,7 +12,7 @@ Require Import PeanoNat.
 Inductive term: Set :=
   (* term or type variable *)
   | fvar: nat -> term
-              
+
   (* types *)
   | T_var: nat -> term
   | T_nat: term
@@ -36,7 +36,7 @@ Inductive term: Set :=
   | err: term
 
   | uu: term
-           
+
   | lambda: term -> term -> term
   | app: term -> term -> term
 
@@ -44,12 +44,12 @@ Inductive term: Set :=
   | pi1: term -> term
   | pi2: term -> term
 
-  | ttrue: term             
+  | ttrue: term
   | tfalse: term
   | ite: term -> term -> term -> term
 
   | zero: term
-  | succ: term -> term 
+  | succ: term -> term
   | rec: term -> term -> term -> term -> term
   | tmatch: term -> term -> term -> term
 
@@ -66,10 +66,10 @@ Fixpoint fv (t: term): set nat :=
   | err => empty
 
   | uu => empty
-            
+
   | lambda T t' => fv T ++ fv t'
   | app t1 t2 => fv t1 ++ fv t2
-                    
+
   | pp t1 t2 => fv t1 ++ fv t2
   | pi1 t' => fv t'
   | pi2 t' => fv t'
@@ -119,7 +119,7 @@ Lemma fv_context_append:
 Proof.
   induction gamma1; repeat step || rewrite app_assoc_reverse.
 Qed.
-  
+
 Hint Rewrite fv_context_append: blistutils.
 
 Fixpoint fv_range (m: list (nat * term)) :=
@@ -149,10 +149,10 @@ Fixpoint substitute t (l: list (nat * term)): term :=
   | err => t
 
   | uu => t
-            
+
   | lambda T t' => lambda (substitute T l) (substitute t' l)
   | app t1 t2 => app (substitute t1 l) (substitute t2 l)
-                     
+
   | pp t1 t2 => pp (substitute t1 l) (substitute t2 l)
   | pi1 t' => pi1 (substitute t' l)
   | pi2 t' => pi2 (substitute t' l)
@@ -168,7 +168,7 @@ Fixpoint substitute t (l: list (nat * term)): term :=
 
   | tlet t1 T t2 => tlet (substitute t1 l) (substitute T l) (substitute t2 l)
   | trefl => t
-              
+
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -202,7 +202,7 @@ Fixpoint open (k: nat) (t rep: term) :=
   | app t1 t2 => app (open k t1 rep) (open k t2 rep)
 
   | uu => t
-                    
+
   | pp t1 t2 => pp (open k t1 rep) (open k t2 rep)
   | pi1 t => pi1 (open k t rep)
   | pi2 t => pi2 (open k t rep)
@@ -229,7 +229,7 @@ Fixpoint open (k: nat) (t rep: term) :=
          (open k T rep)
          (open (S k) t2 rep)
   | trefl => t
-              
+
   | T_var _ => t
   | T_unit => t
   | T_bool => t
@@ -255,14 +255,14 @@ Fixpoint wf t k :=
   | err => True
 
   | uu => True
-            
+
   | lambda T t' => wf T k /\ wf t' (S k)
   | app t1 t2 => wf t1 k /\ wf t2 k
 
   | pp t1 t2 => wf t1 k /\ wf t2 k
   | pi1 t => wf t k
   | pi2 t => wf t k
-                     
+
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => wf t1 k /\ wf t2 k /\ wf t3 k
@@ -318,7 +318,7 @@ Ltac tequality :=
   | |- rec _ _ _ _ = rec _ _ _ _ => f_equal
   | |- tmatch _ _ _ = tmatch _ _ _ => f_equal
   | |- tlet _ _ _ = tlet _ _ _ => f_equal
-                                  
+
   | |- T_refine _ _ = T_refine _ _ => f_equal
   | |- T_prod _ _ = T_prod _ _ => f_equal
   | |- T_arrow _ _ = T_arrow _ _ => f_equal
