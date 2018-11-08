@@ -25,7 +25,7 @@ Lemma equivalence_def2:
 Proof.
   unfold equivalent; steps; eauto.
 Qed.
-  
+
 Lemma not_equivalent:
   equivalent tfalse ttrue -> False.
 Proof.

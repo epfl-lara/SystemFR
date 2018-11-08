@@ -40,7 +40,7 @@ Lemma fv_lookup:
     subset (fv T) (fv_context gamma).
 Proof.
   induction gamma;
-    try solve [ repeat step || unfold subset in * || t_listutils; eauto ].
+    repeat step || unfold subset in * || t_listutils; eauto.
 Qed.
 
 Lemma fv_lookup2:
