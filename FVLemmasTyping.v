@@ -44,6 +44,16 @@ Proof.
   unfold subset; repeat step || slow_instantiations; eauto 2 with bfv.
 Qed.
 
+Lemma subset_open2:
+  forall t rep k S,
+    subset (fv t) S ->
+    subset (fv rep) S ->
+    subset (fv (open k t rep)) S.
+Proof.
+  unfold subset; repeat step.
+  apply fv_open2 in H1; repeat step || t_listutils.
+Qed.
+
 Lemma in_middle:
   forall A (x: A) (s1 s2: list A),
     x ∈ s1 ++ x :: s2.
