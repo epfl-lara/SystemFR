@@ -77,7 +77,7 @@ Lemma reducible_ite:
 Proof.
   intros theta T t1 t2 t3 WF2 WF3 FV2 FV3 H0 H1 H2 H3.
   unfold reducible, reduces_to in H1; repeat step || simp reducible_values in *.
-    
+
   - apply star_backstep_reducible with (ite ttrue t2 t3); repeat step || t_listutils;
       auto with bsteplemmas; eauto with bfv; eauto with bwf.
     eapply backstep_reducible; repeat step || t_listutils;
@@ -91,7 +91,7 @@ Proof.
       eauto 2 with smallstep;
       eauto with bfv;
       eauto with bwf;
-      eauto with b_equiv.   
+      eauto with b_equiv.
 Qed.
 
 Lemma open_reducible_ite:
@@ -116,5 +116,5 @@ Proof.
     eauto using subset_same with bfv.
 
   - unshelve epose proof (H8 _ ((x,trefl) :: lterms) _ _ _); tac1.
-  - unshelve epose proof (H9 _ ((x,trefl) :: lterms) _ _ _); tac1. 
+  - unshelve epose proof (H9 _ ((x,trefl) :: lterms) _ _ _); tac1.
 Qed.
