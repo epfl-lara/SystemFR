@@ -103,7 +103,7 @@ Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3;
     eauto 6 using reducible_equal with bwf bfv.
 Qed.
-  
+
 Lemma open_reducible_refl:
   forall tvars (gamma : context) (t1 t2 : term),
     (forall (l : list (nat * term)) theta,
@@ -116,6 +116,6 @@ Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_termlist || simp_red || eexists;
     eauto with smallstep;
-    eauto using equivalence_def; 
+    eauto using equivalence_def;
     eauto using equivalence_def2.
 Qed.
