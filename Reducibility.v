@@ -134,7 +134,7 @@ Theorem reducibility_lemma:
        satisfies (reducible_values theta) gamma l ->
        support theta = tvars ->
        equivalent (substitute t1 l) (substitute t2 l))
-  ).        
+  ).
 Proof.
   apply mut_HT_IT_IC_IS_AE; steps.
 
