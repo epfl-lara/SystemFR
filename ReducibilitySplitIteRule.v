@@ -76,10 +76,9 @@ Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_listutils || t_sat_cut || t_instantiate_sat3 || t_termlist || step_inversion satisfies ||
            simp_red.
-  
+
     - unshelve epose proof (H24 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _); tac1;
         eauto 2 using satisfies_drop.
     - unshelve epose proof (H25 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _); tac1;
         eauto 2 using satisfies_drop.
 Qed.
-
