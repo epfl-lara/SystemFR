@@ -50,7 +50,6 @@ Require Import Termination.WFLemmasTyping.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasTyping.
 Require Import Termination.FVLemmasTyping2.
-Require Import Termination.FVLemmasOpen.
 Require Import Termination.FVLemmasContext.
 
 Opaque reducible_values.
