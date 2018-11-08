@@ -106,7 +106,7 @@ Lemma reducible_values_pi2:
     valid_interpretation theta ->
     reducible_values theta t (T_prod U V) ->
     reducible theta (pi2 t) (T_let (pi1 t) U V).
-Proof.  
+Proof.
   repeat step || t_values_info2 || simp reducible_values in *.
   eapply backstep_reducible; repeat step || t_listutils || simp reducible_values in *;
     eauto with smallstep;
@@ -115,7 +115,7 @@ Proof.
 
   apply reducible_let_backstep_expr with a;
     eauto with smallstep.
-  
+
   apply reducible_let; eauto using reducible_value_expr.
 Qed.
 
