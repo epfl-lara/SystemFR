@@ -34,7 +34,7 @@ Ltac t_context_right :=
 Lemma is_context_fv:
   forall tvars gamma1 gamma2 x T z,
     is_context tvars (gamma1 ++ (x,T) :: gamma2) ->
-    z ∈ fv T ->
+    z ∈ pfv T term_var ->
     z ∈ support gamma2.
 Proof.
   induction gamma1;
@@ -46,7 +46,7 @@ Lemma is_context_fv2:
   forall tvars gamma1 gamma2 x T z,
     is_context tvars (gamma1 ++ (x,T) :: gamma2) ->
     z ∈ support gamma1 ->
-    z ∈ fv T ->
+    z ∈ pfv T term_var ->
     False.
 Proof.
   induction gamma1 as [ | g gs ];

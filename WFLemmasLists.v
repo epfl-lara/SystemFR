@@ -25,11 +25,11 @@ Qed.
 Hint Resolve satisfies_wfs_1: bwf.
 
 Lemma closed_types_wfs:
-  forall ltypes,
-    closed_types ltypes ->
-    wfs ltypes 0.
+  forall l,
+    closed_terms l ->
+    wfs l 0.
 Proof.
-  induction ltypes; steps.
+  induction l; steps; eauto with bwf.
 Qed.
 
 Hint Resolve closed_types_wfs: bwf.

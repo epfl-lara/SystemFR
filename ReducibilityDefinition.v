@@ -47,13 +47,13 @@ Lemma nat_value_to_nat_fun:
 Proof.
   induction v; steps.
 Qed.
-  
+
 Definition lt_index (i1 i2: option term) :=
   (exists n, i1 = Some n /\ i2 = None) \/
   (exists n1 n2 v1 v2 (p1: is_nat_value v1) (p2: is_nat_value v2),
      i1 = Some n1 /\
      i2 = Some n2 /\
-     star small_step n1 v1 /\ 
+     star small_step n1 v1 /\
      star small_step n2 v2 /\
      nat_value_to_nat v1 p1 < nat_value_to_nat v2 p2)
 .
@@ -87,14 +87,14 @@ Lemma acc_ind_none:
 Proof.
   apply Acc_intro; repeat step || tlu; eauto using acc_ind_some.
 Qed.
-    
+
 Lemma wf_lt_index: well_founded lt_index.
 Proof.
   unfold well_founded.
   destruct a; repeat step; eauto using acc_ind_some, acc_ind_none.
 Qed.
 
-Instance wellfounded_lt_index : 
+Instance wellfounded_lt_index :
   WellFounded lt_index := wf_lt_index.
 
 Notation "p1 '<<' p2" := (lexprod nat (option term) lt lt_index p1 p2) (at level 80).
@@ -113,18 +113,21 @@ Definition interpretation: Type := list (nat * (term -> Prop)).
 Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): Prop :=
   reducible_values theta v T by rec (size T, index T) (lexprod _ _ lt lt_index) :=
 
-  reducible_values theta v (fvar X) :=
-    match lookup Nat.eq_dec theta X with
-    | None => False
-    | Some P => P v
-    end;
-                 
+  reducible_values theta v (fvar X tag) :=
+    if (tag_eq_dec tag type_var)
+    then
+      match lookup Nat.eq_dec theta X with
+      | None => False
+      | Some P => P v
+      end
+    else False;
+
   reducible_values theta v T_unit := v = uu;
-                                 
+
   reducible_values theta v T_bool := v = ttrue \/ v = tfalse;
 
-  reducible_values theta v T_nat := is_nat_value v; 
-    
+  reducible_values theta v T_nat := is_nat_value v;
+
   reducible_values theta v (T_arrow A B) :=
     is_value v /\
     fv v = nil /\
@@ -155,11 +158,11 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
     fv v = nil /\
     wf v 0 /\
     star small_step t v;
-         
+
   reducible_values theta v (T_intersection A B) :=
     reducible_values theta v A /\
     reducible_values theta v B;
-         
+
   reducible_values theta v (T_union A B) :=
     reducible_values theta v A \/
     reducible_values theta v B;
@@ -181,11 +184,12 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
 
   reducible_values theta v (T_exists A B) :=
     exists a (p: term_form a), reducible_values theta a A /\ reducible_values theta v (open 0 B a);
-        
+
   reducible_values theta v T := False
 .
-                             
+
 Solve Obligations with (repeat step || autorewrite with bsize; eauto using left_lex with omega).
+Fail Next Obligation.
 
 Definition reducible (theta: interpretation) (t: term) (T: term): Prop :=
   reduces_to (fun t => reducible_values theta t T) t.
@@ -207,7 +211,7 @@ Lemma in_valid_interpretation_fv: forall theta v X P,
   valid_interpretation theta ->
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
-  fv v = nil.
+  pfv v term_var = nil.
 Proof.
   induction theta; repeat step || eauto || apply_any.
 Qed.
@@ -243,7 +247,7 @@ Lemma obvious_reducible:
     reducible theta t T ->
     exists t',
       star small_step t t' /\
-      reducible_values theta t' T. 
+      reducible_values theta t' T.
 Proof.
   unfold reducible, reduces_to; steps.
 Qed.
@@ -282,8 +286,7 @@ Ltac simp_red :=
     rewrite reducible_values_equation_30 in * ||
     rewrite reducible_values_equation_31 in * ||
     rewrite reducible_values_equation_32 in * ||
-    rewrite reducible_values_equation_33 in * ||
-    rewrite reducible_values_equation_34 in *
+    rewrite reducible_values_equation_33 in *
   ).
 
 Ltac top_level_unfold :=

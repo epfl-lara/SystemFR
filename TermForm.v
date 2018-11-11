@@ -3,23 +3,24 @@ Require Import Termination.Syntax.
 
 Fixpoint term_form t :=
   match t with
-  | fvar y => True
+  | fvar y term_var => True
+  | fvar y type_var => False
   | lvar i => True
   | err => True
 
   | uu => True
-            
+
   | lambda T t' => True
   | app t1 t2 => True
 
   | pp t1 t2 => True
   | pi1 t => True
   | pi2 t => True
-                     
+
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => True
-                     
+
   | zero => True
   | succ t' => True
   | rec T t' t1 t2 => True
@@ -28,7 +29,6 @@ Fixpoint term_form t :=
   | tlet _ _ _ => True
   | trefl => True
 
-  | T_var _ => False
   | T_unit => False
   | T_bool => False
   | T_nat => False

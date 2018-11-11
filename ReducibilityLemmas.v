@@ -22,13 +22,13 @@ Require Import Termination.ReducibilityDefinition.
 Require Import Omega.
 
 Opaque reducible_values. (* workaround for rewriting speed *)
-    
+
 Lemma reducible_val_fv_aux:
   forall n theta t T,
     size T < n ->
     valid_interpretation theta ->
     reducible_values theta t T ->
-    fv t = nil.
+    pfv t term_var = nil.
 Proof.
   induction n; destruct T;
     repeat step || t_listutils || simp reducible_values in *;
@@ -42,7 +42,7 @@ Lemma reducible_val_fv:
   forall theta t T,
     valid_interpretation theta ->
     reducible_values theta t T ->
-    fv t = nil.
+    pfv t term_var = nil.
 Proof.
   eauto using reducible_val_fv_aux.
 Qed.
@@ -110,7 +110,7 @@ Lemma red_irred:
 Proof.
   eauto using red_is_val, value_irred.
 Qed.
-  
+
 Lemma reducible_normalizing:
   forall theta e T,
     valid_interpretation theta ->
@@ -119,7 +119,7 @@ Lemma reducible_normalizing:
 Proof.
   unfold reducible, reduces_to, normalizing; destruct T; steps; eauto using red_is_val.
 Qed.
-  
+
 Ltac t_transport2 :=
   match goal with
   | H: reducible ?t ?T |- _ =>
@@ -205,7 +205,7 @@ Proof.
               apply False_ind; apply evaluate_step with v t; eauto 4 with values
          | _ => step || t_deterministic_step
          end; eauto using red_is_val.
-Qed.  
+Qed.
 
 Lemma smallstep_reducible:
   forall theta t t' T,
@@ -214,8 +214,8 @@ Lemma smallstep_reducible:
     reducible theta t T ->
     reducible theta t' T.
 Proof.
-  eauto using smallstep_reducible_aux. 
-Qed.  
+  eauto using smallstep_reducible_aux.
+Qed.
 
 Lemma star_smallstep_reducible:
   forall t t',
@@ -226,7 +226,7 @@ Lemma star_smallstep_reducible:
       reducible theta t' T.
 Proof.
   induction 1; steps; eauto using smallstep_reducible.
-Qed.  
+Qed.
 
 Lemma backstep_reducible_aux:
   forall n theta t' T,
@@ -239,20 +239,20 @@ Lemma backstep_reducible_aux:
       small_step t t' ->
       reducible theta t T.
 Proof.
-  unfold reducible; unfold reduces_to; steps; eauto with smallstep.  
-Qed.  
+  unfold reducible; unfold reduces_to; steps; eauto with smallstep.
+Qed.
 
 Lemma backstep_reducible:
   forall theta t t' T,
     valid_interpretation theta ->
     small_step t t' ->
     fv t = nil ->
-    wf t 0 -> 
+    wf t 0 ->
     reducible theta t' T ->
     reducible theta t T.
 Proof.
-  eauto using backstep_reducible_aux. 
-Qed.  
+  eauto using backstep_reducible_aux.
+Qed.
 
 Lemma star_backstep_reducible:
   forall t t' theta,
@@ -278,7 +278,7 @@ Lemma reducible_values_exprs:
     (forall t, reducible_values theta t T -> reducible_values theta t T') ->
     reducible theta t T ->
     reducible theta t T'.
-Proof.  
+Proof.
   unfold reducible, reduces_to; steps; eauto.
 Qed.
 
@@ -359,7 +359,7 @@ Qed.
 Ltac t_values_info3 :=
   match goal with
   | H: is_value ?v, H2: satisfies _ _ ?l |- _ =>
-    is_var v; 
+    is_var v;
     poseNew (Mark (v,l) "is_value_subst");
     unshelve epose proof (is_value_subst _ H l _); eauto 2 using reducible_values_list
   end.

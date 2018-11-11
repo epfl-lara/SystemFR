@@ -166,8 +166,8 @@ Lemma reducible_subtype_let_left:
     valid_interpretation theta ->
     support theta = tvars ->
     (forall (v : term) (l : list (nat * term)),
-       satisfies (reducible_values theta) ((p, T_equal (fvar x) t) :: (x, A) :: gamma) l ->
-       reducible_values theta v (substitute (open 0 B (fvar x)) l) ->
+       satisfies (reducible_values theta) ((p, T_equal (term_fvar x) t) :: (x, A) :: gamma) l ->
+       reducible_values theta v (substitute (open 0 B (term_fvar x)) l) ->
        reducible_values theta v (substitute T l)) ->
     satisfies (reducible_values theta) gamma l ->
     reducible_values theta v (T_let (substitute t l) (substitute A l) (substitute B l)) ->
@@ -186,7 +186,7 @@ Lemma reducible_subtype_let_open:
     reducible_values theta t (T_let (substitute v l) (substitute A l) (substitute B l)) ->
     reducible_values theta t (substitute (open 0 B v) l).
 Proof.
-  intros.
+  steps.
   rewrite substitute_open; eauto with bwf.
   eapply reducible_val_let2; eauto using is_value_subst, reducible_values_list.
 Qed.
@@ -202,7 +202,7 @@ Lemma reducible_subtype_let_open2:
       reducible_values theta t (substitute (open 0 B v) l) ->
       reducible_values theta t (T_let (substitute v l) (substitute A l) (substitute B l)).
 Proof.
-  intros.
+  steps.
   unfold open_reducible in *; rewrite substitute_open in *; steps; eauto with bwf.
   eapply reducible_val_let;
     eauto using is_value_subst, reducible_values_list, reducible_expr_value;

@@ -59,7 +59,7 @@ Lemma open_reducible_lambda:
     ~(x ∈ support gamma) ->
     ~(x ∈ fv t) ->
     ~(x ∈ fv V) ->
-    open_reducible tvars ((x, U) :: gamma) (open 0 t (fvar x)) (open 0 V (fvar x)) ->
+    open_reducible tvars ((x, U) :: gamma) (open 0 t (term_fvar x)) (open 0 V (term_fvar x)) ->
     open_reducible tvars gamma (lambda U t) (T_arrow U V).
 Proof.
   unfold open_reducible in *; steps.

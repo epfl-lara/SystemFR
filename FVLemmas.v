@@ -25,9 +25,9 @@ Ltac slow_instantiations :=
   end.
 
 Lemma fv_context_support:
-  forall gamma x,
+  forall gamma x tag,
    x ∈ support gamma ->
-   x ∈ fv_context gamma.
+   x ∈ pfv_context gamma tag.
 Proof.
   induction gamma; repeat step || t_listutils.
 Qed.
@@ -35,36 +35,36 @@ Qed.
 Hint Resolve fv_context_support: bfv.
 
 Lemma fv_lookup:
-  forall gamma x T,
+  forall gamma x T tag,
     lookup Nat.eq_dec gamma x = Some T ->
-    subset (fv T) (fv_context gamma).
+    subset (pfv T tag) (pfv_context gamma tag).
 Proof.
   induction gamma;
     repeat step || unfold subset in * || t_listutils; eauto.
 Qed.
 
 Lemma fv_lookup2:
-  forall gamma x T y,
+  forall gamma x T y tag,
     lookup Nat.eq_dec gamma x = Some T ->
-    y ∈ fv T ->
-    y ∈ fv_context gamma.
+    y ∈ pfv T tag ->
+    y ∈ pfv_context gamma tag.
 Proof.
   induction gamma; repeat step || t_sets || unfold subset in * || t_listutils; eauto.
 Qed.
 
 Lemma fv_lookup3:
-  forall gamma x T,
+  forall gamma x T tag,
     lookup Nat.eq_dec gamma x = Some T ->
-    x ∈ fv_context gamma.
+    x ∈ pfv_context gamma tag.
 Proof.
   induction gamma; repeat step || t_listutils; eauto.
 Qed.
 
 Lemma fv_lookup4:
-  forall l x T y,
+  forall l x T y tag,
     lookup Nat.eq_dec l x = Some T ->
-    y ∈ fv T ->
-    y ∈ fv_range l.
+    y ∈ pfv T tag ->
+    y ∈ pfv_range l tag.
 Proof.
   induction l; repeat step || t_sets || unfold subset in * || t_listutils; eauto.
 Qed.
@@ -75,9 +75,9 @@ Hint Resolve fv_lookup3: bfv.
 Hint Resolve fv_lookup4: bfv.
 
 Lemma fv_in_open:
-  forall t x r k,
-    x ∈ fv t ->
-    x ∈ fv (open k t r).
+  forall t x r k tag,
+    x ∈ pfv t tag ->
+    x ∈ pfv (open k t r) tag.
 Proof.
   induction t; repeat step || t_listutils.
 Qed.
@@ -85,8 +85,8 @@ Qed.
 Hint Resolve fv_in_open: bfv.
 
 Lemma fv_open:
-  forall t rep k,
-    subset (fv (open k t rep)) (fv t ++ fv rep).
+  forall t rep k tag,
+    subset (pfv (open k t rep) tag) (pfv t tag ++ pfv rep tag).
 Proof.
   induction t;
     repeat match goal with
@@ -98,9 +98,9 @@ Proof.
 Qed.
 
 Lemma fv_open2:
-  (forall t rep k y,
-     y ∈ fv (open k t rep) ->
-     y ∈ fv t ++ fv rep).
+  (forall t rep k y tag,
+     y ∈ pfv (open k t rep) tag ->
+     y ∈ pfv t tag ++ pfv rep tag).
 Proof.
   induction t;
     repeat match goal with
@@ -110,31 +110,35 @@ Proof.
            end.
 Qed.
 
+Ltac t_fv_open :=
+  match goal with
+  | H: _ ∈ pfv (open _ _ _) _  |- _ => apply fv_open2 in H
+  end.
+
 Lemma fv_nils_open:
-  forall t rep k,
-    fv t = nil ->
-    fv rep = nil ->
-    fv (open k t rep) = nil.
+  forall t rep k tag,
+    pfv t tag = nil ->
+    pfv rep tag = nil ->
+    pfv (open k t rep) tag = nil.
 Proof.
   intros;
   rewrite <- (empty_list_rewrite nat) in *;
     repeat match goal with
-           | H: ?x ∈ fv (open _ _ _) |- _ =>
-               poseNew (Mark H "fv_open2");
-               pose proof (fv_open2 _ _ _ _ H) 
-           | _ => step || t_listutils
+           | _ => step || t_listutils || t_fv_open
            end; eauto.
 Qed.
 
 Hint Resolve fv_nils_open: bfv.
-  
-  
+
+
 Lemma fv_subst:
-  forall t x rep, subset (fv (substitute t ((x,rep) :: nil))) (((fv t) - x) ++ fv rep).
+  forall t x rep tag,
+    subset (pfv (psubstitute t ((x,rep) :: nil) tag) tag)
+           (((pfv t tag) - x) ++ pfv rep tag).
 Proof.
   induction t;
     repeat match goal with
-           | H: forall x, _, H2: _ |- _ => apply H in H2 
+           | H: forall x, _, H2: _ |- _ => apply H in H2
            | _ => step || t_listutils || unfold subset in *
            end; eauto with sets.
 Qed.
@@ -142,13 +146,15 @@ Qed.
 Hint Resolve fv_subst: bfv.
 
 Lemma fv_subst2:
-  forall t l,
-    subset (fv      (substitute t l))      (((fv t) -- (support l)) ++ fv_range l).
+  forall t l tag,
+    subset (pfv (psubstitute t l tag) tag)
+           (((pfv t tag) -- (support l)) ++ pfv_range l tag).
 Proof.
   induction t;
     repeat match goal with
-           | H: forall x, _, H2: _ |- _ => apply H in H2 
-           | _ => step || t_listutils || unfold subset in *
+           | _ => progress (step || t_listutils || unfold subset in *)
+           | H: forall x, _, H2: _ |- _ =>
+              apply H in H2
            end;
     eauto with sets;
     eauto with bfv.
@@ -157,45 +163,44 @@ Qed.
 Hint Resolve fv_subst2: bfv.
 
 Lemma fv_subst3:
-  forall t x rep y,
+  forall t x rep y tag,
     y <> x ->
-    y ∈ fv t ->
-    y ∈ fv (substitute t ((x,rep) :: nil)).
+    y ∈ pfv t tag ->
+    y ∈ pfv (substitute t ((x,rep) :: nil)) tag.
 Proof.
   induction t;
     repeat match goal with
-    | H: forall x, _, H2: _ |- _ => apply H in H2 
-    | H: forall x rep z, z ∈ ?F ?t - x -> _,
-      H2: ?z ∈ ?F ?t,
-      H3: ?z = ?y -> False
-      |- context[(?y,?rep)] =>
-         poseNew (Mark (H,z,y,rep) "instance");
-         unshelve epose proof (H y rep z _)
+    | H1: forall a b c d, _,
+      H2: ?z ∈ pfv ?t ?tag |- _ =>
+       solve [ eapply H1 in H2; steps; eauto ]
     | _ => step || t_listutils || unfold subset in *
-    end.  
+    end.
 Qed.
 
 Hint Resolve fv_subst3: bfv.
 
+(*
 Lemma fv_subst3_context:
-  forall gamma x rep y,
-    y <> x ->    
-    y ∈ fv_context gamma ->
-    y ∈ fv_context (substitute_context gamma ((x,rep) :: nil)).
+  forall gamma x rep y tag,
+    y <> x ->
+    y ∈ pfv_context gamma tag ->
+    y ∈ pfv_context (psubstitute_context gamma ((x,rep) :: nil) tag) tag.
 Proof.
   induction gamma;
     repeat match goal with
            | _ => step || t_listutils || unfold subset in *
            end; eauto with bfv.
-Qed.  
+  right. right. apply IHgamma; eauto with bfv.
+Qed.
 
 Hint Resolve fv_subst3_context: bfv.
+*)
 
 Lemma closed_mapping_lookup:
-  forall l x t,
-    closed_mapping l ->
+  forall l x t tag,
+    pclosed_mapping l tag ->
     lookup Nat.eq_dec l x = Some t ->
-    fv t = nil.
+    pfv t tag = nil.
 Proof.
   induction l; steps; eauto.
 Qed.
@@ -203,21 +208,21 @@ Qed.
 Hint Resolve closed_mapping_lookup: bfv.
 
 Lemma closed_mapping_range:
-  forall l t,
-    closed_mapping l ->
+  forall l t tag,
+    pclosed_mapping l tag ->
     t ∈ range l ->
-    fv t = nil.
+    pfv t tag = nil.
 Proof.
   induction l; steps; eauto.
 Qed.
 
 Hint Resolve closed_mapping_range: bfv.
-  
+
 Lemma fv_nils:
-  forall t l,
-    fv t = nil ->
-    closed_mapping l ->
-    fv (substitute t l) = nil.
+  forall t l tag,
+    pfv t tag = nil ->
+    pclosed_mapping l tag ->
+    pfv (psubstitute t l tag) tag = nil.
 Proof.
   induction t;
     repeat match goal with
@@ -230,29 +235,29 @@ Qed.
 Hint Resolve fv_nils: bfv.
 
 Lemma closed_mapping_fv:
-  forall l x,
-    closed_mapping l ->
-    x ∈ fv_range l ->
+  forall l x tag,
+    pclosed_mapping l tag ->
+    x ∈ pfv_range l tag ->
     False.
 Proof.
   induction l; repeat step || t_listutils; eauto.
 Qed.
 
 Lemma closed_mapping_fv2:
-  forall l x y t,
-    closed_mapping l ->
+  forall l x y t tag,
+    pclosed_mapping l tag ->
     lookup Nat.eq_dec l x = Some t ->
-    y ∈ fv t ->
+    y ∈ pfv t tag ->
     False.
 Proof.
   induction l; repeat step || t_listutils; eauto.
 Qed.
-  
+
 Lemma fv_nils2:
-  forall t l,
-    subset (fv t) (support l) ->
-    closed_mapping l ->
-    fv (substitute t l) = nil.
+  forall t l tag,
+    subset (pfv t tag) (support l) ->
+    pclosed_mapping l tag ->
+    pfv (psubstitute t l tag) tag = nil.
 Proof.
   induction t;
     repeat match goal with
@@ -277,21 +282,16 @@ Proof.
              poseNew (Mark (x,l) "instance middle");
              unshelve epose proof (H1 x _)
            | H: _ = nil |- _ => rewrite H
-           | H: ?x ∈ fv (substitute ?t ?l) |- _ =>
+           | H: ?x ∈ pfv (psubstitute ?t ?l ?tag) ?tag |- _ =>
              poseNew (Mark (x,t,l) "fv subst");
-             pose proof (in_subset _ _ x (fv_subst2 t l) H)
+             pose proof (in_subset _ _ x (fv_subst2 t l tag) H)
            | _ => step || t_listutils
            | _ => progress (rewrite <- empty_list_rewrite in *)
            | _ => progress (unfold subset in *)
            end;
            eauto 2 with bfv;
            eauto using closed_mapping_fv with falsity;
-           eauto using closed_mapping_fv2 with falsity.                            
+           eauto using closed_mapping_fv2 with falsity.
 Qed.
-                            
-Hint Resolve fv_nils2: bfv.
 
-Ltac t_fv_open :=
-  match goal with
-  | H: _ |- _ => apply fv_open2 in H
-  end.
+Hint Resolve fv_nils2: bfv.

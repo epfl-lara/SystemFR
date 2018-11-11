@@ -64,7 +64,7 @@ Lemma reducible_let_rule:
         star small_step t1 v ->
         reducible theta (open 0 t2 v) B) ->
     reducible theta (tlet t1 A t2) B.
-Proof.  
+Proof.
   unfold reducible, reduces_to; repeat step || t_listutils.
   createHypothesis;
     repeat step || t_values_info2.
@@ -91,7 +91,8 @@ Lemma open_reducible_let:
     subset (fv A) (support gamma) ->
     subset (fv t2) (support gamma) ->
     open_reducible tvars gamma t1 A ->
-    open_reducible tvars ((p, T_equal (fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (fvar x)) B ->
+    open_reducible tvars ((p, T_equal (fvar x term_var) t1) :: (x,A) :: gamma)
+                   (open 0 t2 (fvar x term_var)) B ->
     open_reducible tvars gamma (tlet t1 A t2) B.
 Proof.
   unfold open_reducible; steps.

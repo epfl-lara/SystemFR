@@ -20,16 +20,16 @@ Lemma subset_singleton_support:
     lookup Nat.eq_dec gamma x = Some T ->
     subset (singleton x) (support gamma).
 Proof.
-  repeat step || t_sets; eauto using lookupSupport.    
+  repeat step || t_sets; eauto using lookupSupport.
 Qed.
 
 Hint Resolve subset_singleton_support: b_sub_open.
 
 Lemma subset_range_context:
-  forall (gamma : context) (x : nat) T S,
-    subset (fv_context gamma) S ->
+  forall (gamma : context) (x : nat) T S tag,
+    subset (pfv_context gamma tag) S ->
     lookup Nat.eq_dec gamma x = Some T ->
-    subset (fv T) S.
+    subset (pfv T tag) S.
 Proof.
   eauto using subset_transitive, fv_lookup.
 Qed.
@@ -37,18 +37,18 @@ Qed.
 Hint Resolve subset_range_context: b_sub_open.
 
 Lemma subset_open:
-  forall t rep k S,
-    subset (fv (open k t rep)) S ->
-    subset (fv t) S.
+  forall t rep k S tag,
+    subset (pfv (open k t rep) tag) S ->
+    subset (pfv t tag) S.
 Proof.
-  unfold subset; repeat step || slow_instantiations; eauto 2 with bfv.
+  unfold subset; repeat step || slow_instantiations; eauto with bfv.
 Qed.
 
 Lemma subset_open2:
-  forall t rep k S,
-    subset (fv t) S ->
-    subset (fv rep) S ->
-    subset (fv (open k t rep)) S.
+  forall t rep k S tag,
+    subset (pfv t tag) S ->
+    subset (pfv rep tag) S ->
+    subset (pfv (open k t rep) tag) S.
 Proof.
   unfold subset; repeat step.
   apply fv_open2 in H1; repeat step || t_listutils.
@@ -157,7 +157,7 @@ Lemma subset_middle_indirect:
 Proof.
   intros; eauto with sets.
 Qed.
-  
+
 Hint Immediate subset_middle_indirect: b_sub_open.
 
 Lemma subset_middle_indirect2:
@@ -166,7 +166,7 @@ Lemma subset_middle_indirect2:
 Proof.
   intros; eauto with sets.
 Qed.
-  
+
 Hint Immediate subset_middle_indirect2: b_sub_open.
 
 Lemma subset_right:
@@ -226,58 +226,52 @@ Hint Immediate subset_right6: b_sub_open.
 
 Ltac t_subset_open :=
   match goal with
-  | H: subset (fv (open _ _ _)) ?S |- _ =>
-    apply subset_open in H 
+  | H: subset (pfv (open _ _ _) _) _ |- _ =>
+    apply subset_open in H
   end.
 
 Lemma defined_FV:
   (forall tvars gamma t T,
     has_type tvars gamma t T ->
-      subset (fv t) (support gamma) /\
-      subset (fv T) (support gamma)  /\
-      subset (fv_context gamma) (support gamma)
+      subset (pfv t term_var) (support gamma) /\
+      subset (pfv T term_var) (support gamma)  /\
+      subset (pfv_context gamma term_var) (support gamma)
   ) /\
   (forall tvars gamma T,
     is_type tvars gamma T ->
-      subset (fv T) (support gamma) /\
-      subset (fv_context gamma) (support gamma)
+      subset (pfv T term_var) (support gamma) /\
+      subset (pfv_context gamma term_var) (support gamma)
   ) /\
   (forall tvars gamma,
     is_context tvars gamma ->
-      subset (fv_context gamma) (support gamma)
+      subset (pfv_context gamma term_var) (support gamma)
   ) /\
   (forall tvars gamma T1 T2,
     is_subtype tvars gamma T1 T2 ->
-      subset (fv T1) (support gamma) /\
-      subset (fv T2) (support gamma) /\ 
-      subset (fv_context gamma) (support gamma) 
+      subset (pfv T1 term_var) (support gamma) /\
+      subset (pfv T2 term_var) (support gamma) /\
+      subset (pfv_context gamma term_var) (support gamma)
   ) /\
   (forall tvars gamma t1 t2,
     are_equal tvars gamma t1 t2 ->
-      subset (fv t1) (support gamma) /\
-      subset (fv t2) (support gamma) /\
-      subset (fv_context gamma) (support gamma) 
+      subset (pfv t1 term_var) (support gamma) /\
+      subset (pfv t2 term_var) (support gamma) /\
+      subset (pfv_context gamma term_var) (support gamma)
   ).
 
 Proof.
   apply mut_HT_IT_IC_IS_AE;
     repeat match goal with
-    | _ => t_subset_open 
-    | _ => step
-    | _ => solve [ apply subset_left; eauto 2 with b_sub_open; eauto 2 with bfv ]
-    | _ => solve [ eauto 2 with b_sub_open ]
+    | _ => t_subset_open
+    | _ => step || apply subset_open2 || t_listutils
+    | _ => progress rewrite subset_add
+    | _ => progress rewrite supportAppend, fv_context_append in *
+    | _ => progress rewrite <- subset_union3 in *
     | _ => solve [ eauto 2 with sets ]
+    | _ => solve [ eauto 2 with b_sub_open ]
     | _ => solve [ eauto 2 with bfv ]
     | _ => solve [ eauto 2 using subset_middle2 ]
     | _ => solve [ eauto 2 using subset_middle3 ]
-    | _ => solve [ eauto 2 using subset_middle4 ]
-    | _ => solve [ eauto 2 using subset_middle5 ]
-    | _ => solve [ eauto 2 using subset_middle6 ]
-    | _ => solve [ eauto 2 using subset_middle7 ]
-    | _ => progress rewrite subset_add
-    | _ => progress rewrite <- subset_union3 in *
-    | _ => progress rewrite supportAppend, fv_context_append in *
-    | _ => solve [ eapply subset_transitive; eauto using fv_open; repeat step || t_sets ]
     end.
 Qed.
 
@@ -290,7 +284,7 @@ Definition defined_FV_AE := proj2 (proj2 (proj2 (proj2 defined_FV))).
 Lemma defined_FV_IT_1:
   forall tvars gamma T,
     is_type tvars gamma T ->
-    subset (fv T) (support gamma).
+    subset (pfv T term_var) (support gamma).
 Proof.
   apply defined_FV_IT.
 Qed.
@@ -298,7 +292,7 @@ Qed.
 Lemma defined_FV_HT_1:
   forall tvars gamma t T,
     has_type tvars gamma t T ->
-    subset (fv t) (support gamma).
+    subset (pfv t term_var) (support gamma).
 Proof.
   apply defined_FV_HT.
 Qed.
@@ -306,7 +300,7 @@ Qed.
 Lemma defined_FV_HT_2:
   forall tvars gamma t T,
     has_type tvars gamma t T ->
-    subset (fv T) (support gamma).
+    subset (pfv T term_var) (support gamma).
 Proof.
   apply defined_FV_HT.
 Qed.
@@ -314,7 +308,7 @@ Qed.
 Lemma defined_FV_HT_3:
   forall tvars gamma t T,
     has_type tvars gamma t T ->
-    subset (fv_context gamma) (support gamma).
+    subset (pfv_context gamma term_var) (support gamma).
 Proof.
   apply defined_FV_HT.
 Qed.
@@ -322,7 +316,7 @@ Qed.
 Lemma defined_FV_IS_1:
   forall tvars gamma T1 T2,
     is_subtype tvars gamma T1 T2 ->
-    subset (fv T1) (support gamma).
+    subset (pfv T1 term_var) (support gamma).
 Proof.
   apply defined_FV_IS.
 Qed.
@@ -330,7 +324,7 @@ Qed.
 Lemma defined_FV_IS_2:
   forall tvars gamma T1 T2,
     is_subtype tvars gamma T1 T2 ->
-    subset (fv T2) (support gamma).
+    subset (pfv T2 term_var) (support gamma).
 Proof.
   apply defined_FV_IS.
 Qed.
@@ -338,7 +332,7 @@ Qed.
 Lemma defined_FV_AE_1:
   forall tvars gamma t1 t2,
     are_equal tvars gamma t1 t2 ->
-    subset (fv t1) (support gamma).
+    subset (pfv t1 term_var) (support gamma).
 Proof.
   apply defined_FV_AE.
 Qed.
@@ -346,7 +340,7 @@ Qed.
 Lemma defined_FV_AE_2:
   forall tvars gamma t1 t2,
     are_equal tvars gamma t1 t2 ->
-    subset (fv t2) (support gamma).
+    subset (pfv t2 term_var) (support gamma).
 Proof.
   apply defined_FV_AE.
 Qed.

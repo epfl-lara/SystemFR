@@ -92,7 +92,7 @@ Lemma reducible_nat:
 Proof.
   induction v; repeat step;
     eauto using reducible_zero;
-    eauto using reducible_succ.    
+    eauto using reducible_succ.
 Qed.
 
 Lemma open_reducible_succ:
@@ -103,7 +103,7 @@ Proof.
   unfold open_reducible in *; steps;
     eauto using reducible_succ.
 Qed.
-      
+
 Lemma reducible_match:
   forall theta tn t0 ts T,
     fv ts = nil ->
@@ -135,7 +135,7 @@ Proof.
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
       repeat step || t_listutils; eauto with b_equiv.
-  - (* succ v *) 
+  - (* succ v *)
     eapply backstep_reducible;
       repeat step || t_listutils || apply_any || apply reducible_nat_value;
       eauto 4 with smallstep values;
@@ -161,14 +161,14 @@ Lemma open_reducible_match:
     open_reducible tvars gamma tn T_nat ->
     open_reducible tvars ((p, T_equal tn zero) :: gamma) t0 T ->
     open_reducible tvars (
-        (p, T_equal tn (succ (fvar n))) ::
+        (p, T_equal tn (succ (term_fvar n))) ::
         (n, T_nat) ::
         gamma)
-      (open 0 ts (fvar n))
+      (open 0 ts (term_fvar n))
       T ->
     open_reducible tvars gamma (tmatch tn t0 ts) T.
 Proof.
-  unfold open_reducible in *; repeat step || t_instantiate_sat3.  
+  unfold open_reducible in *; repeat step || t_instantiate_sat3.
 
   apply reducible_match; repeat step || t_termlist;
     eauto with bwf;
@@ -176,7 +176,7 @@ Proof.
 
   - (* zero *)
     unshelve epose proof (H12 theta ((p,trefl) :: lterms) _ _ _); tac1.
-             
+
   - (* successor *)
     unshelve epose proof (H13 theta ((p,trefl) :: (n,n0) :: lterms) _ _ _); tac1.
 Qed.
@@ -206,7 +206,7 @@ Proof.
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
       repeat step || t_listutils.
-  - (* succ v *) 
+  - (* succ v *)
     eapply backstep_reducible; repeat step || t_listutils;
       eauto 3 with smallstep values;
       auto 2 with bfv;
@@ -227,11 +227,12 @@ Proof.
 
     apply reducible_let2 with T_nat; eauto with values.
 Qed.
-      
+
 Lemma reducible_rec:
   forall theta tn t0 ts T,
     fv T = nil ->
     fv ts = nil ->
+    fv t0 = nil ->
     wf T 1 ->
     wf ts 2 ->
     valid_interpretation theta ->
@@ -247,7 +248,7 @@ Lemma reducible_rec:
     reducible theta (rec T tn t0 ts) (T_let tn T_nat T).
 Proof.
   repeat step.
-  unfold reducible, reduces_to in H4; steps.
+  unfold reducible, reduces_to in H5; steps.
   eapply star_backstep_reducible with (rec T _ t0 ts);
     repeat step || t_listutils ||
       unshelve eauto with bsteplemmas ||
@@ -265,6 +266,7 @@ Lemma open_reducible_rec:
     wf ts 2 ->
     subset (fv T) (support gamma) ->
     subset (fv ts) (support gamma) ->
+    subset (fv t0) (support gamma) ->
     ~(p ∈ fv t0) ->
     ~(p ∈ fv tn) ->
     ~(p ∈ fv T) ->
@@ -282,22 +284,22 @@ Lemma open_reducible_rec:
     open_reducible tvars gamma tn T_nat ->
     open_reducible tvars gamma t0 (open 0 T zero) ->
     open_reducible tvars (
-        (p, T_equal (fvar y) (lambda T_unit (rec T (fvar n) t0 ts))) ::
-        (y, T_arrow T_unit (open 0 T (fvar n))) ::
+        (p, T_equal (term_fvar y) (lambda T_unit (rec T (term_fvar n) t0 ts))) ::
+        (y, T_arrow T_unit (open 0 T (term_fvar n))) ::
         (n, T_nat) ::
         gamma)
-      (open 0 (open 1 ts (fvar n)) (fvar y))
-      (open 0 T (succ (fvar n))) ->
+      (open 0 (open 1 ts (term_fvar n)) (term_fvar y))
+      (open 0 T (succ (term_fvar n))) ->
     open_reducible tvars gamma (rec T tn t0 ts) (T_let tn T_nat T).
 Proof.
-  unfold open_reducible in *; steps.  
-    
+  unfold open_reducible in *; steps.
+
   apply reducible_rec; repeat step;
     eauto with bwf;
     eauto with bfv;
     eauto with btf;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  unshelve epose proof (H19 theta ((p,trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
+  unshelve epose proof (H20 theta ((p,trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 Qed.

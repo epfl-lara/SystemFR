@@ -15,7 +15,7 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
 | HTVar: forall tvars (gamma: context) x (T: term),
     is_context tvars gamma ->
     lookup Nat.eq_dec gamma x = Some T ->
-    has_type tvars gamma (fvar x) T
+    has_type tvars gamma (term_fvar x) T
 
 | HTWeaken: forall tvars gamma x T u U,
     has_type tvars gamma u U ->
@@ -23,7 +23,7 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
     ~(x ∈ support gamma) ->
     ~(x ∈ tvars) ->
     has_type tvars ((x,T) :: gamma) u U
-             
+
 | HTLambda:
     forall tvars gamma t U V x,
       is_type tvars gamma U ->
@@ -33,8 +33,8 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ~(x ∈ tvars) ->
       has_type tvars
                ((x,U) :: gamma)
-               (open 0 t (fvar x))
-               (open 0 V (fvar x)) ->
+               (open 0 t (term_fvar x))
+               (open 0 V (term_fvar x)) ->
       has_type tvars gamma (lambda U t) (T_arrow U V)
 
 | HTApp:
@@ -63,7 +63,7 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
     forall tvars gamma,
       is_context tvars gamma ->
       has_type tvars gamma uu T_unit
-               
+
 | HTTrue:
     forall tvars gamma,
       is_context tvars gamma ->
@@ -126,15 +126,15 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       NoDup (n :: y :: p :: nil) ->
       has_type tvars gamma tn T_nat ->
       has_type tvars gamma t0 (open 0 T zero) ->
-      is_type tvars ((n,T_nat) :: gamma) (open 0 T (fvar n)) ->
+      is_type tvars ((n,T_nat) :: gamma) (open 0 T (term_fvar n)) ->
       has_type tvars (
-        (p, T_equal (fvar y) (lambda T_unit (rec T (fvar n) t0 ts))) ::
-        (y, T_arrow T_unit (open 0 T (fvar n))) ::
+        (p, T_equal (term_fvar y) (lambda T_unit (rec T (term_fvar n) t0 ts))) ::
+        (y, T_arrow T_unit (open 0 T (term_fvar n))) ::
         (n, T_nat) ::
         gamma
       )
-        (open 0 (open 1 ts (fvar n)) (fvar y))
-        (open 0 T (succ (fvar n)))
+        (open 0 (open 1 ts (term_fvar n)) (term_fvar y))
+        (open 0 T (succ (term_fvar n)))
       ->
       has_type tvars gamma (rec T tn t0 ts) (T_let tn T_nat T)
 
@@ -155,11 +155,11 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       has_type tvars gamma tn T_nat ->
       has_type tvars ((p, T_equal tn zero) :: gamma) t0 T ->
       has_type tvars (
-        (p, T_equal tn (succ (fvar n))) ::
+        (p, T_equal tn (succ (term_fvar n))) ::
         (n, T_nat) ::
         gamma
       )
-        (open 0 ts (fvar n))
+        (open 0 ts (term_fvar n))
         T
       ->
       has_type tvars gamma (tmatch tn t0 ts) T
@@ -178,10 +178,10 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ~(x ∈ tvars) ->
       ~(p ∈ tvars) ->
       has_type tvars gamma t A ->
-      has_type tvars ((x,A) :: gamma) (open 0 b (fvar x)) T_bool ->
-      are_equal tvars ((p, T_equal (fvar x) t) :: (x,A) :: gamma) (open 0 b (fvar x)) ttrue ->
-      has_type tvars gamma t (T_refine A b) 
-      
+      has_type tvars ((x,A) :: gamma) (open 0 b (term_fvar x)) T_bool ->
+      are_equal tvars ((p, T_equal (term_fvar x) t) :: (x,A) :: gamma) (open 0 b (term_fvar x)) ttrue ->
+      has_type tvars gamma t (T_refine A b)
+
 | HTSub:
     forall tvars gamma t T1 T2,
       is_subtype tvars gamma T1 T2 ->
@@ -200,7 +200,7 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ~(x ∈ tvars) ->
       ~(p ∈ tvars) ->
       has_type tvars gamma t1 A ->
-      has_type tvars ((p,T_equal (fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (fvar x)) B ->
+      has_type tvars ((p,T_equal (term_fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (term_fvar x)) B ->
       has_type tvars gamma (tlet t1 A t2) B
 
 | HTSingleton:
@@ -228,8 +228,8 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ~(z ∈ fv T) ->
       ~(z ∈ tvars) ->
       has_type tvars gamma t (T_union T1 T2) ->
-      has_type tvars ((z,T1) :: gamma) (open 0 t' (fvar z)) T ->
-      has_type tvars ((z,T2) :: gamma) (open 0 t' (fvar z)) T -> 
+      has_type tvars ((z,T1) :: gamma) (open 0 t' (term_fvar z)) T ->
+      has_type tvars ((z,T2) :: gamma) (open 0 t' (term_fvar z)) T ->
       has_type tvars gamma (tlet t (T_union T1 T2) t') T
 
 | HTRefl:
@@ -243,7 +243,7 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ~(x ∈ fv V) ->
       ~(x ∈ tvars) ->
       is_type tvars gamma U ->
-      has_type tvars ((x,U) :: gamma) t (open 0 V (fvar x) )->
+      has_type tvars ((x,U) :: gamma) t (open 0 V (term_fvar x) )->
       has_type tvars gamma t A ->
       has_type tvars gamma t (T_forall U V)
 
@@ -259,12 +259,12 @@ Inductive has_type: list nat -> context -> term -> term -> Prop :=
       ~(x ∈ tvars) ->
       ~(y ∈ tvars) ->
       has_type tvars gamma p (T_exists U V) ->
-      has_type tvars ((y, open 0 V (fvar x)) :: (x,U) :: gamma)
-               (open 0 t (fvar y))
+      has_type tvars ((y, open 0 V (term_fvar x)) :: (x,U) :: gamma)
+               (open 0 t (term_fvar y))
                T
       ->
       has_type tvars gamma (tlet p (T_exists U V) t) T
-               
+
 with is_type: tvar_list -> context -> term -> Prop :=
 | ITUnit:
     forall tvars gamma,
@@ -280,13 +280,13 @@ with is_type: tvar_list -> context -> term -> Prop :=
     forall tvars gamma,
       is_context tvars gamma ->
       is_type tvars gamma T_nat
-              
+
 | ITProd:
     forall tvars gamma T1 T2 x,
       ~(x ∈ support gamma) ->
       ~(x ∈ fv T2) ->
       is_type tvars gamma T1 ->
-      is_type tvars ((x,T1) :: gamma) (open 0 T2 (fvar x)) ->
+      is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_type tvars gamma (T_prod T1 T2)
 
 (*
@@ -295,13 +295,13 @@ with is_type: tvar_list -> context -> term -> Prop :=
       has_type tvars gamma T T_type ->
       is_type tvars gamma T
 *)
-            
+
 | ITArrow:
     forall tvars gamma T1 T2 x,
       ~(x ∈ support gamma) ->
       ~(x ∈ fv T2) ->
       is_type tvars gamma T1 ->
-      is_type tvars ((x,T1) :: gamma) (open 0 T2 (fvar x)) ->
+      is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_type tvars gamma (T_arrow T1 T2)
 
 | ITRefine:
@@ -309,7 +309,7 @@ with is_type: tvar_list -> context -> term -> Prop :=
       ~(x ∈ support gamma) ->
       ~(x ∈ fv p) ->
       is_type tvars gamma T ->
-      has_type tvars ((x,T) :: gamma) (open 0 p (fvar x)) T_bool ->
+      has_type tvars ((x,T) :: gamma) (open 0 p (term_fvar x)) T_bool ->
       is_type tvars gamma (T_refine T p)
 
 | ITLet:
@@ -323,7 +323,7 @@ with is_type: tvar_list -> context -> term -> Prop :=
       ~(p ∈ tvars) ->
       is_type tvars gamma A ->
       has_type tvars gamma t1 A ->
-      is_type tvars ((p, T_equal (fvar x) t1) :: (x,A) :: gamma) (open 0 B (fvar x)) ->
+      is_type tvars ((p, T_equal (term_fvar x) t1) :: (x,A) :: gamma) (open 0 B (term_fvar x)) ->
       is_type tvars gamma (T_let t1 A B)
 
 | ITSingleton:
@@ -367,10 +367,10 @@ with is_type: tvar_list -> context -> term -> Prop :=
 | ITForall:
     forall tvars gamma T1 T2 x,
       ~(x ∈ support gamma) ->
-      ~(x ∈ fv T2) ->      
+      ~(x ∈ fv T2) ->
       ~(x ∈ tvars) ->
       is_type tvars gamma T1 ->
-      is_type tvars ((x,T1) :: gamma) (open 0 T2 (fvar x)) ->
+      is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_type tvars gamma (T_forall T1 T2)
 
 | ITExists:
@@ -379,8 +379,14 @@ with is_type: tvar_list -> context -> term -> Prop :=
       ~(x ∈ fv T2) ->
       ~(x ∈ tvars) ->
       is_type tvars gamma T1 ->
-      is_type tvars ((x,T1) :: gamma) (open 0 T2 (fvar x)) ->
+      is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_type tvars gamma (T_exists T1 T2)
+
+| ITVar:
+    forall tvars gamma X,
+      X ∈ tvars ->
+      is_context tvars gamma ->
+      is_type tvars gamma (type_fvar X)
 
 (*
 | ITType:
@@ -388,7 +394,7 @@ with is_type: tvar_list -> context -> term -> Prop :=
       is_context tvars gamma ->
       is_type tvars gamma T_type
 *)
-      
+
 with is_context: tvar_list -> context -> Prop :=
 | ICNil: forall tvars, is_context tvars nil
 | ICCons:
@@ -413,16 +419,16 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
 | ISArrow:
     forall tvars gamma A1 A2 B1 B2 x,
       ~(x ∈ support gamma) ->
-      ~(x ∈ fv A2) ->      
-      ~(x ∈ fv B2) ->      
+      ~(x ∈ fv A2) ->
+      ~(x ∈ fv B2) ->
       ~(x ∈ tvars) ->
       is_subtype tvars gamma B1 A1 ->
-      is_type tvars ((x,A1) :: gamma) (open 0 A2 (fvar x)) ->
-      is_type tvars ((x,B1) :: gamma) (open 0 B2 (fvar x)) ->
+      is_type tvars ((x,A1) :: gamma) (open 0 A2 (term_fvar x)) ->
+      is_type tvars ((x,B1) :: gamma) (open 0 B2 (term_fvar x)) ->
       is_subtype tvars
                  ((x,B1) :: gamma)
-                 (open 0 A2 (fvar x)) 
-                 (open 0 B2 (fvar x)) ->
+                 (open 0 A2 (term_fvar x))
+                 (open 0 B2 (term_fvar x)) ->
       is_subtype tvars gamma (T_arrow A1 A2) (T_arrow B1 B2)
 
 | ISArrow2:
@@ -430,15 +436,15 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       ~(x ∈ support gamma) ->
       ~(f ∈ support gamma) ->
       ~(x = f) ->
-      ~(x ∈ fv B) ->      
-      ~(f ∈ fv B) ->      
+      ~(x ∈ fv B) ->
+      ~(f ∈ fv B) ->
       ~(x ∈ tvars) ->
       ~(f ∈ tvars) ->
       is_type tvars gamma A ->
       is_type tvars gamma T ->
-      has_type tvars ((x,A) :: (f,T) :: gamma) (app (fvar f) (fvar x))
-                                         (open 0 B (fvar x)) ->
-      is_type tvars ((x,A) :: gamma) (open 0 B (fvar x)) ->
+      has_type tvars ((x,A) :: (f,T) :: gamma) (app (term_fvar f) (term_fvar x))
+                                         (open 0 B (term_fvar x)) ->
+      is_type tvars ((x,A) :: gamma) (open 0 B (term_fvar x)) ->
       is_subtype tvars gamma T (T_arrow A B)
 
 | ISGeneric:
@@ -446,55 +452,55 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       ~(x ∈ support gamma) ->
       is_type tvars gamma A ->
       is_type tvars gamma B ->
-      has_type tvars ((x,A) :: gamma) (fvar x) B ->
+      has_type tvars ((x,A) :: gamma) (term_fvar x) B ->
       is_subtype tvars gamma A B
-                
-                 
+
+
 | ISProd:
     forall tvars gamma A1 A2 B1 B2 x,
       ~(x ∈ support gamma) ->
-      ~(x ∈ fv A2) ->      
-      ~(x ∈ fv B2) ->      
+      ~(x ∈ fv A2) ->
+      ~(x ∈ fv B2) ->
       ~(x ∈ tvars) ->
       is_subtype tvars gamma A1 B1 ->
-      is_type tvars ((x,A1) :: gamma) (open 0 A2 (fvar x)) ->
-      is_type tvars ((x,B1) :: gamma) (open 0 B2 (fvar x)) ->
+      is_type tvars ((x,A1) :: gamma) (open 0 A2 (term_fvar x)) ->
+      is_type tvars ((x,B1) :: gamma) (open 0 B2 (term_fvar x)) ->
       is_subtype tvars
                  ((x,A1) :: gamma)
-                 (open 0 A2 (fvar x)) 
-                 (open 0 B2 (fvar x)) ->
+                 (open 0 A2 (term_fvar x))
+                 (open 0 B2 (term_fvar x)) ->
       is_subtype tvars gamma (T_prod A1 A2) (T_prod B1 B2)
-                 
+
 | ISProd2:
     forall tvars gamma T A B x,
       ~(x ∈ support gamma) ->
-      ~(x ∈ fv A) ->      
-      ~(x ∈ fv B) ->      
+      ~(x ∈ fv A) ->
+      ~(x ∈ fv B) ->
       ~(x ∈ tvars) ->
       is_type tvars gamma T ->
-      is_type tvars ((x,A) :: gamma) (open 0 B (fvar x)) ->
-      has_type tvars ((x,T) :: gamma) (pi1 (fvar x)) A ->
-      has_type tvars ((x,T) :: gamma) (pi2 (fvar x)) (T_let (pi1 (fvar x)) A B) ->
+      is_type tvars ((x,A) :: gamma) (open 0 B (term_fvar x)) ->
+      has_type tvars ((x,T) :: gamma) (pi1 (term_fvar x)) A ->
+      has_type tvars ((x,T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) A B) ->
       is_subtype tvars gamma T (T_prod A B)
-            
+
 | ISRefine:
     forall tvars gamma A B p q x,
       ~(x ∈ support gamma) ->
       ~(x ∈ fv p) ->
       ~(x ∈ fv q) ->
       ~(x ∈ tvars) ->
-      has_type tvars ((x,A) :: gamma) (open 0 p (fvar x)) T_bool ->
-      has_type tvars ((x,B) :: gamma) (open 0 q (fvar x)) T_bool ->
-      are_equal tvars ((x, T_refine A p) :: gamma) (open 0 q (fvar x)) ttrue ->
+      has_type tvars ((x,A) :: gamma) (open 0 p (term_fvar x)) T_bool ->
+      has_type tvars ((x,B) :: gamma) (open 0 q (term_fvar x)) T_bool ->
+      are_equal tvars ((x, T_refine A p) :: gamma) (open 0 q (term_fvar x)) ttrue ->
       is_subtype tvars gamma A B ->
       is_subtype tvars gamma (T_refine A p) (T_refine B q)
-                 
+
 | ISRefine2:
     forall tvars gamma A B p,
       is_subtype tvars gamma A B ->
       is_type tvars gamma (T_refine A p) ->
       is_subtype tvars gamma (T_refine A p) B
-                 
+
 | ISRefine3:
     forall tvars gamma A,
       is_type tvars gamma A ->
@@ -505,8 +511,8 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       ~(x ∈ support gamma) ->
       ~(x ∈ fv p) ->
       ~(x ∈ tvars) ->
-      has_type tvars ((x,A) :: gamma) (open 0 p (fvar x)) T_bool ->
-      are_equal tvars ((x, T) :: gamma) (open 0 p (fvar x)) ttrue ->  
+      has_type tvars ((x,A) :: gamma) (open 0 p (term_fvar x)) T_bool ->
+      are_equal tvars ((x, T) :: gamma) (open 0 p (term_fvar x)) ttrue ->
       is_subtype tvars gamma T A ->
       is_subtype tvars gamma T (T_refine A p)
 
@@ -521,9 +527,9 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       ~(x ∈ tvars) ->
       ~(p ∈ tvars) ->
       is_type tvars gamma A ->
-      has_type tvars ((x,A) :: gamma) (open 0 b (fvar x)) T_bool ->
-      has_type tvars ((p, T_equal (open 0 b (fvar x)) ttrue) :: (x, A) :: gamma)
-               (fvar x)
+      has_type tvars ((x,A) :: gamma) (open 0 b (term_fvar x)) T_bool ->
+      has_type tvars ((p, T_equal (open 0 b (term_fvar x)) ttrue) :: (x, A) :: gamma)
+               (term_fvar x)
                T ->
       is_subtype tvars gamma (T_refine A b) T
 
@@ -544,12 +550,12 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       is_type tvars gamma A ->
       has_type tvars gamma t A ->
       is_type tvars gamma (open 0 B t) ->
-      is_type tvars ((p, T_equal (fvar x) t) :: (x,A) :: gamma) (open 0 B (fvar x)) ->
+      is_type tvars ((p, T_equal (term_fvar x) t) :: (x,A) :: gamma) (open 0 B (term_fvar x)) ->
       is_subtype tvars
-                 ((p, T_equal (fvar x) t) :: (x,A) :: gamma)
-                 (open 0 B (fvar x)) T ->
+                 ((p, T_equal (term_fvar x) t) :: (x,A) :: gamma)
+                 (open 0 B (term_fvar x)) T ->
       is_subtype tvars gamma (T_let t A B) T
-                 
+
 | ISLetEqual:
     forall tvars gamma t t' A B,
       are_equal tvars gamma t t' ->
@@ -614,7 +620,7 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       ~(x ∈ fv T2) ->
       ~(x ∈ tvars) ->
       has_type tvars gamma t T1 ->
-      is_type tvars ((x,T1) :: gamma) (open 0 T2 (fvar x)) ->
+      is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
       is_subtype tvars gamma (T_forall T1 T2) (T_let t T1 T2)
 
 | ISExists:
@@ -623,9 +629,9 @@ with is_subtype: tvar_list -> context -> term -> term -> Prop :=
       ~(x ∈ fv T2) ->
       ~(x ∈ tvars) ->
       has_type tvars gamma t T1 ->
-      is_type tvars ((x,T1) :: gamma) (open 0 T2 (fvar x)) ->
-      is_subtype tvars gamma (T_let t T1 T2) (T_exists T1 T2) 
-                 
+      is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
+      is_subtype tvars gamma (T_let t T1 T2) (T_exists T1 T2)
+
 with are_equal: tvar_list -> context -> term -> term -> Prop :=
 | AERefl: forall tvars gamma t,
     subset (fv t) (support gamma) ->
@@ -720,17 +726,17 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
       ~(n ∈ fv tn) ->
       ~(n ∈ fv ts) ->
       ~(n ∈ fv t) ->
-      ~(n = p) ->      
+      ~(n = p) ->
       ~(p ∈ tvars) ->
       ~(n ∈ tvars) ->
       has_type tvars gamma tn T_nat ->
       are_equal tvars ((p, T_equal tn zero) :: gamma) t0 t ->
-      are_equal tvars ((p, T_equal tn (succ (fvar n))) :: (n, T_nat) :: gamma)
-                (open 0 ts (fvar n))
+      are_equal tvars ((p, T_equal tn (succ (term_fvar n))) :: (n, T_nat) :: gamma)
+                (open 0 ts (term_fvar n))
                 t ->
       are_equal tvars gamma (tmatch tn t0 ts) t
 
-| AERec:    
+| AERec:
     forall tvars gamma T tn t0 ts t n p,
       ~(p ∈ support gamma) ->
       ~(p ∈ fv tn) ->
@@ -748,11 +754,11 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
       ~(n ∈ tvars) ->
       ~(p ∈ tvars) ->
       has_type tvars gamma tn T_nat ->
-      is_type tvars ((n,T_nat) :: gamma) (open 0 T (fvar n)) ->
+      is_type tvars ((n,T_nat) :: gamma) (open 0 T (term_fvar n)) ->
       are_equal tvars ((p, T_equal tn zero) :: gamma) t0 t ->
       are_equal tvars
-        ((p, T_equal tn (succ (fvar n))) :: (n, T_nat) :: gamma)
-        (open 0 (open 1 ts (fvar n)) (lambda T_unit (rec T (fvar n) t0 ts)))
+        ((p, T_equal tn (succ (term_fvar n))) :: (n, T_nat) :: gamma)
+        (open 0 (open 1 ts (term_fvar n)) (lambda T_unit (rec T (term_fvar n) t0 ts)))
         t ->
       are_equal tvars gamma (rec T tn t0 ts) t
 
@@ -790,7 +796,7 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
       ~(y ∈ tvars) ->
       has_type tvars gamma2 n T_nat ->
       are_equal tvars (gamma1 ++ (x,T_equal n zero) :: gamma2) t t' ->
-      are_equal tvars (gamma1 ++ (x,T_equal n (succ (fvar y))) :: (y, T_nat) :: gamma2) t t' ->
+      are_equal tvars (gamma1 ++ (x,T_equal n (succ (term_fvar y))) :: (y, T_nat) :: gamma2) t t' ->
       are_equal tvars (gamma1 ++ gamma2) t t'
 
 | AEError:
@@ -853,8 +859,8 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
     has_type tvars gamma2 n T_nat ->
     is_context tvars (gamma1 ++ ((x, T_equal (tmatch n e1 e2) e)  :: gamma2)) ->
     are_equal tvars (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal n zero) :: gamma2) t t' ->
-    are_equal tvars (gamma1 ++ (x, T_equal (open 0 e2 (fvar v)) e) ::
-                         (y, T_equal n (succ (fvar v))) ::
+    are_equal tvars (gamma1 ++ (x, T_equal (open 0 e2 (term_fvar v)) e) ::
+                         (y, T_equal n (succ (term_fvar v))) ::
                          (v, T_nat) ::
                          gamma2)
               t t' ->
@@ -895,14 +901,14 @@ with are_equal: tvar_list -> context -> term -> term -> Prop :=
     NoDup (x :: y :: v :: nil) ->
 
     has_type tvars gamma2 n T_nat ->
-    is_context tvars (gamma1 ++ ((x, T_equal (rec T n e1 e2) e)  :: gamma2)) -> 
-    is_type tvars gamma2 (open 0 T (fvar x)) ->
+    is_context tvars (gamma1 ++ ((x, T_equal (rec T n e1 e2) e)  :: gamma2)) ->
+    is_type tvars gamma2 (open 0 T (term_fvar x)) ->
     are_equal tvars (gamma1 ++ (x, T_equal e1 e) :: (y, T_equal n zero) :: gamma2) t t' ->
     are_equal tvars (gamma1 ++ (x, T_equal
-                               (open 0 (open 1 e2 (fvar v))
-                                             (lambda T_unit (rec T (fvar v) e1 e2)))
+                               (open 0 (open 1 e2 (term_fvar v))
+                                             (lambda T_unit (rec T (term_fvar v) e1 e2)))
                                e) ::
-                          (y, T_equal n (succ (fvar v))) ::
+                          (y, T_equal n (succ (term_fvar v))) ::
                           (v, T_nat) ::
                           gamma2
               ) t t' ->
@@ -917,3 +923,9 @@ Scheme mut_has_type        := Induction for has_type    Sort Prop
 
 Combined Scheme mut_HT_IT_IC_IS_AE from
          mut_has_type, mut_is_type, mut_is_context, mut_is_subtype, mut_are_equal.
+
+
+Ltac t_invert_context :=
+  match goal with
+  | H: is_context (_ :: _) |- _ => inversion H; clear H
+  end.

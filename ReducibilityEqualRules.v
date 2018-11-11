@@ -54,7 +54,7 @@ Lemma equivalent_error:
     satisfies (reducible_values theta) gamma l ->
     support theta = tvars ->
     equivalent err (substitute t l) ->
-    False.    
+    False.
 Proof.
   repeat step || t_instantiate_sat2 || unfold reducible, reduces_to, equivalent in *;
     eauto using star_smallstep_err, red_is_val.
@@ -83,7 +83,7 @@ Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || simp_red || t_sat_cut || t_instantiate_sat3.
   - unshelve epose proof (H8 (l1 ++ (x,trefl) :: l2) _); tac1.
   - unshelve epose proof (H9 (l1 ++ (x,trefl) :: l2) _); tac1.
-Qed.  
+Qed.
 
 Lemma equivalent_split_nat:
   forall tvars theta (gamma1 gamma2 : context) (n t t' : term) x y l,
@@ -101,12 +101,14 @@ Lemma equivalent_split_nat:
     subset (fv n) (support gamma2) ->
     open_reducible tvars gamma2 n T_nat ->
     valid_interpretation theta ->
-    support theta = tvars -> 
+    support theta = tvars ->
     (forall l : list (nat * term),
        satisfies (reducible_values theta) (gamma1 ++ (x, T_equal n zero) :: gamma2) l ->
        equivalent (substitute t l) (substitute t' l)) ->
     (forall l : list (nat * term),
-       satisfies (reducible_values theta) (gamma1 ++ (x, T_equal n (succ (fvar y))) :: (y, T_nat) :: gamma2) l ->
+       satisfies (reducible_values theta)
+                 (gamma1 ++ (x, T_equal n (succ (fvar y term_var))) :: (y, T_nat) :: gamma2)
+                 l ->
        equivalent (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ gamma2) l ->
     equivalent (substitute t l) (substitute t' l).
@@ -116,7 +118,7 @@ Proof.
 
   - unshelve epose proof (H14 (l1 ++ (x,trefl) :: l2) _); tac1.
   - unshelve epose proof (H15 (l1 ++ (x,trefl) :: (y, t'0) :: l2) _); tac1.
-Qed.  
+Qed.
 
 Lemma equivalent_pair_eta:
   forall tvars theta (gamma : context) (t : term) A B l,
@@ -180,14 +182,16 @@ Lemma reducible_equivalent_match:
        satisfies (reducible_values theta) ((p, T_equal tn zero) :: gamma) l ->
        equivalent (substitute t0 l) (substitute t l)) ->
     (forall l : list (nat * term),
-       satisfies (reducible_values theta) ((p, T_equal tn (succ (fvar n))) :: (n, T_nat) :: gamma) l ->
-       equivalent (substitute (open 0 ts (fvar n)) l) (substitute t l)) ->
+       satisfies (reducible_values theta)
+                 ((p, T_equal tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma)
+                 l ->
+       equivalent (substitute (open 0 ts (fvar n term_var)) l) (substitute t l)) ->
     satisfies (reducible_values theta) gamma l ->
     equivalent (tmatch (substitute tn l) (substitute t0 l) (substitute ts l)) (substitute t l).
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_match; eauto; steps.
-  
+
   - unshelve epose proof (H12 ((p,trefl) :: l) _); tac1.
   - unshelve epose proof (H13 ((p,trefl) :: (n,v') :: l) _); tac1.
 Qed.
@@ -209,15 +213,16 @@ Lemma reducible_equivalent_rec:
     ~(n = p) ->
     open_reducible tvars gamma tn T_nat ->
     valid_interpretation theta ->
-    support theta = tvars ->    
+    support theta = tvars ->
     (forall l : list (nat * term),
        satisfies (reducible_values theta) ((p, T_equal tn zero) :: gamma) l ->
        equivalent (substitute t0 l) (substitute t l)) ->
     (forall l : list (nat * term),
-       satisfies (reducible_values theta) ((p, T_equal tn (succ (fvar n))) :: (n, T_nat) :: gamma) l ->
+       satisfies (reducible_values theta)
+                 ((p, T_equal tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma) l ->
        equivalent
          (substitute
-            (open 0 (open 1 ts (fvar n)) (lambda T_unit (rec T (fvar n) t0 ts))) l)
+            (open 0 (open 1 ts (fvar n term_var)) (lambda T_unit (rec T (fvar n term_var) t0 ts))) l)
          (substitute t l)) ->
     satisfies (reducible_values theta) gamma l ->
     equivalent (rec (substitute T l) (substitute tn l) (substitute t0 l) (substitute ts l))
@@ -225,8 +230,7 @@ Lemma reducible_equivalent_rec:
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_rec; eauto; steps.
-  
+
   - unshelve epose proof (H15 ((p,trefl) :: l) _); tac1.
   - unshelve epose proof (H16 ((p,trefl) :: (n,v') :: l) _); tac1.
 Qed.
-    

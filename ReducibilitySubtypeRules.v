@@ -36,10 +36,10 @@ Opaque makeFresh.
 
 Lemma subtypeExpand:
   forall tvars theta x A B v gamma l,
-    ~(x ∈ fv_context gamma) ->  
-    ~(x ∈ fv A) ->  
+    ~(x ∈ fv_context gamma) ->
+    ~(x ∈ fv A) ->
     ~(x ∈ fv B) ->
-    open_reducible tvars ((x, A) :: gamma) (fvar x) B ->
+    open_reducible tvars ((x, A) :: gamma) (term_fvar x) B ->
     valid_interpretation theta ->
     support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->
@@ -62,7 +62,9 @@ Lemma subtype_arrow2:
     ~(f ∈ fv B) ->
     ~(f ∈ fv T) ->
     ~(x = f) ->
-    open_reducible tvars ((x, A) :: (f, T) :: gamma) (app (fvar f) (fvar x)) (open 0 B (fvar x)) ->
+    open_reducible tvars ((x, A) :: (f, T) :: gamma)
+                   (app (term_fvar f) (term_fvar x))
+                   (open 0 B (term_fvar x)) ->
     valid_interpretation theta ->
     support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->
@@ -87,7 +89,7 @@ Lemma reducible_ext_pair:
       reducible_values theta a A /\
       reducible_values theta b (open 0 B a).
 Proof.
-  repeat step || unfold reducible, reduces_to in * || t_values_info2 || t_invert_star || 
+  repeat step || unfold reducible, reduces_to in * || t_values_info2 || t_invert_star ||
              t_deterministic_star ||
              match goal with
               | H1: is_value ?v,
@@ -104,7 +106,7 @@ Proof.
   eapply reducible_val_let2; eauto with values.
   eapply reducible_let_smallstep_values; eauto.
 Qed.
-  
+
 Lemma subtype_prod2:
   forall tvars theta gamma l A B T v x,
     ~(x ∈ fv_context gamma) ->
@@ -113,8 +115,8 @@ Lemma subtype_prod2:
     ~(x ∈ fv T) ->
     valid_interpretation theta ->
     support theta = tvars ->
-    open_reducible tvars ((x, T) :: gamma) (pi1 (fvar x)) A ->
-    open_reducible tvars ((x, T) :: gamma) (pi2 (fvar x)) (T_let (pi1 (fvar x)) A B) ->
+    open_reducible tvars ((x, T) :: gamma) (pi1 (term_fvar x)) A ->
+    open_reducible tvars ((x, T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) A B) ->
     satisfies (reducible_values theta) gamma l ->
     reducible_values theta v (substitute T l) ->
     reducible_values theta v (T_prod (substitute A l) (substitute B l)).
@@ -129,7 +131,7 @@ Proof.
     tac1.
   unshelve epose proof reducible_ext_pair _ _ _ _ _ _ HP1 HP2; steps; eauto with values;
     eauto 7 using reducible_ext_pair with values btf.
-Qed.  
+Qed.
 
 Lemma reducible_values_refine_subtype:
   forall theta A p q v,
@@ -148,8 +150,8 @@ Lemma reducible_values_arrow_subtype:
     (forall a t, reducible_values theta a B1 ->
         reducible_values theta t (open 0 A2 a) ->
         reducible_values theta t (open 0 B2 a)
-    ) -> 
-   (forall t, reducible_values theta t B1 -> reducible_values theta t A1) -> 
+    ) ->
+   (forall t, reducible_values theta t B1 -> reducible_values theta t A1) ->
    reducible_values theta t (T_arrow A1 A2) ->
    reducible_values theta t (T_arrow B1 B2).
 Proof.
@@ -170,8 +172,8 @@ Lemma reducible_arrow_subtype_subst:
     satisfies (reducible_values theta) gamma l ->
     (forall (t : term) (l : list (nat * term)),
        satisfies (reducible_values theta) ((x, B1) :: gamma) l ->
-       reducible_values theta t (substitute (open 0 A2 (fvar x)) l) ->
-       reducible_values theta t (substitute (open 0 B2 (fvar x)) l)) ->
+       reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
+       reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
     (forall t, reducible_values theta t (substitute B1 l) -> reducible_values theta t (substitute A1 l)) ->
     reducible_values theta t (T_arrow (substitute A1 l) (substitute A2 l)) ->
     reducible_values theta t (T_arrow (substitute B1 l) (substitute B2 l)).
@@ -188,8 +190,8 @@ Lemma reducible_values_prod_subtype:
     (forall a t, reducible_values theta a A1 ->
         reducible_values theta t (open 0 A2 a) ->
         reducible_values theta t (open 0 B2 a)
-    ) -> 
-   (forall t, reducible_values theta t A1 -> reducible_values theta t B1) -> 
+    ) ->
+   (forall t, reducible_values theta t A1 -> reducible_values theta t B1) ->
    reducible_values theta t (T_prod A1 A2) ->
    reducible_values theta t (T_prod B1 B2).
 Proof.
@@ -209,8 +211,8 @@ Lemma reducible_prod_subtype_subst:
     satisfies (reducible_values theta) gamma l ->
     (forall (t : term) (l : list (nat * term)),
        satisfies (reducible_values theta) ((x, A1) :: gamma) l ->
-       reducible_values theta t (substitute (open 0 A2 (fvar x)) l) ->
-       reducible_values theta t (substitute (open 0 B2 (fvar x)) l)) ->
+       reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
+       reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
     (forall t, reducible_values theta t (substitute A1 l) -> reducible_values theta t (substitute B1 l)) ->
     reducible_values theta t (T_prod (substitute A1 l) (substitute A2 l)) ->
     reducible_values theta t (T_prod (substitute B1 l) (substitute B2 l)).
@@ -220,5 +222,3 @@ Proof.
       steps; eauto with btf.
   unshelve epose proof (H6 t0 ((x,a) :: l) _ _); tac1.
 Qed.
-
-

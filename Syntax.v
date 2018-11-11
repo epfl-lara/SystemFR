@@ -8,13 +8,14 @@ Require Import Coq.Lists.List.
 
 Require Import PeanoNat.
 
+Inductive fv_tag: Set := term_var | type_var.
+
 (* locally nameless representation *)
 Inductive term: Set :=
-  (* term variable *)
-  | fvar: nat -> term
+  (* term or type variable *)
+  | fvar: nat -> fv_tag -> term
 
   (* types *)
-  | T_var: nat -> term
   | T_nat: term
   | T_unit: term
   | T_bool: term
@@ -58,143 +59,187 @@ Inductive term: Set :=
   | trefl: term
 .
 
+Definition term_fvar s := fvar s term_var.
+Definition type_fvar s := fvar s type_var.
 
-Fixpoint fv (t: term): set nat :=
+Hint Unfold term_fvar.
+Hint Unfold type_fvar.
+
+Lemma tag_eq_dec:
+  forall tag1 tag2: fv_tag, { tag1 = tag2 } + { tag1 <> tag2 }.
+Proof.
+  intros.
+  decide equality.
+Qed.
+
+Fixpoint pfv (t: term) tag: set nat :=
   match t with
-  | fvar y => singleton y
-  | lvar _ => empty
-  | err => empty
+  | fvar y tag' =>
+    if (tag_eq_dec tag tag')
+    then singleton y
+    else nil
+  | lvar _ => nil
+  | err => nil
 
-  | uu => empty
+  | uu => nil
 
-  | lambda T t' => fv T ++ fv t'
-  | app t1 t2 => fv t1 ++ fv t2
+  | lambda T t' => pfv T tag ++ pfv t' tag
+  | app t1 t2 => pfv t1 tag ++ pfv t2 tag
 
-  | pp t1 t2 => fv t1 ++ fv t2
-  | pi1 t' => fv t'
-  | pi2 t' => fv t'
+  | pp t1 t2 => pfv t1 tag ++ pfv t2 tag
+  | pi1 t' => pfv t' tag
+  | pi2 t' => pfv t' tag
 
-  | ttrue => empty
-  | tfalse => empty
-  | ite t1 t2 t3 => fv t1 ++ fv t2 ++ fv t3
+  | ttrue => nil
+  | tfalse => nil
+  | ite t1 t2 t3 => pfv t1 tag ++ pfv t2 tag ++ pfv t3 tag
 
-  | zero => empty
-  | succ t' => fv t'
-  | rec T t' t0 ts => fv T ++ fv t' ++ fv t0 ++ fv ts
-  | tmatch t' t0 ts => fv t' ++ fv t0 ++ fv ts
+  | zero => nil
+  | succ t' => pfv t' tag
+  | rec T t' t0 ts => pfv T tag ++ pfv t' tag ++ pfv t0 tag ++ pfv ts tag
+  | tmatch t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
 
-  | tlet t1 A t2 => fv t1 ++ fv A ++  fv t2
-  | trefl => empty
+  | tlet t1 A t2 => pfv t1 tag ++ pfv A tag ++  pfv t2 tag
+  | trefl => nil
 
-  | T_var y => nil
   | T_unit => nil
   | T_bool => nil
   | T_nat => nil
-  | T_refine A p => fv A ++ fv p
-  | T_prod A B => fv A ++ fv B
-  | T_arrow A B => fv A ++ fv B
-  | T_let t A B => fv t ++ fv A ++ fv B
-  | T_singleton t => fv t
-  | T_intersection A B => fv A ++ fv B
-  | T_union A B => fv A ++ fv B
+  | T_refine A p => pfv A tag ++ pfv p tag
+  | T_prod A B => pfv A tag ++ pfv B tag
+  | T_arrow A B => pfv A tag ++ pfv B tag
+  | T_let t A B => pfv t tag ++ pfv A tag ++ pfv B tag
+  | T_singleton t => pfv t tag
+  | T_intersection A B => pfv A tag ++ pfv B tag
+  | T_union A B => pfv A tag ++ pfv B tag
   | T_top => nil
   | T_bot => nil
-  | T_equal t1 t2 => fv t1 ++ fv t2
-  | T_forall A B => fv A ++ fv B
-  | T_exists A B => fv A ++ fv B
+  | T_equal t1 t2 => pfv t1 tag ++ pfv t2 tag
+  | T_forall A B => pfv A tag ++ pfv B tag
+  | T_exists A B => pfv A tag ++ pfv B tag
   end.
+
+Definition fv t := pfv t term_var.
+Definition tfv t := pfv t type_var.
+
+Hint Unfold fv.
+Hint Unfold tfv.
 
 Definition tvar_list := list nat.
+
 Definition context: Type := list (nat * term).
 
-Fixpoint fv_context gamma :=
+Fixpoint pfv_context gamma tag :=
   match gamma with
   | nil => nil
-  | (x,T) :: gamma' => x :: fv T ++ fv_context gamma'
+  | (x,T) :: gamma' => x :: pfv T tag ++ pfv_context gamma' tag
   end.
 
+Definition fv_context gamma := pfv_context gamma term_var.
+
+Hint Unfold fv_context.
+
 Lemma fv_context_append:
-  forall gamma1 gamma2,
-    fv_context (gamma1 ++ gamma2) = fv_context gamma1 ++ fv_context gamma2.
+  forall gamma1 gamma2 tag,
+    pfv_context (gamma1 ++ gamma2) tag = pfv_context gamma1 tag ++ pfv_context gamma2 tag.
 Proof.
   induction gamma1; repeat step || rewrite app_assoc_reverse.
 Qed.
 
 Hint Rewrite fv_context_append: blistutils.
 
-Fixpoint fv_range (m: list (nat * term)) :=
+Fixpoint pfv_range (m: list (nat * term)) tag :=
   match m with
-  | nil => empty
-  | (x,t) :: m' => fv t ++ fv_range m'
+  | nil => nil
+  | (x,t) :: m' => pfv t tag ++ pfv_range m' tag
   end.
 
-Fixpoint closed_mapping (m: list (nat * term)): Prop :=
+Definition fv_range (m: list (nat * term)) := pfv_range m term_var.
+
+Hint Unfold fv_range.
+
+Fixpoint pclosed_mapping (m: list (nat * term)) tag: Prop :=
   match m with
   | nil => True
-  | (x,t) :: m' => fv t = nil /\ closed_mapping m'
+  | (x,t) :: m' => pfv t tag = nil /\ pclosed_mapping m' tag
   end.
 
-Fixpoint substitute t (l: list (nat * term)): term :=
+Definition closed_mapping (m: list (nat * term)): Prop := pclosed_mapping m term_var.
+
+Hint Unfold closed_mapping.
+
+Fixpoint psubstitute t (l: list (nat * term)) (tag: fv_tag): term :=
   match t with
-  | fvar x =>
+  | fvar x tag' =>
     match lookup Nat.eq_dec l x with
     | None => t
-    | Some e => e
+    | Some e =>
+      if (tag_eq_dec tag tag')
+      then e
+      else t
     end
-
-  (* substitution is only for term variables *)
-  | T_var _ => t
 
   | lvar _ => t
   | err => t
 
   | uu => t
 
-  | lambda T t' => lambda (substitute T l) (substitute t' l)
-  | app t1 t2 => app (substitute t1 l) (substitute t2 l)
+  | lambda T t' => lambda (psubstitute T l tag) (psubstitute t' l tag)
+  | app t1 t2 => app (psubstitute t1 l tag) (psubstitute t2 l tag)
 
-  | pp t1 t2 => pp (substitute t1 l) (substitute t2 l)
-  | pi1 t' => pi1 (substitute t' l)
-  | pi2 t' => pi2 (substitute t' l)
+  | pp t1 t2 => pp (psubstitute t1 l tag) (psubstitute t2 l tag)
+  | pi1 t' => pi1 (psubstitute t' l tag)
+  | pi2 t' => pi2 (psubstitute t' l tag)
 
   | ttrue => t
   | tfalse => t
-  | ite t1 t2 t3 => ite (substitute t1 l) (substitute t2 l) (substitute t3 l)
+  | ite t1 t2 t3 => ite (psubstitute t1 l tag) (psubstitute t2 l tag) (psubstitute t3 l tag)
 
   | zero => t
-  | succ t' => succ (substitute t' l)
-  | rec T t' t1 t2 => rec (substitute T l) (substitute t' l) (substitute t1 l) (substitute t2 l)
-  | tmatch t' t1 t2 => tmatch (substitute t' l) (substitute t1 l) (substitute t2 l)
+  | succ t' => succ (psubstitute t' l tag)
+  | rec T t' t1 t2 =>
+      rec (psubstitute T l tag) (psubstitute t' l tag)
+          (psubstitute t1 l tag) (psubstitute t2 l tag)
+  | tmatch t' t1 t2 => tmatch (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
 
-  | tlet t1 T t2 => tlet (substitute t1 l) (substitute T l) (substitute t2 l)
+  | tlet t1 T t2 => tlet (psubstitute t1 l tag) (psubstitute T l tag) (psubstitute t2 l tag)
   | trefl => t
 
   | T_unit => t
   | T_bool => t
   | T_nat => t
-  | T_prod T1 T2 => T_prod (substitute T1 l) (substitute T2 l)
-  | T_arrow T1 T2 => T_arrow (substitute T1 l) (substitute T2 l)
-  | T_refine T p => T_refine (substitute T l) (substitute p l)
-  | T_let t A B => T_let (substitute t l) (substitute A l) (substitute B l)
-  | T_singleton t => T_singleton (substitute t l)
-  | T_intersection T1 T2 => T_intersection (substitute T1 l) (substitute T2 l)
-  | T_union T1 T2 => T_union (substitute T1 l) (substitute T2 l)
+  | T_prod T1 T2 => T_prod (psubstitute T1 l tag) (psubstitute T2 l tag)
+  | T_arrow T1 T2 => T_arrow (psubstitute T1 l tag) (psubstitute T2 l tag)
+  | T_refine T p => T_refine (psubstitute T l tag) (psubstitute p l tag)
+  | T_let t A B => T_let (psubstitute t l tag) (psubstitute A l tag) (psubstitute B l tag)
+  | T_singleton t => T_singleton (psubstitute t l tag)
+  | T_intersection T1 T2 => T_intersection (psubstitute T1 l tag) (psubstitute T2 l tag)
+  | T_union T1 T2 => T_union (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (substitute t1 l) (substitute t2 l)
-  | T_forall T1 T2 => T_forall (substitute T1 l) (substitute T2 l)
-  | T_exists T1 T2 => T_exists (substitute T1 l) (substitute T2 l)
+  | T_equal t1 t2 => T_equal (psubstitute t1 l tag) (psubstitute t2 l tag)
+  | T_forall T1 T2 => T_forall (psubstitute T1 l tag) (psubstitute T2 l tag)
+  | T_exists T1 T2 => T_exists (psubstitute T1 l tag) (psubstitute T2 l tag)
   end.
 
-Fixpoint substitute_context (gamma: context) (l: list (nat * term)): context :=
+Definition substitute t l := psubstitute t l term_var.
+Definition substitute_type_vars t l := psubstitute t l type_var.
+
+Hint Unfold substitute.
+Hint Unfold substitute_type_vars.
+
+Fixpoint psubstitute_context (gamma: context) (l: list (nat * term)) tag: context :=
   match gamma with
   | nil => nil
-  | (x,T) :: gamma' => (x, substitute T l) :: substitute_context gamma' l
+  | (x,T) :: gamma' => (x, psubstitute T l tag) :: psubstitute_context gamma' l tag
   end.
+
+Definition substitute_context (gamma: context) (l: list (nat * term)): context :=
+  psubstitute_context gamma l term_var.
 
 Fixpoint open (k: nat) (t rep: term) :=
   match t with
-  | fvar _ => t
+  | fvar _ _ => t
   | lvar i => if (Nat.eq_dec k i) then rep else t
   | err => t
 
@@ -230,7 +275,6 @@ Fixpoint open (k: nat) (t rep: term) :=
          (open (S k) t2 rep)
   | trefl => t
 
-  | T_var _ => t
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -250,7 +294,7 @@ Fixpoint open (k: nat) (t rep: term) :=
 
 Fixpoint wf t k :=
   match t with
-  | fvar _ => True
+  | fvar _ _ => True
   | lvar i => i < k
   | err => True
 
@@ -282,7 +326,6 @@ Fixpoint wf t k :=
   | tlet t1 T t2 => wf t1 k /\ wf T k /\ wf t2 (S k)
   | trefl => True
 
-  | T_var _ => True
   | T_unit => True
   | T_bool => True
   | T_nat => True
@@ -344,3 +387,9 @@ Lemma fold_open_refine:
 Proof.
   reflexivity.
 Qed.
+
+Fixpoint closed_terms (ltypes: list (nat * term)): Prop :=
+  match ltypes with
+  | nil => True
+  | (_, t) :: ts => closed_terms ts /\ wf t 0 /\ fv t = nil
+  end.

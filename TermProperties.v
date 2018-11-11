@@ -4,7 +4,7 @@ Require Import Termination.Tactics.
 Require Export Termination.StarRelation.
 
 Definition normalizing (t: term): Prop :=
-  fv t = nil /\
+  pfv t term_var = nil /\
   wf t 0 /\
   exists v, is_value v /\ star small_step t v.
 
@@ -12,7 +12,7 @@ Hint Unfold normalizing: props.
 
 Definition irred (t: term) :=
   forall t', ~small_step t t'.
-  
+
 Ltac hyp_irred v :=
   match goal with
   | H: irred v |- _ => idtac

@@ -89,8 +89,11 @@ Ltac choose_variables_exists_elim :=
 
 Ltac choose_variables_subtype :=
   match goal with
-  | H: reducible_values _ _ (T_arrow (substitute ?A1 _) (substitute ?A2 _)) |- _ =>
-    eapply reducible_arrow_subtype_subst with A1 A2 _ _
+  | x: nat,
+    H: reducible_values ?theta _
+                        (T_arrow (psubstitute ?A1 _ term_var)
+                                 (psubstitute ?A2 _ term_var)) |- _ =>
+    eapply reducible_arrow_subtype_subst with A1 A2 _ x
   end.
 
 Ltac slow_side_conditions :=
@@ -141,7 +144,7 @@ Proof.
   (* typing *)
   - apply open_reducible_var; auto.
   - apply open_reducible_weaken; side_conditions.
-  - eapply open_reducible_lambda; side_conditions.
+  - eapply open_reducible_lambda; steps; side_conditions.
   - apply open_reducible_app; auto.
   - eapply open_reducible_pp; auto.
   - eapply open_reducible_pi1; eauto.
@@ -149,36 +152,36 @@ Proof.
   - apply open_reducible_unit.
   - apply open_reducible_ttrue.
   - apply open_reducible_tfalse.
-  - eapply open_reducible_ite; side_conditions.
+  - eapply open_reducible_ite; steps; side_conditions.
   - unfold_open; repeat step || t_instantiate_sat3;  auto 3 using not_equivalent with falsity.
   - apply open_reducible_zero.
   - apply open_reducible_succ; auto.
-  - choose_variables; side_conditions.
-  - choose_variables; side_conditions.
-  - choose_variables; side_conditions.
+  - choose_variables; steps; side_conditions.
+  - choose_variables; steps; side_conditions.
+  - choose_variables; steps; side_conditions.
   - unfold_open; eauto using reducible_values_exprs.
-  - choose_variables; side_conditions.
-  - eapply open_reducible_singleton; eauto.
-  - eapply open_reducible_equal; side_conditions.
-  - apply open_reducible_intersection; side_conditions.
+  - choose_variables; steps; side_conditions.
+  - eapply open_reducible_singleton; steps; eauto.
+  - eapply open_reducible_equal; steps; side_conditions.
+  - apply open_reducible_intersection; steps; side_conditions.
   - eapply open_reducible_union_elim; slow_side_conditions.
   - apply open_reducible_refl; steps; eauto.
-  - eapply open_reducible_forall; side_conditions.
+  - eapply open_reducible_forall; steps; side_conditions.
   - choose_variables_exists_elim; slow_side_conditions.
 
   (* subtyping *)
-  - choose_variables_subtype; side_conditions.
-  - eapply subtype_arrow2 with _ x f _ T; side_conditions.
-  - eapply subtypeExpand; side_conditions.
-  - eapply reducible_prod_subtype_subst with A1 A2 _ _; side_conditions.
-  - apply subtype_prod2 with (support theta) gamma T x; side_conditions.
-  - apply reducible_refine_subtype with (support theta) gamma A p x; side_conditions.
+  - steps; choose_variables_subtype; steps; side_conditions.
+  - eapply subtype_arrow2 with _ x f _ T; steps; side_conditions.
+  - eapply subtypeExpand; steps; side_conditions.
+  - eapply reducible_prod_subtype_subst with A1 A2 x gamma; steps; side_conditions.
+  - apply subtype_prod2 with (support theta) gamma T x; steps; side_conditions.
+  - apply reducible_refine_subtype with (support theta) gamma A p x; steps; side_conditions.
   - simp_red; steps; eauto.
   - simp_red; steps; eauto.
-  - apply reducible_refine_subtype2 with gamma T x; side_conditions.
+  - apply reducible_refine_subtype2 with gamma T x; steps; side_conditions.
   - apply reducible_refine_subtype3 with (support theta) gamma A b x p; repeat t_subset_open || slow_side_conditions.
   - unfold_all; repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star.
-  - apply reducible_subtype_let_left with (support theta) gamma t A B x p; side_conditions.
+  - apply reducible_subtype_let_left with (support theta) gamma t A B x p; steps; side_conditions.
   - simp_red; unfold_reduce; repeat step || t_termlist || eexists; eauto using equivalence_def.
   - many_tactics; eauto with bwf.
   - eapply reducible_subtype_let_open2; eauto.
@@ -193,7 +196,7 @@ Proof.
 
   (* equality *)
   - eauto 2 with b_equiv.
-  - eapply reducibility_equivalent_weaken; eauto with bfv.
+  - eapply reducibility_equivalent_weaken; steps; eauto with bfv.
   - eauto using equivalent_trans.
   - apply equivalent_sym; eauto.
   - repeat step || t_smallstep_subst; eauto with values bwf b_equiv.
@@ -208,11 +211,11 @@ Proof.
   - many_tactics.
   - many_tactics.
   - eapply reducible_equivalent_ite; slow_side_conditions.
-  - eapply reducible_equivalent_match with (support theta) theta _ n p; side_conditions.
-  - eapply reducible_equivalent_rec with (support theta) theta  _ n p; side_conditions.
-  - eauto 7 using reducible_satisfies_weaker with bfv bfv2 btermlist.
-  - apply equivalent_split_bool with (support theta) theta gamma1 gamma2 b x; side_conditions.
-  - apply equivalent_split_nat with (support theta) theta gamma1 gamma2 n x y; side_conditions.
+  - eapply reducible_equivalent_match with (support theta) theta _ n p; steps; side_conditions.
+  - eapply reducible_equivalent_rec with (support theta) theta  _ n p; steps; side_conditions.
+  - repeat step || eapply_any; apply reducible_satisfies_weaker with T; steps; eauto with bfv btermlist.
+  - apply equivalent_split_bool with (support theta) theta gamma1 gamma2 b x; steps; side_conditions.
+  - apply equivalent_split_nat with (support theta) theta gamma1 gamma2 n x y; steps; side_conditions.
   - eauto using equivalent_error with step_tactic falsity.
   - apply equivalent_split_ite with (support theta) theta gamma1 gamma2 b e1 e2 e x y; split_tactic; eauto.
   - apply equivalent_split_match with (support theta) theta gamma1 gamma2 n e1 e2 e x y v; split_tactic; eauto.

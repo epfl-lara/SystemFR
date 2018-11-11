@@ -104,10 +104,10 @@ Qed.
 Hint Resolve wf_open: bwf.
 
 Lemma wf_subst:
-  forall t l k,
+  forall t l k tag,
     wf t k ->
     wfs l k ->
-    wf (substitute t l) k.
+    wf (psubstitute t l tag) k.
 Proof.
   induction t; steps; eauto with bwf.
 Qed.

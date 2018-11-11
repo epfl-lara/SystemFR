@@ -63,7 +63,7 @@ Lemma open_reducible_forall:
     wf U 0 ->
     subset (fv U) (support gamma) ->
     subset (fv t) (support gamma) ->
-    open_reducible tvars ((x, U) :: gamma) t (open 0 V (fvar x)) ->
+    open_reducible tvars ((x, U) :: gamma) t (open 0 V (term_fvar x)) ->
     open_reducible tvars gamma t (T_forall U V).
 Proof.
   unfold open_reducible in *; repeat step || t_instantiate_sat3.
@@ -96,7 +96,9 @@ Lemma open_reducible_exists_elim:
     subset (fv V) (support gamma) ->
     subset (fv t) (support gamma) ->
     open_reducible tvars gamma p (T_exists U V) ->
-    open_reducible tvars ((v, open 0 V (fvar u)) :: (u, U) :: gamma) (open 0 t (fvar v)) T ->
+    open_reducible tvars
+                   ((v, open 0 V (term_fvar u)) :: (u, U) :: gamma)
+                   (open 0 t (term_fvar v)) T ->
     open_reducible tvars gamma (tlet p (T_exists U V) t) T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
@@ -132,4 +134,4 @@ Lemma reducible_subtype_exists:
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red || t_deterministic_star; eauto.
-Qed. 
+Qed.

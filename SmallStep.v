@@ -18,7 +18,7 @@ Inductive is_value: term -> Prop :=
 | IVLambda: forall T t,
     is_value (lambda T t)
 | IVVar: forall x,
-    is_value (fvar x)
+    is_value (fvar x term_var)
 | IVRefl:
     is_value trefl
 .

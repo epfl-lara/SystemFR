@@ -77,8 +77,8 @@ Lemma equivalent_split_match:
     (forall l,
           satisfies (reducible_values theta)
                     (gamma1 ++
-                            (x, T_equal (open 0 e2 (fvar v)) e)
-                            :: (y, T_equal n (succ (fvar v))) :: (v, T_nat) :: gamma2) l ->
+                            (x, T_equal (open 0 e2 (term_fvar v)) e)
+                            :: (y, T_equal n (succ (term_fvar v))) :: (v, T_nat) :: gamma2) l ->
           equivalent (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (tmatch n e1 e2) e) :: gamma2) l ->
     wf n 0 ->

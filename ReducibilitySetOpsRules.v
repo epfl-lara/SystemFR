@@ -44,7 +44,7 @@ Lemma reducible_intersection:
 Proof.
   unfold reducible, reduces_to;
     repeat step || simp_red || t_values_info2 || t_deterministic_star || eauto || eexists.
-Qed.  
+Qed.
 
 Lemma reducible_union:
   forall theta e T1 T2,
@@ -54,7 +54,7 @@ Lemma reducible_union:
 Proof.
   unfold reducible, reduces_to;
     repeat step || simp_red || t_values_info2 || t_deterministic_star || eauto || eexists.
-Qed.  
+Qed.
 
 Lemma open_reducible_intersection:
   forall tvars gamma e T1 T2,
@@ -63,7 +63,7 @@ Lemma open_reducible_intersection:
     open_reducible tvars gamma e (T_intersection T1 T2).
 Proof.
   unfold open_reducible; repeat step || apply reducible_intersection.
-Qed.  
+Qed.
 
 Lemma reducible_singleton:
   forall theta (t1 t2 : term) T,
@@ -76,7 +76,7 @@ Proof.
     eauto with bwf bfv;
     eauto with values.
 Qed.
-  
+
 Lemma open_reducible_singleton:
   forall tvars (gamma : context) (t1 t2 : term) T,
     open_reducible tvars gamma t1 T ->
@@ -104,8 +104,8 @@ Lemma open_reducible_union_elim:
     ~(z ∈ fv T1) ->
     ~(z ∈ fv T2) ->
     open_reducible tvars gamma t (T_union T1 T2) ->
-    open_reducible tvars ((z, T1) :: gamma) (open 0 t' (fvar z)) T ->
-    open_reducible tvars ((z, T2) :: gamma) (open 0 t' (fvar z)) T ->
+    open_reducible tvars ((z, T1) :: gamma) (open 0 t' (term_fvar z)) T ->
+    open_reducible tvars ((z, T2) :: gamma) (open 0 t' (term_fvar z)) T ->
     open_reducible tvars gamma (tlet t (T_union T1 T2) t') T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold || simp_red.

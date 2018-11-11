@@ -11,9 +11,9 @@ Require Import Termination.WFLemmas.
 Require Import Termination.FVLemmas.
 
 Lemma substitute_nothing:
-  forall t l,
-    (forall x, x ∈ fv t -> x ∈ support l -> False) ->
-    substitute t l = t.
+  forall t l tag,
+    (forall x, x ∈ pfv t tag -> x ∈ support l -> False) ->
+    psubstitute t l tag = t.
 Proof.
   induction t;
     repeat match goal with
@@ -30,16 +30,16 @@ Proof.
 Qed.
 
 Lemma substitute_nothing2:
-  forall t x e l,
-    ~(x ∈ fv t) ->
-    substitute t ((x,e) :: l) = substitute t l.
+  forall t x e l tag,
+    ~(x ∈ pfv t tag) ->
+    psubstitute t ((x,e) :: l) tag = psubstitute t l tag.
 Proof.
   induction t;
     repeat step || unfold fv in * || (rewrite in_app_iff in *) || tequality || apply_any.
 Qed.
                     
 Lemma substitute_nothing3:
-  forall t, substitute t nil = t.
+  forall t tag, psubstitute t nil tag = t.
 Proof.
   induction t; steps.
 Qed.
@@ -47,7 +47,7 @@ Qed.
 Hint Rewrite substitute_nothing3: bsubst.
 
 Lemma substitute_nothing_context:
-  forall gamma, substitute_context gamma nil = gamma.
+  forall gamma tag, psubstitute_context gamma nil tag = gamma.
 Proof.
   induction gamma; repeat step || autorewrite with bsubst in *.
 Qed.
@@ -55,25 +55,26 @@ Qed.
 Hint Rewrite substitute_nothing_context: bsubst.
 
 Lemma substitute_nothing4:
-  forall t l,
-    (forall x, x ∈ fv t -> False) ->
-    substitute t l = t.
+  forall t l tag,
+    (forall x, x ∈ pfv t tag -> False) ->
+    psubstitute t l tag = t.
 Proof.
   intros; apply substitute_nothing; eauto.
 Qed.
 
 Lemma substitute_nothing5:
-  forall t l,
-    fv t = nil ->
-    substitute t l = t.
+  forall t l tag,
+    pfv t tag = nil ->
+    psubstitute t l tag = t.
 Proof.
   intros; apply substitute_nothing; repeat step || t_listutils.
 Qed.
 
 Lemma substitute_cons:
-  forall t x l rep,
-    fv rep = nil ->
-    substitute t ((x,rep) :: l) = substitute (substitute t ((x,rep) :: nil)) l.
+  forall t x l rep tag,
+    pfv rep tag = nil ->
+    psubstitute t ((x,rep) :: l) tag =
+    psubstitute (psubstitute t ((x,rep) :: nil) tag) l tag.
 Proof.
   induction t;
     repeat match goal with
@@ -83,9 +84,10 @@ Proof.
 Qed.
 
 Lemma substitute_cons2:
-  forall t x l rep,
-    (forall z, z ∈ fv rep -> z ∈ support l -> False) ->
-    substitute t ((x,rep) :: l) = substitute (substitute t ((x,rep) :: nil)) l.
+  forall t x l rep tag,
+    (forall z, z ∈ pfv rep tag -> z ∈ support l -> False) ->
+    psubstitute t ((x,rep) :: l) tag =
+    psubstitute (psubstitute t ((x,rep) :: nil) tag) l tag.
 Proof.
   induction t;
     repeat match goal with
@@ -95,42 +97,44 @@ Proof.
 Qed.
                                           
 Lemma substitute_cons3:
-  forall t x l rep,
-    substitute t ((x, substitute rep l) :: l) =
-    substitute (substitute t ((x,rep) :: nil)) l.
+  forall t x l rep tag,
+    psubstitute t ((x, psubstitute rep l tag) :: l) tag =
+    psubstitute (psubstitute t ((x,rep) :: nil) tag) l tag.
 Proof.
   induction t; steps.
 Qed.
 
 Lemma substitute_append:
-  forall l1 l2 t,
+  forall l1 l2 t tag,
     NoDup (l1 ++ l2) ->
-    closed_mapping l1 ->
-    substitute t (l1 ++ l2) = substitute (substitute t l1) l2.
+    pclosed_mapping l1 tag ->
+    psubstitute t (l1 ++ l2) tag = psubstitute (psubstitute t l1 tag) l2 tag.
 Proof.
   induction l1;
     repeat match goal with
-           | |- context[substitute ?t ((?x,?rep) :: ?l)] =>
-             noUnify l (@nil (nat * term)); rewrite (substitute_cons t x l rep)
+           | |- context[psubstitute ?t ((?x,?rep) :: ?l) ?tag] =>
+             noUnify l (@nil (nat * term)); rewrite (substitute_cons t x l rep tag)
            | _ => step || step_inversion NoDup || autorewrite with bsubst
            end.
 Qed.  
 
 Lemma substitute_cons_context:
-  forall gamma x l rep,
-    fv rep = nil ->
-    substitute_context gamma ((x,rep) :: l) =
-      substitute_context (substitute_context gamma ((x,rep) :: nil)) l.
+  forall gamma x l rep tag,
+    pfv rep tag = nil ->
+    psubstitute_context gamma ((x,rep) :: l) tag =
+      psubstitute_context (psubstitute_context gamma ((x,rep) :: nil) tag) l tag.
 Proof.
   induction gamma; repeat step.
-  f_equal; repeat step || rewrite substitute_cons; eauto.
+  f_equal; steps.
+  f_equal; steps.
+  rewrite substitute_cons; eauto.
 Qed.
 
 Lemma substitute_open:
-  forall t, forall k rep l, 
+  forall t, forall k rep l tag, 
      wfs l k ->
-     substitute (open k t rep) l =
-     open k (substitute t l) (substitute rep l).
+     psubstitute (open k t rep) l tag =
+     open k (psubstitute t l tag) (psubstitute rep l tag).
 Proof.
   induction t;
     repeat match goal with
@@ -142,10 +146,10 @@ Qed.
 Hint Resolve substitute_open: bsubst.
 
 Lemma substitute_open2:
-  forall t, forall k rep l,
+  forall t, forall k rep l tag,
       wfs l k ->
-      (forall x, x ∈ fv rep -> x ∈ support l -> False) ->
-      open k (substitute t l) rep = substitute (open k t rep) l.
+      (forall x, x ∈ pfv rep tag -> x ∈ support l -> False) ->
+      open k (psubstitute t l tag) rep = psubstitute (open k t rep) l tag.
 Proof.        
   intros; rewrite <- (substitute_nothing rep l) at 1; steps; eauto.
   symmetry; apply substitute_open; steps.
@@ -154,12 +158,12 @@ Qed.
 Hint Resolve substitute_open2: bsubst.    
 
 Lemma substitute_open3:
-  forall t k x rep l,
+  forall t k x rep l tag,
     wfs l k ->
     wf rep k ->
-    (x ∈ fv t -> False) ->
-    substitute (open k t (fvar x)) ((x, rep) :: l) =
-    open k (substitute t l) rep.
+    (x ∈ pfv t tag -> False) ->
+    psubstitute (open k t (fvar x tag)) ((x, rep) :: l) tag =
+    open k (psubstitute t l tag) rep.
 Proof.
   intros.
   rewrite substitute_open; steps.
@@ -169,8 +173,8 @@ Qed.
 Hint Rewrite substitute_open3: bsubst.    
 
 Lemma same_support_substitute:
-  forall gamma l,
-    support (substitute_context gamma l) = support gamma.
+  forall gamma l tag,
+    support (psubstitute_context gamma l tag) = support gamma.
 Proof.
   induction gamma; steps.
 Qed.
@@ -178,9 +182,10 @@ Qed.
 Hint Rewrite same_support_substitute: bsubst.
   
 Lemma lookup_subst:
-  forall gamma x T l,
+  forall gamma x T l tag,
     lookup Nat.eq_dec gamma x = Some T ->
-    lookup Nat.eq_dec (substitute_context gamma l) x = Some (substitute T l).
+      lookup Nat.eq_dec (psubstitute_context gamma l tag) x =
+      Some (psubstitute T l tag).
 Proof.
   induction gamma; steps.
 Qed.  
@@ -188,9 +193,9 @@ Qed.
 Hint Resolve lookup_subst: bsubst.
 
 Lemma lookup_subst2:
-  forall gamma x l,
+  forall gamma x l tag,
     lookup Nat.eq_dec gamma x = None ->
-    lookup Nat.eq_dec (substitute_context gamma l) x = None.
+    lookup Nat.eq_dec (psubstitute_context gamma l tag) x = None.
 Proof.
   induction gamma; steps.
 Qed.  
@@ -203,7 +208,9 @@ Definition equivalent_subst (l1 l2: list (nat * term)): Prop :=
     lookup Nat.eq_dec l2 s = Some t.
 
 Lemma subst_permutation:
-  forall t l1 l2, equivalent_subst l1 l2 -> substitute t l1 = substitute t l2.
+  forall t l1 l2 tag,
+    equivalent_subst l1 l2 ->
+    psubstitute t l1 tag = psubstitute t l2 tag.
 Proof.
   unfold equivalent_subst; induction t;
     repeat match goal with
@@ -221,9 +228,11 @@ Definition weak_equivalent_subst (vars: list nat) (l1 l2: list (nat * term)): Pr
     ).
 
 Lemma weak_subst_permutation:
-  forall t l1 l2, weak_equivalent_subst (fv t) l1 l2 -> substitute t l1 = substitute t l2.
+  forall t l1 l2 tag,
+    weak_equivalent_subst (pfv t tag) l1 l2 ->
+    psubstitute t l1 tag = psubstitute t l2 tag.
 Proof.
-  unfold weak_equivalent_subst, fv; induction t;
+  unfold weak_equivalent_subst; induction t;
     repeat match goal with
            | _ => step || tequality || t_listutils
            | _ => solve [ rewrite_any; steps ]
@@ -237,9 +246,9 @@ Proof.
 Qed.
     
 Lemma substitute_skip:
-  forall l1 l2 t x e,
-    ~(x ∈ fv t) ->
-    substitute t (l1 ++ (x,e) :: l2) = substitute t (l1 ++ l2).
+  forall l1 l2 t x e tag,
+    ~(x ∈ pfv t tag) ->
+    psubstitute t (l1 ++ (x,e) :: l2) tag = psubstitute t (l1 ++ l2) tag.
 Proof.
   intros.
   apply weak_subst_permutation.

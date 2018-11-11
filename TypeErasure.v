@@ -10,7 +10,7 @@ Inductive erased_term: Set :=
   | e_err: erased_term
 
   | e_uu: erased_term
-           
+
   | e_lambda: erased_term -> erased_term
   | e_app: erased_term -> erased_term -> erased_term
 
@@ -18,12 +18,12 @@ Inductive erased_term: Set :=
   | e_pi1: erased_term -> erased_term
   | e_pi2: erased_term -> erased_term
 
-  | e_ttrue: erased_term             
+  | e_ttrue: erased_term
   | e_tfalse: erased_term
   | e_ite: erased_term -> erased_term -> erased_term -> erased_term
 
   | e_zero: erased_term
-  | e_succ: erased_term -> erased_term 
+  | e_succ: erased_term -> erased_term
   | e_rec: erased_term -> erased_term -> erased_term -> erased_term
   | e_tmatch: erased_term -> erased_term -> erased_term -> erased_term
 
@@ -35,15 +35,16 @@ Inductive erased_term: Set :=
 
 Fixpoint erase (t: term): term :=
   match t with
-  | fvar y => fvar y
-  | lvar y => lvar y 
+  | fvar y term_var => t
+  | fvar y type_var => T_unit
+  | lvar y => lvar y
   | err => err
 
   | uu => uu
-            
+
   | lambda T t' => lambda (erase T) (erase t')
   | app t1 t2 => app (erase t1) (erase t2)
-                    
+
   | pp t1 t2 => pp (erase t1) (erase t2)
   | pi1 t' => pi1 (erase t')
   | pi2 t' => pi2 (erase t')
@@ -51,7 +52,7 @@ Fixpoint erase (t: term): term :=
   | ttrue => ttrue
   | tfalse => tfalse
   | ite t1 t2 t3 => ite (erase t1) (erase t2) (erase t3)
-                         
+
   | zero => zero
   | succ t' => succ (erase t')
   | rec T t' t0 ts => rec (erase T) (erase t') (erase t0) (erase ts)
@@ -60,7 +61,6 @@ Fixpoint erase (t: term): term :=
   | tlet t1 A t2 => tlet (erase t1) (erase A) (erase t2)
   | trefl => trefl
 
-  | T_var _ => T_unit
   | T_unit => T_unit
   | T_bool => T_unit
   | T_nat => T_unit

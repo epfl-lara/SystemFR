@@ -68,7 +68,7 @@ Qed.
 Lemma open_reducible_var:
   forall tvars gamma x T,
     lookup Nat.eq_dec gamma x = Some T ->
-    open_reducible tvars gamma (fvar x) T.
+    open_reducible tvars gamma (term_fvar x) T.
 Proof.
   unfold open_reducible;
     repeat step || t_termlist || t_lookup;

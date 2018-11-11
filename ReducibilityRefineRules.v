@@ -53,12 +53,12 @@ Lemma reducible_refine:
     (forall theta l,
         valid_interpretation theta ->
         support theta = tvars ->
-        satisfies (reducible_values theta) ((p,T_equal (fvar x) t) :: (x, A) :: gamma) l ->
-        equivalent (substitute (open 0 b (fvar x)) l) ttrue) ->
+        satisfies (reducible_values theta) ((p,T_equal (term_fvar x) t) :: (x, A) :: gamma) l ->
+        equivalent (substitute (open 0 b (term_fvar x)) l) ttrue) ->
     open_reducible tvars gamma t (T_refine A b).
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
-  
+
   unfold reducible, reduces_to in *; repeat step;
     eauto with bwf; eauto with bfv.
 
@@ -79,12 +79,12 @@ Lemma reducible_refine_subtype:
     ~(x ∈ fv A) ->
     ~(x ∈ fv p) ->
     ~(x ∈ fv q) ->
-    open_reducible tvars ((x, B) :: gamma) (open 0 q (fvar x)) T_bool ->
+    open_reducible tvars ((x, B) :: gamma) (open 0 q (term_fvar x)) T_bool ->
     valid_interpretation theta ->
     support theta = tvars ->
     (forall l : list (nat * term),
         satisfies (reducible_values theta) ((x, T_refine A p) :: gamma) l ->
-        equivalent (substitute (open 0 q (fvar x)) l) ttrue) ->
+        equivalent (substitute (open 0 q (term_fvar x)) l) ttrue) ->
     (forall (t : term) (l : list (nat * term)),
         satisfies (reducible_values theta) gamma l ->
         reducible_values theta t (substitute A l) -> reducible_values theta t (substitute B l)) ->
@@ -107,7 +107,7 @@ Lemma reducible_refine_subtype2:
     valid_interpretation theta ->
     (forall l : list (nat * term),
         satisfies (reducible_values theta) ((x, T) :: gamma) l ->
-        equivalent (substitute (open 0 p (fvar x)) l) ttrue) ->
+        equivalent (substitute (open 0 p (term_fvar x)) l) ttrue) ->
     (forall (t : term) (l : list (nat * term)),
         satisfies (reducible_values theta) gamma l ->
         reducible_values theta t (substitute T l) -> reducible_values theta t (substitute A l)) ->
@@ -132,7 +132,10 @@ Lemma reducible_refine_subtype3:
     ~(x ∈ fv T) ->
     ~(x ∈ fv b) ->
     ~(x = p) ->
-    open_reducible tvars ((p, T_equal (open 0 b (fvar x)) ttrue) :: (x, A) :: gamma) (fvar x) T ->
+    open_reducible tvars
+                   ((p, T_equal (open 0 b (term_fvar x)) ttrue) :: (x, A) :: gamma)
+                   (term_fvar x)
+                   T ->
     valid_interpretation theta ->
     support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->

@@ -20,7 +20,7 @@ Require Import Termination.FVLemmasTyping.
 Lemma defined_FV_HT_1_open:
   forall tvars gamma t T k rep,
     has_type tvars gamma (open k t rep) T ->
-    subset (fv t) (support gamma).
+    subset (pfv t term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_subset_open.
 Qed.
@@ -30,7 +30,7 @@ Hint Resolve defined_FV_HT_1_open: bfv2.
 Lemma defined_FV_HT_2_open:
   forall tvars gamma t T k rep,
     has_type tvars gamma t (open k T rep) ->
-    subset (fv T) (support gamma).
+    subset (pfv T term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_subset_open.
 Qed.
@@ -45,7 +45,7 @@ Lemma defined_FV_HT_1_open_3_2:
     has_type tvars
              ((x,X) :: (y,Y) :: (z,Z) :: gamma)
              (open i (open j t rep1) rep2) T ->
-    subset (fv t) (support gamma).
+    subset (pfv t term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_subset_open; eauto 2 with sets.
 Qed.
@@ -59,7 +59,7 @@ Lemma defined_FV_HT_1_open_2_1:
     has_type tvars
              ((x,X) :: (y,Y) :: gamma)
              (open i t rep) T ->
-    subset (fv t) (support gamma).
+    subset (pfv t term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_subset_open; eauto 2 with sets.
 Qed.
@@ -69,7 +69,7 @@ Hint Resolve defined_FV_HT_1_open_2_1: bfv2.
 Lemma defined_FV_HT_1_var:
   forall tvars gamma t T x,
     has_type tvars gamma t T ->
-    x ∈ fv t ->
+    x ∈ pfv t term_var ->
     (x ∈ support gamma).
 Proof.
   repeat step || p_fv || unfold subset in * || instantiate_any || t_listutils.
@@ -81,7 +81,7 @@ Lemma defined_FV_HT_1_var_neg:
   forall tvars gamma t T x,
     has_type tvars gamma t T ->
     (x ∈ support gamma -> False) ->
-    (x ∈ fv t -> False).
+    (x ∈ pfv t term_var -> False).
 Proof.
   intros tvars gamma t T x H1 H2 H.
   pose proof (defined_FV_HT_1_var _ _ _ _ _ H1 H); steps.
@@ -92,7 +92,7 @@ Hint Resolve defined_FV_HT_1_var_neg: bfv2.
 Lemma defined_FV_HT_2_var:
   forall tvars gamma t T x,
     has_type tvars gamma t T ->
-    x ∈ fv T ->
+    x ∈ pfv T term_var ->
     x ∈ support gamma.
 Proof.
   repeat step || p_fv || unfold subset in * || instantiate_any || t_listutils.
@@ -104,7 +104,7 @@ Lemma defined_FV_HT_2_var_neg:
   forall tvars gamma t T x,
     has_type tvars gamma t T ->
     (x ∈ support gamma -> False) ->
-    (x ∈ fv T -> False).
+    (x ∈ pfv T term_var -> False).
 Proof.
   intros tvars gamma t T x H1 H2 H.
   pose proof (defined_FV_HT_2_var _ _ _ _ _ H1 H); steps.
@@ -115,7 +115,7 @@ Hint Resolve defined_FV_HT_2_var_neg: bfv2.
 Lemma defined_FV_IT_var:
   forall tvars gamma T x,
     is_type tvars gamma T ->
-    x ∈ fv T ->
+    x ∈ pfv T term_var ->
     x ∈ support gamma.
 Proof.
   repeat step || p_fv || unfold subset in * || instantiate_any || t_listutils.
@@ -127,7 +127,7 @@ Lemma defined_FV_IT_var_neg:
   forall tvars gamma T x,
     is_type tvars gamma T ->
     (x ∈ support gamma -> False) ->
-    (x ∈ fv T -> False).
+    (x ∈ pfv T term_var -> False).
 Proof.
   intros tvars gamma T x H1 H2 H.
   pose proof (defined_FV_IT_var _ _ _ _ H1 H); steps.
@@ -139,8 +139,8 @@ Hint Resolve defined_FV_IT_var_neg: bfv2.
 Lemma defined_FV_context:
   forall tvars x gamma t T A,
     has_type tvars ((x,A) :: gamma) t T ->
-    ~(x ∈ fv_context gamma) ->
-    subset (fv_context gamma) (support gamma).
+    ~(x ∈ pfv_context gamma term_var) ->
+    subset (pfv_context gamma term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_sets; eauto 2 with sets.
 Qed.
@@ -150,8 +150,8 @@ Hint Resolve defined_FV_context: bfv2.
 Lemma defined_HT_open:
   forall tvars x gamma t T A k rep,
     has_type tvars ((x,A) :: gamma) (open k t rep) T ->
-    ~(x ∈ fv t) ->
-    subset (fv t) (support gamma).
+    ~(x ∈ pfv t term_var) ->
+    subset (pfv t term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_sets || t_subset_open; eauto 2 with sets.
 Qed.
@@ -161,8 +161,8 @@ Hint Resolve defined_HT_open: bfv2.
 Lemma defined_HT_open_type:
   forall tvars x gamma t T A k rep,
     has_type tvars ((x,A) :: gamma) t (open k T rep) ->
-    ~(x ∈ fv T) ->
-    subset (fv T) (support gamma).
+    ~(x ∈ pfv T term_var) ->
+    subset (pfv T term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_sets || t_subset_open; eauto 2 with sets.
 Qed.
@@ -172,8 +172,8 @@ Hint Resolve defined_HT_open_type: bfv2.
 Lemma defined_HT_unused:
   forall tvars x gamma t T A,
     has_type tvars ((x,A) :: gamma) t T ->
-    ~(x ∈ fv t) ->
-    subset (fv t) (support gamma).
+    ~(x ∈ pfv t term_var) ->
+    subset (pfv t term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_sets || t_subset_open; eauto 2 with sets.
 Qed.
@@ -183,8 +183,8 @@ Hint Resolve defined_HT_unused: bfv2.
 Lemma defined_HT_unused_type:
   forall tvars x gamma t T A,
     has_type tvars ((x,A) :: gamma) t T ->
-    ~(x ∈ fv T) ->
-    subset (fv T) (support gamma).
+    ~(x ∈ pfv T term_var) ->
+    subset (pfv T term_var) (support gamma).
 Proof.
   repeat step || p_fv || t_sets || t_subset_open; eauto 2 with sets.
 Qed.
@@ -195,53 +195,93 @@ Lemma defined_HT_context:
   forall tvars x gamma t T ,
     has_type tvars gamma t T ->
     ~(x ∈ support gamma) ->
-    ~(x ∈ fv_context gamma).
+    ~(x ∈ pfv_context gamma term_var).
 Proof.
   repeat step || p_fv || unfold subset in * || instantiate_any || t_listutils.
 Qed.
 
-Hint Resolve defined_HT_context: bfv2.
+Ltac t_defined_HT_context :=
+  match goal with
+  | H1: has_type ?tvars ?gamma ?t ?T,
+    H2: ?x ∈ support ?gamma -> False,
+    H3: ?x ∈ pfv_context ?gamma term_var |- _ =>
+    apply False_ind; apply (defined_HT_context tvars x gamma t T H1 H2 H3)
+  end.
+
+Hint Extern 1 => t_defined_HT_context: bfv2.
 
 Lemma defined_IT_context:
   forall tvars x gamma T,
     is_type tvars gamma T ->
     ~(x ∈ support gamma) ->
-    ~(x ∈ fv_context gamma).
+    ~(x ∈ pfv_context gamma term_var).
 Proof.
   repeat step || p_fv || unfold subset in * || instantiate_any || t_listutils.
 Qed.
 
-Hint Resolve defined_IT_context: bfv2.
+Ltac t_defined_IT_context :=
+  match goal with
+  | H1: is_type ?tvars ?gamma ?T,
+    H2: ?x ∈ support ?gamma -> False,
+    H3: ?x ∈ pfv_context ?gamma term_var |- _ =>
+    apply False_ind; apply (defined_IT_context tvars x gamma T H1 H2 H3)
+  end.
+
+Hint Extern 1 => t_defined_IT_context: bfv2.
 
 Lemma defined_IS_context:
   forall tvars x gamma T1 T2 ,
     is_subtype tvars gamma T1 T2 ->
     ~(x ∈ support gamma) ->
-    ~(x ∈ fv_context gamma).
+    ~(x ∈ pfv_context gamma term_var).
 Proof.
   repeat step || p_sub_fv || unfold subset in * || instantiate_any || t_listutils.
 Qed.
 
-Hint Resolve defined_IS_context: bfv2.
+Ltac t_defined_IS_context :=
+  match goal with
+  | H1: is_subtype ?tvars ?gamma ?T1 ?T2,
+    H2: ?x ∈ support ?gamma -> False,
+    H3: ?x ∈ pfv_context ?gamma term_var |- _ =>
+    apply False_ind; apply (defined_IS_context tvars x gamma T1 T2 H1 H2 H3)
+  end.
+
+Hint Extern 1 => t_defined_IS_context: bfv2.
 
 Lemma defined_IS_T1:
   forall tvars x gamma T1 T2 ,
     is_subtype tvars gamma T1 T2 ->
     ~(x ∈ support gamma) ->
-    ~(x ∈ fv T1).
+    ~(x ∈ pfv T1 term_var).
 Proof.
   repeat step || p_sub_fv || unfold subset in * || instantiate_any || t_listutils.
 Qed.
 
-Hint Resolve defined_IS_T1: bfv2.
+Ltac t_defined_IS_T1 :=
+  match goal with
+  | H1: is_subtype ?tvars ?gamma ?T1 ?T2,
+    H2: ?x ∈ support ?gamma -> False,
+    H3: ?x ∈ pfv ?T1 term_var |- _ =>
+    apply False_ind; apply (defined_IS_T1 tvars x gamma T1 T2 H1 H2 H3)
+  end.
+
+Hint Extern 1 => t_defined_IS_T1: bfv2.
 
 Lemma defined_IS_T2:
   forall tvars x gamma T1 T2 ,
     is_subtype tvars gamma T1 T2 ->
     ~(x ∈ support gamma) ->
-    ~(x ∈ fv T2).
+    ~(x ∈ pfv T2 term_var).
 Proof.
   repeat step || p_sub_fv || unfold subset in * || instantiate_any || t_listutils.
 Qed.
 
-Hint Resolve defined_IS_T2: bfv2.
+Ltac t_defined_IS_T2 :=
+  match goal with
+  | H1: is_subtype ?tvars ?gamma ?T1 ?T2,
+    H2: ?x ∈ support ?gamma -> False,
+    H3: ?x ∈ pfv ?T2 term_var |- _ =>
+    apply False_ind; apply (defined_IS_T2 tvars x gamma T1 T2 H1 H2 H3)
+  end.
+
+Hint Extern 1 => t_defined_IS_T2: bfv2.

@@ -83,10 +83,10 @@ Lemma equivalent_split_rec:
        satisfies (reducible_values theta)
                     (gamma1 ++
                             (x, T_equal
-                                   (open 0 (open 1 e2 (fvar v))
-                                     (lambda T_unit (rec T (fvar v) e1 e2)))
+                                   (open 0 (open 1 e2 (term_fvar v))
+                                     (lambda T_unit (rec T (term_fvar v) e1 e2)))
                                  e)
-                            :: (y, T_equal n (succ (fvar v))) :: (v, T_nat) :: gamma2) l ->
+                            :: (y, T_equal n (succ (term_fvar v))) :: (v, T_nat) :: gamma2) l ->
           equivalent (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equal (rec T n e1 e2) e) :: gamma2) l ->
     equivalent (substitute t l) (substitute t' l).
@@ -97,13 +97,13 @@ Proof.
            simp_red.
 
   destruct t'0; steps.
-  
+
   - unshelve epose proof (H33 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _);
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
-      
-  - unshelve epose proof (H34 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _); 
-      clear H33; clear H34; 
+
+  - unshelve epose proof (H34 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _);
+      clear H33; clear H34;
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
 Qed.

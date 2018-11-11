@@ -7,13 +7,12 @@ Require Import Omega.
 (* measure for ensuring termination of reducible_values *)
 Fixpoint size T: nat :=
   match T with
-  | T_var _ => 0
   | T_unit => 0
   | T_bool => 0
   | T_nat => 0
   | T_refine A p => 1 + size A
   | T_arrow A B => 3 + size A + size B
-  | T_prod A B => 3 + size A + size B 
+  | T_prod A B => 3 + size A + size B
   | T_let t A B => 2 + size A + size B
   | T_singleton t => 0
   | T_intersection A B => 1 + size A + size B
@@ -32,7 +31,7 @@ Lemma size_term_form:
 Proof.
   destruct t; steps.
 Qed.
-  
+
 Lemma size_opening:
   forall T k rep, term_form rep -> size (open k T rep) = size T.
 Proof.
