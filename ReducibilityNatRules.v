@@ -2,6 +2,7 @@ Require Import Equations.Equations.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityLetRules.

@@ -26,6 +26,7 @@ Require Import Termination.WFLemmasLists.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 Require Import Termination.RedTactics.

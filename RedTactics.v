@@ -6,12 +6,18 @@ Require Import Termination.ListUtils.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
-Require Import Termination.ReducibilityDefinition.
 Require Import Termination.AssocList.
+Require Import Termination.Parametricity.
+Require Import Termination.TypeErasure.
+
+Require Import Termination.ReducibilityCandidate.
+Require Import Termination.ReducibilityDefinition.
+Require Import Termination.ReducibilityLemmas.
 
 Ltac t_rewrite := repeat step || t_listutils || t_fv_open || finisher;
                   eauto with bwf; eauto with bfv;
                   eauto with b_cmap bfv.
+
 Ltac tac1 :=
   repeat step || t_listutils || finisher || apply SatCons || simp_red ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
@@ -21,14 +27,17 @@ Ltac tac1 :=
          (rewrite substitute_open in * by t_rewrite) ||
              eauto with b_equiv;
              eauto with bwf bfv;
-             eauto 3 using NoDup_append with sets.
+             eauto 3 using NoDup_append with sets;
+             eauto with bparam.
 
 Lemma instantiate_open_reducible:
   forall theta gamma t T lterms,
     open_reducible (support theta) gamma t T ->
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma lterms ->
-    reducible theta (substitute t lterms) (substitute T lterms).
+    reducible theta
+              (psubstitute t lterms term_var)
+              (psubstitute T lterms term_var).
 Proof.
   unfold open_reducible; steps.
 Qed.
@@ -40,7 +49,7 @@ Ltac t_instantiate_sat2 :=
     H2: satisfies (reducible_values ?theta) ?gamma ?lterms
     |- _ =>
       poseNew (Mark (theta, gamma, t, T, lterms) "instantiate_open_reducible");
-      pose proof (instantiate_open_reducible theta gamma t T lterms H0 H1 H2)
+      unshelve epose proof (instantiate_open_reducible theta gamma t T lterms H0 H1 H2)
   end.
 
 Ltac t_instantiate_sat3 :=

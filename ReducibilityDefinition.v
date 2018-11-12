@@ -16,14 +16,16 @@ Require Import Termination.TermList.
 Require Import Termination.TypeList.
 Require Import Termination.TypeErasure.
 
+Require Import Termination.ReducibilityCandidate.
+
 Require Import Equations.Equations.
 Require Import Equations.Subterm.
 
 Require Import Omega.
 
 Definition reduces_to (P: term -> Prop) (t: term) :=
-  wf t 0 /\
   fv t = nil /\
+  wf t 0 /\
   exists t',
     star small_step t t' /\
     P t'.
@@ -107,9 +109,6 @@ Proof.
   unfold lt_index; steps; eauto.
 Qed.
 
-(* an interpretation for every type variable, as a collection of values *)
-Definition interpretation: Type := list (nat * (term -> Prop)).
-
 Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): Prop :=
   reducible_values theta v T by rec (size T, index T) (lexprod _ _ lt lt_index) :=
 
@@ -168,7 +167,9 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
     reducible_values theta v B;
 
   reducible_values theta v T_top :=
-      is_value v /\ fv v = nil /\ wf v 0 ;
+    is_value v /\
+    fv v = nil /\
+    wf v 0;
 
   reducible_values theta v T_bot := False;
 
@@ -177,10 +178,10 @@ Equations (noind) reducible_values (theta: interpretation) (v: term) (T: term): 
     equivalent t1 t2;
 
   reducible_values theta v (T_forall A B) :=
-      is_value v /\
-      fv v = nil /\
-      wf v 0 /\
-      forall a (p: term_form a), reducible_values theta a A -> reducible_values theta v (open 0 B a);
+    is_value v /\
+    fv v = nil /\
+    wf v 0 /\
+    forall a (p: term_form a), reducible_values theta a A -> reducible_values theta v (open 0 B a);
 
   reducible_values theta v (T_exists A B) :=
     exists a (p: term_form a), reducible_values theta a A /\ reducible_values theta v (open 0 B a);
@@ -194,45 +195,14 @@ Fail Next Obligation.
 Definition reducible (theta: interpretation) (t: term) (T: term): Prop :=
   reduces_to (fun t => reducible_values theta t T) t.
 
-Fixpoint valid_interpretation (theta: interpretation): Prop :=
-  match theta with
-  | nil => True
-  | (x,P) :: theta' => valid_interpretation theta' /\ forall v, P v -> (is_value v /\ fv v = nil /\ wf v 0)
-  end.
-
 Definition open_reducible (tvars: tvar_list) (gamma: context) t T: Prop :=
   forall theta lterms,
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma lterms  ->
     support theta = tvars ->
-    reducible theta (substitute t lterms) (substitute T lterms).
-
-Lemma in_valid_interpretation_fv: forall theta v X P,
-  valid_interpretation theta ->
-  lookup Nat.eq_dec theta X = Some P ->
-  P v ->
-  pfv v term_var = nil.
-Proof.
-  induction theta; repeat step || eauto || apply_any.
-Qed.
-
-Lemma in_valid_interpretation_wf: forall theta v X P,
-  valid_interpretation theta ->
-  lookup Nat.eq_dec theta X = Some P ->
-  P v ->
-  wf v 0.
-Proof.
-  induction theta; repeat step || eauto || apply_any.
-Qed.
-
-Lemma in_valid_interpretation_value: forall theta v X P,
-  valid_interpretation theta ->
-  lookup Nat.eq_dec theta X = Some P ->
-  P v ->
-  is_value v.
-Proof.
-  induction theta; repeat step || eauto || apply_any.
-Qed.
+    reducible theta
+              (substitute t lterms)
+              (substitute T lterms).
 
 Lemma reducibility_rewrite:
   forall theta t T,

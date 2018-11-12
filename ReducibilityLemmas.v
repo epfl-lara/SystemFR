@@ -17,6 +17,8 @@ Require Import Termination.FVLemmasEval.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
+
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 
 Require Import Omega.

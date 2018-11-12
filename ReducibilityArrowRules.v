@@ -15,6 +15,7 @@ Require Import Termination.TermForm.
 Require Import Termination.StarRelation.
 Require Import Termination.SmallStep.
 
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityLetRules.

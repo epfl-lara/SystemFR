@@ -31,6 +31,7 @@ Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
 
 Require Import Termination.RedTactics.
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 

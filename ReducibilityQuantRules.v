@@ -18,6 +18,7 @@ Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.StarInversions.
 Require Import Termination.TermForm.
 
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityLetRules.

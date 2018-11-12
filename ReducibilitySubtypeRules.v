@@ -25,6 +25,7 @@ Require Import Termination.FVLemmasLists.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
+Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityLetRules.
@@ -155,11 +156,10 @@ Lemma reducible_values_arrow_subtype:
    reducible_values theta t (T_arrow A1 A2) ->
    reducible_values theta t (T_arrow B1 B2).
 Proof.
-  repeat step || simp reducible_values in *.
-  - eexists; eexists; unfold reduces_to; repeat step || t_listutils;
-      eauto with bwf; eauto with bfv.
-    unshelve epose proof (H6 a _ _);
-      repeat step || t_listutils || unfold reduces_to in *; eauto.
+  repeat step || simp reducible_values in * || unfold reduces_to || t_listutils;
+    eauto with bwf; eauto with bfv.
+  unshelve epose proof (H6 a _ _);
+    repeat step || unfold reduces_to in *; eauto.
 Qed.
 
 Lemma reducible_arrow_subtype_subst:
