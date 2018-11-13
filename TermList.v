@@ -12,7 +12,7 @@ Require Import Termination.SubstitutionLemmas.
 Open Scope list_scope.
 
 Inductive satisfies (P: term -> term -> Prop):
-  list (nat * term) -> (* gamma *) 
+  list (nat * term) -> (* gamma *)
   list (nat * term) -> (* lterms *)
   Prop :=
 | SatNil: satisfies P nil nil
@@ -109,11 +109,11 @@ Proof.
       rewrite <- substitute_cons3 in *.
       erewrite subst_permutation; eauto.
       eapply obvious_equivalence3.
-  
-    
+
+
       eauto using obvious_equivalence3.
     + rewrite substitute_nothing2; steps; eauto.
-      apply IHgamma1; repeat step || step_inversion NoDup; eauto. 
+      apply IHgamma1; repeat step || step_inversion NoDup; eauto.
 Qed.
 *)
 
@@ -155,7 +155,7 @@ Ltac f_equal_cons :=
   match goal with
   | |- cons _ _ = cons _ _ => f_equal
   end.
-                                                
+
 Lemma satisfies_cut:
   forall p gamma1 gamma2 lterms,
     satisfies p (gamma1 ++ gamma2) lterms ->

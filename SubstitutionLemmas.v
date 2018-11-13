@@ -37,7 +37,7 @@ Proof.
   induction t;
     repeat step || unfold fv in * || (rewrite in_app_iff in *) || tequality || apply_any.
 Qed.
-                    
+
 Lemma substitute_nothing3:
   forall t tag, psubstitute t nil tag = t.
 Proof.
@@ -95,7 +95,7 @@ Proof.
            | _ => step || tequality || rewrite substitute_nothing
            end; eauto.
 Qed.
-                                          
+
 Lemma substitute_cons3:
   forall t x l rep tag,
     psubstitute t ((x, psubstitute rep l tag) :: l) tag =
@@ -116,7 +116,7 @@ Proof.
              noUnify l (@nil (nat * term)); rewrite (substitute_cons t x l rep tag)
            | _ => step || step_inversion NoDup || autorewrite with bsubst
            end.
-Qed.  
+Qed.
 
 Lemma substitute_cons_context:
   forall gamma x l rep tag,
@@ -131,7 +131,7 @@ Proof.
 Qed.
 
 Lemma substitute_open:
-  forall t, forall k rep l tag, 
+  forall t, forall k rep l tag,
      wfs l k ->
      psubstitute (open k t rep) l tag =
      open k (psubstitute t l tag) (psubstitute rep l tag).
@@ -150,12 +150,12 @@ Lemma substitute_open2:
       wfs l k ->
       (forall x, x ∈ pfv rep tag -> x ∈ support l -> False) ->
       open k (psubstitute t l tag) rep = psubstitute (open k t rep) l tag.
-Proof.        
+Proof.
   intros; rewrite <- (substitute_nothing rep l) at 1; steps; eauto.
   symmetry; apply substitute_open; steps.
 Qed.
 
-Hint Resolve substitute_open2: bsubst.    
+Hint Resolve substitute_open2: bsubst.
 
 Lemma substitute_open3:
   forall t k x rep l tag,
@@ -170,7 +170,7 @@ Proof.
   rewrite substitute_nothing2; steps.
 Qed.
 
-Hint Rewrite substitute_open3: bsubst.    
+Hint Rewrite substitute_open3: bsubst.
 
 Lemma same_support_substitute:
   forall gamma l tag,
@@ -180,7 +180,7 @@ Proof.
 Qed.
 
 Hint Rewrite same_support_substitute: bsubst.
-  
+
 Lemma lookup_subst:
   forall gamma x T l tag,
     lookup Nat.eq_dec gamma x = Some T ->
@@ -188,7 +188,7 @@ Lemma lookup_subst:
       Some (psubstitute T l tag).
 Proof.
   induction gamma; steps.
-Qed.  
+Qed.
 
 Hint Resolve lookup_subst: bsubst.
 
@@ -198,7 +198,7 @@ Lemma lookup_subst2:
     lookup Nat.eq_dec (psubstitute_context gamma l tag) x = None.
 Proof.
   induction gamma; steps.
-Qed.  
+Qed.
 
 Hint Immediate lookup_subst2: bsubst.
 
@@ -244,7 +244,7 @@ Proof.
                  ]
            end.
 Qed.
-    
+
 Lemma substitute_skip:
   forall l1 l2 t x e tag,
     ~(x ∈ pfv t tag) ->
@@ -270,7 +270,7 @@ Proof.
            | H: _ |- _ => apply H
            end; eauto with blookup.
 Qed.
-                            
+
 Lemma obvious_equivalence2:
   forall l1 x e l2,
     ~(x ∈ support l1) ->
@@ -294,7 +294,7 @@ Lemma equivalent_append:
     equivalent_subst (l1 ++ l) (l2 ++ l).
 Proof.
   unfold equivalent_subst;
-    repeat step || t_lookup || t_lookupor || t_listutils;  
-    auto using lookupWeaken with bcongruence bapply_any;  
+    repeat step || t_lookup || t_lookupor || t_listutils;
+    auto using lookupWeaken with bcongruence bapply_any;
     auto 6 using lookupRight2, lookupNoneSupport with bapply_any step_tactic.
 Qed.

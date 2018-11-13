@@ -12,7 +12,7 @@ Lemma value_irred:
 Proof.
   unfold irred; repeat step || t_nostep.
 Qed.
-  
+
 Lemma values_normalizing:
   forall v,
     fv v = nil ->
@@ -51,7 +51,7 @@ Hint Resolve smallstep_star: p_steplemmas.
 Lemma star_smallstep_trans:
   forall t1 t2,
     star small_step t1 t2 ->
-    forall t3,    
+    forall t3,
       star small_step t2 t3 ->
       star small_step t1 t3.
 Proof.
@@ -70,7 +70,7 @@ Qed.
 Lemma star_smallstep_app_r:
   forall t1 t2,
     star small_step t1 t2 ->
-    forall v, 
+    forall v,
       is_value v ->
       star small_step (app v t1) (app v t2).
 Proof.
@@ -89,7 +89,7 @@ Qed.
 Lemma star_smallstep_pp_r:
   forall t1 t2,
     star small_step t1 t2 ->
-    forall v, 
+    forall v,
       is_value v ->
       star small_step (pp v t1) (pp v t2).
 Proof.

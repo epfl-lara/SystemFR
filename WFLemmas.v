@@ -44,7 +44,7 @@ Lemma open_fun_late:
   (forall T k rep, wf T k -> open_fun k T rep = T) /\
   (forall t k rep, wf t k -> open_fun k t rep = t).
 Proof.
-  apply type_ind; 
+  apply type_ind;
     repeat step || tequality || t_typeequality; eauto with omega; eauto with bwf.
 Qed.
 
@@ -76,7 +76,7 @@ Lemma wfs_append:
   forall l1 l2 k,
     wfs l1 k ->
     wfs l2 k ->
-    wfs (l1 ++ l2) k. 
+    wfs (l1 ++ l2) k.
 Proof.
   induction l1; steps; eauto.
 Qed.
@@ -92,7 +92,7 @@ Qed.
 Hint Resolve wf_open_rev: bwf.
 
 Lemma wf_open:
-  forall t rep k, wf t (S k) -> wf rep k -> wf (open k t rep) k. 
+  forall t rep k, wf t (S k) -> wf rep k -> wf (open k t rep) k.
 Proof.
   induction t;
     repeat match goal with

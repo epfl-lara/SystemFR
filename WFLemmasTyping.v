@@ -43,12 +43,12 @@ Lemma has_type_wf_term:
 Proof.
   apply has_type_wf_tt.
 Qed.
-  
+
 Lemma has_type_wf_type:
   forall tvars gamma t T, has_type tvars gamma t T -> wf T 0.
 Proof.
   apply has_type_wf_tt.
-Qed.  
+Qed.
 
 Hint Resolve has_type_wf_term has_type_wf_type: bwf.
 
@@ -57,7 +57,7 @@ Lemma are_equal_wf_left:
 Proof.
   apply are_equal_wf.
 Qed.
-  
+
 Lemma are_equal_wf_right:
   forall tvars gamma t1 t2, are_equal tvars gamma t1 t2 -> wf t2 0.
 Proof.
