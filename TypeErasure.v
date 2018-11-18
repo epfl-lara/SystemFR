@@ -10,7 +10,7 @@ Open Scope list_scope.
 Program Fixpoint erase_term (t: tree): tree :=
   match t with
   | fvar y term_var => t
-  | lvar y => lvar y
+  | lvar y term_var => t
   | err => err
 
   | uu => uu

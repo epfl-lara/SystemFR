@@ -6,6 +6,7 @@ Inductive fv_tag: Set := term_var | type_var.
 Inductive tree: Set :=
   (* term or type variable *)
   | fvar: nat -> fv_tag -> tree
+  | lvar: nat -> fv_tag -> tree
 
   (* types *)
   | T_nat: tree
@@ -25,7 +26,6 @@ Inductive tree: Set :=
   | T_exists: tree -> tree -> tree
 
   (* terms *)
-  | lvar: nat -> tree
   | err: tree
 
   | uu: tree
@@ -63,7 +63,7 @@ Hint Unfold type_fvar.
 Fixpoint is_annotated_term t :=
   match t with
   | fvar y term_var => True
-  | lvar _ => True
+  | lvar _ term_var => True
   | err => True
 
   | uu => True
@@ -93,6 +93,7 @@ Fixpoint is_annotated_term t :=
 with is_annotated_type T :=
   match T with
   | fvar y type_var => True
+  | lvar y type_var => True
   | T_unit => True
   | T_bool => True
   | T_nat => True
@@ -116,7 +117,7 @@ with is_annotated_type T :=
 Fixpoint is_erased_term t :=
     match t with
   | fvar y term_var => True
-  | lvar _ => True
+  | lvar _ term_var => True
   | err => True
 
   | uu => True
@@ -145,6 +146,7 @@ Fixpoint is_erased_term t :=
 Fixpoint is_erased_type T :=
   match T with
   | fvar y type_var => True
+  | lvar y type_var => True
   | T_unit => True
   | T_bool => True
   | T_nat => True
@@ -182,7 +184,7 @@ Coercion erased_type_to_tree: erased_type >-> tree.
 Fixpoint tree_size t :=
   match t with
   | fvar _ _ => 0
-  | lvar _ => 0
+  | lvar _ _ => 0
   | err => 0
 
   | uu => 0

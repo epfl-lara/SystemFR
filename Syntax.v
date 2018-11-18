@@ -22,7 +22,7 @@ Fixpoint pfv t tag: set nat :=
     if (tag_eq_dec tag tag')
     then singleton y
     else nil
-  | lvar _ => nil
+  | lvar _ _ => nil
   | err => nil
 
   | uu => nil
@@ -126,7 +126,7 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
       else t
     end
 
-  | lvar _ => t
+  | lvar _ _ => t
   | err => t
 
   | uu => t
@@ -191,7 +191,8 @@ Definition substitute_context (gamma: context) (l: list (nat * tree)): context :
 Fixpoint open (k: nat) (t rep: tree) :=
   match t with
   | fvar _ _ => t
-  | lvar i => if (Nat.eq_dec k i) then rep else t
+  | lvar i term_var => if (Nat.eq_dec k i) then rep else t
+  | lvar i type_var => t
   | err => t
 
   | notype_lambda t' => notype_lambda (open (S k) t' rep)
@@ -251,7 +252,8 @@ Fixpoint open (k: nat) (t rep: tree) :=
 Fixpoint wf t k :=
   match t with
   | fvar _ _ => True
-  | lvar i => i < k
+  | lvar i term_var => i < k
+  | lvar i type_var => True
   | err => True
 
   | uu => True
