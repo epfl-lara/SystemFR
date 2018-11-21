@@ -53,6 +53,7 @@ Require Import Termination.ReducibilitySplitIteRule.
 Require Import Termination.ReducibilitySplitMatchRule.
 Require Import Termination.ReducibilitySplitRecRule.
 Require Import Termination.ReducibilityPolymorphism.
+Require Import Termination.ReducibilityFixRules.
 
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasTyping.
@@ -208,6 +209,7 @@ Proof.
   - apply open_reducible_zero.
   - apply open_reducible_succ; auto.
   - choose_variables; side_conditions.
+  - apply open_reducible_fix with n y p; side_conditions.
   - choose_variables; side_conditions.
   - choose_variables; side_conditions.
   - unfold_open; tac1; eauto using reducible_values_exprs.

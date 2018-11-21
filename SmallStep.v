@@ -78,6 +78,9 @@ Inductive small_step: tree -> tree -> Prop :=
       (notype_rec (succ v) t0 ts)
       (open 0 (open 1 ts v) (notype_lambda (notype_rec v t0 ts)))
 
+| SPBetaFix: forall ts,
+    small_step (notype_tfix ts) (open 0 ts (notype_lambda (notype_tfix ts)))
+
 | SPBetaMatch0: forall t0 ts,
     small_step
       (tmatch zero t0 ts)
@@ -220,6 +223,7 @@ Hint Resolve SPBetaTypeInst: smallstep.
 Hint Resolve SPBetaLet: smallstep.
 Hint Resolve SPBetaRec0: smallstep.
 Hint Resolve SPBetaRecS: smallstep.
+Hint Resolve SPBetaFix: smallstep.
 Hint Resolve SPBetaMatch0: smallstep.
 Hint Resolve SPBetaMatchS: smallstep.
 Hint Resolve SPBetaIte1: smallstep.

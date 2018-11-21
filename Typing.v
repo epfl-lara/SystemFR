@@ -126,7 +126,6 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
 
 | HTRec:
     forall tvars gamma tn t0 ts T n y p,
-     (* type_form T -> *)
       ~(n ∈ fv_context gamma) ->
       ~(y ∈ fv_context gamma) ->
       ~(p ∈ fv_context gamma) ->
@@ -158,6 +157,41 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
         (open 0 T (succ (term_fvar n)))
       ->
       has_type tvars gamma (rec T tn t0 ts) (T_let tn T_nat T)
+
+| HTFix:
+    forall tvars gamma tn ts T n y p,
+      ~(n ∈ fv_context gamma) ->
+      ~(y ∈ fv_context gamma) ->
+      ~(p ∈ fv_context gamma) ->
+      ~(n ∈ fv T) ->
+      ~(n ∈ fv ts) ->
+      ~(n ∈ fv tn) ->
+      ~(y ∈ fv T) ->
+      ~(y ∈ fv ts) ->
+      ~(p ∈ fv T) ->
+      ~(p ∈ fv ts) ->
+      ~(p ∈ fv tn) ->
+      ~(n ∈ tvars) ->
+      ~(y ∈ tvars) ->
+      ~(p ∈ tvars) ->
+      NoDup (n :: y :: p :: nil) ->
+      has_type tvars gamma tn T_nat ->
+      is_type tvars ((n,T_nat) :: gamma) (open 0 T (term_fvar n)) ->
+      has_type tvars (
+        (p, T_equal (term_fvar y) (lambda T_unit (tfix T ts))) ::
+        (y, T_arrow T_unit (open 0 T (term_fvar n))) ::
+        (n, T_nat) ::
+        gamma
+      )
+        (open 0 ts (term_fvar y))
+        (open 0 T (succ (term_fvar n)))
+      ->
+      has_type tvars
+               ((y, T_top) :: gamma)
+               (open 0 ts (fvar y term_var))
+               (open 0 T zero)
+      ->
+      has_type tvars gamma (tfix T ts) (T_let tn T_nat T)
 
 | HTMatch:
     forall tvars gamma tn t0 ts T n p,

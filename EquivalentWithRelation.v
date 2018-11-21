@@ -77,6 +77,12 @@ Fixpoint equal_with_relation rel t t' :=
   | notype_inst t, notype_inst t' =>
       equal_with_relation rel t t'
 
+  | tfix T t, tfix T' t' =>
+      equal_with_relation rel T T' /\
+      equal_with_relation rel t t'
+  | notype_tfix t, notype_tfix t' =>
+      equal_with_relation rel t t'
+
   | T_unit, T_unit => True
   | T_bool, T_bool => True
   | T_nat, T_nat => True

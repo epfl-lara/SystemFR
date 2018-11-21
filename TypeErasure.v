@@ -37,6 +37,8 @@ Program Fixpoint erase_term (t: tree): tree :=
   | type_abs t => type_abs (erase_term t)
   | type_inst t T => notype_inst (erase_term t)
 
+  | tfix T t => notype_tfix (erase_term t)
+
   | _ => uu
   end.
 

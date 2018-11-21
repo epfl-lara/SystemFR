@@ -49,6 +49,9 @@ Fixpoint pfv t tag: set nat :=
   | rec T t' t0 ts => pfv T tag ++ pfv t' tag ++ pfv t0 tag ++ pfv ts tag
   | tmatch t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
 
+  | tfix T t' => pfv T tag ++ pfv t' tag
+  | notype_tfix t' => pfv t' tag
+
   | notype_tlet t1 t2 => pfv t1 tag ++  pfv t2 tag
   | tlet t1 A t2 => pfv t1 tag ++ pfv A tag ++  pfv t2 tag
   | trefl => nil
@@ -161,6 +164,9 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
           (psubstitute t1 l tag) (psubstitute t2 l tag)
   | tmatch t' t1 t2 => tmatch (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
 
+  | tfix T t' => tfix (psubstitute T l tag) (psubstitute t' l tag)
+  | notype_tfix t' => notype_tfix (psubstitute t' l tag)
+
   | notype_tlet t1 t2 => notype_tlet (psubstitute t1 l tag) (psubstitute t2 l tag)
   | tlet t1 T t2 => tlet (psubstitute t1 l tag) (psubstitute T l tag) (psubstitute t2 l tag)
   | trefl => t
@@ -240,6 +246,9 @@ Fixpoint open (k: nat) (t rep: tree) :=
           (open k t1 rep)
           (open (S k) t2 rep)
 
+  | tfix T t' => tfix (open (S k) T rep) (open (S k) t' rep)
+  | notype_tfix t' => notype_tfix (open (S k) t' rep)
+
   | notype_tlet t1 t2 =>
       notype_tlet (open k t1 rep) (open (S k) t2 rep)
   | tlet t1 T t2 =>
@@ -306,6 +315,9 @@ Fixpoint topen (k: nat) (t rep: tree) :=
           (topen k t1 rep)
           (topen k t2 rep)
 
+  | tfix T t' => tfix (topen k T rep) (topen k t' rep)
+  | notype_tfix t' => notype_tfix (topen k t' rep)
+
   | notype_tlet t1 t2 =>
       notype_tlet (topen k t1 rep) (topen k t2 rep)
   | tlet t1 T t2 =>
@@ -371,6 +383,9 @@ Fixpoint wf t k :=
       wf t1 k /\
       wf t2 (S k)
 
+  | tfix T t' => wf T (S k) /\ wf t' (S k)
+  | notype_tfix t' => wf t' (S k)
+
   | notype_tlet t1 t2 => wf t1 k /\ wf t2 (S k)
   | tlet t1 T t2 => wf t1 k /\ wf T k /\ wf t2 (S k)
   | trefl => True
@@ -434,6 +449,9 @@ Fixpoint twf t k :=
       twf t1 k /\
       twf t2 k
 
+  | tfix T t' => twf T k /\ twf t' k
+  | notype_tfix t' => twf t' k
+
   | notype_tlet t1 t2 => twf t1 k /\ twf t2 k
   | tlet t1 T t2 => twf t1 k /\ twf T k /\ twf t2 k
   | trefl => True
@@ -486,6 +504,8 @@ Ltac tequality :=
   | |- type_abs _ = type_abs _ => f_equal
   | |- type_inst _ _ = type_inst _ _ => f_equal
   | |- notype_inst _ = notype_inst _ => f_equal
+  | |- tfix _ _ = tfix _ _ => f_equal
+  | |- notype_tfix _ = notype_tfix _ => f_equal
 
   | |- T_refine _ _ = T_refine _ _ => f_equal
   | |- T_prod _ _ = T_prod _ _ => f_equal
