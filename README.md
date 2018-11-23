@@ -9,7 +9,7 @@ The requirements can be installed using `opam`.
 
 ```
 ./configure
-make -j4     # takes around 14 minutes
+make -j4     # takes around 14 minutes (32 minutes user time)
 ```
 
 # Overview
