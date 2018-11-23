@@ -13,7 +13,7 @@ Open Scope list_scope.
 Lemma wf_monotone:
   forall t, forall k k', wf t k -> k <= k' -> wf t k'.
 Proof.
-  induction t; repeat step; eauto with omega.
+  induction t; repeat step; eauto 2 with omega.
 Qed.
 
 Hint Resolve wf_monotone: bwf.
@@ -36,7 +36,7 @@ Lemma open_none:
   forall t k rep, wf t k -> open k t rep = t.
 Proof.
   induction t;
-    repeat step || f_equal; eauto with omega; eauto with bwf.
+    repeat step || f_equal; eauto 2 with omega; eauto with bwf.
 Qed.
 
 Lemma wfs_lookup:
@@ -70,25 +70,6 @@ Qed.
 
 Hint Resolve wfs_append: bwf.
 
-(*
-Lemma wf_close:
-  forall t, forall k, wf t k -> forall x, wf (close k t x) (S k).
-Proof.
-  induction t; steps; eauto with bwf.
-Qed.
-
-Hint Immediate wf_close: bwf.
-*)
-(*
-Lemma close_open:
-  forall t k x, ~(x ∈ fv t) -> close k (open k t (fvar x)) x = t.
-Proof.
-  induction t;
-    repeat step || tequality || t_listutils; eauto with bwf.
-Qed.
-
-Hint Immediate close_open: bwf.
-*)
 Lemma wf_open_rev:
   forall t rep k, wf (open k t rep) k -> wf t (S k).
 Proof.

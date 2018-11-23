@@ -133,3 +133,11 @@ Proof.
            (rewrite idrel_lookup_swap_fail in * by auto) ||
            apply equivalent_rc_at_left.
 Qed.
+
+Ltac t_idrel :=
+  rewrite support_idrel in * ||
+  rewrite support_swap in * ||
+  rewrite range_idrel in * ||
+  rewrite range_swap in * ||
+  (rewrite idrel_lookup in * by auto) ||
+  (rewrite idrel_lookup_swap_fail in * by auto).

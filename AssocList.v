@@ -347,3 +347,19 @@ Lemma swap_twice:
 Proof.
   induction l; steps.
 Qed.
+
+Lemma lookup_same:
+  forall X Y eq (l: list (X * Y)) x y1 y2,
+    lookup eq l x = Some y1 ->
+    lookup eq l x = Some y2 ->
+    y1 = y2.
+Proof.
+  repeat step || rewrite_any.
+Qed.
+
+Ltac t_lookup_same :=
+  match goal with
+  | H1: lookup _ ?l ?x = Some ?y1,
+    H2: lookup _ ?l ?x = Some ?y2 |- _ =>
+      pose proof (lookup_same _ _ _ _ _ _ _ H1 H2); clear H2
+  end.

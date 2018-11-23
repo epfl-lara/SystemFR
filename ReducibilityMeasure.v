@@ -104,3 +104,24 @@ Lemma lt_index_some_none:
 Proof.
   unfold lt_index; steps; eauto.
 Qed.
+
+Lemma nat_value_to_nat_succ:
+  forall t p1 p2,
+    nat_value_to_nat t p1 < nat_value_to_nat (succ t) p2.
+Proof.
+  repeat step || simp nat_value_to_nat in *.
+    match goal with
+    | |- context[nat_value_to_nat ?t?p]  =>
+      rewrite (nat_value_to_nat_fun t p1 p) in *
+    end; eauto with omega.
+Qed.
+
+Lemma lt_index_step:
+  forall t v,
+    star small_step t (succ v) ->
+    is_nat_value v ->
+    lt_index (Some v) (Some t).
+Proof.
+  unfold lt_index; right.
+  unshelve eexists v, t, v, (succ v), _, _; steps.
+Qed.

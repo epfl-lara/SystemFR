@@ -105,9 +105,9 @@ Lemma fv_open2:
 Proof.
   induction t;
     repeat match goal with
+           | _ => step || t_listutils
            | H: forall x, _, H2: _ ∈ _  |- _ =>
              apply (H _ _ _) in H2
-           | _ => step || t_listutils
            end.
 Qed.
 
@@ -145,11 +145,7 @@ Lemma fv_topen:
   forall t rep k tag,
     subset (pfv (topen k t rep) tag) (pfv t tag ++ pfv rep tag).
 Proof.
-  induction t;
-    repeat match goal with
-           | _ => step || t_listutils || t_fv_open
-           | _ => unfold subset in *
-           end.
+  induction t; repeat step || t_listutils || t_fv_open || unfold subset in *.
 Qed.
 
 Lemma fv_nils_open:
@@ -160,9 +156,7 @@ Lemma fv_nils_open:
 Proof.
   intros;
   rewrite <- (empty_list_rewrite nat) in *;
-    repeat match goal with
-           | _ => step || t_listutils || t_fv_open
-           end; eauto.
+    repeat step || t_listutils || t_fv_open; eauto.
 Qed.
 
 Hint Resolve fv_nils_open: bfv.
@@ -175,9 +169,7 @@ Lemma fv_nils_topen:
 Proof.
   intros;
   rewrite <- (empty_list_rewrite nat) in *;
-    repeat match goal with
-           | _ => step || t_listutils || t_fv_open
-           end; eauto.
+    repeat step || t_listutils || t_fv_open; eauto.
 Qed.
 
 Hint Resolve fv_nils_topen: bfv.
@@ -189,9 +181,9 @@ Lemma fv_subst:
 Proof.
   induction t;
     repeat match goal with
+           | _ => step || t_listutils || (progress unfold subset in *)
            | H: forall x, _, H2: _ ∈ _  |- _ => apply (H _ _ _) in H2
-           | _ => step || t_listutils || unfold subset in *
-           end; eauto with sets.
+           end.
 Qed.
 
 Hint Resolve fv_subst: bfv.
@@ -203,7 +195,7 @@ Lemma fv_subst2:
 Proof.
   induction t;
     repeat match goal with
-           | _ => progress (step || t_listutils || unfold subset in *)
+           | _ => step || t_listutils || (progress unfold subset in *)
            | H: forall x, _, H2: _ ∈ _  |- _ => apply (H _ _ _) in H2
            end;
     eauto with sets;
@@ -228,23 +220,6 @@ Proof.
 Qed.
 
 Hint Resolve fv_subst3: bfv.
-
-(*
-Lemma fv_subst3_context:
-  forall gamma x rep y tag,
-    y <> x ->
-    y ∈ pfv_context gamma tag ->
-    y ∈ pfv_context (psubstitute_context gamma ((x,rep) :: nil) tag) tag.
-Proof.
-  induction gamma;
-    repeat match goal with
-           | _ => step || t_listutils || unfold subset in *
-           end; eauto with bfv.
-  right. right. apply IHgamma; eauto with bfv.
-Qed.
-
-Hint Resolve fv_subst3_context: bfv.
-*)
 
 Lemma closed_mapping_lookup:
   forall l x t tag,

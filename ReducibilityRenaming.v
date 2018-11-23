@@ -44,22 +44,6 @@ Opaque reducible_values.
 Opaque makeFresh.
 Opaque lt.
 
-Lemma lookup_same:
-  forall X Y eq (l: list (X * Y)) x y1 y2,
-    lookup eq l x = Some y1 ->
-    lookup eq l x = Some y2 ->
-    y1 = y2.
-Proof.
-  repeat step || rewrite_any.
-Qed.
-
-Ltac t_lookup_same :=
-  match goal with
-  | H1: lookup _ ?l ?x = Some ?y1,
-    H2: lookup _ ?l ?x = Some ?y2 |- _ =>
-      pose proof (lookup_same _ _ _ _ _ _ _ H1 H2); clear H2
-  end.
-
 Ltac t_apply_ih :=
   lazymatch goal with
   | IH: forall m, _ -> forall T T' t theta theta' l, _ ,
@@ -87,27 +71,6 @@ Ltac t_apply_ih2 :=
       reducible_values ?theta' ?t ?T' =>
         unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
   end.
-
-Lemma nat_value_to_nat_succ:
-  forall t p1 p2,
-    nat_value_to_nat t p1 < nat_value_to_nat (succ t) p2.
-Proof.
-  repeat simp nat_value_to_nat in *; steps.
-    match goal with
-    | |- context[nat_value_to_nat ?t?p]  =>
-      rewrite (nat_value_to_nat_fun t p1 p) in *
-    end; eauto with omega.
-Qed.
-
-Lemma lt_index_step:
-  forall t v,
-    star small_step t (succ v) ->
-    is_nat_value v ->
-    lt_index (Some v) (Some t).
-Proof.
-  unfold lt_index; right.
-  unshelve eexists v, t, v, (succ v), _, _; steps.
-Qed.
 
 Set Program Mode.
 
@@ -311,20 +274,6 @@ Lemma reducible_rename :
     reducible_values theta' t T'     .
 Proof.
   intros; eapply (reducible_rename_aux _ T T' t theta theta' rel); eauto.
-Qed.
-
-Ltac t_idrel :=
-  rewrite support_idrel in * ||
-  rewrite support_swap in * ||
-  rewrite range_idrel in * ||
-  rewrite range_swap in * ||
-  (rewrite idrel_lookup in * by auto) ||
-  (rewrite idrel_lookup_swap_fail in * by auto).
-
-Lemma equivalent_rc_at_refl:
-  forall theta x, equivalent_rc_at theta theta x x.
-Proof.
-  unfold equivalent_rc_at; repeat step || eauto || eexists.
 Qed.
 
 Lemma reducible_rename_one:

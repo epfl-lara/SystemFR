@@ -44,6 +44,12 @@ Definition equivalent_rc_at l1 l2 x y :=
   (forall rc2, lookup Nat.eq_dec l2 y = Some rc2 ->
   exists rc1, lookup Nat.eq_dec l1 x = Some rc1  /\ equivalent_rc rc1 rc2).
 
+Lemma equivalent_rc_at_refl:
+  forall theta x, equivalent_rc_at theta theta x x.
+Proof.
+  unfold equivalent_rc_at; repeat step || eauto || eexists.
+Qed.
+
 Lemma equivalent_rc_at_sym:
   forall l1 l2 x y,
     equivalent_rc_at l1 l2 x y ->
@@ -53,17 +59,6 @@ Proof.
     try solve [ instantiate_any; steps; eauto using equivalent_rc_sym ].
 Qed.
 
-(*
-Lemma equivalent_rc_at_add:
-  forall l1 l2 x y,
-    equivalent_rc rc1 rc2 ->
-    equivalent_rc_at l1 l2 x y ->
-    equivalent_rc_at l1 l2 y x.
-Proof.
-  unfold equivalent_rc_at; repeat step;
-    try solve [ instantiate_any; steps; eauto using equivalent_rc_sym ].
-Qed.
-*)
 Definition equivalent_with_relation rel l1 l2 :=
   forall x y,
     lookup Nat.eq_dec rel x = Some y ->
