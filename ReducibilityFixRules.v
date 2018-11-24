@@ -61,9 +61,7 @@ Proof.
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
       repeat step || t_listutils || apply_any || simp_red;
-      eauto with bwf;
-      eauto with berased;
-      eauto with bfv.
+      t_closer.
   - (* succ v *)
     eapply backstep_reducible; repeat step || t_listutils || apply_any;
       eauto 3 with smallstep values;
@@ -104,7 +102,7 @@ Proof.
   repeat step.
   unfold reducible, reduces_to in H5; steps.
 
-  eapply reducible_let_backstep_expr; eauto.
+  eapply reducible_let_backstep_expr; eauto; t_closer.
   apply reducible_fix_induction; repeat step || simp_red;
     repeat step; eauto with bfv bwf b_equiv.
 Qed.

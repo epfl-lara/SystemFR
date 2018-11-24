@@ -5,29 +5,17 @@ Require Import Termination.TypeErasure.
 Inductive is_value: tree -> Prop :=
 | IVUnit: is_value uu
 | IVZero: is_value zero
-| IVSucc:
-    forall v,
-      is_value v ->
-      is_value (succ v)
+| IVSucc: forall v, is_value v -> is_value (succ v)
 | IVFalse: is_value tfalse
 | IVTrue: is_value ttrue
-| IVPair:
-    forall v1 v2,
-      is_value v1 ->
-      is_value v2 ->
-      is_value (pp v1 v2)
-| IVLambda: forall t,
-    is_value (notype_lambda t)
-| IVTypeAbs: forall t,
-    is_value (type_abs t)
-| IVVar: forall x,
-    is_value (fvar x term_var)
-| IVRefl:
-    is_value trefl
-| IVFold:
-    forall v,
-      is_value v ->
-      is_value (tfold v)
+| IVPair: forall v1 v2, is_value v1 -> is_value v2 -> is_value (pp v1 v2)
+| IVLambda: forall t, is_value (notype_lambda t)
+| IVTypeAbs: forall t, is_value (type_abs t)
+| IVVar: forall x, is_value (fvar x term_var)
+| IVRefl: is_value trefl
+| IVFold: forall v, is_value v -> is_value (tfold v)
+| IVLeft: forall v, is_value v -> is_value (tleft v)
+| IVRight: forall v, is_value v -> is_value (tright v)
 .
 
 Definition typed_is_value (t: erased_term) := is_value (proj1_sig t).
@@ -95,6 +83,13 @@ Inductive small_step: tree -> tree -> Prop :=
       (tmatch (succ v) t0 ts)
       (open 0 ts v)
 
+| SPBetaMatchLeft: forall v tl tr,
+    is_value v ->
+    small_step (sum_match (tleft v) tl tr) (open 0 tl v)
+| SPBetaMatchRight: forall v tl tr,
+    is_value v ->
+    small_step (sum_match (tright v) tl tr) (open 0 tr v)
+
 | SPBetaFold:
     forall v, is_value v ->
          small_step (tunfold (tfold v)) v
@@ -147,6 +142,16 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPUnfold: forall t1 t2,
     small_step t1 t2 ->
     small_step (tunfold t1) (tunfold t2)
+
+| SPLeft: forall t1 t2,
+    small_step t1 t2 ->
+    small_step (tleft t1) (tleft t2)
+| SPRight: forall t1 t2,
+    small_step t1 t2 ->
+    small_step (tright t1) (tright t2)
+| SPSumMatch: forall t1 t2 tl tr,
+    small_step t1 t2 ->
+    small_step (sum_match t1 tl tr) (sum_match t2 tl tr)
 .
 
 Definition typed_small_step (t1 t2: erased_term) := small_step t1 t2.
@@ -176,6 +181,9 @@ Ltac t_invert_step :=
   | H: small_step (tlet _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pi1 _) _ |- _ => inversion H; clear H
   | H: small_step (pi2 _) _ |- _ => inversion H; clear H
+  | H: small_step (tleft _) _ |- _ => inversion H; clear H
+  | H: small_step (tright _) _ |- _ => inversion H; clear H
+  | H: small_step (sum_match _ _ _) _ |- _ => inversion H; clear H
   end.
 
 Hint Extern 50 => t_invert_step: smallstep.
@@ -233,6 +241,8 @@ Hint Resolve IVTypeAbs: values.
 Hint Resolve IVVar: values.
 Hint Resolve IVRefl: values.
 Hint Resolve IVFold: values.
+Hint Resolve IVLeft: values.
+Hint Resolve IVRight: values.
 
 Hint Resolve SPBetaProj1: smallstep.
 Hint Resolve SPBetaProj2: smallstep.
@@ -247,6 +257,8 @@ Hint Resolve SPBetaMatchS: smallstep.
 Hint Resolve SPBetaIte1: smallstep.
 Hint Resolve SPBetaIte2: smallstep.
 Hint Resolve SPBetaFold: smallstep.
+Hint Resolve SPBetaMatchLeft: smallstep.
+Hint Resolve SPBetaMatchRight: smallstep.
 
 Hint Resolve SPTypeInst: smallstep.
 Hint Resolve SPAppLeft: smallstep.
@@ -262,6 +274,9 @@ Hint Resolve SPIte: smallstep.
 Hint Resolve SPLet: smallstep.
 Hint Resolve SPFold: smallstep.
 Hint Resolve SPUnfold: smallstep.
+Hint Resolve SPLeft: smallstep.
+Hint Resolve SPRight: smallstep.
+Hint Resolve SPSumMatch: smallstep.
 
 Lemma is_nat_value_value:
   forall v,

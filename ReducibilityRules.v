@@ -89,7 +89,8 @@ Lemma reducible_equal:
     reducible theta t2 T.
 Proof.
   unfold reducible, reduces_to, equivalent; repeat step;
-    eauto with values.
+    eauto with values;
+    try t_closer.
 Qed.
 
 Lemma open_reducible_equal:

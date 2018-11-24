@@ -65,7 +65,7 @@ Proof.
     eauto with bwf; eauto with bfv.
 
   eexists; steps; eauto.
-  repeat step || simp_red; eauto with bwf; eauto with berased.
+  repeat step || simp_red; t_closer.
 
   unshelve epose proof (H12 theta ((p,trefl) :: (x,t') :: lterms) _ _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv;
@@ -117,7 +117,7 @@ Lemma reducible_refine_subtype2:
       reducible_values theta t (substitute T l) ->
       reducible_values theta t (T_refine (substitute A l) (substitute p l)).
 Proof.
-  repeat step || simp_red; eauto with bwf; eauto with berased.
+  repeat step || simp_red; t_closer.
 
   unshelve epose proof (H5 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.

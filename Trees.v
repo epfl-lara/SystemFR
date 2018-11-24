@@ -19,6 +19,7 @@ Inductive tree: Set :=
   | T_bool: tree
   | T_arrow: tree -> tree -> tree
   | T_prod: tree -> tree -> tree
+  | T_sum: tree -> tree -> tree
   | T_refine: tree -> tree -> tree
   | T_let: tree -> tree -> tree -> tree
   | T_singleton: tree -> tree
@@ -30,7 +31,7 @@ Inductive tree: Set :=
   | T_forall: tree -> tree -> tree
   | T_exists: tree -> tree -> tree
   | T_abs: tree -> tree
-  | T_rec: tree -> tree -> tree
+  | T_rec: tree -> tree -> tree -> tree
 
   (* terms *)
   | err: tree
@@ -67,6 +68,10 @@ Inductive tree: Set :=
 
   | tfold: tree -> tree
   | tunfold: tree -> tree
+
+  | tright: tree -> tree
+  | tleft: tree -> tree
+  | sum_match: tree -> tree -> tree -> tree
 
   | trefl: tree
 .
@@ -115,6 +120,10 @@ Fixpoint is_annotated_term t :=
   | tfold t => is_annotated_term t
   | tunfold t => is_annotated_term t
 
+  | tleft t => is_annotated_term t
+  | tright t => is_annotated_term t
+  | sum_match t tl tr => is_annotated_term t /\ is_annotated_term tl /\ is_annotated_term tr
+
   | _ => False
   end
 with is_annotated_type T :=
@@ -127,6 +136,7 @@ with is_annotated_type T :=
   | T_refine A p => is_annotated_type A /\ is_annotated_term p
   | T_prod A B => is_annotated_type A /\ is_annotated_type B
   | T_arrow A B => is_annotated_type A /\ is_annotated_type B
+  | T_sum A B => is_annotated_type A /\ is_annotated_type B
   | T_let t A B => is_annotated_term t /\ is_annotated_type A /\ is_annotated_type B
   | T_singleton t => is_annotated_term t
   | T_intersection A B => is_annotated_type A /\ is_annotated_type B
@@ -137,7 +147,7 @@ with is_annotated_type T :=
   | T_forall A B => is_annotated_type A /\ is_annotated_type B
   | T_exists A B => is_annotated_type A /\ is_annotated_type B
   | T_abs T => is_annotated_type T
-  | T_rec n T => is_annotated_term n /\ is_annotated_type T
+  | T_rec n T0 Ts => is_annotated_term n /\ is_annotated_type T0 /\ is_annotated_type Ts
   | _ => False
   end
 .
@@ -178,6 +188,10 @@ Fixpoint is_erased_term t :=
   | tfold t => is_erased_term t
   | tunfold t => is_erased_term t
 
+  | tleft t => is_erased_term t
+  | tright t => is_erased_term t
+  | sum_match t tl tr => is_erased_term t /\ is_erased_term tl /\ is_erased_term tr
+
   | _ => False
   end.
 
@@ -191,6 +205,7 @@ Fixpoint is_erased_type T :=
   | T_refine A p => is_erased_type A /\ is_erased_term p
   | T_prod A B => is_erased_type A /\ is_erased_type B
   | T_arrow A B => is_erased_type A /\ is_erased_type B
+  | T_sum A B => is_erased_type A /\ is_erased_type B
   | T_let t A B => is_erased_term t /\ is_erased_type A /\ is_erased_type B
   | T_singleton t => is_erased_term t
   | T_intersection A B => is_erased_type A /\ is_erased_type B
@@ -201,7 +216,7 @@ Fixpoint is_erased_type T :=
   | T_forall A B => is_erased_type A /\ is_erased_type B
   | T_exists A B => is_erased_type A /\ is_erased_type B
   | T_abs A => is_erased_type A
-  | T_rec n T => is_erased_term n /\ is_erased_type T
+  | T_rec n T0 Ts => is_erased_term n /\ is_erased_type T0 /\ is_erased_type Ts
   | _ => False
   end.
 
@@ -265,12 +280,17 @@ Fixpoint tree_size t :=
   | tfold t => 1 + tree_size t
   | tunfold t => 1 + tree_size t
 
+  | tright t => 1 + tree_size t
+  | tleft t => 1 + tree_size t
+  | sum_match t tl tr => 1 + tree_size t + tree_size tl + tree_size tr
+
   | T_unit => 0
   | T_bool => 0
   | T_nat => 0
   | T_refine A p => 1 + tree_size A + tree_size p
   | T_prod A B => 1 + tree_size A + tree_size B
   | T_arrow A B => 1 + tree_size A + tree_size B
+  | T_sum A B => 1 + tree_size A + tree_size B
   | T_let t A B => 1 + tree_size t + tree_size A + tree_size B
   | T_singleton t => 1 + tree_size t
   | T_intersection A B => 1 + tree_size A + tree_size B
@@ -281,7 +301,7 @@ Fixpoint tree_size t :=
   | T_forall A B => 1 + tree_size A + tree_size B
   | T_exists A B => 1 + tree_size A + tree_size B
   | T_abs T => 1 + tree_size T
-  | T_rec n T => 1 + tree_size n + tree_size T
+  | T_rec n T0 Ts => 1 + tree_size n + tree_size T0 + tree_size Ts
   end.
 
 
@@ -302,6 +322,3 @@ Ltac destruct_refinements :=
   end.
 
 Ltac t_ref := repeat step || destruct_refinements.
-
-Notation "[ t ]" := (exist _ t (ltac:( t_ref ) : is_annotated_term t)).
-Notation "'#' t '#'" := (exist _ t (ltac:( t_ref ) : is_erased_term t)) (at level 1000).

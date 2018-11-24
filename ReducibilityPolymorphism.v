@@ -48,9 +48,7 @@ Lemma reducible_type_abs_value:
       reducible ((X,RC) :: theta) t (topen 0 T (fvar X type_var))) ->
     reducible_values theta (type_abs t) (T_abs T).
 Proof.
-  repeat step || simp_red;
-    eauto with bfv;
-    eauto with bwf.
+  repeat step || simp_red; t_closer.
   exists X; repeat step || rewrite reducibility_rewrite.
   apply backstep_reducible with t; repeat step || t_listutils;
     eauto 2 using reducible_value_expr with step_tactic.
@@ -123,7 +121,7 @@ Proof.
         eauto using reducibility_is_candidate
   end.
   exists t'0; steps; eauto using star_smallstep_trans with bsteplemmas.
-  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H20;
+  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H13;
     repeat step || finisher; eauto using reducibility_is_candidate.
   eapply reducibility_subst_head; eauto; repeat step || t_listutils || finisher.
 Qed.
@@ -140,8 +138,6 @@ Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen || apply reducible_inst ||
       rewrite fv_subst_different_tag in * by (steps; eauto with bfv);
-    eauto with bwf;
-    eauto with btwf;
-    eauto with bfv;
-    eauto with berased.
+    t_closer;
+    eauto with btwf.
 Qed.

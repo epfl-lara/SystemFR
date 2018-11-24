@@ -47,7 +47,7 @@ Lemma reducible_intersection:
     reducible theta e (T_intersection T1 T2).
 Proof.
   unfold reducible, reduces_to;
-    repeat step || simp_red || t_values_info2 || t_deterministic_star || eauto || eexists.
+    repeat step || simp_red || t_values_info2 || t_deterministic_star || eauto || eexists; t_closer.
 Qed.
 
 Lemma reducible_union:
@@ -57,7 +57,7 @@ Lemma reducible_union:
     reducible theta e (T_union T1 T2).
 Proof.
   unfold reducible, reduces_to;
-    repeat step || simp_red || t_values_info2 || t_deterministic_star || eauto || eexists.
+    repeat step || simp_red || t_values_info2 || t_deterministic_star || eauto || eexists; t_closer.
 Qed.
 
 Lemma open_reducible_intersection:

@@ -68,7 +68,7 @@ Lemma reducible_let_rule:
         reducible theta (open 0 t2 v) B) ->
     reducible theta (notype_tlet t1 t2) B.
 Proof.
-  unfold reducible, reduces_to; repeat step || t_listutils; eauto with bfv.
+  unfold reducible, reduces_to, closed_term; repeat step || t_listutils; eauto with bfv.
   createHypothesis;
     repeat step || t_values_info2.
   eexists; steps; eauto.

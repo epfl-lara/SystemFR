@@ -320,26 +320,79 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma (tlet p (T_exists U V) t) T
 
 | HTUnfold:
-    forall tvars gamma t n T,
+    forall tvars gamma t n T0 Ts,
       is_annotated_term n ->
       wf n 0 ->
-      wf T 0 ->
-      twf T 1 ->
-      has_type tvars gamma t (T_rec (succ n) T) ->
-      has_type tvars gamma (tunfold t) (topen 0 T (T_rec n T))
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      has_type tvars gamma t (T_rec (succ n) T0 Ts) ->
+      has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts))
 
 | HTFold:
-    forall tvars gamma t n T,
+    forall tvars gamma t n T0 Ts,
       wf n 0 ->
       twf n 0 ->
-      wf T 0 ->
-      twf T 1 ->
+      wf T0 0 ->
+      twf T0 0 ->
+      wf Ts 0 ->
+      twf Ts 1 ->
       subset (fv n) (support gamma) ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
       is_annotated_term n ->
-      is_annotated_type T ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
       has_type tvars gamma n T_nat ->
-      has_type tvars gamma t (topen 0 T (T_rec n T)) ->
-      has_type tvars gamma (tfold t) (T_rec (succ n) T)
+      has_type tvars gamma t (topen 0 Ts (T_rec n T0 Ts)) ->
+      has_type tvars gamma (tfold t) (T_rec (succ n) T0 Ts)
+
+| HTLeft:
+    forall tvars gamma t A B,
+      has_type tvars gamma t A ->
+      is_type tvars gamma B ->
+      has_type tvars gamma (tleft t) (T_sum A B)
+
+| HTRight:
+    forall tvars gamma t A B,
+      has_type tvars gamma t B ->
+      is_type tvars gamma A ->
+      has_type tvars gamma (tright t) (T_sum A B)
+
+| HTSumMatch:
+    forall tvars gamma t tl tr A B T y p,
+      ~(p ∈ fv tl) ->
+      ~(p ∈ fv tr) ->
+      ~(p ∈ fv t) ->
+      ~(p ∈ fv T) ->
+      ~(p ∈ fv A) ->
+      ~(p ∈ fv B) ->
+      ~(p ∈ fv_context gamma) ->
+      ~(y ∈ fv tl) ->
+      ~(y ∈ fv tr) ->
+      ~(y ∈ fv t) ->
+      ~(y ∈ fv T) ->
+      ~(y ∈ fv A) ->
+      ~(y ∈ fv B) ->
+      ~(y ∈ fv_context gamma) ->
+      ~(y = p) ->
+      ~(y ∈ tvars) ->
+      ~(p ∈ tvars) ->
+      is_type tvars ((y,T_sum A B) :: gamma) (open 0 T (fvar y term_var)) ->
+      has_type tvars gamma t (T_sum A B) ->
+      has_type
+        tvars ((p, T_equal t (tleft (fvar y term_var))) :: (y, A) :: gamma)
+        (open 0 tl (fvar y term_var))
+        (open 0 T (tleft (fvar y term_var)))
+      ->
+      has_type
+        tvars ((p, T_equal t (tright (fvar y term_var))) :: (y, B) :: gamma)
+        (open 0 tr (fvar y term_var))
+        (open 0 T (tright (fvar y term_var)))
+      ->
+      has_type tvars gamma (sum_match t tl tr) (T_let t (T_sum A B) T)
+
 
 with is_type: tvar_list -> context -> tree -> Prop :=
 | ITUnit:
@@ -473,14 +526,17 @@ with is_type: tvar_list -> context -> tree -> Prop :=
 
 
 | ITRec:
-    forall tvars gamma n T X,
+    forall tvars gamma n T0 Ts X,
       ~(X ∈ support gamma) ->
-      ~(X ∈ pfv T type_var) ->
+      ~(X ∈ pfv T0 type_var) ->
+      ~(X ∈ pfv Ts type_var) ->
       ~(X ∈ tvars) ->
-      is_annotated_type T ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
       has_type tvars gamma n T_nat ->
-      is_type (X :: tvars) gamma (topen 0 T (fvar X type_var)) ->
-      is_type tvars gamma (T_rec n T)
+      is_type tvars gamma T0 ->
+      is_type (X :: tvars) gamma (topen 0 Ts (fvar X type_var)) ->
+      is_type tvars gamma (T_rec n T0 Ts)
 
 with is_context: tvar_list -> context -> Prop :=
 | ICNil: forall tvars, is_context tvars nil
@@ -720,13 +776,43 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_subtype tvars gamma (T_let t T1 T2) (T_exists T1 T2)
 
 | ISRec:
-    forall tvars gamma n1 n2 T,
-      wf T 0 ->
-      twf T 1 ->
-      subset (fv T) (support gamma) ->
-      is_annotated_type T ->
+    forall tvars gamma n1 n2 T0 Ts,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
       are_equal tvars gamma n1 n2 ->
-      is_subtype tvars gamma (T_rec n1 T) (T_rec n2 T)
+      is_subtype tvars gamma (T_rec n1 T0 Ts) (T_rec n2 T0 Ts)
+
+| ISRecBase:
+    forall tvars gamma T0 Ts,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      is_context tvars gamma ->
+      is_subtype tvars gamma T0 (T_rec zero T0 Ts)
+
+| ISRecBase2:
+    forall tvars gamma T0 Ts,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      is_context tvars gamma ->
+      is_subtype tvars gamma (T_rec zero T0 Ts) T0
 
 with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,

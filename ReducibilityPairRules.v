@@ -48,8 +48,12 @@ Lemma reducible_values_pp:
     reducible_values theta v2 (open 0 T2 v1) ->
     reducible_values theta (pp v1 v2) (T_prod T1 T2).
 Proof.
-  repeat step || simp reducible_values || rewrite reducibility_rewrite || unshelve exists v1, v2;
-    eauto with berased.
+  repeat step || simp reducible_values || t_closer ||
+         rewrite reducibility_rewrite || unshelve exists v1, v2;
+    eauto with berased;
+    eauto with bfv;
+    eauto with bwf;
+    eauto with values.
 Qed.
 
 Lemma reducible_pp:
@@ -59,9 +63,10 @@ Lemma reducible_pp:
     reducible theta t2 (T_let t1 U V) ->
     reducible theta (pp t1 t2) (T_prod U V).
 Proof.
-  unfold reducible, reduces_to; repeat step || t_listutils.
+  unfold reducible, reduces_to; repeat step || t_listutils; try t_closer.
   exists (pp t'0 t'); repeat step || simp_red || t_values_info2 || t_deterministic_star;
-    eauto 6 using red_is_val with bsteplemmas.
+    eauto 6 using red_is_val with bsteplemmas;
+    try t_closer.
 Qed.
 
 Lemma open_reducible_pp:
@@ -95,10 +100,10 @@ Lemma reducible_pi1:
 Proof.
   intros theta U V t HV H.
   unfold reducible, reduces_to in H; steps.
-  eapply star_backstep_reducible;
+  eapply star_backstep_reducible; steps;
     eauto with bsteplemmas;
     eauto using reducible_values_pi1;
-    eauto using is_erased_term_tfv.
+    try t_closer.
 Qed.
 
 Lemma open_reducible_pi1:
@@ -137,8 +142,8 @@ Lemma reducible_pi2:
 Proof.
   intros theta U V t HV H.
   unfold reducible, reduces_to in H; steps.
-  eapply star_backstep_reducible; eauto with bsteplemmas.
-  eapply reducible_let_backstep_expr; eauto with bsteplemmas.
+  eapply star_backstep_reducible; eauto with bsteplemmas; t_closer.
+  eapply reducible_let_backstep_expr; eauto with bsteplemmas; t_closer.
   eauto using reducible_values_pi2.
 Qed.
 

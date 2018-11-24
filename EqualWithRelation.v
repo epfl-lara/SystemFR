@@ -81,6 +81,15 @@ Fixpoint equal_with_relation rel t t' :=
   | tunfold t, tunfold t' =>
       equal_with_relation rel t t'
 
+  | tleft t, tleft t' =>
+      equal_with_relation rel t t'
+  | tright t, tright t' =>
+      equal_with_relation rel t t'
+  | sum_match t tl tr, sum_match t' tl' tr' =>
+      equal_with_relation rel t t' /\
+      equal_with_relation rel tl tl' /\
+      equal_with_relation rel tr tr'
+
   | T_unit, T_unit => True
   | T_bool, T_bool => True
   | T_nat, T_nat => True
@@ -93,6 +102,10 @@ Fixpoint equal_with_relation rel t t' :=
   | T_arrow A B, T_arrow A' B' =>
       equal_with_relation rel A A' /\
       equal_with_relation rel B B'
+  | T_sum A B, T_sum A' B' =>
+      equal_with_relation rel A A' /\
+      equal_with_relation rel B B'
+
   | T_let t A B, T_let t' A' B' =>
       equal_with_relation rel t t' /\
       equal_with_relation rel A A' /\
@@ -118,9 +131,10 @@ Fixpoint equal_with_relation rel t t' :=
       equal_with_relation rel B B'
   | T_abs T, T_abs T' =>
       equal_with_relation rel T T'
-  | T_rec n T, T_rec n' T' =>
+  | T_rec n T0 Ts, T_rec n' T0' Ts' =>
       equal_with_relation rel n n' /\
-      equal_with_relation rel T T'
+      equal_with_relation rel T0 T0' /\
+      equal_with_relation rel Ts Ts'
 
   | _, _ => False
   end.

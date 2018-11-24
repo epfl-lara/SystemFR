@@ -43,7 +43,7 @@ Lemma reducible_val_let:
     reducible_values theta b (open 0 B a) ->
     reducible_values theta b (T_let a A B).
 Proof.
-  repeat step || simp reducible_values in *.
+  repeat step || simp reducible_values in *; eauto using reducible_values_closed.
   unshelve eexists (exist _ a _); steps; eauto with smallstep;
     eauto using red_is_val;
     eauto with berased.

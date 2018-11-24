@@ -127,12 +127,9 @@ Lemma reducible_match:
 Proof.
   steps.
   unfold reducible, reduces_to in H6; steps.
-  eapply star_backstep_reducible with (tmatch _ t0 ts);
-    repeat step || t_listutils || simp reducible_values in *;
-      eauto with bsteplemmas;
-      eauto with bwf;
-      eauto with bfv;
-      eauto with berased.
+  eapply star_backstep_reducible with (tmatch t' t0 ts);
+    repeat step || t_listutils || simp reducible_values in *; t_closer;
+      eauto with bsteplemmas.
 
   destruct t'; steps.
 
@@ -267,11 +264,9 @@ Proof.
   eapply star_backstep_reducible with (notype_rec _ t0 ts);
     repeat step || t_listutils ||
       unshelve eauto with bsteplemmas ||
-      unshelve eauto with bwf;
-      unshelve eauto with bfv;
-      eauto with berased.
+      t_closer.
 
-  eapply reducible_let_backstep_expr; eauto.
+  eapply reducible_let_backstep_expr; eauto; t_closer.
   apply reducible_rec_induction; repeat step || simp_red;
     repeat step; eauto with bfv bwf b_equiv.
 Qed.

@@ -55,7 +55,7 @@ Proof.
     eauto using red_is_val.
 
   exists t'; repeat step || simp_red || t_deterministic_star || instantiate_any;
-    eauto using red_is_val; eauto with bwf bfv berased.
+    t_closer.
 Qed.
 
 Lemma open_reducible_forall:
@@ -73,11 +73,7 @@ Lemma open_reducible_forall:
 Proof.
   unfold open_reducible in *; repeat step || t_instantiate_sat3.
 
-  eapply reducible_forall; steps;
-    eauto with bwf;
-    eauto with bfv sets btermlist;
-    eauto with values;
-    eauto with berased.
+  eapply reducible_forall; steps; t_closer.
   unshelve epose proof (H7 theta ((x,u) :: lterms) _ _ _); tac1.
 Qed.
 
@@ -112,10 +108,7 @@ Proof.
   unfold reducible, reduces_to in H5.
   repeat step || t_instantiate_sat3 || t_listutils || simp_red || t_deterministic_star ||
          destruct_refinements || apply reducible_let_rule with
-             (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var));
-    eauto with bwf;
-    eauto with bfv;
-    eauto with berased.
+             (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var)); t_closer.
 
   unshelve epose proof (H18 theta ((v,v0) :: (u,a) :: lterms) _ _ _); tac1.
 Qed.
@@ -134,7 +127,7 @@ Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red.
 
-  unshelve exists t'; steps; eauto using red_is_val; eauto with berased.
+  unshelve exists t'; steps; t_closer.
 Qed.
 
 Lemma reducible_subtype_exists:

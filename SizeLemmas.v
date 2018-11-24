@@ -4,6 +4,7 @@ Require Import Termination.Tactics.
 Require Import Omega.
 
 (* measure for ensuring termination of reducible_values *)
+(* see file ReducibilityMeasure for the full measure *)
 Fixpoint size T: nat :=
   match T with
   | T_unit => 0
@@ -12,6 +13,7 @@ Fixpoint size T: nat :=
   | T_refine A p => 1 + size A
   | T_arrow A B => 3 + size A + size B
   | T_prod A B => 3 + size A + size B
+  | T_sum A B => 1 + size A + size B
   | T_let t A B => 2 + size A + size B
   | T_singleton t => 0
   | T_intersection A B => 1 + size A + size B
@@ -22,7 +24,7 @@ Fixpoint size T: nat :=
   | T_forall A B => 3 + size A + size B
   | T_exists A B => 3 + size A + size B
   | T_abs T => 3 + size T
-  | T_rec _ T => 2 + size T
+  | T_rec _ T0 Ts => 2 + size T0 + size Ts
 
   | _ => 0
   end.

@@ -54,16 +54,6 @@ Qed.
 
 Hint Extern 50 => eapply closed_mapping_append: b_cmap.
 
-Lemma closed_fvs:
-  forall l tag,
-    closed_terms l ->
-    pclosed_mapping l tag.
-Proof.
-  induction l; destruct tag; repeat step || unfold closed_term in * || destruct tag.
-Qed.
-
-Hint Extern 50 => eapply closed_fvs: b_cmap.
-
 Lemma satisfies_fv_nil:
   forall P gamma lterms,
     satisfies P gamma lterms ->
@@ -98,30 +88,3 @@ Lemma fv_subst_different_tag:
 Proof.
   induction t; repeat step || f_equal; eauto with bfv.
 Qed.
-
-Lemma fv2_nil:
-  forall gamma t P lterms ltypes,
-    subset (pfv t term_var) (support gamma) ->
-    closed_terms ltypes ->
-    satisfies P gamma lterms ->
-    pfv (psubstitute (psubstitute t lterms term_var) ltypes type_var) term_var = nil.
-Proof.
-  intros; rewrite fv_subst_different_tag; steps; eauto with b_cmap; eauto with bfv.
-Qed.
-
-Hint Resolve fv2_nil: bfv.
-
-Lemma fv2_nil2:
-  forall T gamma t P (theta: M nat T) lterms ltypes,
-    subset (pfv t type_var) (support theta) ->
-    support ltypes = support theta ->
-    closed_terms ltypes ->
-    satisfies P gamma lterms ->
-    pfv (psubstitute (psubstitute t lterms term_var) ltypes type_var) type_var = nil.
-Proof.
-  intros.
-  apply fv_nils2; steps; eauto with b_cmap bfv.
-  rewrite fv_subst_different_tag; steps; eauto with b_cmap; eauto with sets bfv.
-Qed.
-
-Hint Resolve fv2_nil2: bfv.

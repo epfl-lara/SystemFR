@@ -134,9 +134,12 @@ Proof.
         H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t ?T' => right
       | H1: equal_with_relation _ ?T' ?T,
         H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t ?T' => right
+      | H: star small_step _ zero |- _ \/ _ => left
       | H: star small_step _ (succ _) |- _ => right
       | H1: equal_with_relation ?rel ?T ?T' |- exists X, (X ∈ ?L -> False) /\ _ =>
           exists (makeFresh (L :: (range rel) :: (range (swap rel)) :: (pfv T type_var) :: (pfv T' type_var) :: nil))
+      | |- (exists v, tleft ?v' = tleft v /\ _) \/ _ => left; exists v'
+      | |- _ \/ (exists v, tright ?v' = tright v /\ _) => right; exists v'
       end;
       try omega;
       try finisher;
@@ -199,7 +202,7 @@ Proof.
         eauto using in_remove_support;
         eauto using equivalent_rc_refl.
 
-  - unshelve eexists n', v', (makeFresh (pfv t0_2 type_var :: support theta' :: nil)), _, _; eauto;
+  - unshelve eexists n', v', (makeFresh (pfv t0_2 type_var :: pfv t0_3 type_var ::  support theta' :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ -> forall T T' t theta theta' rel, _ ,
@@ -228,7 +231,7 @@ Proof.
       eauto using reducibility_is_candidate;
       eauto with bfv.
 
-  - unshelve eexists n', v', (makeFresh (pfv T2 type_var :: support theta :: nil)), _, _; eauto;
+  - unshelve eexists n', v', (makeFresh (pfv T2 type_var :: pfv T3 type_var :: support theta :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ -> forall T T' t theta theta' rel, _ ,

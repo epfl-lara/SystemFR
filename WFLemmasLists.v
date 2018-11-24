@@ -23,23 +23,3 @@ Proof.
 Qed.
 
 Hint Resolve satisfies_twfs: btwf.
-
-Lemma closed_types_wfs:
-  forall l k,
-    closed_terms l ->
-    wfs l k.
-Proof.
-  induction l; steps; eauto with bwf omega.
-Qed.
-
-Hint Resolve closed_types_wfs: bwf.
-
-Lemma closed_types_twfs:
-  forall l k,
-    closed_terms l ->
-    twfs l k.
-Proof.
-  induction l; steps; eauto with btwf omega.
-Qed.
-
-Hint Resolve closed_types_twfs: btwf.

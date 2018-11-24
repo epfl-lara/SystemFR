@@ -48,7 +48,7 @@ Lemma open_reducible_ttrue:
   forall theta gamma,
     open_reducible theta gamma ttrue T_bool.
 Proof.
-  unfold open_reducible, reducible, reduces_to in *; steps;
+  unfold open_reducible, reducible, reduces_to, closed_term in *; steps;
     eauto using reducible_ttrue with smallstep.
 Qed.
 
@@ -62,7 +62,7 @@ Lemma open_reducible_tfalse:
   forall theta gamma,
     open_reducible theta gamma tfalse T_bool.
 Proof.
-  unfold open_reducible, reducible, reduces_to in *; steps;
+  unfold open_reducible, reducible, reduces_to, closed_term in *; steps;
     eauto using reducible_tfalse with smallstep.
 Qed.
 
@@ -83,7 +83,7 @@ Proof.
   intros theta T t1 t2 t3 WF2 WF3 FV2 FV3 H0 H1 H2 H3.
   match goal with
   | H: reducible _ _ T_bool |- _ =>
-    unfold reducible, reduces_to in H
+    unfold reducible, reduces_to, closed_term in H
   end; repeat step || simp reducible_values in *.
 
   - apply star_backstep_reducible with (ite ttrue t2 t3); repeat step || t_listutils;

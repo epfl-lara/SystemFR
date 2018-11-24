@@ -13,6 +13,7 @@ Require Import Termination.EquivalenceLemmas.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
+Require Import Termination.ErasedTermLemmas.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
@@ -25,6 +26,17 @@ Ltac t_rewrite :=
     eauto with bfv;
     eauto with b_cmap bfv.
 
+Ltac t_closing :=
+  unfold closed_value, closed_term in *; repeat step || t_listutils;
+    eauto with berased;
+    eauto with bwf;
+    eauto with bfv;
+    eauto with values;
+    eauto using is_erased_term_tfv;
+    eauto using is_erased_term_twf.
+
+Ltac t_closer := try solve [ t_closing ].
+
 Ltac tac1 :=
   repeat step || t_listutils || finisher || apply SatCons || simp_red ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
@@ -34,12 +46,13 @@ Ltac tac1 :=
          (rewrite substitute_topen3 in * by t_rewrite) ||
          (rewrite substitute_skip in * by t_rewrite) ||
          (rewrite substitute_open in * by t_rewrite) ||
-         (rewrite substitute_topen in * by t_rewrite) ||
-             eauto with b_equiv;
-             eauto with bwf bfv;
-             eauto with btwf;
-             eauto with berased;
-             eauto 3 using NoDup_append with sets.
+         (rewrite substitute_topen in * by t_rewrite);
+           t_closer;
+           eauto with b_equiv;
+           eauto with bwf bfv;
+           eauto with btwf;
+           eauto with berased;
+           eauto 3 using NoDup_append with sets.
 
 Lemma instantiate_open_reducible:
   forall theta gamma t T lterms,

@@ -236,3 +236,33 @@ Proof.
 Qed.
 
 Hint Resolve star_smallstep_unfold: bsteplemmas.
+
+Lemma star_smallstep_tleft:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    star small_step (tleft t1) (tleft t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_tleft: bsteplemmas.
+
+Lemma star_smallstep_tright:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    star small_step (tright t1) (tright t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_tright: bsteplemmas.
+
+Lemma star_smallstep_sum_match:
+  forall t1 t1' tl tr,
+    star small_step t1 t1' ->
+    star small_step (sum_match t1 tl tr) (sum_match t1' tl tr).
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_sum_match: bsteplemmas.

@@ -80,7 +80,8 @@ Lemma subtype_arrow2:
 Proof.
   repeat step || simp_red || rewrite reducibility_rewrite ;
     eauto using red_is_val, values_normalizing with bwf bfv;
-    eauto 2 with berased.
+    eauto 2 with berased;
+    eauto using reducible_values_closed.
   unfold open_reducible in *.
   unshelve epose proof (H8 theta ((x,a) :: (f,v) :: l) _ _ _); tac1.
 Qed.
@@ -129,7 +130,8 @@ Lemma subtype_prod2:
     reducible_values theta v (T_prod (substitute A l) (substitute B l)).
 Proof.
   repeat step || simp_red || rewrite reducibility_rewrite ;
-    eauto using red_is_val, values_normalizing with bwf bfv.
+    eauto using red_is_val, values_normalizing with bwf bfv;
+    t_closer.
 
   unfold open_reducible in *.
 
@@ -164,9 +166,7 @@ Lemma reducible_values_arrow_subtype:
    reducible_values theta t (T_arrow B1 B2).
 Proof.
   repeat step || simp reducible_values in * || unfold reduces_to || t_listutils;
-    eauto with bwf;
-    eauto with bfv;
-    eauto with berased.
+    t_closer.
     match goal with
     | H: forall a, _ |- _ =>
       unshelve epose proof (H a _); repeat step || unfold reduces_to in *; eauto

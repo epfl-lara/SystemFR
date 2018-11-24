@@ -39,6 +39,7 @@ Open Scope list_scope.
 
 Opaque makeFresh.
 Opaque reducible_values.
+Opaque lt.
 
 Require Import Omega.
 
@@ -59,6 +60,20 @@ Ltac t_fv_red :=
   end.
 
 Set Program Mode.
+
+Ltac t_apply_ih_sub :=
+  lazymatch goal with
+  | IHn: forall m, _ -> forall theta U V X v P, _,
+     H1: reducible_values ?theta ?t (T_rec ?n (psubstitute ?T0 _ type_var) (psubstitute ?Ts _ type_var)) |-
+     reducible_values ?theta ?t (T_rec ?n ?T0 ?Ts)  =>
+       poseNew (Mark 0 "IHOncee");
+       unshelve eapply (IHn (size (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P); eauto
+  | IHn: forall m, _ -> forall theta U V X v P, _,
+     H1: reducible_values ?theta ?t (T_rec ?n ?T0 ?Ts) |-
+     reducible_values ?theta ?t (T_rec ?n (psubstitute ?T0 _ type_var) (psubstitute ?Ts _ type_var))  =>
+       poseNew (Mark 0 "IHOnce");
+       unshelve eapply (IHn (size (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P) in H1; eauto
+  end.
 
 Lemma reducibility_subst_aux:
   forall measure (theta: interpretation) U V X v P,
@@ -92,6 +107,9 @@ Proof.
            | H: reducible_values _ ?t (psubstitute ?T _ _) |- reducible_values _ ?t ?T \/ _ => left
            | H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t (psubstitute ?T _ _) => right
            | H: reducible_values _ ?t (psubstitute ?T _ _) |- _ \/ reducible_values _ ?t ?T => right
+           | H: star small_step _ zero |- _ \/ _ => left
+           | |- (exists v, tleft ?v' = tleft v /\ _) \/ _ => left; exists v'
+           | |- _ \/ (exists v, tright ?v' = tright v /\ _) => right; exists v'
            | H1: forall a, reducible_values _ _ _ -> _,
              a: erased_term  |- _ =>
                poseNew (Mark H1 "instantiate");
@@ -112,8 +130,7 @@ Proof.
       try omega;
       try solve [ apply_any; auto ].
 
-    - Opaque lt.
-exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U [(X, V)] type_var) type_var :: nil)); repeat step || finisher.
+    - exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U [(X, V)] type_var) type_var :: nil)); repeat step || finisher.
       instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
       lazymatch goal with
       | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
@@ -168,22 +185,8 @@ exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_v
        end; repeat step || finisher || apply_any.
 
     - right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv (psubstitute U2 [(X, V)] type_var) type_var :: support theta :: nil)), _, _; eauto;
+      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var :: pfv (psubstitute U2 [(X, V)] type_var) type_var :: pfv (psubstitute U3 [(X, V)] type_var) type_var :: support theta :: nil)), _, _; eauto;
         repeat step || finisher.
-
-Ltac t_apply_ih_sub :=
-  lazymatch goal with
-  | IHn: forall m, _ -> forall theta U V X v P, _,
-     H1: reducible_values ?theta ?t (T_rec ?n (psubstitute ?T _ type_var)) |-
-     reducible_values ?theta ?t (T_rec ?n ?T)  =>
-       poseNew (Mark 0 "IHOncee");
-       unshelve eapply (IHn (size (T_rec n T), index (T_rec n T)) _ theta (T_rec n T) V X t P); eauto
-  | IHn: forall m, _ -> forall theta U V X v P, _,
-     H1: reducible_values ?theta ?t (T_rec ?n ?T) |-
-     reducible_values ?theta ?t (T_rec ?n (psubstitute ?T _ type_var))  =>
-       poseNew (Mark 0 "IHOnce");
-       unshelve eapply (IHn (size (T_rec n T), index (T_rec n T)) _ theta (T_rec n T) V X t P) in H1; eauto
-  end.
 
       lazymatch goal with
       | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
@@ -223,7 +226,7 @@ Ltac t_apply_ih_sub :=
          eauto using reducibility_is_candidate.
 
     - right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv (psubstitute U2 [(X, V)] type_var) type_var :: support theta :: nil)), _, _; eauto;
+      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var :: pfv (psubstitute U3 [(X, V)] type_var) type_var :: pfv (psubstitute U2 [(X, V)] type_var) type_var :: support theta :: nil)), _, _; eauto;
         repeat step || finisher.
 
       lazymatch goal with

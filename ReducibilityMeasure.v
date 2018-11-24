@@ -14,7 +14,7 @@ Require Import Omega.
 
 Definition index (T: tree): option tree :=
   match T with
-  | T_rec n _ => Some n
+  | T_rec n _ _ => Some n
   | _ => None
   end.
 

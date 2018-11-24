@@ -41,6 +41,10 @@ Program Fixpoint erase_term (t: tree): tree :=
   | tfold t' => tfold (erase_term t')
   | tunfold t' => tunfold (erase_term t')
 
+  | tleft t' => tleft (erase_term t')
+  | tright t' => tright (erase_term t')
+  | sum_match t' tl tr => sum_match (erase_term t') (erase_term tl) (erase_term tr)
+
   | _ => uu
   end.
 
@@ -59,6 +63,7 @@ Program Fixpoint erase_type (T: tree): tree :=
   | T_refine A p => T_refine (erase_type A) (erase_term p)
   | T_prod A B => T_prod (erase_type A) (erase_type B)
   | T_arrow A B => T_arrow (erase_type A) (erase_type B)
+  | T_sum A B => T_sum (erase_type A) (erase_type B)
   | T_let t A B => T_let (erase_term t) (erase_type A) (erase_type B)
   | T_singleton t => T_singleton (erase_term t)
   | T_intersection A B => T_intersection (erase_type A) (erase_type B)
@@ -69,7 +74,7 @@ Program Fixpoint erase_type (T: tree): tree :=
   | T_forall A B => T_forall (erase_type A) (erase_type B)
   | T_exists A B => T_exists (erase_type A) (erase_type B)
   | T_abs T => T_abs (erase_type T)
-  | T_rec n T => T_rec (erase_term n) (erase_type T)
+  | T_rec n T0 Ts => T_rec (erase_term n) (erase_type T0) (erase_type Ts)
   | _ => T_unit
   end.
 

@@ -23,10 +23,17 @@ Require Import Equations.Subterm.
 
 Require Import Omega.
 
-Definition reduces_to (P: tree -> Prop) (t: tree) :=
+Definition closed_term t :=
   pfv t term_var = nil /\
   wf t 0 /\
-  is_erased_term t /\
+  is_erased_term t.
+
+Definition closed_value v :=
+  closed_term v /\
+  is_value v.
+
+Definition reduces_to (P: tree -> Prop) (t: tree) :=
+  closed_term t /\
   exists t',
     star small_step t t' /\
     P t'.
@@ -56,10 +63,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
   reducible_values theta v T_nat := is_nat_value v;
 
   reducible_values theta v (T_abs T) :=
-    is_erased_term v /\
-    is_value v /\
-    pfv v term_var = nil /\
-    wf v 0 /\
+    closed_value v /\
     exists X,
       ~(X ∈ support theta) /\
       ~(X ∈ pfv T type_var) /\
@@ -69,27 +73,33 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
                    (notype_inst v);
 
   reducible_values theta v (T_arrow A B) :=
-    is_erased_term v /\
-    is_value v /\
-    pfv v term_var = nil /\
-    wf v 0 /\
+    closed_value v /\
     forall (a: erased_term),
       reducible_values theta a A ->
       reduces_to (fun t => reducible_values theta t (open 0 B a)) (app v a);
 
   reducible_values theta v (T_prod A B) :=
-     exists (a: erased_term) b,
-       v = pp a b /\
-       reducible_values theta a A /\
-       reducible_values theta b (open 0 B a);
+    closed_value v /\
+    exists (a: erased_term) b,
+      v = pp a b /\
+      reducible_values theta a A /\
+      reducible_values theta b (open 0 B a);
+
+  reducible_values theta v (T_sum A B) :=
+    closed_value v /\ (
+      (exists v', v = tleft v' /\ reducible_values theta v' A) \/
+      (exists v', v = tright v' /\ reducible_values theta v' B)
+    );
 
   reducible_values theta v (T_refine T p) :=
+    closed_value v /\
     reducible_values theta v T /\
     is_erased_term p /\
     wf p 1 /\
     star small_step (open 0 p v) ttrue;
 
   reducible_values theta v (T_let a A B) :=
+    closed_value v /\
     exists (a': erased_term),
       is_erased_term a /\
       is_value a' /\
@@ -97,63 +107,57 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
       reducible_values theta v (open 0 B a');
 
   reducible_values theta v (T_singleton t) :=
+    closed_value v /\
     is_erased_term t /\
-    is_erased_term v /\
-    is_value v /\
-    pfv v term_var = nil /\
-    wf v 0 /\
     star small_step t v;
 
   reducible_values theta v (T_intersection A B) :=
+    closed_value v /\
     reducible_values theta v A /\
     reducible_values theta v B;
 
   reducible_values theta v (T_union A B) :=
-    reducible_values theta v A \/
-    reducible_values theta v B;
+    closed_value v /\ (
+      reducible_values theta v A \/
+      reducible_values theta v B
+    );
 
   reducible_values theta v T_top :=
-    is_erased_term v /\
-    is_value v /\
-    pfv v term_var = nil /\
-    wf v 0;
+    closed_value v;
 
   reducible_values theta v T_bot := False;
 
   reducible_values theta v (T_equal t1 t2) :=
+    closed_value v /\
     is_erased_term t1 /\
     is_erased_term t2 /\
     v = trefl /\
     equivalent t1 t2;
 
   reducible_values theta v (T_forall A B) :=
-    is_erased_term v /\
-    is_value v /\
-    pfv v term_var = nil /\
-    wf v 0 /\
+    closed_value v /\
     forall (a: erased_term),
       reducible_values theta a A ->
       reducible_values theta v (open 0 B a);
 
   reducible_values theta v (T_exists A B) :=
+    closed_value v /\
     exists (a: erased_term),
       reducible_values theta a A /\
       reducible_values theta v (open 0 B a);
 
-  reducible_values theta v (T_rec n T) :=
-    is_erased_term n /\
-    is_erased_term v /\
-    is_value v /\
-    pfv v term_var = nil /\
-    wf v 0 /\ (
-      star small_step n zero \/
+  reducible_values theta v (T_rec n T0 Ts) :=
+    closed_value v /\
+    is_erased_term n /\ (
+      (star small_step n zero /\ reducible_values theta v T0) \/
       (exists n' v' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
          v = tfold v' /\
-         ~(X ∈ pfv T type_var) /\
+         ~(X ∈ pfv T0 type_var) /\
+         ~(X ∈ pfv Ts type_var) /\
          ~(X ∈ support theta) /\
-         reducible_values ((X, fun t => reducible_values theta t (T_rec n' T)) :: theta)
+         reducible_values ((X, fun t => reducible_values theta t (T_rec n' T0 Ts)) :: theta)
                           v'
-                          (topen 0 T (fvar X type_var))
+                          (topen 0 Ts (fvar X type_var))
       )
     );
 
@@ -161,24 +165,11 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 .
 
 Ltac t_reducibility_definition :=
-  repeat step || destruct_refinements || autorewrite with bsize; eauto using left_lex with omega.
+  repeat step || destruct_refinements || autorewrite with bsize;
+    eauto using left_lex with omega;
+    eauto using right_lex, lt_index_step.
 
 Solve Obligations with t_reducibility_definition.
-
-Next Obligation.
-  apply right_lex.
-  unfold lt_index; steps.
-  right.
-  exists n', n, n', (succ n'), p1, p1; steps.
-Qed.
-
-Next Obligation.
-  apply right_lex.
-  unfold lt_index; steps.
-  right.
-  exists n', n, n', (succ n'), p1, p1; steps.
-Qed.
-
 Fail Next Obligation.
 
 Definition reducible (theta: interpretation) t T: Prop :=
@@ -258,7 +249,11 @@ Ltac simp_red :=
     rewrite reducible_values_equation_43 in * ||
     rewrite reducible_values_equation_44 in * ||
     rewrite reducible_values_equation_45 in * ||
-    rewrite reducible_values_equation_46 in *
+    rewrite reducible_values_equation_46 in * ||
+    rewrite reducible_values_equation_47 in * ||
+    rewrite reducible_values_equation_48 in * ||
+    rewrite reducible_values_equation_49 in * ||
+    rewrite reducible_values_equation_50 in *
   ).
 
 Ltac top_level_unfold :=

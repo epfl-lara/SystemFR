@@ -45,7 +45,7 @@ Lemma reducible_lambda:
     (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (T_let u U V)) ->
     reducible_values theta (notype_lambda t) (T_arrow U V).
 Proof.
-  repeat step || t_listutils || simp reducible_values in * ||
+  repeat step || t_listutils || simp reducible_values in * || unfold closed_value, closed_term ||
          rewrite reducibility_rewrite || destruct_refinements;
     eauto 2 with bsteplemmas.
 
@@ -91,13 +91,15 @@ Lemma reducible_app:
 Proof.
   intros theta U V t1 t2 H1 H2.
   unfold reducible, reduces_to in *;
-    repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *.
+    repeat step || t_listutils || simp reducible_values in * || unfold reduces_to in *;
+    t_closer.
 
   match goal with
   | H: forall a, _ |- _ => unshelve epose proof (H t' _); steps; eauto with berased
-  end.
+  end; unfold closed_value, closed_term in *; repeat step || t_listutils.
   exists t'1; repeat step || simp reducible_values in *;
-    eauto using star_smallstep_trans with bsteplemmas values.
+    eauto using star_smallstep_trans with bsteplemmas values;
+    t_closer.
   unshelve exists t';
     repeat step || simp reducible_values in *;
       eauto using red_is_val; eauto with berased.
@@ -114,14 +116,15 @@ Proof.
   intros e1 e2 U V W H1 H2;
     unfold reducible in *;
     unfold reduces_to in *;
-    repeat step || t_listutils || simp reducible_values in * || instantiate_any || unfold reduces_to in *.
+    repeat step || t_listutils || simp reducible_values in * || instantiate_any || unfold reduces_to in *;
+      t_closer.
 
   match goal with
   | H: forall a, _ |- _ => unshelve epose proof (H t' _); steps; eauto with berased
   end.
 
   rewrite open_none in *; auto.
-  eexists; steps; eauto;
+  eexists; repeat step || t_closing; eauto;
     eauto using star_smallstep_trans with bsteplemmas values.
 Qed.
 

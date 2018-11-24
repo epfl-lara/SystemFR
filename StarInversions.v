@@ -376,6 +376,50 @@ Proof.
     eauto with smallstep values bsteplemmas.
 Qed.
 
+Lemma star_smallstep_tleft_inv:
+  forall t v,
+    star small_step t v ->
+    is_value v ->
+    forall t',
+      t = tleft t' ->
+      exists v',
+        v = tleft v' /\
+        is_value v' /\
+        star small_step t' v'.
+Proof.
+  induction 1; repeat step || step_inversion is_value || t_invert_step;
+    eauto with smallstep values bsteplemmas.
+Qed.
+
+Lemma star_smallstep_tright_inv:
+  forall t v,
+    star small_step t v ->
+    is_value v ->
+    forall t',
+      t = tright t' ->
+      exists v',
+        v = tright v' /\
+        is_value v' /\
+        star small_step t' v'.
+Proof.
+  induction 1; repeat step || step_inversion is_value || t_invert_step;
+    eauto with smallstep values bsteplemmas.
+Qed.
+
+Lemma star_smallstep_sum_match_inv:
+  forall t v,
+    star small_step t v ->
+    is_value v ->
+    forall t' tl tr,
+      t = sum_match t' tl tr -> (
+        (exists v', star small_step t' (tleft v') /\ star small_step (open 0 tl v') v) \/
+        (exists v', star small_step t' (tright v') /\ star small_step (open 0 tr v') v)
+      ).
+Proof.
+  induction 1; repeat step || step_inversion is_value || t_invert_step;
+    eauto with smallstep values bsteplemmas.
+Qed.
+
 Lemma star_smallstep_value:
   forall v1 v2,
     star small_step v1 v2 ->
