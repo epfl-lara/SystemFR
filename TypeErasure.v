@@ -6,7 +6,7 @@ Require Import Termination.AssocList.
 
 Open Scope list_scope.
 
-Program Fixpoint erase_term (t: tree): tree :=
+Fixpoint erase_term (t: tree): tree :=
   match t with
   | fvar y term_var => t
   | lvar y term_var => t
@@ -48,12 +48,7 @@ Program Fixpoint erase_term (t: tree): tree :=
   | _ => uu
   end.
 
-Ltac t_proof_obligations := program_simpl; steps.
-
-Solve Obligations with t_proof_obligations.
-Fail Next Obligation.
-
-Program Fixpoint erase_type (T: tree): tree :=
+Fixpoint erase_type (T: tree): tree :=
   match T with
   | fvar _ type_var => T
   | lvar _ type_var => T
@@ -83,9 +78,6 @@ Lemma erase_term_erased:
 Proof.
   induction t; steps.
 Qed.
-
-Solve Obligations with t_proof_obligations; eauto using erase_term_erased.
-Fail Next Obligation.
 
 Lemma erase_type_erased:
   forall T, is_erased_type (erase_type T).

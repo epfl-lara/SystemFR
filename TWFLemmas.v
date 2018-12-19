@@ -13,7 +13,12 @@ Open Scope list_scope.
 Lemma twf_monotone:
   forall t, forall k k', twf t k -> k <= k' -> twf t k'.
 Proof.
-  induction t; repeat step; eauto 2 with omega.
+  induction t;
+    repeat match goal with
+           | _ => step
+           | IH: forall x, _, H: twf ?t ?k |- twf ?t ?k1 => apply IH with k
+           end;
+    try omega.
 Qed.
 
 Hint Resolve twf_monotone: btwf.
@@ -36,7 +41,7 @@ Lemma topen_none:
   forall t k rep, twf t k -> topen k t rep = t.
 Proof.
   induction t;
-    repeat step || f_equal; eauto with omega.
+    repeat step || tequality; try omega.
 Qed.
 
 Lemma twfs_lookup:
@@ -73,8 +78,7 @@ Hint Resolve twfs_append: btwf.
 Lemma twf_topen_rev:
   forall t rep k, twf (topen k t rep) k -> twf t (S k).
 Proof.
-  induction t;
-    try solve [ repeat step; eauto ].
+  induction t; repeat step || eapply_any.
 Qed.
 
 Hint Resolve twf_topen_rev: btwf.
@@ -82,8 +86,7 @@ Hint Resolve twf_topen_rev: btwf.
 Lemma twf_open_rev:
   forall t rep i k, twf (open i t rep) k -> twf t k.
 Proof.
-  induction t;
-    try solve [ repeat step; eauto].
+  induction t; repeat step || eapply_any.
 Qed.
 
 Hint Resolve twf_open_rev: btwf2.

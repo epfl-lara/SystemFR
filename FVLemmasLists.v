@@ -9,7 +9,6 @@ Require Import Termination.Sets.
 Require Import Termination.AssocList.
 Require Import Termination.FVLemmas.
 Require Import Termination.TermList.
-Require Import Termination.TypeList.
 Require Import Termination.ListUtils.
 
 Lemma satisfies_closed_mapping:

@@ -12,7 +12,6 @@ Require Import Termination.SizeLemmas.
 Require Import Termination.Equivalence.
 Require Import Termination.StarInversions.
 Require Import Termination.TermList.
-Require Import Termination.TypeList.
 Require Import Termination.TypeErasure.
 
 Require Import Termination.ReducibilityMeasure.

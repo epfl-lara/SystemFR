@@ -13,7 +13,12 @@ Open Scope list_scope.
 Lemma wf_monotone:
   forall t, forall k k', wf t k -> k <= k' -> wf t k'.
 Proof.
-  induction t; repeat step; eauto 2 with omega.
+  induction t;
+    repeat match goal with
+           | _ => step
+           | IH: forall x, _, H: wf ?t ?k |- wf ?t ?k1 => apply IH with k
+           end;
+    try omega.
 Qed.
 
 Hint Resolve wf_monotone: bwf.
@@ -36,7 +41,7 @@ Lemma open_none:
   forall t k rep, wf t k -> open k t rep = t.
 Proof.
   induction t;
-    repeat step || f_equal; eauto 2 with omega; eauto with bwf.
+    repeat light || tequality || step; try omega.
 Qed.
 
 Lemma wfs_lookup:
@@ -73,8 +78,7 @@ Hint Resolve wfs_append: bwf.
 Lemma wf_open_rev:
   forall t rep k, wf (open k t rep) k -> wf t (S k).
 Proof.
-  induction t;
-    try solve [ repeat step; eauto ].
+  induction t; repeat step || eapply_any.
 Qed.
 
 Hint Resolve wf_open_rev: bwf.
@@ -82,8 +86,7 @@ Hint Resolve wf_open_rev: bwf.
 Lemma wf_topen_rev:
   forall t rep i k, wf (topen i t rep) k -> wf t k.
 Proof.
-  induction t;
-    try solve [ repeat step; eauto].
+  induction t; repeat step || eapply_any.
 Qed.
 
 Hint Resolve wf_topen_rev: bwft.
@@ -91,7 +94,7 @@ Hint Resolve wf_topen_rev: bwft.
 Lemma wf_open:
   forall t rep k, wf t (S k) -> wf rep k -> wf (open k t rep) k.
 Proof.
-  induction t; repeat step || apply_any || omega; eauto with bwf.
+  induction t; repeat step || apply_any; try omega; eauto 3 with bwf.
 Qed.
 
 Hint Resolve wf_open: bwf.
@@ -99,7 +102,7 @@ Hint Resolve wf_open: bwf.
 Lemma wf_topen:
   forall t rep i k, wf t k -> wf rep k -> wf (topen i t rep) k.
 Proof.
-  induction t; repeat step || apply_any || omega; eauto with bwf.
+  induction t; repeat step || apply_any; try omega; eauto 3 with bwf.
 Qed.
 
 Hint Resolve wf_topen: bwft.
@@ -110,7 +113,7 @@ Lemma wf_subst:
     wfs l k ->
     wf (psubstitute t l tag) k.
 Proof.
-  induction t; repeat steps; eauto with bwf.
+  induction t; repeat steps; eauto 4 with bwf.
 Qed.
 
 Hint Resolve wf_subst: bwf.

@@ -105,9 +105,9 @@ Lemma fv_open2:
 Proof.
   induction t;
     repeat match goal with
-           | _ => step || t_listutils
            | H: forall x, _, H2: _ ∈ _  |- _ =>
-             apply (H _ _ _) in H2
+             apply (H _ _ _ _) in H2
+           | _ => step || t_listutils
            end.
 Qed.
 
@@ -119,7 +119,7 @@ Proof.
   induction t;
     repeat match goal with
            | H: forall x, _, H2: _ ∈ _  |- _ =>
-             apply (H _ _ _) in H2
+             apply (H _ _ _ _) in H2
            | _ => step || t_listutils
            end.
 Qed.

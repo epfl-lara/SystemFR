@@ -38,9 +38,8 @@ Qed.
 Lemma size_opening:
   forall T k rep, is_erased_term rep -> size (open k T rep) = size T.
 Proof.
-  induction T; repeat step || rewrite_any;
-    eauto with omega;
-    eauto using size_term_form.
+  induction T; repeat step || rewrite_any || apply size_term_form;
+    try omega.
 Qed.
 
 Hint Rewrite size_opening: bsize.

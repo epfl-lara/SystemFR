@@ -1,7 +1,6 @@
 Require Import Termination.Tactics.
 Require Import Termination.Syntax.
 Require Import Termination.TermList.
-Require Import Termination.TypeList.
 Require Import Termination.WFLemmas.
 
 Lemma satisfies_wfs:
