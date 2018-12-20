@@ -36,7 +36,7 @@ Lemma substitute_nothing2:
     psubstitute t ((x,e) :: l) tag = psubstitute t l tag.
 Proof.
   induction t;
-    repeat step || unfold fv in * || (rewrite in_app_iff in *) || tequality || apply_any.
+    repeat step || (rewrite in_app_iff in *) || tequality || apply_any.
 Qed.
 
 Lemma substitute_nothing3:
@@ -125,10 +125,13 @@ Lemma substitute_cons_context:
     psubstitute_context gamma ((x,rep) :: l) tag =
       psubstitute_context (psubstitute_context gamma ((x,rep) :: nil) tag) l tag.
 Proof.
-  induction gamma; repeat step.
-  f_equal; steps.
-  f_equal; steps.
-  rewrite substitute_cons; eauto.
+  induction gamma;
+    repeat match goal with
+           | _ => step
+           | |- _ :: _ = _ :: _ => f_equal
+           | |- (_, _) = (_, _) => f_equal
+           | _ => rewrite substitute_cons by eauto
+           end.
 Qed.
 
 Lemma substitute_open:

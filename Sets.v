@@ -27,7 +27,7 @@ Notation "A -- B" := (diff Nat.eq_dec A B) (at level 50).
 Lemma add_mem: forall {T} (s: list T) x, x ∈ (add s x).
   steps.
 Qed.
-  
+
 Hint Resolve add_mem: sets.
 
 Lemma add_more: forall {T} (s: list T) x y,
@@ -36,7 +36,7 @@ Lemma add_more: forall {T} (s: list T) x y,
 Proof.
   steps.
 Qed.
-  
+
 Hint Resolve add_more: sets.
 
 Definition subset {T} (l1 l2: list T) :=

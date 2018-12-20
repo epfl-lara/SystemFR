@@ -83,7 +83,7 @@ Lemma fv_in_open:
     x ∈ pfv t tag ->
     x ∈ pfv (open k t r) tag.
 Proof.
-  induction t; repeat light || t_listutils.
+  induction t; repeat light || t_fair_split.
 Qed.
 
 Hint Resolve fv_in_open: bfv.
@@ -93,7 +93,7 @@ Lemma fv_in_topen:
     x ∈ pfv t tag ->
     x ∈ pfv (topen k t r) tag.
 Proof.
-  induction t; repeat light || t_listutils.
+  induction t; repeat light || t_fair_split.
 Qed.
 
 Hint Resolve fv_in_topen: bfv.
@@ -104,11 +104,13 @@ Lemma fv_open2:
      y ∈ pfv t tag ++ pfv rep tag).
 Proof.
   induction t;
-    repeat match goal with
-           | H: forall x, _, H2: _ ∈ _  |- _ =>
-             apply (H _ _ _ _) in H2
-           | _ => step || t_listutils
-           end.
+    repeat light;
+    try solve [ apply in_left; assumption ];
+    try solve [ eapply_any; eauto 1 ];
+    try solve [ steps ];
+    try solve [ t_strange_split; repeat light || eapply_any ];
+    try solve [ t_strange_split3; repeat light || eapply_any ];
+    try solve [ t_strange_split4; repeat light || eapply_any ].
 Qed.
 
 Lemma fv_topen2:
@@ -117,11 +119,13 @@ Lemma fv_topen2:
      y ∈ pfv t tag ++ pfv rep tag).
 Proof.
   induction t;
-    repeat match goal with
-           | H: forall x, _, H2: _ ∈ _  |- _ =>
-             apply (H _ _ _ _) in H2
-           | _ => step || t_listutils
-           end.
+    repeat light;
+    try solve [ apply in_left; assumption ];
+    try solve [ eapply_any; eauto 1 ];
+    try solve [ steps ];
+    try solve [ t_strange_split; repeat light || eapply_any ];
+    try solve [ t_strange_split3; repeat light || eapply_any ];
+    try solve [ t_strange_split4; repeat light || eapply_any ].
 Qed.
 
 Ltac t_fv_open :=
@@ -134,18 +138,14 @@ Lemma fv_open:
   forall t rep k tag,
     subset (pfv (open k t rep) tag) (pfv t tag ++ pfv rep tag).
 Proof.
-  induction t;
-    repeat match goal with
-           | _ => step || t_listutils || t_fv_open
-           | _ => unfold subset in *
-           end.
+  unfold subset; repeat step || t_fv_open.
 Qed.
 
 Lemma fv_topen:
   forall t rep k tag,
     subset (pfv (topen k t rep) tag) (pfv t tag ++ pfv rep tag).
 Proof.
-  induction t; repeat step || t_listutils || t_fv_open || unfold subset in *.
+  unfold subset; repeat step || t_fv_open.
 Qed.
 
 Lemma fv_nils_open:
@@ -174,19 +174,35 @@ Qed.
 
 Hint Resolve fv_nils_topen: bfv.
 
+Lemma fv_subst_lemma:
+  forall s1 s1' s2 s2' s3 x,
+    subset s1 (s1' - x ++ s3) ->
+    subset s2 (s2' - x ++ s3) ->
+    subset (s1 ++ s2) ((s1' ++ s2') - x ++ s3).
+Proof.
+  unfold subset; repeat step || t_listutils || instantiate_any.
+Qed.
+
 Lemma fv_subst:
   forall t x rep tag,
     subset (pfv (psubstitute t ((x,rep) :: nil) tag) tag)
            (((pfv t tag) - x) ++ pfv rep tag).
 Proof.
   induction t;
-    repeat match goal with
-           | _ => step || t_listutils || (progress unfold subset in *)
-           | H: forall x, _, H2: _ ∈ _  |- _ => apply (H _ _ _) in H2
-           end.
+    repeat step || apply fv_subst_lemma;
+    eauto 2 with sets.
 Qed.
 
 Hint Resolve fv_subst: bfv.
+
+Lemma fv_subst2_lemma:
+  forall s1 s1' s2 s2' s3 s,
+    subset s1 (s1' -- s ++ s3) ->
+    subset s2 (s2' -- s ++ s3) ->
+    subset (s1 ++ s2) ((s1' ++ s2') -- s ++ s3).
+Proof.
+  unfold subset; repeat step || t_listutils || instantiate_any.
+Qed.
 
 Lemma fv_subst2:
   forall t l tag,
@@ -194,12 +210,9 @@ Lemma fv_subst2:
            (((pfv t tag) -- (support l)) ++ pfv_range l tag).
 Proof.
   induction t;
-    repeat match goal with
-           | _ => step || t_listutils || (progress unfold subset in *)
-           | H: forall x, _, H2: _ ∈ _  |- _ => apply (H _ _ _) in H2
-           end;
-    eauto with sets;
-    eauto with bfv.
+    repeat step || apply fv_subst2_lemma;
+    eauto 2 with sets;
+    try solve [ unfold subset; repeat step || t_listutils; eauto with bfv ].
 Qed.
 
 Hint Resolve fv_subst2: bfv.
@@ -286,36 +299,13 @@ Lemma fv_nils2:
 Proof.
   induction t;
     repeat match goal with
-           | H: forall x, _ -> _ -> _, H1: _, H2: _ |- _ => pose proof (H _ H1 H2); clear H
-           | H: forall x, ?s = x \/ False -> _ |- _ => unshelve epose proof (H s _); clear H
-           | H1: forall x, x ∈ ?l ++ _ -> _, H2: ?x ∈ ?l |- _ =>
-             poseNew (Mark (x,l) "instance");
-             unshelve epose proof (H1 x _)
-           | H1: forall x, x ∈ _ ++ ?l -> _, H2: ?x ∈ ?l |- _ =>
-             poseNew (Mark (x,l) "instance right");
-             unshelve epose proof (H1 x _)
-           | H1: forall x, x ∈ _ ++ _ ++ ?l -> _, H2: ?x ∈ ?l |- _ =>
-             poseNew (Mark (x,l) "instance rright");
-             unshelve epose proof (H1 x _)
-           | H1: forall x, x ∈ _ ++ _ ++ ?l ++ _ -> _, H2: ?x ∈ ?l |- _ =>
-             poseNew (Mark (x,l) "instance 3/4");
-             unshelve epose proof (H1 x _)
-           | H1: forall x, x ∈ _ ++ _ ++ _ ++ ?l -> _, H2: ?x ∈ ?l |- _ =>
-             poseNew (Mark (x,l) "instance 4/4");
-             unshelve epose proof (H1 x _)
-           | H1: forall x, x ∈ _ ++ ?l ++ _ -> _, H2: ?x ∈ ?l |- _ =>
-             poseNew (Mark (x,l) "instance middle");
-             unshelve epose proof (H1 x _)
-           | H: ?x ∈ pfv (psubstitute ?t ?l ?tag) ?tag |- _ =>
-             poseNew (Mark (x,t,l) "fv subst");
-             pose proof (in_subset _ _ x (fv_subst2 t l tag) H)
            | _ => step || t_listutils
-           | _ => progress (rewrite <- empty_list_rewrite in *)
-           | _ => progress (unfold subset in *)
            end;
-           eauto 2 with bfv;
-           eauto 2 using closed_mapping_fv with falsity;
-           eauto 2 using closed_mapping_fv2 with falsity.
+      eauto 2 with bfv;
+      eauto 2 using closed_mapping_fv with falsity;
+      eauto 2 using closed_mapping_fv2 with falsity;
+      try solve [ rewrite (@singleton_subset nat) in *; repeat step || t_lookup ];
+      try solve [ apply_any; eauto 2 with sets ].
 Qed.
 
 Hint Resolve fv_nils2: bfv.

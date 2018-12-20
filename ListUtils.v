@@ -45,7 +45,7 @@ Ltac t_listutils :=
   | |- context[_ ∈ _ ++ _] => rewrite in_app_iff
   | H: ?x ∈ ?l |- context[map ?f ?l] =>
     poseNew (Mark (f,l,x) "in_map");
-    poseNew (in_map _ _ f l x)     
+    poseNew (in_map _ _ f l x)
   | H: ?y ∈ map ?f ?l |- _ =>
     poseNew (Mark (y,f,l) "in_map_iff");
     poseNew (proj1 (in_map_iff f l y) H)
@@ -58,24 +58,24 @@ Ltac t_listutils :=
   end.
 
 Lemma empty_list:
-  forall A (l: list A), 
+  forall A (l: list A),
     (forall x, x ∈ l -> False) ->
     l = nil.
 Proof.
   destruct l; steps; eauto with falsity.
-Qed.  
+Qed.
 
 Hint Resolve empty_list: blistutils.
 
 Hint Extern 50 => t_listutils: blistutils.
 
 Lemma empty_list_rewrite:
-  forall A (l: list A), 
+  forall A (l: list A),
     (forall x, x ∈ l -> False) <->
     l = nil.
 Proof.
   destruct l; steps; eauto with falsity.
-Qed.  
+Qed.
 
 Lemma empty_list2:
   forall A (l: list A) x,

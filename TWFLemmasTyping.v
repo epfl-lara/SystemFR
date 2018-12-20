@@ -38,7 +38,6 @@ Definition is_subtype_twf := proj1 (proj2 (proj2 (proj2 well_typed_twf))).
 Definition are_equal_twf := proj2 (proj2 (proj2 (proj2 well_typed_twf))).
 
 Hint Resolve is_type_twf: btwf.
-(* Hint Resolve is_subtype_wf: bwf. *)
 
 Lemma has_type_twf_term:
   forall tvars gamma t T k, has_type tvars gamma t T -> twf t k.

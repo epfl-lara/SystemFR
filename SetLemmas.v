@@ -24,6 +24,15 @@ Qed.
 
 Hint Resolve singleton_subset: sets.
 
+Lemma singleton_subset2:
+  forall {T} (l: list T) (x: T),
+    subset (singleton x) (x :: l).
+Proof.
+  unfold subset; unfold singleton; steps.
+Qed.
+
+Hint Resolve singleton_subset2: sets.
+
 Lemma union_left:
   forall {T} (l1 l2 l: list T),
     subset l1 l ->
@@ -48,6 +57,43 @@ Proof.
 Qed.
 
 Hint Resolve union_left union_right1 union_right2: sets.
+
+Lemma union_weaken1:
+  forall {T} (l1 l2 s: list T),
+    subset (l1 ++ l2) s ->
+    subset l1 s.
+Proof.
+  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+Qed.
+
+Lemma union_weaken2:
+  forall {T} (l1 l2 s: list T),
+    subset (l1 ++ l2) s ->
+    subset l2 s.
+Proof.
+  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+Qed.
+
+Lemma union_weaken3:
+  forall {T} (l1 l2 l3 l4 s: list T),
+    subset (l1 ++ l2 ++ l3 ++ l4) s ->
+    subset l3 s.
+Proof.
+  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+Qed.
+
+Lemma union_weaken4:
+  forall {T} (l1 l2 l3 l4 s: list T),
+    subset (l1 ++ l2 ++ l3 ++ l4) s ->
+    subset l4 s.
+Proof.
+  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+Qed.
+
+Hint Resolve union_weaken1: sets.
+Hint Resolve union_weaken2: sets.
+Hint Resolve union_weaken3: sets.
+Hint Resolve union_weaken4: sets.
 
 Lemma empty_is_subset:
   forall {T} (l: list T),
@@ -206,3 +252,85 @@ Lemma subset_singleton:
 Proof.
   unfold subset; steps.
 Qed.
+
+Lemma in_left:
+  forall A (x: A) l1 l2,
+    x ∈ l1 ->
+    x ∈ l1 ++ l2.
+Proof.
+  repeat step || t_listutils.
+Qed.
+
+Lemma in_right:
+  forall A (x: A) l1 l2,
+    x ∈ l2 ->
+    x ∈ l1 ++ l2.
+Proof.
+  repeat step || t_listutils.
+Qed.
+
+Lemma fair_split:
+  forall A l1 l1' l2 l2' (x: A),
+    (forall z, z ∈ l1 -> z ∈ l1') ->
+    (forall z, z ∈ l2 -> z ∈ l2') ->
+    x ∈ l1 ++ l2 ->
+    x ∈ l1' ++ l2'.
+Proof.
+  repeat step || t_listutils.
+Qed.
+
+Ltac t_fair_split :=
+  match goal with
+  | H: ?x ∈ ?l1 ++ ?l2 |- ?x ∈ ?l1' ++ ?l2' => apply fair_split with l1 l2
+  end.
+
+Lemma strange_split:
+  forall A l1 l1' l2 l2' l3 (x: A),
+    (forall z, z ∈ l1 -> z ∈ l1' ++ l3) ->
+    (forall z, z ∈ l2 -> z ∈ l2' ++ l3) ->
+    x ∈ l1 ++ l2 ->
+    x ∈ (l1' ++ l2') ++ l3.
+Proof.
+  repeat step || t_listutils || instantiate_any.
+Qed.
+
+Ltac t_strange_split :=
+  match goal with
+  | H: ?x ∈ ?l1 ++ ?l2 |- ?x ∈ (?l1' ++ ?l2') ++ ?l3 =>
+    apply strange_split with l1 l2
+  end.
+
+Lemma strange_split3:
+  forall A l1 l1' l2 l2' l3 l3' l4 (x: A),
+    (forall z, z ∈ l1 -> z ∈ l1' ++ l4) ->
+    (forall z, z ∈ l2 -> z ∈ l2' ++ l4) ->
+    (forall z, z ∈ l3 -> z ∈ l3' ++ l4) ->
+    x ∈ l1 ++ l2 ++ l3 ->
+    x ∈ (l1' ++ l2' ++ l3') ++ l4.
+Proof.
+  repeat step || t_listutils || instantiate_any.
+Qed.
+
+Ltac t_strange_split3 :=
+  match goal with
+  | H: ?x ∈ ?l1 ++ ?l2 ++ ?l3 |- ?x ∈ (?l1' ++ ?l2' ++ ?l3') ++ ?l4 =>
+    apply strange_split3 with l1 l2 l3
+  end.
+
+Lemma strange_split4:
+  forall A l1 l1' l2 l2' l3 l3' l4 l4' l5 (x: A),
+    (forall z, z ∈ l1 -> z ∈ l1' ++ l5) ->
+    (forall z, z ∈ l2 -> z ∈ l2' ++ l5) ->
+    (forall z, z ∈ l3 -> z ∈ l3' ++ l5) ->
+    (forall z, z ∈ l4 -> z ∈ l4' ++ l5) ->
+    x ∈ l1 ++ l2 ++ l3 ++ l4 ->
+    x ∈ (l1' ++ l2' ++ l3' ++ l4') ++ l5.
+Proof.
+  repeat step || t_listutils || instantiate_any.
+Qed.
+
+Ltac t_strange_split4 :=
+  match goal with
+  | H: ?x ∈ ?l1 ++ ?l2 ++ ?l3 ++ ?l4 |- ?x ∈ (?l1' ++ ?l2' ++ ?l3' ++ ?l4') ++ ?l5 =>
+    apply strange_split4 with l1 l2 l3 l4
+  end.
