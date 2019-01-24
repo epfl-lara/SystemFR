@@ -230,53 +230,8 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve IVUnit: values.
-Hint Resolve IVZero: values.
-Hint Resolve IVSucc: values.
-Hint Resolve IVFalse: values.
-Hint Resolve IVTrue: values.
-Hint Resolve IVPair: values.
-Hint Resolve IVLambda: values.
-Hint Resolve IVTypeAbs: values.
-Hint Resolve IVVar: values.
-Hint Resolve IVRefl: values.
-Hint Resolve IVFold: values.
-Hint Resolve IVLeft: values.
-Hint Resolve IVRight: values.
-
-Hint Resolve SPBetaProj1: smallstep.
-Hint Resolve SPBetaProj2: smallstep.
-Hint Resolve SPBetaApp: smallstep.
-Hint Resolve SPBetaTypeInst: smallstep.
-Hint Resolve SPBetaLet: smallstep.
-Hint Resolve SPBetaRec0: smallstep.
-Hint Resolve SPBetaRecS: smallstep.
-Hint Resolve SPBetaFix: smallstep.
-Hint Resolve SPBetaMatch0: smallstep.
-Hint Resolve SPBetaMatchS: smallstep.
-Hint Resolve SPBetaIte1: smallstep.
-Hint Resolve SPBetaIte2: smallstep.
-Hint Resolve SPBetaFold: smallstep.
-Hint Resolve SPBetaMatchLeft: smallstep.
-Hint Resolve SPBetaMatchRight: smallstep.
-
-Hint Resolve SPTypeInst: smallstep.
-Hint Resolve SPAppLeft: smallstep.
-Hint Resolve SPAppRight: smallstep.
-Hint Resolve SPPairL: smallstep.
-Hint Resolve SPPairR: smallstep.
-Hint Resolve SPProj1: smallstep.
-Hint Resolve SPProj2: smallstep.
-Hint Resolve SPSucc: smallstep.
-Hint Resolve SPRec: smallstep.
-Hint Resolve SPMatch: smallstep.
-Hint Resolve SPIte: smallstep.
-Hint Resolve SPLet: smallstep.
-Hint Resolve SPFold: smallstep.
-Hint Resolve SPUnfold: smallstep.
-Hint Resolve SPLeft: smallstep.
-Hint Resolve SPRight: smallstep.
-Hint Resolve SPSumMatch: smallstep.
+Hint Constructors is_value: values.
+Hint Constructors small_step: smallstep.
 
 Lemma is_nat_value_value:
   forall v,
