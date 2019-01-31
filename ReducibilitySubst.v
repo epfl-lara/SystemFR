@@ -2,6 +2,7 @@ Require Import Equations.Equations.
 Require Import Equations.Subterm.
 
 Require Import Coq.Strings.String.
+Require Import Coq.Lists.List.
 
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
@@ -130,7 +131,7 @@ Proof.
       try omega;
       try solve [ apply_any; auto ].
 
-    - exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U [(X, V)] type_var) type_var :: nil)); repeat step || finisher.
+    - exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
       instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
       lazymatch goal with
       | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
@@ -156,7 +157,7 @@ Proof.
        | H: _ |- _ => apply reducible_unused3 in H
        end; repeat step || finisher || apply_any.
 
-    - exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U [(X, V)] type_var) type_var :: nil)); repeat step || finisher.
+    - exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
       instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
 
       lazymatch goal with
@@ -185,7 +186,10 @@ Proof.
        end; repeat step || finisher || apply_any.
 
     - right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var :: pfv (psubstitute U2 [(X, V)] type_var) type_var :: pfv (psubstitute U3 [(X, V)] type_var) type_var :: support theta :: nil)), _, _; eauto;
+      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var
+                                                     :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
+                                                     :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
+                                                     :: support theta :: nil)), _, _; eauto;
         repeat step || finisher.
 
       lazymatch goal with
@@ -226,7 +230,10 @@ Proof.
          eauto using reducibility_is_candidate.
 
     - right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var :: pfv (psubstitute U3 [(X, V)] type_var) type_var :: pfv (psubstitute U2 [(X, V)] type_var) type_var :: support theta :: nil)), _, _; eauto;
+      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var
+                                                     :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
+                                                     :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
+                                                     :: support theta :: nil)), _, _; eauto;
         repeat step || finisher.
 
       lazymatch goal with

@@ -7,6 +7,8 @@ Require Import Termination.ListUtils.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarRelation.
 
+Require Import Coq.Strings.String.
+
 Lemma star_one_step:
   forall t1 t2 v,
     star small_step t1 v ->

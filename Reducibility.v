@@ -1,6 +1,7 @@
 Require Import Equations.Equations.
 
 Require Import Coq.Arith.PeanoNat.
+Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
 Require Import Termination.Syntax.

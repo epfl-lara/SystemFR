@@ -1,3 +1,5 @@
+Require Import Coq.Strings.String.
+
 Require Import Termination.TypeErasure.
 Require Import Termination.TypeErasureLemmas.
 Require Import Termination.Syntax.

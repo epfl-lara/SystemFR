@@ -6,6 +6,8 @@ Require Import Termination.ListUtils.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 
+Require Import Coq.Strings.String.
+
 Lemma star_smallstep_let_inv_irred:
   forall t v,
     star small_step t v ->

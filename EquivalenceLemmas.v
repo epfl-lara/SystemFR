@@ -6,6 +6,8 @@ Require Import Termination.StarRelation.
 Require Import Termination.SmallStep.
 Require Import Termination.StarLemmas.
 
+Require Import Coq.Strings.String.
+
 Lemma equivalence_def:
   forall t1 t2 v,
     is_value v ->

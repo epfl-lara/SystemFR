@@ -46,9 +46,8 @@ Proof.
   unfold reduces_to; repeat step || eexists; eauto.
 Qed.
 
-Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): Prop :=
-  reducible_values theta v T by rec (size T, index T) (lexprod _ _ lt lt_index) :=
-
+Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
+    by wf (size T, index T) (lexprod _ _ lt lt_index) :=
   reducible_values theta v (fvar X type_var) :=
     match lookup Nat.eq_dec theta X with
     | None => False

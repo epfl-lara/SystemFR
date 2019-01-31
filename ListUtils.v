@@ -4,6 +4,7 @@ Require Import Termination.Sets.
 Require Import Omega.
 
 Require Import Coq.Lists.List.
+Require Import Coq.Strings.String.
 
 Lemma notInAppend: forall {T} l1 l2 (x: T),
     ~(x ∈ l1 ++ l2) ->

@@ -1,3 +1,5 @@
+Require Import Coq.Strings.String.
+
 Require Import Equations.Equations.
 
 Require Import Termination.AssocList.
@@ -47,6 +49,13 @@ Proof.
       eauto 2 using is_nat_value_erased;
       eauto 2 using is_nat_value_value.
 Qed.
+
+Ltac t_reducible_values_closed :=
+  match goal with
+  | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?v ?T |- _ =>
+      poseNew (Mark v "reducible_values_closed");
+      pose proof (reducible_values_closed _ _ _ H1 H2)
+  end.
 
 Lemma reducible_values_props:
   forall theta t T tag,

@@ -1,3 +1,5 @@
+Require Import Coq.Strings.String.
+
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
 Require Import Termination.Freshness.

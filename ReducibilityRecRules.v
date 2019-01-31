@@ -1,3 +1,4 @@
+Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
 Require Import Termination.Sets.
@@ -94,6 +95,73 @@ Proof.
     eauto using reducible_values_rec_step, reducible_values_rec_backstep.
 Qed.
 
+Lemma reducible_values_unfold:
+  forall theta v n T0 Ts,
+    wf n 0 ->
+    twf n 0 ->
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    is_erased_term n ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    valid_interpretation theta ->
+    reducible_values theta (tfold v) (T_rec (succ n) T0 Ts) ->
+    reducible_values theta v (topen 0 Ts (T_rec n T0 Ts)).
+Proof.
+  unfold reducible, reduces_to;
+    repeat match goal with
+           | H: star small_step (succ _) ?v |- _ =>
+              poseNew (Mark 0 "inv succ");
+              unshelve epose proof (star_smallstep_succ_inv _ v H _ _ eq_refl)
+           | _ => step || simp_red || step_inversion is_value
+           end; eauto with values.
+
+  eapply reducibility_subst_head; eauto; repeat step || t_listutils;
+    try solve [ rewrite is_erased_term_tfv in *; steps ].
+  eapply reducible_rename_one_rc; eauto using reducibility_is_candidate.
+  apply equivalent_rc_sym; apply equivalent_rc_rec_step; eauto with berased.
+Qed.
+
+Lemma red_one:
+  forall theta, reducible_values theta (succ zero) T_nat.
+Proof.
+  repeat step || simp_red.
+Qed.
+
+Ltac inst_one :=
+  match goal with
+  | H: forall a, reducible_values ?theta _ T_nat -> _ |- _ =>
+      poseNew (Mark 0 "once"); unshelve epose proof (H (succ zero) (red_one theta))
+  end.
+
+Lemma fold_in_rec:
+  forall theta v T0 Ts n,
+    valid_interpretation theta ->
+    reducible_values theta v (T_rec (succ n) T0 Ts) ->
+    exists v', closed_value v' /\ v = tfold v'.
+Proof.
+  repeat match goal with
+         | _ => step || simp_red || inst_one
+         | H: reducible_values ?theta ?v ?T |- _ => apply reducible_values_closed with theta T
+         | H: reducible_values ?theta ?v ?T |- _ => exists v
+         | H: star small_step (succ ?n) zero |- _ =>
+             unshelve eapply (False_ind _ (smallstep_succ_zero (succ n) zero H n _ _))
+         end; eauto using reducibility_is_candidate.
+Qed.
+
+Lemma star_unfold_fold:
+  forall t v,
+    closed_value (tfold v) ->
+    star small_step t (tfold v) ->
+    star small_step (tunfold t) v.
+Proof.
+  unfold closed_value.
+  repeat step || step_inversion is_value.
+  eapply star_smallstep_trans; eauto with bsteplemmas; eauto with smallstep.
+Qed.
+
 Lemma reducible_unfold:
   forall theta t n T0 Ts,
     wf n 0 ->
@@ -111,23 +179,14 @@ Lemma reducible_unfold:
 Proof.
   unfold reducible, reduces_to;
     repeat match goal with
-           | H: star small_step (succ _) ?v |- _ =>
-              poseNew (Mark 0 "inv succ");
-              unshelve epose proof (star_smallstep_succ_inv _ v H _ _ eq_refl)
-           | _ => step || simp_red || step_inversion is_value
+           | _ => apply star_unfold_fold
+           | _ => apply reducible_values_unfold
+           | H: star small_step ?t (tfold ?v) |- exists t', star small_step (tunfold ?t) _ /\ _ => exists v
+           | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?v (T_rec _ _ _) |- _ =>
+               poseNew (Mark 0 "once");
+               is_var v; unshelve epose proof (fold_in_rec _ _ _ _ _ H1 H2)
+           | _ => step || unfold closed_value in *
            end; eauto with values.
-
-  exists v'; steps.
-  - apply star_smallstep_trans with (tunfold (tfold v'));
-      eauto with bsteplemmas.
-    eapply Trans; eauto with smallstep.
-    apply SPBetaFold; unshelve eapply (red_is_val _ _ _ _ H20); steps;
-      eauto using reducibility_is_candidate.
-
-  - eapply reducibility_subst_head; eauto; repeat step || t_listutils;
-      try solve [ rewrite is_erased_term_tfv in *; steps ].
-    eapply reducible_rename_one_rc; eauto using reducibility_is_candidate.
-    apply equivalent_rc_sym; apply equivalent_rc_rec_step; eauto with berased.
 Qed.
 
 Lemma open_reducible_unfold:
