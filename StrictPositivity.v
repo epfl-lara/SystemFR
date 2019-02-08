@@ -29,6 +29,7 @@ Require Import Termination.ReducibilityMeasure.
 Require Import Termination.ReducibilityRenaming.
 Require Import Termination.ReducibilitySubst.
 Require Import Termination.RedTactics.
+Require Import Termination.RedTactics2.
 
 Require Import Termination.AssocList.
 Require Import Termination.Sets.
@@ -79,36 +80,6 @@ Proof.
   induction T; steps; eauto using twf_open with btwf omega.
 Qed.
 
-Ltac t_topen_none :=
-  match goal with
-  | H1: twf ?T ?k, H2: context[topen ?k ?T ?rep] |- _ => rewrite (topen_none T k rep H1) in H2
-  | H1: twf ?T ?k |- context[topen ?k ?T ?rep] => rewrite (topen_none T k rep H1)
-  | H1: is_erased_term ?T, H2: context[topen ?k ?T ?rep] |- _ =>
-    rewrite (topen_none T k rep) in H2 by (steps; eauto with btwf)
-  | H1: is_erased_term ?T |- context[topen ?k ?T ?rep] =>
-    rewrite (topen_none T k rep) by (steps; eauto with btwf)
-  | H1: is_erased_term ?T, H2: context[topen ?k (open ?k' ?T ?rep') ?rep] |- _ =>
-    rewrite (topen_none (open k' T rep') k rep) in H2
-      by (repeat steps || apply twf_open; eauto 2 with btwf)
-  | H1: is_erased_term ?T |- context[topen ?k (open ?k' ?T ?rep') ?rep] =>
-    rewrite (topen_none (open k' T rep') k rep) by (repeat steps || apply twf_open; eauto 2 with btwf)
-  end.
-
-Ltac t_instantiate_reducible :=
-  match goal with
-  | H1: reducible_values _ ?v ?T, H2: is_erased_term ?v, H3: forall a, _ -> _ -> _ |- _ =>
-    poseNew (Mark (v,H3) "t_instantiate_reducible");
-    pose proof (H3 v H2 H1)
-  | H1: reducible_values _ ?v ?T, H2: forall a, _ -> _ |- _ =>
-    poseNew (Mark (v,H2) "t_instantiate_reducible");
-    pose proof (H2 v H1)
-  end.
-
-Ltac t_reduces_to :=
-  match goal with
-  | H: reduces_to ?P ?t |- reduces_to ?P' ?t => apply (reduces_to_equiv P P' t H)
-  end.
-
 Definition non_empty theta A := exists v, reducible_values theta v A.
 
 Lemma instantiate_non_empty:
@@ -131,33 +102,6 @@ Ltac apply_induction H :=
   | |- reducible_values _ _ (topen 0 ?T _) => apply H with (size T, index T)
   end.
 
-Ltac find_smallstep_value :=
-  match goal with
-  | H: star small_step ?t ?v |- exists v, star small_step ?t v /\ _ => exists v
-  | H: star small_step ?t ?v |- exists x _, _ /\ _ /\ star small_step ?t x /\ _ => exists v
-  end.
-
-Ltac find_exists :=
-  match goal with
-  | |- exists a b _, pp ?c ?d = pp a b /\ _ => exists c, d
-  | |- (exists x, tleft ?v = tleft x /\ _) \/ _  => left; exists v
-  | |- _ \/ (exists x, tright ?v = tright x /\ _)  => right; exists v
-  end.
-
-Ltac find_reducible_value :=
-  match goal with
-  | H: reducible_values ?theta ?v (topen 0 ?T _) |-
-      exists a _, reducible_values ?theta a (topen 0 ?T _) /\ _ => exists v
-  end.
-
-Ltac reducibility_choice :=
-  match goal with
-  | H: reducible_values ?theta ?v (topen 0 ?T _) |-
-      reducible_values ?theta ?v (topen 0 ?T _) \/ _ => left
-  | H: reducible_values ?theta ?v (topen 0 ?T _) |-
-      _ \/ reducible_values ?theta ?v (topen 0 ?T _) => right
-  end.
-
 Lemma twf_positive:
   forall T k,
     is_erased_type T ->
@@ -166,66 +110,6 @@ Lemma twf_positive:
 Proof.
   induction T; steps; try omega.
 Qed.
-
-Lemma swap_nothing:
-  forall T k i j,
-    twf T k ->
-    k <= i ->
-    k <= j ->
-    swap_type_holes T i j = T.
-Proof.
-  induction T; repeat step || tequality; eauto with omega.
-Qed.
-
-Lemma is_erased_swap:
-  forall T i j,
-    is_erased_type T ->
-    is_erased_type (swap_type_holes T i j).
-Proof.
-  induction T; repeat step || apply_any || rewrite (swap_nothing _ 0);
-    eauto with omega btwf.
-Qed.
-
-Hint Resolve is_erased_swap: berased.
-
-Lemma twf_swap:
-  forall T k rep,
-    twf rep 0 ->
-    twf T (S k) ->
-    twf (topen (S k) (swap_type_holes T k (S k)) rep) k.
-Proof.
-  induction T; steps; eauto with btwf omega.
-Qed.
-
-Hint Resolve twf_swap: btwf.
-
-Lemma twf_swap2:
-  forall T k rep,
-    twf rep 0 ->
-    twf T (S (S k)) ->
-    twf (topen (S k) (swap_type_holes T k (S k)) rep) (S k).
-Proof.
-  induction T; repeat step || unshelve eauto with btwf omega.
-Qed.
-
-Hint Resolve twf_swap2: btwf.
-
-Lemma wf_swap:
-  forall T k i j,
-    wf T k ->
-    wf (swap_type_holes T i j) k.
-Proof.
-  induction T; steps.
-Qed.
-
-Hint Resolve wf_swap: bwf.
-
-Ltac t_instantiate_rc :=
-  match goal with
-  | H: reducibility_candidate ?RC, H2: forall R, reducibility_candidate R -> _ |- _ =>
-     poseNew (Mark (H,H2) "instantiate_rc");
-     pose proof (H2 RC H)
-  end.
 
 Lemma strict_positive_monotone:
   forall T k1 k2,
@@ -259,39 +143,6 @@ Lemma non_empty_extend:
     non_empty ((x, RC) :: theta) A.
 Proof.
   unfold non_empty; repeat step || exists v || apply reducible_unused2.
-Qed.
-
-Lemma valid_interpretation_cons:
-  forall theta RC X,
-    valid_interpretation theta ->
-    reducibility_candidate RC ->
-    valid_interpretation ((X, RC) :: theta).
-Proof.
-  steps.
-Qed.
-
-Lemma swap_holes_twice:
-  forall T i j,
-    swap_type_holes (swap_type_holes T i j) i j = T.
-Proof.
-  induction T; steps.
-Qed.
-
-Ltac t_reducible_rename_one :=
-  match goal with
-  | H: reducible_values ((?X,?RC) :: ?theta) ?v (topen 0 ?T (fvar ?X type_var)) |-
-       reducible_values ((?Y,?RC) :: ?theta) ?v (topen 0 ?T (fvar ?Y type_var)) =>
-    apply reducible_rename_one with X
-  end.
-
-Lemma fv_in_reducible_val:
-  forall theta v T x tag,
-    reducible_values theta v T ->
-    valid_interpretation theta ->
-    x ∈ pfv v tag ->
-    False.
-Proof.
-  intros. erewrite reducible_val_fv in *; eauto.
 Qed.
 
 Lemma strictly_positive_push_forall:

@@ -1,8 +1,11 @@
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
 Require Import Termination.TWFLemmas.
+Require Import Termination.ErasedTermLemmas.
 
 Require Import PeanoNat.
+
+Opaque Nat.eq_dec.
 
 Fixpoint swap_type_holes t i j :=
   match t with
@@ -96,4 +99,64 @@ Lemma open_swap:
     topen j1 (topen j2 (swap_type_holes t j1 j2) rep1) rep2).
 Proof.
   induction t; repeat step || tequality || rewrite topen_none; eauto with btwf omega.
+Qed.
+
+Lemma swap_nothing:
+  forall T k i j,
+    twf T k ->
+    k <= i ->
+    k <= j ->
+    swap_type_holes T i j = T.
+Proof.
+  induction T; repeat step || tequality; eauto with omega.
+Qed.
+
+Lemma is_erased_swap:
+  forall T i j,
+    is_erased_type T ->
+    is_erased_type (swap_type_holes T i j).
+Proof.
+  induction T; repeat step || apply_any || rewrite (swap_nothing _ 0);
+    eauto with omega btwf.
+Qed.
+
+Hint Resolve is_erased_swap: berased.
+
+Lemma twf_swap:
+  forall T k rep,
+    twf rep 0 ->
+    twf T (S k) ->
+    twf (topen (S k) (swap_type_holes T k (S k)) rep) k.
+Proof.
+  induction T; steps; eauto with btwf omega.
+Qed.
+
+Hint Resolve twf_swap: btwf.
+
+Lemma twf_swap2:
+  forall T k rep,
+    twf rep 0 ->
+    twf T (S (S k)) ->
+    twf (topen (S k) (swap_type_holes T k (S k)) rep) (S k).
+Proof.
+  induction T; repeat step || unshelve eauto with btwf omega.
+Qed.
+
+Hint Resolve twf_swap2: btwf.
+
+Lemma wf_swap:
+  forall T k i j,
+    wf T k ->
+    wf (swap_type_holes T i j) k.
+Proof.
+  induction T; steps.
+Qed.
+
+Hint Resolve wf_swap: bwf.
+
+Lemma swap_holes_twice:
+  forall T i j,
+    swap_type_holes (swap_type_holes T i j) i j = T.
+Proof.
+  induction T; steps.
 Qed.

@@ -117,3 +117,18 @@ Proof.
 Qed.
 
 Hint Resolve twf_subst: btwf.
+
+Ltac t_topen_none :=
+  match goal with
+  | H1: twf ?T ?k, H2: context[topen ?k ?T ?rep] |- _ => rewrite (topen_none T k rep H1) in H2
+  | H1: twf ?T ?k |- context[topen ?k ?T ?rep] => rewrite (topen_none T k rep H1)
+  | H1: is_erased_term ?T, H2: context[topen ?k ?T ?rep] |- _ =>
+    rewrite (topen_none T k rep) in H2 by (steps; eauto with btwf)
+  | H1: is_erased_term ?T |- context[topen ?k ?T ?rep] =>
+    rewrite (topen_none T k rep) by (steps; eauto with btwf)
+  | H1: is_erased_term ?T, H2: context[topen ?k (open ?k' ?T ?rep') ?rep] |- _ =>
+    rewrite (topen_none (open k' T rep') k rep) in H2
+      by (repeat steps || apply twf_open; eauto 2 with btwf)
+  | H1: is_erased_term ?T |- context[topen ?k (open ?k' ?T ?rep') ?rep] =>
+    rewrite (topen_none (open k' T rep') k rep) by (repeat steps || apply twf_open; eauto 2 with btwf)
+  end.

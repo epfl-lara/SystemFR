@@ -26,6 +26,15 @@ Fixpoint valid_interpretation (theta: interpretation): Prop :=
   | (x,P) :: theta' => valid_interpretation theta' /\ reducibility_candidate P
   end.
 
+Lemma valid_interpretation_cons:
+  forall theta RC X,
+    valid_interpretation theta ->
+    reducibility_candidate RC ->
+    valid_interpretation ((X, RC) :: theta).
+Proof.
+  steps.
+Qed.
+
 (*
 Lemma in_valid_interpretation_closed: forall theta v X P,
   valid_interpretation theta ->

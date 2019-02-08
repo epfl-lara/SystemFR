@@ -16,6 +16,8 @@ Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
 Require Import Termination.ErasedTermLemmas.
+Require Import Termination.StarRelation.
+Require Import Termination.SmallStep.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
@@ -68,6 +70,39 @@ Proof.
   unfold open_reducible; steps.
 Qed.
 
+Ltac find_smallstep_value :=
+  match goal with
+  | H: star small_step ?t ?v |- exists v, star small_step ?t v /\ _ => exists v
+  | H: star small_step ?t ?v |- exists x _, _ /\ _ /\ star small_step ?t x /\ _ => exists v
+  end.
+
+Ltac find_smallstep_value2 :=
+  match goal with
+  | H: star small_step _ ?v |- exists v, star small_step ?t v /\ _ => exists v
+  | H: star small_step _ ?v |- exists x _, _ /\ _ /\ star small_step ?t x /\ _ => exists v
+  end.
+
+Ltac find_exists :=
+  match goal with
+  | |- exists a b _, pp ?c ?d = pp a b /\ _ => exists c, d
+  | |- (exists x, tleft ?v = tleft x /\ _) \/ _  => left; exists v
+  | |- _ \/ (exists x, tright ?v = tright x /\ _)  => right; exists v
+  end.
+
+Ltac find_reducible_value :=
+  match goal with
+  | H: reducible_values ?theta ?v (topen 0 ?T _) |-
+      exists a _, reducible_values ?theta a (topen 0 ?T _) /\ _ => exists v
+  end.
+
+Ltac reducibility_choice :=
+  match goal with
+  | H: reducible_values ?theta ?v (topen 0 ?T _) |-
+      reducible_values ?theta ?v (topen 0 ?T _) \/ _ => left
+  | H: reducible_values ?theta ?v (topen 0 ?T _) |-
+      _ \/ reducible_values ?theta ?v (topen 0 ?T _) => right
+  end.
+
 Ltac t_instantiate_sat2 :=
   match goal with
   | H0: open_reducible (support ?theta) ?gamma ?t ?T,
@@ -117,4 +152,26 @@ Ltac t_instantiate_sat5 :=
     |- _ =>
       poseNew (Mark (H0, theta0, gamma, lterms0) "instantiate_open_reducible");
       pose proof (H0 lterms0 theta0 H1 H2)
+  end.
+
+Ltac t_reduces_to :=
+  match goal with
+  | H: reduces_to ?P ?t |- reduces_to ?P' ?t => apply (reduces_to_equiv P P' t H)
+  end.
+
+Ltac t_instantiate_reducible :=
+  match goal with
+  | H1: reducible_values _ ?v ?T, H2: is_erased_term ?v, H3: forall a, _ -> _ -> _ |- _ =>
+    poseNew (Mark (v,H3) "t_instantiate_reducible");
+    pose proof (H3 v H2 H1)
+  | H1: reducible_values _ ?v ?T, H2: forall a, _ -> _ |- _ =>
+    poseNew (Mark (v,H2) "t_instantiate_reducible");
+    pose proof (H2 v H1)
+  end.
+
+Ltac t_instantiate_rc :=
+  match goal with
+  | H: reducibility_candidate ?RC, H2: forall R, reducibility_candidate R -> _ |- _ =>
+     poseNew (Mark (H,H2) "instantiate_rc");
+     pose proof (H2 RC H)
   end.

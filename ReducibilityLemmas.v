@@ -22,6 +22,7 @@ Require Import Termination.TypeErasure.
 Require Import Termination.TypeErasureLemmas.
 Require Import Termination.ErasedTermLemmas.
 Require Import Termination.Trees.
+Require Import Termination.Sets.
 
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
@@ -103,6 +104,16 @@ Proof.
 Qed.
 
 Hint Resolve reducible_val_fv: bfv.
+
+Lemma fv_in_reducible_val:
+  forall theta v T x tag,
+    reducible_values theta v T ->
+    valid_interpretation theta ->
+    x ∈ pfv v tag ->
+    False.
+Proof.
+  intros. erewrite reducible_val_fv in *; eauto.
+Qed.
 
 Lemma reducible_val_wf:
   forall theta t T,

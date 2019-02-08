@@ -34,6 +34,7 @@ Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.
 
 Require Import Termination.RedTactics.
+Require Import Termination.RedTactics2.
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
 Require Import Termination.ReducibilityLemmas.
@@ -244,7 +245,7 @@ Proof.
   - apply reducible_refine_subtype3 with (support theta) (erase_context gamma) (erase_type A) (erase_term b) x p; repeat t_subset_open || slow_side_conditions.
   - unfold_all; repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star; t_closer.
   - apply reducible_subtype_let_left with (support theta) (erase_context gamma) (erase_term t) (erase_type A) (erase_type B) x p; side_conditions.
-  - simp_red; unfold_reduce; repeat step || t_termlist || eexists; eauto using equivalence_def with berased.
+  - simp_red; unfold_reduce; repeat step || t_termlist || find_smallstep_value2; eauto using equivalence_def with berased.
   - many_tactics; eauto with bwf.
   - eapply reducible_subtype_let_open2; eauto; many_tactics.
   - simp_red; steps.
