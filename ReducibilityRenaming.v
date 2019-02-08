@@ -112,20 +112,24 @@ Proof.
         H2: equal_with_relation ?rel ?T ?T' |-
           reducible_values ?theta' ?t (open 0 ?T' ?a) =>
             unshelve eapply (IH _ _ (open 0 T a) (open 0 T' a) t theta theta' rel); eauto
-      | b: erased_term, H: forall a, _ -> reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _ |-
+      | _: is_erased_term ?b, H: forall a, _ -> _ -> reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _ |-
           reduces_to _ _ =>
         poseNew (Mark 0 "reduces_to_equiv");
         apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T b))
       | |- _ ∈ support _ => apply_any
       | H: forall a, _ -> reduces_to _ _ |- _ => apply H
       | H: forall a, _ -> reducible_values _ _ _ |- _ => apply H
-      | H1: forall a, reducible_values _ _ _ -> _,
-        a: erased_term  |- _ =>
+      | H1: forall a, is_erased_term a -> reducible_values _ _ _ -> _,
+        H2: is_erased_term ?a  |- _ =>
           poseNew (Mark H1 "instantiate");
-          unshelve epose proof (H1 a _)
-      | |- exists c d, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
+          unshelve epose proof (H1 a _ _)
+      | |- exists c d _, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
       | H: star small_step _ ?a |- _ => is_var a; unshelve exists a (* !! *)
-      | a: erased_term |- _ => unshelve exists a (* !! *)
+(*      | H: is_erased_term ?a |- _ => unshelve exists a (* !! *) *)
+      | H1: equal_with_relation _ ?T ?T',
+        H: reducible_values _ ?t ?T |- exists _ _, reducible_values _ _ ?T' /\ _ => exists t
+      | H1: equal_with_relation _ ?T' ?T,
+        H: reducible_values _ ?t ?T |- exists _ _, reducible_values _ _ ?T' /\ _ => exists t
       | H1: equal_with_relation _ ?T ?T',
         H: reducible_values _ ?t ?T |- reducible_values _ ?t ?T' \/ _ => left
       | H1: equal_with_relation _ ?T' ?T,
@@ -145,6 +149,7 @@ Proof.
       try finisher;
       eauto with falsity;
       eauto with bwf;
+      eauto with bfv;
       try solve [ eapply equivalent_rc_left; eauto 1 ];
       try solve [ eapply equivalent_rc_right; eauto 1 ].
 

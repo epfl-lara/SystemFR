@@ -107,7 +107,7 @@ Proof.
   pose proof H5 as Copy.
   unfold reducible, reduces_to in H5.
   repeat step || t_instantiate_sat3 || t_listutils || simp_red || t_deterministic_star ||
-         destruct_refinements || apply reducible_let_rule with
+         apply reducible_let_rule with
              (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var)); t_closer.
 
   unshelve epose proof (H18 theta ((v,v0) :: (u,a) :: lterms) _ _ _); tac1.

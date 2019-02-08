@@ -47,7 +47,7 @@ Qed.
 
 Ltac t_smallstep_subst :=
   match goal with
-  | H: small_step ?t1 ?t2, l: list (nat * term) |- _ =>
+  | H: small_step ?t1 ?t2, l: list (nat * tree) |- _ =>
     is_var t1; is_var t2;
     poseNew (Mark (t1,t2,l) "small_step_subst");
     unshelve epose proof (small_step_subst t1 t2 l H _ _)

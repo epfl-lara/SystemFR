@@ -1,5 +1,6 @@
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
+Require Import Termination.SwapHoles.
 
 Require Import Omega.
 
@@ -59,3 +60,11 @@ Proof.
 Qed.
 
 Hint Rewrite size_topening_var: bsize.
+
+Lemma size_swap:
+  forall t i j, size (swap_type_holes t i j) = size t.
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Rewrite size_swap: bsize.

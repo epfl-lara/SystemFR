@@ -18,10 +18,6 @@ Inductive is_value: tree -> Prop :=
 | IVRight: forall v, is_value v -> is_value (tright v)
 .
 
-Definition typed_is_value (t: erased_term) := is_value (proj1_sig t).
-
-Hint Unfold typed_is_value.
-
 Fixpoint is_nat_value (t: tree): Prop :=
   match t with
   | zero => True
@@ -153,10 +149,6 @@ Inductive small_step: tree -> tree -> Prop :=
     small_step t1 t2 ->
     small_step (sum_match t1 tl tr) (sum_match t2 tl tr)
 .
-
-Definition typed_small_step (t1 t2: erased_term) := small_step t1 t2.
-
-Hint Unfold typed_small_step.
 
 Ltac t_invert_step :=
   match goal with

@@ -378,6 +378,84 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | T_rec n T0 Ts => T_rec (topen k n rep) (topen k T0 rep) (topen (S k) Ts rep)
   end.
 
+Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
+  match t with
+  | fvar _ term_var => t
+  | fvar y type_var => if (Nat.eq_dec y x) then lvar k type_var else t
+  | lvar i _ => t
+  | err => t
+
+  | notype_lambda t' => notype_lambda (tclose k t' x)
+  | lambda T t' => lambda (tclose k T x) (tclose k t' x)
+  | app t1 t2 => app (tclose k t1 x) (tclose k t2 x)
+
+  | type_abs t => type_abs (tclose (S k) t x)
+  | type_inst t T => type_inst (tclose k t x) (tclose k T x)
+  | notype_inst t => notype_inst (tclose k t x)
+
+  | uu => t
+
+  | pp t1 t2 => pp (tclose k t1 x) (tclose k t2 x)
+  | pi1 t => pi1 (tclose k t x)
+  | pi2 t => pi2 (tclose k t x)
+
+  | ttrue => t
+  | tfalse => t
+  | ite t1 t2 t3 => ite (tclose k t1 x) (tclose k t2 x) (tclose k t3 x)
+
+  | zero => t
+  | succ t' => succ (tclose k t' x)
+  | notype_rec t' t1 t2 =>
+      notype_rec (tclose k t' x)
+                 (tclose k t1 x)
+                 (tclose k t2 x)
+  | rec T t' t1 t2 =>
+      rec (tclose k T x)
+          (tclose k t' x)
+          (tclose k t1 x)
+          (tclose k t2 x)
+  | tmatch t' t1 t2 =>
+      tmatch
+          (tclose k t' x)
+          (tclose k t1 x)
+          (tclose k t2 x)
+
+  | tfix T t' => tfix (tclose k T x) (tclose k t' x)
+  | notype_tfix t' => notype_tfix (tclose k t' x)
+
+  | notype_tlet t1 t2 =>
+      notype_tlet (tclose k t1 x) (tclose k t2 x)
+  | tlet t1 T t2 =>
+      tlet (tclose k t1 x) (tclose k T x) (tclose k t2 x)
+  | trefl => t
+
+  | tfold t => tfold (tclose k t x)
+  | tunfold t => tunfold (tclose k t x)
+
+  | tleft t' => tleft (tclose k t' x)
+  | tright t' => tright (tclose k t' x)
+  | sum_match t' tl tr => sum_match (tclose k t' x) (tclose k tl x) (tclose k tr x)
+
+  | T_unit => t
+  | T_bool => t
+  | T_nat => t
+  | T_prod T1 T2 => T_prod (tclose k T1 x) (tclose k T2 x)
+  | T_arrow T1 T2 => T_arrow (tclose k T1 x) (tclose k T2 x)
+  | T_sum T1 T2 => T_sum (tclose k T1 x) (tclose k T2 x)
+  | T_refine T p => T_refine (tclose k T x) (tclose k p x)
+  | T_let t A B => T_let (tclose k t x) (tclose k A x) (tclose k B x)
+  | T_singleton t => T_singleton (tclose k t x)
+  | T_intersection T1 T2 => T_intersection (tclose k T1 x) (tclose k T2 x)
+  | T_union T1 T2 => T_union (tclose k T1 x) (tclose k T2 x)
+  | T_top => t
+  | T_bot => t
+  | T_equal t1 t2 => T_equal (tclose k t1 x) (tclose k t2 x)
+  | T_forall T1 T2 => T_forall (tclose k T1 x) (tclose k T2 x)
+  | T_exists T1 T2 => T_exists (tclose k T1 x) (tclose k T2 x)
+  | T_abs T => T_abs (tclose (S k) T x)
+  | T_rec n T0 Ts => T_rec (tclose k n x) (tclose k T0 x) (tclose (S k) Ts x)
+  end.
+
 Fixpoint wf t k :=
   match t with
   | fvar _ _ => True

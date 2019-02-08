@@ -838,7 +838,7 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     are_equal tvars gamma t1 t2 ->
     are_equal tvars gamma t2 t1
 
-| AEStep: forall tvars gamma (t1 t2: term),
+| AEStep: forall tvars gamma t1 t2,
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
     wf t1 0 ->

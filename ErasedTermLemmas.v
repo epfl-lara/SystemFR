@@ -110,20 +110,6 @@ Qed.
 
 Hint Immediate erase_star_smallstep: berased.
 
-Lemma erased_is_erased:
-  forall (t: erased_term), is_erased_term t.
-Proof.
-  destruct t; auto.
-Qed.
-
-Hint Resolve erased_is_erased: berased.
-
-Lemma erased_term_tfv:
-  forall (t: erased_term), pfv t type_var = nil.
-Proof.
-  destruct t; steps; eauto using is_erased_term_tfv.
-Qed.
-
 Lemma is_erased_subst:
   forall t l,
     is_erased_term t ->

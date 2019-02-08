@@ -104,7 +104,7 @@ Lemma star_smallstep_err:
     is_value v ->
     False.
 Proof.
-  inversion 1; repeat step || destruct_refinements || step_inversion (is_value, small_step).
+  inversion 1; repeat step || step_inversion (is_value, small_step).
 Qed.
 
 Ltac error_to_value :=

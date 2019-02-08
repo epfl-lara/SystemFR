@@ -97,7 +97,7 @@ Proof.
            | H: is_erased_term ?t |- _ => rewrite (is_erased_subst t) in *
            | _ => apply erased_is_erased
            | _ => rewrite erased_term_tfv in *
-           | b: erased_term, H: forall a, _ -> reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _ |-
+           | _: is_erased_term ?b, H: forall a, _ -> _ -> reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _ |-
                  reduces_to _ _ =>
                    poseNew (Mark 0 "reduces_to_equiv");
                    apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T b))
@@ -111,10 +111,10 @@ Proof.
            | H: star small_step _ zero |- _ \/ _ => left
            | |- (exists v, tleft ?v' = tleft v /\ _) \/ _ => left; exists v'
            | |- _ \/ (exists v, tright ?v' = tright v /\ _) => right; exists v'
-           | H1: forall a, reducible_values _ _ _ -> _,
-             a: erased_term  |- _ =>
+           | H1: forall a, _ -> reducible_values _ _ _ -> _,
+             H2: is_erased_term ?a  |- _ =>
                poseNew (Mark H1 "instantiate");
-               unshelve epose proof (H1 a _)
+               unshelve epose proof (H1 a _ _)
            | IHn: forall m, _ -> forall theta U V X v P, _,
              H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
                reducible_values ?theta ?t ?T =>
@@ -123,8 +123,8 @@ Proof.
              H1: reducible_values ?theta ?t ?T |-
                reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
                  unshelve eapply (IHn (size T, index T) _ theta T V X t P); eauto
-           | |- exists c d, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
-           | a: erased_term |- _ => unshelve exists a (* !!! *)
+           | |- exists c d _, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
+           | H: is_erased_term ?a |- _ => unshelve exists a (* !!! *)
            end;
       eauto with bwf;
       eauto with berased;

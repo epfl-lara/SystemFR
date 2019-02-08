@@ -72,13 +72,13 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 
   reducible_values theta v (T_arrow A B) :=
     closed_value v /\
-    forall (a: erased_term),
+    forall a (p: is_erased_term a),
       reducible_values theta a A ->
       reduces_to (fun t => reducible_values theta t (open 0 B a)) (app v a);
 
   reducible_values theta v (T_prod A B) :=
     closed_value v /\
-    exists (a: erased_term) b,
+    exists a b (_: is_erased_term a),
       v = pp a b /\
       reducible_values theta a A /\
       reducible_values theta b (open 0 B a);
@@ -98,7 +98,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 
   reducible_values theta v (T_let a A B) :=
     closed_value v /\
-    exists (a': erased_term),
+    exists a' (_: is_erased_term a'),
       is_erased_term a /\
       is_value a' /\
       star small_step a a' /\
@@ -134,13 +134,13 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 
   reducible_values theta v (T_forall A B) :=
     closed_value v /\
-    forall (a: erased_term),
+    forall a (p: is_erased_term a),
       reducible_values theta a A ->
       reducible_values theta v (open 0 B a);
 
   reducible_values theta v (T_exists A B) :=
     closed_value v /\
-    exists (a: erased_term),
+    exists a (_: is_erased_term a),
       reducible_values theta a A /\
       reducible_values theta v (open 0 B a);
 
@@ -163,7 +163,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 .
 
 Ltac t_reducibility_definition :=
-  repeat step || destruct_refinements || autorewrite with bsize;
+  repeat step || autorewrite with bsize;
     eauto using left_lex with omega;
     eauto using right_lex, lt_index_step.
 

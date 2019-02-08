@@ -43,6 +43,8 @@ Require Import Termination.WFLemmas.
 Require Import Termination.FVLemmasLists.
 Require Import Termination.WFLemmasLists.
 
+Require Import Termination.StrictPositivity.
+
 Require Import Omega.
 
 Opaque reducible_values.
@@ -97,7 +99,7 @@ Proof.
            | H: _ |- _  => apply fold_in_rec with theta T_top (open 0 T (succ zero)) zero
            | H: forall a, _ -> _ |-  _ =>
                poseNew (Mark 0 "once");
-               unshelve epose proof (H (succ zero) _)
+               unshelve epose proof (H (succ zero) _ _)
            | _ => simp reducible_values
            end.
 Qed.
@@ -122,6 +124,7 @@ Lemma reducible_values_unfold_gen:
     twf n 0 ->
     wf T 0 ->
     twf T 1 ->
+    strictly_positive T 0 ->
     pfv T type_var = nil ->
     is_erased_term n ->
     is_erased_type T ->
@@ -130,10 +133,21 @@ Lemma reducible_values_unfold_gen:
     reducible_values theta v (topen 0 T (intersect T)).
 Proof.
   unfold intersect in *; repeat step.
-  simp reducible_values in H7; steps.
+(*  apply strictly_positive_push_forall; steps.
+  simp reducible_values in H8; steps.
   evar (a: term).
-  assert (reducible_values theta a T_nat). { admit. }
-  unshelve epose proof (H9 (succ a) _); steps.
+  unshelve epose proof (H10 (succ a) _) as HH; steps.
+  - admit.
+  - admit.
+  - simp reducible_values in HH; steps.
+    + admit.
+    + apply reducibility_subst_head in H17; steps.
+      * rewrite open_none in * by t_rewrite.
+Admitted.
+*)
+Admitted.
+
+
 (*
   - admit.
   - admit.
@@ -175,7 +189,6 @@ Proof.
   repeat rewrite_any.
   - rewrite H7 in *.
 *)
-Admitted.
 
 Lemma reducible_unfold:
   forall T theta t n,

@@ -221,21 +221,6 @@ Fixpoint is_erased_type T :=
   end.
 
 
-Definition term := { t: tree | is_annotated_term t }.
-Definition type := { t: tree | is_erased_type t }.
-Definition erased_term := { t: tree | is_erased_term t }.
-Definition erased_type := { t: tree | is_erased_type t }.
-
-Definition term_to_tree (t: term) := proj1_sig t.
-Definition type_to_tree (t: type) := proj1_sig t.
-Definition erased_term_to_tree (t: erased_term) := proj1_sig t.
-Definition erased_type_to_tree (t: erased_type) := proj1_sig t.
-
-Coercion term_to_tree: term >-> tree.
-Coercion type_to_tree: type >-> tree.
-Coercion erased_term_to_tree: erased_term >-> tree.
-Coercion erased_type_to_tree: erased_type >-> tree.
-
 Fixpoint tree_size t :=
   match t with
   | fvar _ _ => 0
@@ -303,22 +288,3 @@ Fixpoint tree_size t :=
   | T_abs T => 1 + tree_size T
   | T_rec n T0 Ts => 1 + tree_size n + tree_size T0 + tree_size Ts
   end.
-
-
-Ltac destruct_refinements :=
-  match goal with
-  | t: erased_term |- _ =>
-    let pp := fresh "pp" in
-    destruct t as [ t pp ]
-  | t: erased_type |- _ =>
-    let pp := fresh "pp" in
-    destruct t as [ t pp ]
-  | t: term |- _ =>
-    let pp := fresh "pp" in
-    destruct t as [ t pp ]
-  | t: type |- _ =>
-    let pp := fresh "pp" in
-    destruct t as [ t pp ]
-  end.
-
-Ltac t_ref := repeat step || destruct_refinements.

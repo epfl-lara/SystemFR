@@ -14,12 +14,15 @@ Open Scope list_scope.
 
 Lemma open_topen:
   forall t k1 k2 rep1 rep2,
+    wf rep2 0 ->
     twf rep1 0 ->
-    wf t 0 ->
-    open k1 (topen k2 t rep2) rep1 = topen k2 t (open k1 rep2 rep1).
+    wf t (S k1) ->
+    twf t (S k2) ->
+    open k1 (topen k2 t rep2) rep1 = topen k2 (open k1 t rep1) rep2.
 Proof.
   induction t;
     repeat step || tequality || apply_any ||
-      (rewrite topen_none by (steps;eauto with btwf omega));
+      (rewrite topen_none by (steps;eauto with btwf omega)) ||
+      (rewrite open_none by (steps;eauto with bwf omega));
         eauto with bwf btwf omega.
-Admitted.
+Qed.

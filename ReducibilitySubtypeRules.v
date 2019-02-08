@@ -170,7 +170,7 @@ Proof.
     t_closer.
     match goal with
     | H: forall a, _ |- _ =>
-      unshelve epose proof (H a _); repeat step || unfold reduces_to in *; eauto
+      unshelve epose proof (H a _ _); repeat step || unfold reduces_to in *; eauto
     end.
 Qed.
 

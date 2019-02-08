@@ -44,9 +44,7 @@ Lemma reducible_val_let:
     reducible_values theta b (T_let a A B).
 Proof.
   repeat step || simp reducible_values in *; eauto using reducible_values_closed.
-  unshelve eexists (exist _ a _); steps; eauto with smallstep;
-    eauto using red_is_val;
-    eauto with berased.
+  exists a; steps; eauto using red_is_val; eauto with berased.
 Qed.
 
 Lemma reducible_let:
@@ -133,8 +131,7 @@ Lemma reducible_let_backstep_values:
     reducible_values theta v (T_let t1 A B).
 Proof.
   repeat step || simp reducible_values in *.
-  eexists; steps; eauto.
-  eauto using star_smallstep_trans.
+  exists a'; steps; eauto using star_smallstep_trans.
 Qed.
 
 Lemma reducible_let_backstep_expr:
@@ -174,8 +171,8 @@ Lemma reducible_subtype_let_left:
     reducible_values theta v (substitute T l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
-    repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star || destruct_refinements.
-  unshelve epose proof (H13 v ((p,trefl) :: (x,a') :: l) _ _); tac1;
+    repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star.
+  unshelve epose proof (H13 v ((p,trefl) :: (x,t') :: l) _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv.
 Qed.
 

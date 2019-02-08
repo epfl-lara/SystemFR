@@ -46,7 +46,7 @@ Lemma reducible_lambda:
     reducible_values theta (notype_lambda t) (T_arrow U V).
 Proof.
   repeat step || t_listutils || simp reducible_values in * || unfold closed_value, closed_term ||
-         rewrite reducibility_rewrite || destruct_refinements;
+         rewrite reducibility_rewrite;
     eauto 2 with bsteplemmas.
 
   apply backstep_reducible with (open 0 t a); repeat step || t_listutils;
@@ -72,7 +72,7 @@ Lemma open_reducible_lambda:
 Proof.
   unfold open_reducible in *; steps.
 
-  apply reducible_value_expr; repeat step || destruct_refinements.
+  apply reducible_value_expr; repeat step.
   apply reducible_lambda; tac1;
     eauto with bwf;
     eauto with bfv;

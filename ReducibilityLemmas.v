@@ -36,8 +36,8 @@ Opaque reducible_values. (* workaround for rewriting speed *)
 
 Lemma reducible_values_closed:
   forall theta v T,
-    valid_interpretation theta ->
     reducible_values theta v T ->
+    valid_interpretation theta ->
     closed_value v.
 Proof.
   destruct T;
@@ -54,13 +54,13 @@ Ltac t_reducible_values_closed :=
   match goal with
   | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?v ?T |- _ =>
       poseNew (Mark v "reducible_values_closed");
-      pose proof (reducible_values_closed _ _ _ H1 H2)
+      pose proof (reducible_values_closed _ _ _ H2 H1)
   end.
 
 Lemma reducible_values_props:
   forall theta t T tag,
-    valid_interpretation theta ->
     reducible_values theta t T ->
+    valid_interpretation theta ->
       (is_erased_term t /\ pfv t tag = nil /\ wf t 0 /\ is_value t).
 Proof.
   intros theta t T tag H1 H2; destruct tag;
@@ -71,8 +71,8 @@ Qed.
 
 Lemma reducible_values_erased:
   forall theta t T,
-    valid_interpretation theta ->
     reducible_values theta t T ->
+    valid_interpretation theta ->
     is_erased_term t.
 Proof.
   intros theta t T H1 H2.
@@ -83,8 +83,8 @@ Hint Resolve reducible_values_erased: berased.
 
 Lemma reducible_erased:
   forall theta t T,
-    valid_interpretation theta ->
     reducible theta t T ->
+    valid_interpretation theta ->
     is_erased_term t.
 Proof.
   unfold reducible, reduces_to, closed_term; steps.
@@ -94,8 +94,8 @@ Hint Resolve reducible_erased: berased.
 
 Lemma reducible_val_fv:
   forall theta t T tag,
-    valid_interpretation theta ->
     reducible_values theta t T ->
+    valid_interpretation theta ->
     pfv t tag = nil.
 Proof.
   intros theta t T tag H1 H2.
@@ -106,8 +106,8 @@ Hint Resolve reducible_val_fv: bfv.
 
 Lemma reducible_val_wf:
   forall theta t T,
-    valid_interpretation theta ->
     reducible_values theta t T ->
+    valid_interpretation theta ->
     wf t 0.
 Proof.
   intros theta t T H1 H2.
@@ -118,8 +118,8 @@ Hint Resolve reducible_val_wf: bwf.
 
 Lemma reducible_val_twf:
   forall theta t T,
-    valid_interpretation theta ->
     reducible_values theta t T ->
+    valid_interpretation theta ->
     twf t 0.
 Proof.
   intros theta t T H1 H2.
@@ -131,8 +131,8 @@ Hint Resolve reducible_val_twf: btwf.
 
 Lemma red_is_val:
   forall theta v T,
-    valid_interpretation theta ->
     reducible_values theta v T ->
+    valid_interpretation theta ->
     is_value v.
 Proof.
   intros theta t T H1 H2.
@@ -194,8 +194,8 @@ Ltac t_values_info2 :=
     poseNew (Mark v "erase_value");
     pose proof (erase_value v H) *)
   | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?t ?T  |- _ =>
-    poseNew (Mark t "reducible_value_value");
-    pose proof (red_is_val _ _ _ H1 H2)
+    poseNew (Mark t "redvalval");
+    pose proof (red_is_val _ _ _ H2 H1)
   end.
 
 Lemma smallstep_norm:
