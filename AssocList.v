@@ -363,3 +363,32 @@ Ltac t_lookup_same :=
     H2: lookup _ ?l ?x = Some ?y2 |- _ =>
       pose proof (lookup_same _ _ _ _ _ _ _ H1 H2); clear H2
   end.
+
+Lemma lookupMap2:
+  forall X Y Z
+         (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
+         (m: M X Y) (f: Y -> Z) x z,
+    lookup eq_dec (mapValues f m) x = Some z ->
+    exists y, lookup eq_dec m x = Some y /\ f y  = z.
+Proof.
+  induction m; steps; eauto.
+Qed.
+
+Ltac t_lookupMap2 :=
+  match goal with
+  | H: Some _ = lookup _ _ _ |- _ => apply eq_sym in H
+  | H: lookup _ (mapValues _ _) _ = Some _ |- _ =>
+    poseNew (Mark H "lookupMap2");
+    pose proof (lookupMap2 _ _ _ _ _ _ _ _ H)
+  end.
+
+Ltac t_lookup_rewrite :=
+  match goal with
+  | H: lookup _ (_ ++ _) _ = lookup _ _ _ |- _ => rewrite H in *
+  end.
+
+Lemma support_mapValues:
+  forall X Y Z (f: Y -> Z) (l: M X Y), support (mapValues f l) = support l.
+Proof.
+  induction l; steps.
+Qed.

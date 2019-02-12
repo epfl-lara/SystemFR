@@ -44,32 +44,71 @@ Opaque makeFresh.
 Opaque Nat.eq_dec.
 Opaque reducible_values.
 
+Fixpoint no_type_lvar (t: tree) (k: nat) :=
+  match t with
+  | fvar _ type_var => True
+  | lvar i type_var => i <> k
+
+  | T_unit => True
+  | T_bool => True
+  | T_nat => True
+  | T_prod T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_arrow T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_sum T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_refine T p => no_type_lvar T k
+  | T_let t A B => no_type_lvar A k /\ no_type_lvar B k
+  | T_singleton t => True
+  | T_intersection T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_union T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_top => True
+  | T_bot => True
+  | T_equal t1 t2 => True
+  | T_forall T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_exists T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k
+  | T_abs T => no_type_lvar T (S k)
+  | T_rec n T0 Ts => no_type_lvar T0 k /\ no_type_lvar Ts (S k)
+
+  | _ => False
+  end.
+
 Fixpoint strictly_positive (t: tree) (k: nat) :=
   match t with
   | fvar _ type_var => True
-  | lvar i type_var => i <= k
+  | lvar i type_var => True
 
   | T_unit => True
   | T_bool => True
   | T_nat => True
   | T_prod T1 T2 => strictly_positive T1 k /\ strictly_positive T2 k
-  | T_arrow T1 T2 => twf T1 k /\ strictly_positive T2 k
+  | T_arrow T1 T2 => no_type_lvar T1 k /\ strictly_positive T2 k
   | T_sum T1 T2 => strictly_positive T1 k /\ strictly_positive T2 k
   | T_refine T p => strictly_positive T k
-  | T_let t A B => strictly_positive B k
+  | T_let t A B => strictly_positive A k /\ strictly_positive B k
   | T_singleton t => True
   | T_intersection T1 T2 => strictly_positive T1 k /\ strictly_positive T2 k
-  | T_union T1 T2 => twf T1 k /\ twf T2 k (* !! TOOD: This could be relaxed by letting one hole in either T1 or T2 *)
+  | T_union T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k (* !! TODO: This could be relaxed by letting one hole in either T1 or T2 *)
   | T_top => True
   | T_bot => True
   | T_equal t1 t2 => True
-  | T_forall T1 T2 => twf T1 k /\ strictly_positive T2 k
-  | T_exists T1 T2 => twf T1 k /\ twf T2 k (* !! We cannot push foralls down exists *)
+  | T_forall T1 T2 => no_type_lvar T1 k /\ strictly_positive T2 k
+  | T_exists T1 T2 => no_type_lvar T1 k /\ no_type_lvar T2 k (* !! We cannot push foralls down exists *)
   | T_abs T => strictly_positive T (S k)
-  | T_rec n T0 Ts => strictly_positive T0 k /\ strictly_positive Ts (S k)
+  | T_rec n T0 Ts => strictly_positive T0 k /\ strictly_positive Ts (S k) /\ (
+                    (* if (S k) appears in Ts, then the recursive type variable of Ts must be positive*)
+                      no_type_lvar Ts (S k) \/ strictly_positive Ts 0
+                    )
 
   | _ => False
   end.
+
+Lemma no_type_lvar_open:
+  forall T k1 k2 rep,
+    twf rep 0 ->
+    no_type_lvar T k1 ->
+    no_type_lvar (open k2 T rep) k1.
+Proof.
+  induction T; steps; eauto using twf_open with btwf omega.
+Qed.
 
 Lemma strictly_positive_open:
   forall T k1 k2 rep,
@@ -77,7 +116,9 @@ Lemma strictly_positive_open:
     strictly_positive T k1 ->
     strictly_positive (open k2 T rep) k1.
 Proof.
-  induction T; steps; eauto using twf_open with btwf omega.
+  induction T; steps;
+    eauto using twf_open with btwf omega;
+    eauto using no_type_lvar_open.
 Qed.
 
 Definition non_empty theta A := exists v, reducible_values theta v A.
@@ -102,6 +143,7 @@ Ltac apply_induction H :=
   | |- reducible_values _ _ (topen 0 ?T _) => apply H with (size T, index T)
   end.
 
+(*
 Lemma twf_positive:
   forall T k,
     is_erased_type T ->
@@ -110,7 +152,9 @@ Lemma twf_positive:
 Proof.
   induction T; steps; try omega.
 Qed.
+*)
 
+(*
 Lemma strict_positive_monotone:
   forall T k1 k2,
     strictly_positive T k1 ->
@@ -121,7 +165,9 @@ Proof.
     repeat step;
     eauto with btwf omega.
 Qed.
+*)
 
+(*
 Lemma strictly_positive_swap:
   forall T i rep,
     twf rep 0 ->
@@ -133,6 +179,7 @@ Proof.
   induction T; repeat step || apply twf_swap;
     eauto using strict_positive_monotone with omega.
 Qed.
+*)
 
 Lemma non_empty_extend:
   forall theta A x RC,
@@ -143,6 +190,77 @@ Lemma non_empty_extend:
     non_empty ((x, RC) :: theta) A.
 Proof.
   unfold non_empty; repeat step || exists v || apply reducible_unused2.
+Qed.
+
+Lemma twf_no_type_lvar:
+  forall T k,
+    is_erased_type T ->
+    twf T k ->
+    no_type_lvar T k.
+Proof.
+  induction T; steps; try omega.
+Qed.
+
+Lemma twf_positive:
+  forall T k,
+    is_erased_type T ->
+    twf T k ->
+    strictly_positive T k.
+Proof.
+  induction T; steps; try omega;
+    eauto using twf_no_type_lvar.
+Qed.
+
+Lemma twf_positive2:
+  forall T k,
+    is_erased_type T ->
+    twf T 0 ->
+    strictly_positive T k.
+Proof.
+  eauto using twf_positive with btwf omega.
+Qed.
+
+Lemma no_type_lvar_in_topen:
+  forall T i j R,
+    is_erased_type T ->
+    is_erased_type R ->
+    twf R 0 ->
+    no_type_lvar T i ->
+    no_type_lvar (topen j T R) i.
+Proof.
+  induction T; repeat step || apply twf_no_type_lvar;
+    eauto using twf_positive2; eauto with btwf omega.
+Qed.
+
+Lemma strictly_positive_topen:
+  forall T i j R,
+    is_erased_type T ->
+    is_erased_type R ->
+    twf R 0 ->
+    strictly_positive T i ->
+    strictly_positive (topen j T R) i.
+Proof.
+  induction T; steps;
+    eauto using twf_positive2;
+    eauto using no_type_lvar_in_topen.
+Qed.
+
+Lemma no_type_var_positive:
+  forall T k,
+    is_erased_type T ->
+    no_type_lvar T k ->
+    strictly_positive T k.
+Proof.
+  induction T; steps; try omega.
+Qed.
+
+Lemma no_type_lvar_topen:
+  forall T k R,
+    no_type_lvar T k ->
+    is_erased_type T ->
+    topen k T R = T.
+Proof.
+  induction T; repeat step || tequality || t_topen_none.
 Qed.
 
 Lemma strictly_positive_push_forall:
@@ -183,12 +301,15 @@ Proof.
       apply_induction HH ||
       find_exists ||
       ( progress autorewrite with bsize in * ) ||
-      (rewrite open_topen in * by (steps; eauto with btwf; eauto with bwf))
+      (rewrite open_topen in * by (steps; eauto with btwf; eauto with bwf)) ||
+      (rewrite no_type_lvar_topen in * by (repeat step || apply no_type_lvar_open || apply is_erased_type_open; eauto with btwf))
     end;
     try omega;
     eauto using reducible_values_closed;
     eauto with berased bwf btwf;
-    try solve [ apply twf_open; eauto with btwf ].
+    eauto using no_type_var_positive;
+    try solve [ apply twf_open; eauto with btwf ];
+    t_closer.
 
   (** Polymorphic type **)
   - exists (makeFresh (
@@ -271,14 +392,69 @@ Proof.
         eauto with btwf;
         eauto with bwf.
 
+Set Nested Proofs Allowed.
+Lemma topen_rec:
+  forall k n T0 Ts R,
+    twf n 0 ->
+    topen k (T_rec n T0 Ts) R = T_rec n (topen k T0 R) (topen (S k) Ts R).
+Proof.
+  repeat step || tequality || rewrite topen_none; eauto with btwf omega.
+Qed.
+
+      rewrite open_swap;
+        repeat step || apply twf_topen;
+        eauto with omega;
+        eauto with btwf.
+
+      rewrite <- topen_rec; eauto with btwf.
+      define M2 (makeFresh (
+                     pfv (swap_type_holes T3 0 1) type_var ::
+                     pfv (T_rec n'0 T2 T3) type_var ::
+                     nil
+                )).
+      rewrite (topen_twice _ _ _ M2); steps; eauto with btwf; try finisher.
+
+    apply_induction HH;
+      repeat
+        step ||
+        apply left_lex ||
+        (progress autorewrite with bsize in * ) ||
+        apply strictly_positive_swap ||
+        apply twf_topen ||
+        apply is_erased_type_topen ||
+        apply non_empty_extend ||
+        t_deterministic_star ||
+        apply wf_topen;
+      try finisher;
+      eauto with bwf btwf omega berased;
+      eauto 2 using red_is_val with step_tactic;
+      eauto using reducibility_is_candidate.
+
+    + admit. (* use multiset measure *)
+    +
+
+Lemma strictly_positive_close:
+  forall T k1 k2 rep,
+    twf rep 0 ->
+    strictly_positive T k1 ->
+    strictly_positive (open k2 T rep) k1.
+Proof.
+  induction T; steps; eauto using twf_open with btwf omega.
+Qed.
+
+      remember (makeFresh (
+                       support theta ::
+                       pfv A type_var ::
+                       pfv n'0 type_var ::
+                       pfv (topen 0 T2 (T_forall A B)) type_var ::
+                       pfv (topen 1 T3 (T_forall A B)) type_var ::
+                       nil)) as M.
+      
+
      (*
     topen 0 (topen 1 A R) (topen 0 B R)
 *)
 (*
-      rewrite open_swap;
-      repeat step || apply twf_topen;
-      eauto with omega;
-      eauto with btwf.
 *)
     (*
     assert (

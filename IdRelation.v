@@ -141,3 +141,24 @@ Ltac t_idrel :=
   rewrite range_swap in * ||
   (rewrite idrel_lookup in * by auto) ||
   (rewrite idrel_lookup_swap_fail in * by auto).
+
+Lemma equivalent_with_relation_permute:
+  forall theta1 theta2 (RC : tree -> Prop) M l,
+    ~(M ∈ support theta1) ->
+    equivalent_with_relation
+      ((M, M) :: idrel (support theta1 ++ support theta2 ++ l))
+        (theta1 ++ (M, RC) :: theta2)
+        ((M, RC) :: theta1 ++ theta2).
+Proof.
+  unfold equivalent_with_relation, equivalent_rc_at;
+    repeat match goal with
+           | |- exists r, Some ?R = Some r /\ _ => exists R
+           | |- exists r, _ /\ equivalent_rc r ?R => exists R
+           | H: _ |- _ => rewrite lookup_remove2 in H by steps
+           | _ => rewrite lookup_remove2 by steps
+           | _ => step || t_lookup_rewrite || t_idrel || t_lookup || t_listutils ||
+                 rewrite obvious_lookup in * by steps ||
+                 t_lookupor || t_lookup_same
+           end;
+    eauto using equivalent_rc_refl.
+Qed.

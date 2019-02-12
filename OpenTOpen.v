@@ -16,8 +16,6 @@ Lemma open_topen:
   forall t k1 k2 rep1 rep2,
     wf rep2 0 ->
     twf rep1 0 ->
-    wf t (S k1) ->
-    twf t (S k2) ->
     open k1 (topen k2 t rep2) rep1 = topen k2 (open k1 t rep1) rep2.
 Proof.
   induction t;
