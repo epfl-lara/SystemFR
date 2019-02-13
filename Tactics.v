@@ -8,6 +8,8 @@ Hint Extern 50 => omega: omega.
 Hint Extern 50 => cbn: cbn.
 Hint Extern 50 => cbn; intuition auto: cbn_intuition.
 
+Ltac success t := (t; fail) || (t; []).
+
 Ltac light :=
   (intros) ||
   (intuition auto) ||

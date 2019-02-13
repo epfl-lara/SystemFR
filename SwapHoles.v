@@ -4,6 +4,7 @@ Require Import Termination.TWFLemmas.
 Require Import Termination.ErasedTermLemmas.
 
 Require Import PeanoNat.
+Require Import Omega.
 
 Opaque Nat.eq_dec.
 
@@ -159,4 +160,32 @@ Lemma swap_holes_twice:
     swap_type_holes (swap_type_holes T i j) i j = T.
 Proof.
   induction T; steps.
+Qed.
+
+Lemma pfv_swap:
+  forall T i j tag, pfv (swap_type_holes T i j) tag = pfv T tag.
+Proof.
+  induction T; steps.
+Qed.
+
+Lemma topen_swap:
+  forall T i j rep,
+    twf rep 0 ->
+    topen i (swap_type_holes T j i) rep =
+    swap_type_holes (topen j T rep) j i.
+Proof.
+  induction T; repeat step || tequality || rewrite (swap_nothing _ 0);
+    try omega.
+Qed.
+
+Lemma topen_swap2:
+  forall T k i j rep,
+    twf rep 0 ->
+    k <> i ->
+    k <> j ->
+    topen k (swap_type_holes T j i) rep =
+    swap_type_holes (topen k T rep) j i.
+Proof.
+  induction T; repeat step || tequality || rewrite (swap_nothing _ 0);
+    try omega.
 Qed.

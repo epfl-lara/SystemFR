@@ -48,9 +48,6 @@ Opaque makeFresh.
 Opaque Nat.eq_dec.
 Opaque reducible_values.
 
-Definition no_type_fvar T vars :=
-  forall X, X ∈ pfv T type_var -> X ∈ vars -> False.
-
 Equations strictly_positive (T: tree) (vars: list nat): Prop
     by wf (size T) lt :=
   strictly_positive (fvar _ type_var) _ := True;
@@ -148,25 +145,6 @@ Ltac simp_spos :=
 
 Opaque strictly_positive.
 
-Lemma is_erased_term_no_type_fvar:
-  forall t vars,
-    is_erased_term t ->
-    no_type_fvar t vars.
-Proof.
-  unfold no_type_fvar; repeat step || rewrite is_erased_term_tfv in *.
-Qed.
-
-Lemma no_type_fvar_open:
-  forall T vars rep k,
-    is_erased_term rep ->
-    no_type_fvar T vars ->
-    no_type_fvar (open k T rep) vars.
-Proof.
-  unfold no_type_fvar;
-    repeat step || t_fv_open || t_listutils ||
-           rewrite is_erased_term_tfv in * by steps; eauto.
-Qed.
-
 Definition non_empty theta A := exists v, reducible_values theta v A.
 
 Lemma instantiate_non_empty:
@@ -253,32 +231,6 @@ Hint Resolve valid_interpretation_all: b_valid_interp.
 Hint Resolve valid_interpretation_all2: b_valid_interp.
 Hint Resolve valid_interpretation_append: b_valid_interp.
 Hint Extern 1 => eapply valid_interpretation_one; eauto: b_valid_interp.
-
-Ltac t_reducible_unused3 :=
-  match goal with
-  | H: reducible_values ((?X,?RC) :: ?theta) ?v ?T |- reducible_values ?theta' ?v ?T =>
-    unify theta theta'; apply reducible_unused3 with X RC
-  end.
-
-Lemma no_type_fvar_tail:
-  forall T x xs,
-    no_type_fvar T (x :: xs) ->
-    no_type_fvar T xs.
-Proof.
-  unfold no_type_fvar; repeat step; eauto.
-Qed.
-
-Lemma no_type_fvar_head:
-  forall T x xs,
-    no_type_fvar T (x :: xs) ->
-    x ∈ pfv T type_var ->
-    False.
-Proof.
-  unfold no_type_fvar; repeat step; eauto.
-Qed.
-
-Hint Immediate no_type_fvar_head: b_no_type_fvar.
-Hint Resolve no_type_fvar_tail: b_no_type_fvar.
 
 Lemma reducible_unused_push_all1:
   forall theta' P theta T v,
@@ -383,16 +335,6 @@ Ltac t_valid_pre_interpration_same :=
   match goal with
   | H: valid_pre_interpretation ?P1 ?theta |- valid_pre_interpretation ?P2 ?theta =>
      apply valid_pre_interpretation_same with P1
-  end.
-
-Ltac t_instantiate_reducible2 :=
-  match goal with
-  | H0: no_type_fvar ?T (support ?theta'),
-    H1:reducible_values _ ?v ?T,
-    H2:is_erased_term ?v,
-    H3: forall a, _ -> reducible_values (push_one _ ?theta' ++ ?theta) a ?T -> _
-    |- _ => poseNew (Mark (v, H3) "t_instantiate_reducible2");
-          unshelve epose proof (H3 v H2 _)
   end.
 
 Ltac t_rewrite_push_one :=
@@ -502,72 +444,11 @@ Proof.
   unfold sat; steps; eauto with bapply_any.
 Qed.
 
-Lemma no_type_fvar_in_topen:
-  forall T vars k X,
-    no_type_fvar T vars ->
-    ~(X ∈ vars) ->
-    no_type_fvar (topen k T (fvar X type_var)) vars.
-Proof.
-  unfold no_type_fvar; repeat step || t_fv_open || t_listutils; eauto.
-Qed.
-
 Definition similar_sets (rel: M nat nat) (vars vars': list nat): Prop :=
   forall x y,
     lookup Nat.eq_dec rel x = Some y ->
     lookup Nat.eq_dec (swap rel) y = Some x ->
     (x ∈ vars <-> y ∈ vars').
-
-Opaque strictly_positive.
-
-Lemma equal_with_relation_pfv:
-  forall T T' rel X,
-    equal_with_relation rel T T' ->
-    X ∈ pfv T type_var ->
-    exists X',
-      X' ∈ pfv T' type_var /\
-      lookup Nat.eq_dec rel X = Some X' /\
-      lookup Nat.eq_dec (swap rel) X' = Some X.
-Proof.
-  induction T;
-    repeat match goal with
-           | H1: equal_with_relation ?rel ?T ?T',
-             H2: ?X ∈ pfv ?T type_var,
-             H3: forall _ _ _, _ -> _ -> _ |- _ => pose proof (H3 _ _ _ H1 H2); clear H3
-           | _ => step || t_listutils || destruct_tag
-           end; eauto;
-      try solve [ eexists; repeat step || t_listutils; eauto ].
-Qed.
-
-Ltac t_equal_with_relation_pfv :=
-  match goal with
-  | H1: equal_with_relation ?rel ?T ?T',
-    H2: ?X ∈ pfv ?T type_var |- _ =>
-    poseNew (Mark H1 "equal_with_relation_pfv");
-    pose proof (equal_with_relation_pfv _ _ _ _ H1 H2)
-  end.
-
-Lemma equal_with_relation_pfv2:
-  forall T T' rel X',
-    equal_with_relation rel T T' ->
-    X' ∈ pfv T' type_var ->
-    exists X,
-      X ∈ pfv T type_var /\
-      lookup Nat.eq_dec rel X = Some X' /\
-      lookup Nat.eq_dec (swap rel) X' = Some X.
-Proof.
-  intros.
-  apply equal_with_relation_swap in H.
-  repeat step || t_equal_with_relation_pfv || eexists || rewrite swap_twice in *; eauto.
-Qed.
-
-Ltac t_equal_with_relation_pfv2 :=
-  match goal with
-  | H1: equal_with_relation ?rel ?T ?T',
-    H2: ?X ∈ pfv ?T' type_var |- _ =>
-    poseNew (Mark H1 "equal_with_relation_pfv2");
-    pose proof (equal_with_relation_pfv2 _ _ _ _ H1 H2)
-  | _ => t_equal_with_relation_pfv
-  end.
 
 Lemma no_type_fvar_rename:
   forall T T' vars vars' rel,
@@ -629,40 +510,12 @@ Proof.
   eauto using strictly_positive_rename_aux.
 Qed.
 
-Lemma topen_swap:
-  forall T i j rep,
-    twf rep 0 ->
-    topen i (swap_type_holes T j i) rep =
-    swap_type_holes (topen j T rep) j i.
-Proof.
-  induction T; repeat step || tequality || rewrite (swap_nothing _ 0);
-    try omega.
-Qed.
-
-Lemma pfv_swap:
-  forall T i j tag, pfv (swap_type_holes T i j) tag = pfv T tag.
-Proof.
-  induction T; steps.
-Qed.
-
 Lemma no_type_fvar_swap:
   forall T vars i j,
     no_type_fvar T vars ->
     no_type_fvar (swap_type_holes T i j) vars.
 Proof.
   unfold no_type_fvar; repeat step || rewrite pfv_swap in *; eauto.
-Qed.
-
-Lemma topen_swap2:
-  forall T k i j rep,
-    twf rep 0 ->
-    k <> i ->
-    k <> j ->
-    topen k (swap_type_holes T j i) rep =
-    swap_type_holes (topen k T rep) j i.
-Proof.
-  induction T; repeat step || tequality || rewrite (swap_nothing _ 0);
-    try omega.
 Qed.
 
 Lemma strictly_positive_swap_aux:
@@ -738,25 +591,6 @@ Proof.
     eauto using equivalent_rc_refl.
 Qed.
 
-Lemma reducible_rename_permute:
-  forall T theta1 theta2 X Y (RC : tree -> Prop) v,
-    valid_interpretation theta1 ->
-    valid_interpretation theta2 ->
-    reducibility_candidate RC ->
-    ~(Y ∈ support theta1) ->
-    ~(X ∈ pfv T type_var) ->
-    ~(Y ∈ pfv T type_var) ->
-    reducible_values ((X, RC) :: theta1 ++ theta2) v (topen 0 T (fvar X type_var)) ->
-    reducible_values (theta1 ++ (Y, RC) :: theta2) v (topen 0 T (fvar Y type_var)).
-Proof.
-  intros.
-  eapply (reducible_rename _ _ _ _ _ ((X,Y) :: idrel (pfv T type_var))); eauto;
-    repeat step || apply valid_interpretation_append || apply equal_with_relation_topen;
-    eauto using equal_with_idrel.
-
-  apply equivalent_with_relation_permute2; steps.
-Qed.
-
 Lemma support_push_one:
   forall theta a,
     support (push_one a theta) = support theta.
@@ -780,52 +614,133 @@ Proof.
   eauto using strictly_positive_topen_aux.
 Qed.
 
-Lemma swap_idrel:
-  forall l, swap (idrel l) = idrel l.
-Proof.
-  induction l; steps.
-Qed.
+Definition pre_interpretation := list (nat * (tree -> tree -> Prop)).
 
-Lemma idrel_lookup2:
-  forall x y l eq_dec, lookup eq_dec (idrel l) x = Some y -> x = y /\ x ∈ l.
-Proof.
-  induction l; repeat step || eapply_any || instantiate_any.
-Qed.
-
-Ltac t_idrel_lookup2 :=
-  match goal with
-  | H: lookup _ (idrel ?l) ?x = Some ?y |- _ => pose proof (idrel_lookup2 _ _ _ _ H); clear H
+Fixpoint forall_implicate (P: tree -> Prop) (pre_theta: pre_interpretation) (theta: interpretation) :=
+  match pre_theta, theta with
+  | nil, nil => True
+  | (X,pre_rc) :: pre_theta', (Y,rc) :: theta' =>
+      X = Y /\
+      forall_implicate P pre_theta' theta' /\
+      forall (v: tree), (forall a, P a -> pre_rc a v) -> rc v
+  | _, _ => False
   end.
 
-Lemma reducible_unused_middle:
-  forall X RC theta1 theta2 v T,
-    valid_interpretation theta1 ->
-    valid_interpretation theta2 ->
-    reducibility_candidate RC ->
-    no_type_fvar T (support theta1) -> (
-      reducible_values ((X,RC) :: theta1 ++ theta2) v T <->
-      reducible_values ((X,RC) :: theta2) v T
-    ).
+Lemma forall_implicate_apply:
+  forall P pre_theta theta X pre_rc rc v,
+    forall_implicate P pre_theta theta ->
+    lookup Nat.eq_dec pre_theta X = Some pre_rc ->
+    lookup Nat.eq_dec theta X = Some rc ->
+    (forall a, P a -> pre_rc a v) ->
+    rc v.
 Proof.
-  repeat step.
-  - apply reducible_rename with T ((X, RC) :: theta1 ++ theta2) (idrel (pfv T type_var));
-      repeat step || apply valid_interpretation_append || (rewrite swap_idrel in * by steps) ||
-             t_idrel_lookup2 || t_lookupor || t_lookup_rewrite || t_lookup ||
-             unfold equivalent_with_relation, equivalent_rc_at || unfold no_type_fvar in * ||
-             unshelve eauto with falsity || exact True;
-      eauto using equal_with_idrel;
-      eauto using equivalent_rc_refl;
-    unfold equivalent_with_relation.
+  induction pre_theta; destruct theta; repeat step || eapply_any.
+Qed.
 
-    exists rc2; repeat step || rewrite lookupRight || apply lookupNoneSupport; eauto using equivalent_rc_refl.
-  - apply reducible_rename with T ((X, RC) :: theta2) (idrel (pfv T type_var));
-      repeat step || apply valid_interpretation_append || (rewrite swap_idrel in * by steps) ||
-             t_idrel_lookup2 || t_lookupor || t_lookup_rewrite || t_lookup ||
-             unfold equivalent_with_relation, equivalent_rc_at || unfold no_type_fvar in * ||
-             unshelve eauto with falsity || exact True;
-      eauto using equal_with_idrel;
-      eauto using equivalent_rc_refl;
-    unfold equivalent_with_relation.
+Ltac t_forall_implicate_apply :=
+  match goal with
+  | H1: forall_implicate ?P ?ptheta ?theta,
+    H2: lookup _ ?ptheta ?X = Some ?prc,
+    H3: lookup _ ?theta ?X = Some ?rc |- ?rc ?v =>
+    apply (forall_implicate_apply _ _ _ _ _ _ _ H1 H2 H3)
+  end.
 
-    exists rc1; repeat step || rewrite lookupRight || apply lookupNoneSupport; eauto using equivalent_rc_refl.
+Lemma forall_implicate_support:
+  forall P pre_theta theta,
+    forall_implicate P pre_theta theta ->
+    support pre_theta = support theta.
+Proof.
+  induction pre_theta; destruct theta; repeat step || f_equal.
+Qed.
+
+Ltac t_forall_implicate_support :=
+  match goal with
+  | H: forall_implicate ?P ?ptheta ?theta |- _ =>
+    poseNew (Mark (ptheta,theta) "forall_implicate_suppoft");
+    pose proof (forall_implicate_support _ _ _ H)
+  end.
+
+Lemma valid_interpretation_equiv:
+  forall P1 P2 ptheta,
+    valid_pre_interpretation P1 ptheta ->
+    (forall x, P1 x <-> P2 x) ->
+    valid_pre_interpretation P2 ptheta.
+Proof.
+  induction ptheta; steps; eauto with beapply_any.
+Qed.
+
+Ltac t_valid_interpretation_equiv :=
+  match goal with
+  | H1: valid_pre_interpretation ?P1 ?ptheta |- valid_pre_interpretation _ ?ptheta => apply valid_interpretation_equiv with P1
+  end.
+
+Lemma forall_implicate_equiv:
+  forall P1 P2 ptheta theta,
+    forall_implicate P1 ptheta theta ->
+    (forall x, P1 x <-> P2 x) ->
+    forall_implicate P2 ptheta theta.
+Proof.
+  induction ptheta; destruct theta; steps; eauto with beapply_any.
+Qed.
+
+Ltac t_forall_implicate_equiv :=
+  match goal with
+  | H1: forall_implicate ?P1 ?ptheta ?theta |- forall_implicate _ ?ptheta ?theta =>
+      apply forall_implicate_equiv with P1
+  end.
+
+Lemma strictly_positive_append_aux:
+  forall n T vars1 vars2,
+    size T < n ->
+    strictly_positive T vars1 ->
+    strictly_positive T vars2 ->
+    strictly_positive T (vars1 ++ vars2).
+Proof.
+  induction n; destruct T;
+    repeat omega || step || destruct_tag || simp_spos || apply_any;
+      eauto using no_type_fvar_append.
+Qed.
+
+Lemma strictly_positive_append:
+  forall T vars1 vars2,
+    strictly_positive T vars1 ->
+    strictly_positive T vars2 ->
+    strictly_positive T (vars1 ++ vars2).
+Proof.
+  eauto using strictly_positive_append_aux.
+Qed.
+
+Lemma strictly_positive_cons:
+  forall T X vars,
+    strictly_positive T (X :: nil) ->
+    strictly_positive T vars ->
+    strictly_positive T (X :: vars).
+Proof.
+  intros.
+  change (X :: vars) with ((X :: nil) ++ vars);
+    eauto using strictly_positive_append.
+Qed.
+
+Lemma strictly_positive_topen2:
+  forall T k X vars,
+    ~(X ∈ vars) ->
+    strictly_positive T vars ->
+    strictly_positive (topen k T (fvar X type_var)) (X :: nil) ->
+    strictly_positive (topen k T (fvar X type_var)) (X :: vars).
+Proof.
+  intros; apply strictly_positive_cons;
+    repeat step || apply strictly_positive_topen.
+Qed.
+
+Lemma strictly_positive_rename_one:
+  forall T X Y vars,
+    strictly_positive (topen 0 T (fvar X type_var)) (X :: vars) ->
+    ~(X ∈ pfv T type_var) ->
+    ~(Y ∈ pfv T type_var) ->
+    strictly_positive (topen 0 T (fvar Y type_var)) (Y :: vars).
+Proof.
+  intros.
+  apply strictly_positive_rename with (topen 0 T (fvar X type_var)) (X :: vars) ((X,Y) :: idrel (pfv T type_var));
+    repeat step || apply equal_with_relation_topen || unfold similar_sets || rewrite swap_idrel in * || t_idrel_lookup2;
+    eauto using equal_with_idrel.
 Qed.

@@ -243,3 +243,53 @@ Proof.
            | H: _ |- _ => erewrite H; eauto
            end.
 Qed.
+
+Lemma equal_with_relation_pfv:
+  forall T T' rel X,
+    equal_with_relation rel T T' ->
+    X ∈ pfv T type_var ->
+    exists X',
+      X' ∈ pfv T' type_var /\
+      lookup Nat.eq_dec rel X = Some X' /\
+      lookup Nat.eq_dec (swap rel) X' = Some X.
+Proof.
+  induction T;
+    repeat match goal with
+           | H1: equal_with_relation ?rel ?T ?T',
+             H2: ?X ∈ pfv ?T type_var,
+             H3: forall _ _ _, _ -> _ -> _ |- _ => pose proof (H3 _ _ _ H1 H2); clear H3
+           | _ => step || t_listutils || destruct_tag
+           end; eauto;
+      try solve [ eexists; repeat step || t_listutils; eauto ].
+Qed.
+
+Ltac t_equal_with_relation_pfv :=
+  match goal with
+  | H1: equal_with_relation ?rel ?T ?T',
+    H2: ?X ∈ pfv ?T type_var |- _ =>
+    poseNew (Mark H1 "equal_with_relation_pfv");
+    pose proof (equal_with_relation_pfv _ _ _ _ H1 H2)
+  end.
+
+Lemma equal_with_relation_pfv2:
+  forall T T' rel X',
+    equal_with_relation rel T T' ->
+    X' ∈ pfv T' type_var ->
+    exists X,
+      X ∈ pfv T type_var /\
+      lookup Nat.eq_dec rel X = Some X' /\
+      lookup Nat.eq_dec (swap rel) X' = Some X.
+Proof.
+  intros.
+  apply equal_with_relation_swap in H.
+  repeat step || t_equal_with_relation_pfv || eexists || rewrite swap_twice in *; eauto.
+Qed.
+
+Ltac t_equal_with_relation_pfv2 :=
+  match goal with
+  | H1: equal_with_relation ?rel ?T ?T',
+    H2: ?X ∈ pfv ?T' type_var |- _ =>
+    poseNew (Mark H1 "equal_with_relation_pfv2");
+    pose proof (equal_with_relation_pfv2 _ _ _ _ H1 H2)
+  | _ => t_equal_with_relation_pfv
+  end.

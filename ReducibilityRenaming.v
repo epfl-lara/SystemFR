@@ -325,3 +325,22 @@ Proof.
            eauto using equivalent_rc_refl;
            eauto using equivalent_rc_at_refl.
 Qed.
+
+Lemma reducible_rename_permute:
+  forall T theta1 theta2 X Y (RC : tree -> Prop) v,
+    valid_interpretation theta1 ->
+    valid_interpretation theta2 ->
+    reducibility_candidate RC ->
+    ~(Y ∈ support theta1) ->
+    ~(X ∈ pfv T type_var) ->
+    ~(Y ∈ pfv T type_var) ->
+    reducible_values ((X, RC) :: theta1 ++ theta2) v (topen 0 T (fvar X type_var)) ->
+    reducible_values (theta1 ++ (Y, RC) :: theta2) v (topen 0 T (fvar Y type_var)).
+Proof.
+  intros.
+  eapply (reducible_rename _ _ _ _ _ ((X,Y) :: idrel (pfv T type_var))); eauto;
+    repeat step || apply valid_interpretation_append || apply equal_with_relation_topen;
+    eauto using equal_with_idrel.
+
+  apply equivalent_with_relation_permute2; steps.
+Qed.

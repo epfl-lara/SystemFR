@@ -162,3 +162,20 @@ Proof.
            end;
     eauto using equivalent_rc_refl.
 Qed.
+
+Lemma idrel_lookup2:
+  forall x y l eq_dec, lookup eq_dec (idrel l) x = Some y -> x = y /\ x ∈ l.
+Proof.
+  induction l; repeat step || eapply_any || instantiate_any.
+Qed.
+
+Ltac t_idrel_lookup2 :=
+  match goal with
+  | H: lookup _ (idrel ?l) ?x = Some ?y |- _ => pose proof (idrel_lookup2 _ _ _ _ H); clear H
+  end.
+
+Lemma swap_idrel:
+  forall l, swap (idrel l) = idrel l.
+Proof.
+  induction l; steps.
+Qed.

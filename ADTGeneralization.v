@@ -44,6 +44,8 @@ Require Import Termination.FVLemmasLists.
 Require Import Termination.WFLemmasLists.
 
 Require Import Termination.StrictPositivity.
+Require Import Termination.StrictPositivityPush.
+Require Import Termination.StrictPositivityPull.
 
 Require Import Omega.
 
