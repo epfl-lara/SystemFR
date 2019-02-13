@@ -57,6 +57,7 @@ Require Import Termination.ReducibilitySumRules.
 Require Import Termination.ReducibilityFixRules.
 Require Import Termination.ReducibilityPolymorphism.
 Require Import Termination.ReducibilityRecRules.
+Require Import Termination.ReducibilityRecGenRules.
 
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasTyping.

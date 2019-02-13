@@ -8,6 +8,7 @@ Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 Require Import Termination.SmallStep.
 Require Import Termination.TypeErasure.
+Require Import Termination.StrictPositivity.
 
 Open Scope list_scope.
 
@@ -330,19 +331,6 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t (T_rec (succ n) T0 Ts) ->
       has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts))
 
-               (*
-| HTUnfold:
-    forall tvars gamma t n T0 Ts,
-      is_annotated_term n ->
-      wf n 0 ->
-      wf T0 0 ->
-      wf Ts 0 ->
-      twf T0 0 ->
-      twf Ts 1 ->
-      has_type tvars gamma t (T_rec (succ n) T0 Ts) ->
-      has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts))
-*)
-
 | HTFold:
     forall tvars gamma t n T0 Ts,
       wf n 0 ->
@@ -360,6 +348,32 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma n T_nat ->
       has_type tvars gamma t (topen 0 Ts (T_rec n T0 Ts)) ->
       has_type tvars gamma (tfold t) (T_rec (succ n) T0 Ts)
+
+| HTUnfoldGen:
+    forall tvars gamma t T0 Ts X,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      ~(X ∈ pfv Ts type_var) ->
+      strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+      has_type tvars gamma t (intersect T0 Ts) ->
+      has_type tvars gamma (tunfold t) (topen 0 Ts (intersect T0 Ts))
+
+| HTFoldGen:
+    forall tvars gamma t T0 Ts X,
+      wf T0 0 ->
+      twf T0 0 ->
+      wf Ts 0 ->
+      twf Ts 1 ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      ~(X ∈ pfv Ts type_var) ->
+      strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+      has_type tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
+      has_type tvars gamma (tfold t) (intersect T0 Ts)
 
 | HTLeft:
     forall tvars gamma t A B,

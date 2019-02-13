@@ -42,6 +42,7 @@ Require Import Termination.SwapHoles.
 Require Import Termination.ListUtils.
 Require Import Termination.TOpenTClose.
 Require Import Termination.StrictPositivity.
+Require Import Termination.StrictPositivityLemmas.
 Require Import Termination.StrictPositivityLemma.
 
 Require Import Termination.FVLemmas.
@@ -52,13 +53,13 @@ Opaque reducible_values.
 Opaque strictly_positive.
 
 Lemma strictly_positive_push_forall2:
-  forall T theta theta' A v X,
+  forall T theta A B v X,
     ~(X ∈ pfv T type_var) ->
     non_empty theta A ->
     strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
     (forall a,
         reducible_values theta a A ->
-        reducible_values v (topen 0 T (open 0 B a))) ->
-    reducible_values v (topen 0 T (T_forall A B)).
+        reducible_values theta v (topen 0 T (open 0 B a))) ->
+    reducible_values theta v (topen 0 T (T_forall A B)).
 Proof.
 Admitted.

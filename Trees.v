@@ -76,6 +76,8 @@ Inductive tree: Set :=
   | trefl: tree
 .
 
+Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
+
 Definition term_fvar s := fvar s term_var.
 Definition type_fvar s := fvar s type_var.
 

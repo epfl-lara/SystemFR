@@ -42,6 +42,7 @@ Require Import Termination.SwapHoles.
 Require Import Termination.ListUtils.
 Require Import Termination.TOpenTClose.
 Require Import Termination.StrictPositivity.
+Require Import Termination.StrictPositivityLemmas.
 Require Import Termination.NoTypeFVar.
 
 Require Import Termination.FVLemmas.
@@ -50,52 +51,6 @@ Opaque makeFresh.
 Opaque Nat.eq_dec.
 Opaque reducible_values.
 Opaque strictly_positive.
-
-Definition pre_interpretation := list (nat * (tree -> tree -> Prop)).
-
-Fixpoint forall_implicate (P: tree -> Prop) (pre_theta: pre_interpretation) (theta: interpretation) :=
-  match pre_theta, theta with
-  | nil, nil => True
-  | (X,pre_rc) :: pre_theta', (Y,rc) :: theta' =>
-      X = Y /\
-      forall_implicate P pre_theta' theta' /\
-      forall (v: tree), (forall a, P a -> pre_rc a v) -> rc v
-  | _, _ => False
-  end.
-
-Lemma forall_implicate_apply:
-  forall P pre_theta theta X pre_rc rc v,
-    forall_implicate P pre_theta theta ->
-    lookup Nat.eq_dec pre_theta X = Some pre_rc ->
-    lookup Nat.eq_dec theta X = Some rc ->
-    (forall a, P a -> pre_rc a v) ->
-    rc v.
-Proof.
-  induction pre_theta; destruct theta; repeat step || eapply_any.
-Qed.
-
-Ltac t_forall_implicate_apply :=
-  match goal with
-  | H1: forall_implicate ?P ?ptheta ?theta,
-    H2: lookup _ ?ptheta ?X = Some ?prc,
-    H3: lookup _ ?theta ?X = Some ?rc |- ?rc ?v =>
-    apply (forall_implicate_apply _ _ _ _ _ _ _ H1 H2 H3)
-  end.
-
-Lemma forall_implicate_support:
-  forall P pre_theta theta,
-    forall_implicate P pre_theta theta ->
-    support pre_theta = support theta.
-Proof.
-  induction pre_theta; destruct theta; repeat step || f_equal.
-Qed.
-
-Ltac t_forall_implicate_support :=
-  match goal with
-  | H: forall_implicate ?P ?ptheta ?theta |- _ =>
-    poseNew (Mark (ptheta,theta) "forall_implicate_suppoft");
-    pose proof (forall_implicate_support _ _ _ H)
-  end.
 
 Lemma strictly_positive_push_forall_fvar:
   forall (n : nat) theta theta' (pre_theta : list (nat * (tree -> tree -> Prop))) X (A : tree) v,
@@ -117,48 +72,6 @@ Qed.
 
 Hint Resolve strictly_positive_push_forall_fvar: b_push.
 
-Lemma reducible_unused_many1:
-  forall theta' theta T v,
-    no_type_fvar T (support theta') ->
-    valid_interpretation theta ->
-    valid_interpretation theta' ->
-    reducible_values (theta' ++ theta) v T ->
-    reducible_values theta v T.
-Proof.
-  induction theta';
-    repeat step || (poseNew (Mark 0 "once"); eapply IHtheta') || t_reducible_unused3 ||
-           apply valid_interpretation_append || apply valid_interpretation_all || unfold sat in * ||
-           unfold reducibility_candidate in * || instantiate_any;
-    eauto with b_no_type_fvar.
-Qed.
-
-Lemma reducible_unused_many2:
-  forall theta' theta T v,
-    no_type_fvar T (support theta') ->
-    valid_interpretation theta ->
-    valid_interpretation theta' ->
-    reducible_values theta v T ->
-    reducible_values (theta' ++ theta) v T.
-Proof.
-  induction theta';
-    repeat step || (poseNew (Mark 0 "once"); eapply IHtheta') || apply reducible_unused2 ||
-           apply valid_interpretation_append || apply valid_interpretation_all || unfold sat in * ||
-           unfold reducibility_candidate in * || instantiate_any;
-    eauto with b_no_type_fvar.
-Qed.
-
-Lemma reducible_unused_many:
-  forall theta' theta T v,
-    no_type_fvar T (support theta') ->
-    valid_interpretation theta ->
-    valid_interpretation theta' -> (
-      reducible_values (theta' ++ theta) v T <->
-      reducible_values theta v T
-    ).
-Proof.
-  intuition auto; eauto using reducible_unused_many1, reducible_unused_many2.
-Qed.
-
 Ltac t_instantiate_reducible2 :=
   match goal with
   | H0: no_type_fvar ?T (support ?theta'),
@@ -169,8 +82,6 @@ Ltac t_instantiate_reducible2 :=
     |- _ => poseNew (Mark (v, H3) "t_instantiate_reducible2");
           unshelve epose proof (H3 v H2 _)
   end.
-
-Ltac success t := (t; fail) || (t; []).
 
 Ltac t_rewrite_support :=
   match goal with
@@ -276,7 +187,6 @@ Proof.
         eauto with b_valid_interp;
         eauto using reducibility_is_candidate;
         try solve [ unfold equivalent_rc; steps; eauto ];
-        try solve [ apply valid_interpretation_all; eauto using sat_p ];
         try finisher;
         eauto with b_red_is_val.
 
@@ -341,13 +251,11 @@ Proof.
         rewrite reducible_unused_middle in * by (
           repeat step || t_listutils || t_forall_implicate_support || t_rewrite_support ||
                  apply valid_interpretation_append ||
-                 apply valid_interpretation_all ||
                  (eapply valid_interpretation_one; eauto) ||
                  apply no_type_fvar_in_topen ||
                  rewrite support_push_one in * ||
                  rewrite support_push_all in * ||
                  apply reducibility_is_candidate;
-          eauto using sat_p;
           try solve [ apply_any; assumption ];
           try finisher
         ).
@@ -357,7 +265,7 @@ Proof.
                (rewrite reducible_unused_many in * by t_rewriter) ||
                apply reducibility_is_candidate ||
                unfold equivalent_rc;
-        eauto using sat_p with b_valid_interp bapply_any;
+        eauto with b_valid_interp bapply_any;
         try finisher.
 
   (** Recursive type at n+1: case where the recursive type is itself strictly positive **)
