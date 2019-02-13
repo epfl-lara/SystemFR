@@ -106,7 +106,15 @@ Ltac apply_induction H :=
       apply H with (size T, index T) ptheta A
   end.
 
-Lemma strictly_positive_push_forall:
+Ltac find_exists3 :=
+  match goal with
+  | H1: reducible_values ?theta ?a ?T1,
+    H2: reducible_values ?theta ?v (open 0 ?T2 ?a)
+    |- _ =>
+    exists a
+  end.
+
+Lemma strictly_positive_push_forall_aux:
   forall measure T pre_theta theta theta' A v,
     (size T, index T) = measure ->
     wf T 0 ->
@@ -132,6 +140,8 @@ Proof.
     repeat match goal with
     | |- closed_term _ => solve [ t_closing; eauto with bfv bwf b_valid_interp ]
     | |- wf _ _ => solve [ t_closing; repeat step || apply wf_open ]
+    | H: star small_step _ zero |- _ \/ _ => left
+    | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
     | _ =>
       step ||
       simp_red ||
@@ -221,14 +231,6 @@ Proof.
     + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
     + apply reducible_unused3 in H29; steps; try finisher; eauto with bapply_any.
 
-  (** Recursive type at 0: case where the recursive type is itself strictly positive **)
-  - left.
-      repeat step || simp_red ||
-             t_instantiate_reducible || apply_induction HH || apply left_lex ||
-             t_deterministic_star ||
-             t_topen_none; eauto with omega;
-        eauto with bapply_any.
-
   (** Recursive type at n+1: case where the variables do not appear in the recursive type **)
   - right.
       exists n'0, v'0, (makeFresh (
@@ -314,4 +316,26 @@ Proof.
         apply_induction HH;
           repeat step || apply right_lex || simp_spos; eauto using lt_index_step;
             eauto with bwf btwf berased.
+Qed.
+
+Lemma strictly_positive_push_forall:
+  forall T pre_theta theta theta' A v,
+    wf T 0 ->
+    twf T 0 ->
+    wf A 0 ->
+    twf A 0 ->
+    valid_interpretation theta ->
+    valid_interpretation theta' ->
+    non_empty theta A ->
+    valid_pre_interpretation (fun a => reducible_values theta a A) pre_theta ->
+    strictly_positive T (support theta') ->
+    is_erased_type A ->
+    is_erased_type T ->
+    (forall a,
+      reducible_values theta a A ->
+      reducible_values (push_one a pre_theta ++ theta) v T) ->
+    forall_implicate (fun a => reducible_values theta a A) pre_theta theta' ->
+    reducible_values (theta' ++ theta) v T.
+Proof.
+  eauto using strictly_positive_push_forall_aux.
 Qed.

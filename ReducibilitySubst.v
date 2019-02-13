@@ -90,6 +90,7 @@ Proof.
   induction measure using measure_induction; destruct U;
     repeat match goal with
            | _ => progress (step || simp_red)
+           | _ => find_smallstep_value
            | _ => apply left_lex
            | _ => rewrite substitute_nothing5 in * by (steps; eauto with bfv)
            | _ => rewrite substitute_open2 in *  by repeat step || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased)
@@ -103,7 +104,7 @@ Proof.
                    apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T b))
            | H: forall a, _ -> reduces_to _ _ |- _ => apply H
            | H: forall a, _ -> reducible_values _ _ _ |- _ => apply H
-           | H: star small_step _ ?a |- _ => unshelve exists a
+(*           | H: star small_step _ ?a |- _ => unshelve exists a *)
            | H: reducible_values _ ?t ?T |- reducible_values _ ?t (psubstitute ?T _ _) \/ _ => left
            | H: reducible_values _ ?t (psubstitute ?T _ _) |- reducible_values _ ?t ?T \/ _ => left
            | H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t (psubstitute ?T _ _) => right
@@ -111,6 +112,8 @@ Proof.
            | H: star small_step _ zero |- _ \/ _ => left
            | |- (exists v, tleft ?v' = tleft v /\ _) \/ _ => left; exists v'
            | |- _ \/ (exists v, tright ?v' = tright v /\ _) => right; exists v'
+           | H: reducible_values ?theta ?a ?U |- exists x _, reducible_values ?theta x (psubstitute ?U _ _) /\ _ => exists a
+           | H: reducible_values ?theta ?a (psubstitute ?U _ _) |- exists x _, reducible_values ?theta x ?U /\ _ => exists a
            | H1: forall a, _ -> reducible_values _ _ _ -> _,
              H2: is_erased_term ?a  |- _ =>
                poseNew (Mark H1 "instantiate");
@@ -124,21 +127,22 @@ Proof.
                reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
                  unshelve eapply (IHn (size T, index T) _ theta T V X t P); eauto
            | |- exists c d _, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
-           | H: is_erased_term ?a |- _ => unshelve exists a (* !!! *)
+           | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
+(*           | H: is_erased_term ?a |- _ => unshelve exists a (* !!! *) *)
            end;
       eauto with bwf;
       eauto with berased;
       try omega;
       try solve [ apply_any; auto ].
 
-    - exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
+    - (* polymorphic type *)
+      exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
       instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
       lazymatch goal with
       | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
         apply (reducible_rename_one _ _ _ _ _ M) in H
       end;
         repeat step || finisher || rewrite substitute_topen2.
-
 
       lazymatch goal with
       | IHn: forall m, _ -> forall theta U V X v P, _,
@@ -157,7 +161,8 @@ Proof.
        | H: _ |- _ => apply reducible_unused3 in H
        end; repeat step || finisher || apply_any.
 
-    - exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
+    - (* polymorphic type (2) *)
+      exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
       instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
 
       lazymatch goal with

@@ -103,3 +103,10 @@ Lemma cons_append:
 Proof.
   repeat step || rewrite <- List.app_assoc.
 Qed.
+
+Lemma cons_app:
+  forall X (x: X) (xs: list X),
+    x :: xs = (x :: nil) ++ xs.
+Proof.
+  steps.
+Qed.

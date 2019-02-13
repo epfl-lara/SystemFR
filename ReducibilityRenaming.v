@@ -207,7 +207,12 @@ Proof.
         eauto using in_remove_support;
         eauto using equivalent_rc_refl.
 
-  - unshelve eexists n', v', (makeFresh (pfv t0_2 type_var :: pfv t0_3 type_var ::  support theta' :: nil)), _, _; eauto;
+  - (* case recursive type at n = 0 *)
+    exists v'; steps.
+    repeat step || t_apply_ih || apply left_lex; try omega.
+
+  - (* case recursive type at n + 1 *)
+    unshelve eexists n', v', (makeFresh (pfv t0_2 type_var :: pfv t0_3 type_var ::  support theta' :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ -> forall T T' t theta theta' rel, _ ,
@@ -236,7 +241,12 @@ Proof.
       eauto using reducibility_is_candidate;
       eauto with bfv.
 
-  - unshelve eexists n', v', (makeFresh (pfv T2 type_var :: pfv T3 type_var :: support theta :: nil)), _, _; eauto;
+  - (* case recursive type at n = 0 *)
+    exists v'; steps.
+    repeat step || t_apply_ih || apply left_lex; try omega.
+
+  - (* case recursive type at n + 1 *)
+   unshelve eexists n', v', (makeFresh (pfv T2 type_var :: pfv T3 type_var :: support theta :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ -> forall T T' t theta theta' rel, _ ,
@@ -342,5 +352,6 @@ Proof.
     repeat step || apply valid_interpretation_append || apply equal_with_relation_topen;
     eauto using equal_with_idrel.
 
+  +
   apply equivalent_with_relation_permute2; steps.
 Qed.

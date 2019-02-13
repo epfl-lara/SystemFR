@@ -147,7 +147,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
   reducible_values theta v (T_rec n T0 Ts) :=
     closed_value v /\
     is_erased_term n /\ (
-      (star small_step n zero /\ reducible_values theta v T0) \/
+      (exists v', v = tfold v' /\ star small_step n zero /\ reducible_values theta v' T0) \/
       (exists n' v' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
          v = tfold v' /\
          ~(X ∈ pfv T0 type_var) /\

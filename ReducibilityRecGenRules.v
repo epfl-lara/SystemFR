@@ -174,22 +174,6 @@ Proof.
     eauto with values.
 Qed.
 
-(*
-Ltac t_reducible_unfold :=
-  match goal with
-  | _ => progress (unfold closed_value in * )
-  | _ => apply star_unfold_fold
-  | H: star small_step ?t (tfold ?v) |- exists t', star small_step (tunfold ?t) _ /\ _ => exists v
-  | H: singleton _ = nil |- _ => inversion H
-( *  | H: reducible_values _ _ (intersect _) |- _ => simp reducible_values in H
-  | H: reducible_values _ _ (T_rec (succ zero) _ _) |- _ => simp reducible_values in H * )
-  | _ => step || inst_one
-  | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?t (intersect ?T) |- _ =>
-     is_var t; pose proof (fold_in_intersect theta t T H1 H2)
-  | _ => rewrite_any
-  end.
-*)
-
 Lemma reducible_unfold_gen:
   forall T0 Ts theta t X,
     wf T0 0 ->
@@ -209,4 +193,77 @@ Proof.
   exists v; repeat step || apply star_unfold_fold;
     try solve [ t_closing ];
     eauto using reducible_values_unfold_gen.
+Qed.
+
+Definition decreasing theta T0 Ts :=
+  forall v, reducible_values theta v (topen 0 Ts (T_rec zero T0 Ts)) -> reducible_values theta v T0.
+
+Lemma reducible_values_fold_gen:
+  forall T0 Ts theta v X,
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    ~(X ∈ pfv Ts type_var) ->
+    strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    valid_interpretation theta ->
+    decreasing theta T0 Ts ->
+    reducible_values theta v (topen 0 Ts (intersect T0 Ts)) ->
+    reducible_values theta (tfold v) (intersect T0 Ts).
+Proof.
+  unfold intersect in *; repeat step.
+  simp reducible_values; repeat step || (rewrite open_none in * by steps); try solve [ t_closing ].
+
+  unshelve epose proof (strictly_positive_pull_forall2 _ _ _ _ _ X _ _ _ H9);
+    repeat step; eauto using non_empty_nat.
+
+  destruct a; repeat step || simp_red;
+    try solve [ t_closing ];
+    eauto with smallstep.
+  - (* case a = 0, we use the decreasing property *)
+    left; exists v; repeat step. unfold decreasing in *; repeat step || apply_any.
+    unshelve epose proof (H11 zero _);
+      repeat step || simp_red || rewrite open_none in * by steps.
+  - (* case a = n+1 *)
+    right; exists a, v, (makeFresh (
+                     support theta ::
+                     pfv a type_var ::
+                     pfv T0 type_var ::
+                     pfv Ts type_var ::
+                     (X :: nil) ::
+                     nil));
+    repeat step;
+    try finisher.
+
+    apply reducibility_subst_head2;
+      repeat step || t_listutils;
+      try finisher;
+      eauto with bwf btwf.
+
+    unshelve epose proof (H11 a _); repeat step || simp_red || rewrite open_none in * by steps.
+Qed.
+
+Lemma reducible_fold_gen:
+  forall T0 Ts theta t X,
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    ~(X ∈ pfv Ts type_var) ->
+    strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    valid_interpretation theta ->
+    decreasing theta T0 Ts ->
+    reducible theta t (topen 0 Ts (intersect T0 Ts)) ->
+    reducible theta (tfold t) (intersect T0 Ts).
+Proof.
+  unfold reducible, reduces_to;
+    repeat step.
+  exists (tfold t'); repeat step;
+    try solve [ t_closing ];
+    eauto using reducible_values_fold_gen;
+    eauto with bsteplemmas.
 Qed.

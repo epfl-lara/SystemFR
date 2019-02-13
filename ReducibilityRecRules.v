@@ -50,7 +50,7 @@ Lemma reducible_values_rec_step:
 Proof.
   repeat step || simp_red;
     eauto with berased.
-  - left; steps; eapply star_many_steps; eauto; unfold irred; repeat step || t_invert_step.
+  - left; exists v'; steps; eapply star_many_steps; eauto; unfold irred; repeat step || t_invert_step.
   - right. unshelve eexists n', v', X, _, _; steps;
              eauto using is_nat_value_value, value_irred, star_many_steps.
 Qed.
