@@ -105,6 +105,12 @@ Proof.
     exists rc1; repeat step || rewrite lookupRight || apply lookupNoneSupport; eauto using equivalent_rc_refl.
 Qed.
 
+Ltac t_reducible_unused3 :=
+  match goal with
+  | H: reducible_values ((?X,?RC) :: ?theta) ?v ?T |- reducible_values ?theta' ?v ?T =>
+    unify theta theta'; apply reducible_unused3 with X RC
+  end.
+
 Lemma reducible_unused_many1:
   forall theta' theta T v,
     no_type_fvar T (support theta') ->
@@ -146,9 +152,3 @@ Lemma reducible_unused_many:
 Proof.
   intuition auto; eauto using reducible_unused_many1, reducible_unused_many2.
 Qed.
-
-Ltac t_reducible_unused3 :=
-  match goal with
-  | H: reducible_values ((?X,?RC) :: ?theta) ?v ?T |- reducible_values ?theta' ?v ?T =>
-    unify theta theta'; apply reducible_unused3 with X RC
-  end.

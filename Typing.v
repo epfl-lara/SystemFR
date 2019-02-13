@@ -330,6 +330,19 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t (T_rec (succ n) T0 Ts) ->
       has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts))
 
+               (*
+| HTUnfold:
+    forall tvars gamma t n T0 Ts,
+      is_annotated_term n ->
+      wf n 0 ->
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      has_type tvars gamma t (T_rec (succ n) T0 Ts) ->
+      has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts))
+*)
+
 | HTFold:
     forall tvars gamma t n T0 Ts,
       wf n 0 ->

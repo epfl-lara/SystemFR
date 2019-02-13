@@ -42,7 +42,7 @@ Require Import Termination.SwapHoles.
 Require Import Termination.ListUtils.
 Require Import Termination.TOpenTClose.
 Require Import Termination.StrictPositivity.
-Require Import Termination.StrictPositivityPush.
+Require Import Termination.StrictPositivityLemma.
 
 Require Import Termination.FVLemmas.
 
@@ -51,32 +51,13 @@ Opaque Nat.eq_dec.
 Opaque reducible_values.
 Opaque strictly_positive.
 
-Ltac apply_induction_pull H :=
-  match goal with
-  | H1: non_empty ?theta ?A,
-    H2: forall_implicate _ ?ptheta ?theta' |- reducible_values (?theta' ++ _) _ ?T =>
-      apply H with (size T, index T) ptheta A
-  end.
-
-(*
-Lemma strictly_positive_push_forall:
-  forall measure T pre_theta theta theta' A v,
-    (size T, index T) = measure ->
-    wf T 0 ->
-    twf T 0 ->
-    wf A 0 ->
-    twf A 0 ->
-    valid_interpretation theta ->
-    valid_interpretation theta' ->
+Lemma strictly_positive_pull_forall:
+  forall T theta theta' A v X a,
+    ~(X ∈ pfv T type_var) ->
     non_empty theta A ->
-    valid_pre_interpretation (fun a => reducible_values theta a A) pre_theta ->
-    strictly_positive T (support theta') ->
-    is_erased_type A ->
-    is_erased_type T ->
-    (forall a,
-      reducible_values theta a A ->
-      reducible_values (push_one a pre_theta ++ theta) v T) ->
-    forall_implicate (fun a => reducible_values theta a A) pre_theta theta' ->
-    reducible_values (theta' ++ theta) v T.
+    strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
+    reducible_values v (topen 0 T (T_forall A B)) ->
+    reducible_values theta a A ->
+    reducible_values v (topen 0 T (open 0 B a))).
 Proof.
-*)
+Admitted.

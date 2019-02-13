@@ -41,6 +41,7 @@ Require Import Termination.Freshness.
 Require Import Termination.SwapHoles.
 Require Import Termination.ListUtils.
 Require Import Termination.TOpenTClose.
+Require Import Termination.NoTypeFVar.
 
 Require Import Termination.FVLemmas.
 
@@ -173,65 +174,7 @@ Proof.
   unfold non_empty; repeat step || exists v || apply reducible_unused2.
 Qed.
 
-Definition push_one (a: tree) (l: list (nat * (tree -> tree -> Prop))): interpretation :=
-  mapValues (fun rc => rc a) l.
-
-Definition push_all (P: tree -> Prop) (l: list (nat * (tree -> tree -> Prop))): interpretation :=
-  mapValues (fun (rc: tree -> tree -> Prop) (v: tree) => (forall a, P a -> rc a v)) l.
-
-Fixpoint valid_pre_interpretation (P: tree -> Prop) (theta: list (nat * (tree -> tree -> Prop))) : Prop :=
-  match theta with
-  | nil => True
-  | (_, RC) :: theta' => valid_pre_interpretation P theta' /\ forall a, P a -> reducibility_candidate (RC a)
-  end.
-
-Lemma valid_interpretation_one:
-  forall a (P: tree -> Prop) theta,
-    P a ->
-    valid_pre_interpretation P theta ->
-    valid_interpretation (push_one a theta).
-Proof.
-  induction theta; steps.
-Qed.
-
-Definition sat { X } (P: X -> Prop) := exists x, P x.
-
-Lemma valid_interpretation_all:
-  forall (P: tree -> Prop) theta,
-    sat P ->
-    valid_pre_interpretation P theta ->
-    valid_interpretation (push_all P theta).
-Proof.
-  unfold sat; induction theta;
-    repeat step || unfold reducibility_candidate in * || instantiate_any.
-Qed.
-
-Lemma valid_interpretation_append:
-  forall theta1 theta2,
-    valid_interpretation theta1 ->
-    valid_interpretation theta2 ->
-    valid_interpretation (theta1 ++ theta2).
-Proof.
-  induction theta1; steps.
-Qed.
-
-Lemma valid_interpretation_all2:
-  forall theta theta' A,
-    non_empty theta A ->
-    valid_interpretation theta ->
-    valid_pre_interpretation (fun a => reducible_values theta a A) theta' ->
-    valid_interpretation (push_all (fun a => reducible_values theta a A) theta' ++ theta).
-Proof.
-  repeat step || apply valid_interpretation_append || apply valid_interpretation_all || unfold sat.
-Qed.
-
-Hint Resolve valid_interpretation_cons: b_valid_interp.
-Hint Resolve valid_interpretation_one: b_valid_interp.
-Hint Resolve valid_interpretation_all: b_valid_interp.
-Hint Resolve valid_interpretation_all2: b_valid_interp.
-Hint Resolve valid_interpretation_append: b_valid_interp.
-Hint Extern 1 => eapply valid_interpretation_one; eauto: b_valid_interp.
-
+(*
 Lemma reducible_unused_push_all1:
   forall theta' P theta T v,
     sat P ->
@@ -276,7 +219,9 @@ Lemma reducible_unused_push_all:
 Proof.
   intuition auto; eauto using reducible_unused_push_all1, reducible_unused_push_all2.
 Qed.
+*)
 
+(*
 Lemma reducible_unused_push_one1:
   forall theta' (P: tree -> Prop) a theta T v,
     no_type_fvar T (support theta') ->
@@ -321,22 +266,8 @@ Lemma reducible_unused_push_one:
 Proof.
   intuition auto; eauto using reducible_unused_push_one1, reducible_unused_push_one2.
 Qed.
-
-Lemma valid_pre_interpretation_same:
-  forall P1 P2 theta,
-    valid_pre_interpretation P1 theta ->
-    (forall a, P1 a <-> P2 a) ->
-    valid_pre_interpretation P2 theta.
-Proof.
-  induction theta; steps; eauto with bapply_any.
-Qed.
-
-Ltac t_valid_pre_interpration_same :=
-  match goal with
-  | H: valid_pre_interpretation ?P1 ?theta |- valid_pre_interpretation ?P2 ?theta =>
-     apply valid_pre_interpretation_same with P1
-  end.
-
+*)
+(*
 Ltac t_rewrite_push_one :=
   match goal with
   | H1: reducible_values ?theta ?a ?A,
@@ -352,7 +283,7 @@ Ltac t_rewrite_push_one :=
         try solve [ apply_any; assumption ]
       )
   end.
-
+*)
 Lemma strictly_positive_open_aux:
   forall n T vars rep k,
     size T < n ->
@@ -435,6 +366,7 @@ Ltac t_red_is_val :=
 
 Hint Extern 50 => solve [ t_red_is_val ]: b_red_is_val.
 
+(*
 Lemma sat_p:
   forall P theta a A,
     reducible_values theta a A ->
@@ -443,6 +375,7 @@ Lemma sat_p:
 Proof.
   unfold sat; steps; eauto with bapply_any.
 Qed.
+*)
 
 Definition similar_sets (rel: M nat nat) (vars vars': list nat): Prop :=
   forall x y,
@@ -570,27 +503,6 @@ Proof.
     eauto using equal_with_idrel.
 Qed.
 
-Lemma equivalent_with_relation_permute2:
-  forall theta1 theta2 (RC : tree -> Prop) X Y l,
-    ~(X ∈ support theta1) ->
-    equivalent_with_relation
-      ((Y, X) :: idrel l)
-        ((Y, RC) :: theta1 ++ theta2)
-        (theta1 ++ (X, RC) :: theta2).
-Proof.
-  unfold equivalent_with_relation, equivalent_rc_at;
-    repeat match goal with
-           | |- exists r, Some ?R = Some r /\ _ => exists R
-           | |- exists r, _ /\ equivalent_rc r ?R => exists R
-           | H: _ |- _ => rewrite lookup_remove2 in H by steps
-           | _ => rewrite lookup_remove2 by steps
-           | _ => step || t_lookup_rewrite || t_idrel || t_lookup || t_listutils ||
-                 rewrite obvious_lookup in * by steps ||
-                 t_lookupor || t_lookup_same
-           end;
-    eauto using equivalent_rc_refl.
-Qed.
-
 Lemma support_push_one:
   forall theta a,
     support (push_one a theta) = support theta.
@@ -658,20 +570,6 @@ Ltac t_forall_implicate_support :=
   | H: forall_implicate ?P ?ptheta ?theta |- _ =>
     poseNew (Mark (ptheta,theta) "forall_implicate_suppoft");
     pose proof (forall_implicate_support _ _ _ H)
-  end.
-
-Lemma valid_interpretation_equiv:
-  forall P1 P2 ptheta,
-    valid_pre_interpretation P1 ptheta ->
-    (forall x, P1 x <-> P2 x) ->
-    valid_pre_interpretation P2 ptheta.
-Proof.
-  induction ptheta; steps; eauto with beapply_any.
-Qed.
-
-Ltac t_valid_interpretation_equiv :=
-  match goal with
-  | H1: valid_pre_interpretation ?P1 ?ptheta |- valid_pre_interpretation _ ?ptheta => apply valid_interpretation_equiv with P1
   end.
 
 Lemma forall_implicate_equiv:

@@ -42,6 +42,7 @@ Require Import Termination.SwapHoles.
 Require Import Termination.ListUtils.
 Require Import Termination.TOpenTClose.
 Require Import Termination.StrictPositivity.
+Require Import Termination.NoTypeFVar.
 
 Require Import Termination.FVLemmas.
 
@@ -181,7 +182,6 @@ Ltac t_rewriter :=
          t_fv_open ||
          (rewrite is_erased_term_tfv in * by (steps; eauto with berased)) ||
          rewrite support_push_all in * || rewrite support_push_one in *;
-    eauto using sat_p;
     eauto with bapply_any;
     eauto with b_valid_interp;
     eauto 2 with beapply_any step_tactic;

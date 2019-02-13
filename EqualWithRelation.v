@@ -141,14 +141,14 @@ Fixpoint equal_with_relation rel t t' :=
   | _, _ => False
   end.
 
-
+(* OPTIMIZE: should be optimized *)
 Lemma equal_with_erased_term1:
   forall t1 t2 rel,
     equal_with_relation rel t1 t2 ->
     is_erased_term t1 ->
     t1 = t2.
 Proof.
-  induction t1;
+  induction t1; destruct t2; intros; simpl equal_with_relation in *; intuition auto;
     repeat match goal with
            | H: forall x, _, H2: equal_with_relation _ _ _ |- _ =>
             unshelve epose proof (H _ _ H2); clear H2
@@ -156,13 +156,14 @@ Proof.
            end.
 Qed.
 
+(* OPTIMIZE: should be optimized *)
 Lemma equal_with_erased_term2:
   forall t1 t2 rel,
     equal_with_relation rel t1 t2 ->
     is_erased_term t2 ->
     t1 = t2.
 Proof.
-  induction t1;
+  induction t1; destruct t2; intros; simpl equal_with_relation in *; intuition auto;
     repeat match goal with
            | H: forall x, _, H2: equal_with_relation _ _ _ |- _ =>
               unshelve epose proof (H _ _ H2); clear H2

@@ -44,6 +44,7 @@ Require Import Termination.FVLemmasLists.
 Require Import Termination.WFLemmasLists.
 
 Require Import Termination.StrictPositivity.
+Require Import Termination.StrictPositivityLemma.
 Require Import Termination.StrictPositivityPush.
 Require Import Termination.StrictPositivityPull.
 
@@ -58,8 +59,7 @@ Fixpoint build_nat (n: nat): tree :=
   | S n => succ (build_nat n)
   end.
 
-
-Definition intersect T := T_forall T_nat (T_rec (lvar 0 term_var) T_top T).
+Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
 
 (*
 Definition generalizes T :=
@@ -121,18 +121,20 @@ Ltac t_reducible_unfold :=
   end.
 
 Lemma reducible_values_unfold_gen:
-  forall T theta v n,
+  forall T0 Ts theta v n X,
     wf n 0 ->
     twf n 0 ->
-    wf T 0 ->
-    twf T 1 ->
-    strictly_positive T 0 ->
-    pfv T type_var = nil ->
+    wf T0 0 ->
+    twf T0 1 ->
+    wf Ts 0 ->
+    twf Ts 1 ->
+    ~(X ∈ pfv T type_var) ->
+    strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
     is_erased_term n ->
     is_erased_type T ->
     valid_interpretation theta ->
-    reducible_values theta (tfold v) (intersect T) ->
-    reducible_values theta v (topen 0 T (intersect T)).
+    reducible_values theta (tfold v) (intersect T0 Ts) ->
+    reducible_values theta v (topen 0 T (intersect T0 Ts)).
 Proof.
   unfold intersect in *; repeat step.
 (*  apply strictly_positive_push_forall; steps.
