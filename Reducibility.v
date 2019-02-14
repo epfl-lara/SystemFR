@@ -59,6 +59,10 @@ Require Import Termination.ReducibilityPolymorphism.
 Require Import Termination.ReducibilityRecRules.
 Require Import Termination.ReducibilityRecGenRules.
 
+Require Import Termination.StrictPositivity.
+Require Import Termination.StrictPositivityLemmas.
+Require Import Termination.StrictPositivityErased.
+
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasTyping.
 
@@ -89,16 +93,6 @@ Ltac unfold_all :=
 
 Ltac unfold_reduce :=
   unfold open_reducible, reducible, reduces_to in *.
-
-(*
-Ltac side_conditions :=
-  repeat step ||
-         (progress t_subset_erase) ||
-         (progress autorewrite with berased in * ) ||
-         (progress t_fv_erase) ||
-         (progress rewrite erase_type_open in * by (eauto with bannot; eauto 2 with bannot step_tactic));
-    try eassumption; eauto with bwf; eauto with bfv bfv2; eauto with berased.
-*)
 
 Ltac t_erase_open :=
   (progress rewrite erase_type_open in * by (eauto 2 with bannot step_tactic)) ||
@@ -229,6 +223,17 @@ Proof.
   - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold; side_conditions.
   - apply open_reducible_fold; side_conditions.
+  - repeat step || t_annotations. apply open_reducible_unfold_zero with (erase_type Ts); side_conditions.
+  - apply open_reducible_fold_zero; side_conditions.
+  - rewrite erase_type_topen; repeat step || t_annotations.
+    apply open_reducible_unfold_gen with X; side_conditions.
+    change (fvar X type_var) with (erase_type (fvar X type_var)).
+    rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased; eauto 2 with bannot.
+  - apply open_reducible_fold_gen with X; side_conditions.
+    + change (fvar X type_var) with (erase_type (fvar X type_var)).
+      rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
+        eauto 2 with bannot step_tactic.
+    + apply H; steps. rewrite substitute_topen; steps; eauto with btwf.
   - apply open_reducible_left; side_conditions.
   - apply open_reducible_right; side_conditions.
   - apply open_reducible_sum_match with y p; side_conditions.
@@ -260,8 +265,6 @@ Proof.
 
   (* equality *)
   - eapply reducible_values_rec_equivalent; eauto with berased.
-  - repeat step || simp_red || left; t_closer.
-  - repeat step || simp_red || t_invert_star; t_closer.
   - eauto 2 with b_equiv.
   - apply reducibility_equivalent_weaken with theta (erase_context gamma) x (erase_type T); side_conditions.
   - eauto using equivalent_trans.

@@ -547,3 +547,13 @@ Proof.
     repeat step || apply equal_with_relation_topen || unfold similar_sets || rewrite swap_idrel in * || t_idrel_lookup2;
     eauto using equal_with_idrel.
 Qed.
+
+Lemma strictly_positive_no_fv:
+  forall T vars,
+    is_erased_type T ->
+    (forall X, X ∈ pfv T type_var -> False) ->
+    strictly_positive T vars.
+Proof.
+  intros.
+  apply no_type_fvar_strictly_positive; repeat step || unfold no_type_fvar; eauto.
+Qed.

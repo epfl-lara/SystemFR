@@ -87,3 +87,18 @@ Lemma fv_subst_different_tag:
 Proof.
   induction t; repeat step || f_equal; eauto with bfv.
 Qed.
+
+Lemma pfv_in_subst:
+  forall (T : tree) (l : list (nat * tree)) (tag1 tag2 : fv_tag) (X : nat),
+    pclosed_mapping l tag1 ->
+    X ∈ pfv (psubstitute T l tag2) tag1->
+    X ∈ pfv T tag1.
+Proof.
+  destruct tag1, tag2; repeat step || rewrite fv_subst_different_tag in * by steps.
+  - epose proof (fv_subst2 _ _ _ X H0);
+    repeat step || t_listutils;
+    eauto using closed_mapping_fv with falsity.
+  - epose proof (fv_subst2 _ _ _ X H0);
+    repeat step || t_listutils;
+    eauto using closed_mapping_fv with falsity.
+Qed.

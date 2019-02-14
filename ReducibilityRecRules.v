@@ -139,7 +139,7 @@ Ltac inst_one :=
 Lemma fold_in_rec:
   forall theta v T0 Ts n,
     valid_interpretation theta ->
-    reducible_values theta v (T_rec (succ n) T0 Ts) ->
+    reducible_values theta v (T_rec n T0 Ts) ->
     exists v', closed_value v' /\ v = tfold v'.
 Proof.
   repeat match goal with
@@ -273,4 +273,89 @@ Proof.
 
   rewrite substitute_topen in *; steps;
     eauto with btwf.
+Qed.
+
+
+Lemma reducible_unfold_zero:
+  forall theta t T0 Ts,
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    valid_interpretation theta ->
+    reducible theta t (T_rec zero T0 Ts) ->
+    reducible theta (tunfold t) T0.
+Proof.
+  unfold reducible, reduces_to;
+    repeat match goal with
+           | _ => apply star_unfold_fold
+           | _ => apply reducible_values_unfold
+           | H: star small_step ?t (tfold ?v) |- exists t', star small_step (tunfold ?t) _ /\ _ => exists v
+           | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?v (T_rec _ _ _) |- _ =>
+               poseNew (Mark 0 "once");
+               is_var v; unshelve epose proof (fold_in_rec _ _ _ _ _ H1 H2)
+           | _ => step || unfold closed_value in * || simp_red || t_invert_star
+           end; eauto with values.
+Qed.
+
+Lemma open_reducible_unfold_zero:
+  forall tvars gamma t T0 Ts,
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    open_reducible tvars gamma t (T_rec zero T0 Ts) ->
+    open_reducible tvars gamma (tunfold t) T0.
+Proof.
+  unfold open_reducible;
+    repeat step || rewrite substitute_topen;
+      eauto with btwf.
+
+  eapply reducible_unfold_zero; steps;
+    eauto with bwf btwf berased.
+Qed.
+
+Lemma reducible_fold_zero:
+  forall theta t T0 Ts,
+    valid_interpretation theta ->
+    wf T0 0 ->
+    twf T0 0 ->
+    wf Ts 0 ->
+    twf Ts 1 ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    reducible theta t T0 ->
+    reducible theta (tfold t) (T_rec zero T0 Ts).
+Proof.
+  unfold reducible, reduces_to;
+    repeat match goal with
+           | _ => step || simp_red
+           end; eauto with values.
+
+  eexists; steps; eauto with bsteplemmas.
+  repeat step || simp_red; t_closer; eauto with smallstep.
+Qed.
+
+Lemma open_reducible_fold_zero:
+  forall tvars gamma t T0 Ts,
+    wf T0 0 ->
+    twf T0 0 ->
+    wf Ts 0 ->
+    twf Ts 1 ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    open_reducible tvars gamma t T0 ->
+    open_reducible tvars gamma (tfold t) (T_rec zero T0 Ts).
+Proof.
+  unfold open_reducible;
+    repeat step || t_instantiate_sat3.
+
+  apply reducible_fold_zero; steps;
+    eauto with bwf;
+    eauto 3 with btwf;
+    eauto with berased.
 Qed.

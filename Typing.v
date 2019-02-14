@@ -349,6 +349,28 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t (topen 0 Ts (T_rec n T0 Ts)) ->
       has_type tvars gamma (tfold t) (T_rec (succ n) T0 Ts)
 
+| HTUnfoldZ:
+    forall tvars gamma t T0 Ts,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      has_type tvars gamma t (T_rec zero T0 Ts) ->
+      has_type tvars gamma (tunfold t) T0
+
+| HTFoldZ:
+    forall tvars gamma t T0 Ts,
+      wf T0 0 ->
+      twf T0 0 ->
+      wf Ts 0 ->
+      twf Ts 1 ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      has_type tvars gamma t T0 ->
+      has_type tvars gamma (tfold t) (T_rec zero T0 Ts)
+
 | HTUnfoldGen:
     forall tvars gamma t T0 Ts X,
       wf T0 0 ->
@@ -371,6 +393,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       is_annotated_type T0 ->
       is_annotated_type Ts ->
       ~(X ∈ pfv Ts type_var) ->
+      is_subtype tvars gamma (topen 0 Ts (T_rec zero T0 Ts)) T0 ->
       strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
       has_type tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
       has_type tvars gamma (tfold t) (intersect T0 Ts)
@@ -815,6 +838,7 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       are_equal tvars gamma n1 n2 ->
       is_subtype tvars gamma (T_rec n1 T0 Ts) (T_rec n2 T0 Ts)
 
+(* These are not true anymore with the new definition
 | ISRecBase:
     forall tvars gamma T0 Ts,
       wf T0 0 ->
@@ -840,7 +864,7 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_annotated_type Ts ->
       is_context tvars gamma ->
       is_subtype tvars gamma (T_rec zero T0 Ts) T0
-
+*)
 with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,
     subset (fv t) (support gamma) ->
