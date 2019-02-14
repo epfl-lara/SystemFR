@@ -30,6 +30,8 @@ Fixpoint swap_type_holes t i j :=
 
   | uu => t
 
+  | tsize t => tsize (swap_type_holes t i j)
+
   | pp t1 t2 => pp (swap_type_holes t1 i j) (swap_type_holes t2 i j)
   | pi1 t => pi1 (swap_type_holes t i j)
   | pi2 t => pi2 (swap_type_holes t i j)

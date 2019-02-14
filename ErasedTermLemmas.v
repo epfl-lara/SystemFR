@@ -6,6 +6,7 @@ Require Import Termination.ListUtils.
 Require Import Termination.SmallStep.
 Require Import Termination.StarRelation.
 Require Import Termination.SubstitutionLemmas.
+Require Import Termination.PrimitiveSize.
 
 Lemma is_erased_term_twf:
   forall t k,
@@ -88,13 +89,22 @@ Proof.
   induction t; steps; eauto.
 Qed.
 
+Lemma is_erased_term_tsize:
+  forall n, is_erased_term (build_nat n).
+Proof.
+  eauto using is_nat_value_erased, is_nat_value_build_nat.
+Qed.
+
+Hint Resolve is_erased_term_tsize: berased.
+
 Lemma erase_smallstep:
   forall t1 t2,
     small_step t1 t2 ->
     is_erased_term t1 ->
     is_erased_term t2.
 Proof.
-  induction 1; steps; eauto 3 using is_erased_open with step_tactic.
+  induction 1; steps; eauto 3 using is_erased_open with step_tactic;
+    eauto with berased.
 Qed.
 
 Hint Immediate erase_smallstep: berased.

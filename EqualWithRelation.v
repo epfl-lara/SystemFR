@@ -25,6 +25,8 @@ Fixpoint equal_with_relation rel t t' :=
 
   | uu, uu => True
 
+  | tsize t, tsize t' => equal_with_relation rel t t'
+
   | notype_lambda t, notype_lambda t' => equal_with_relation rel t t'
   | lambda T t, lambda T' t' => equal_with_relation rel T T' /\ equal_with_relation rel t t'
   | app t1 t2, app t1' t2' => equal_with_relation rel t1 t1' /\ equal_with_relation rel t2 t2'
@@ -188,7 +190,8 @@ Lemma equal_with_relation_swap:
     equal_with_relation rel t1 t2 ->
     equal_with_relation (swap rel) t2 t1.
 Proof.
-  induction t1; repeat step || rewrite swap_twice in *.
+  induction t1; destruct t2; intros; simpl equal_with_relation in *; intuition auto;
+    repeat step || rewrite swap_twice in *.
 Qed.
 
 Lemma equal_with_relation_refl:
@@ -197,7 +200,7 @@ Lemma equal_with_relation_refl:
     equal_with_relation rel t t.
 Proof.
   induction t; repeat step || t_listutils;
-   try solve [ unfold singleton in *; unfold add in *; steps ].
+    try solve [ unfold singleton in *; unfold add in *; steps ].
 Qed.
 
 Lemma equal_with_relation_refl2:

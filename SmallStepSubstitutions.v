@@ -34,6 +34,7 @@ Qed.
 
 Hint Resolve is_value_subst: values.
 
+(* Not true anymore when introducing a size primitive
 Lemma small_step_subst:
   forall t t' l,
     small_step t t' ->
@@ -52,3 +53,4 @@ Ltac t_smallstep_subst :=
     poseNew (Mark (t1,t2,l) "small_step_subst");
     unshelve epose proof (small_step_subst t1 t2 l H _ _)
   end.
+*)

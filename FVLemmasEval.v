@@ -8,6 +8,7 @@ Require Import Termination.ListUtils.
 Require Import Termination.SizeLemmas.
 Require Import Termination.StarRelation.
 Require Import Termination.SetLemmas.
+Require Import Termination.PrimitiveSize.
 
 Require Import Coq.Strings.String.
 
@@ -33,7 +34,8 @@ Lemma fv_smallstep:
       x ∈ pfv t tag.
 Proof.
   induction 1;
-    repeat step || t_listutils || t_fv_open || unfold subset in *;
+    repeat step || t_listutils || t_fv_open || unfold subset in * ||
+           (rewrite nat_value_fv in * by eauto using is_nat_value_build_nat);
     eauto with bfv blistutils.
 Qed.
 

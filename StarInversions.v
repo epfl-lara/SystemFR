@@ -6,6 +6,7 @@ Require Import Termination.WFLemmas.
 Require Import Termination.ListUtils.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarRelation.
+Require Import Termination.PrimitiveSize.
 
 Require Import Coq.Strings.String.
 
@@ -431,6 +432,24 @@ Proof.
   induction 1; steps; eauto with smallstep.
 Qed.
 
+Lemma star_smallstep_tsize_inv:
+  forall t v,
+    star small_step t v ->
+    is_value v ->
+    forall t',
+      t = tsize t' ->
+      is_nat_value v.
+Proof.
+  induction 1;
+    repeat match goal with
+           | H2: star small_step (build_nat _) ?v2 |- _ =>
+              unshelve epose proof (star_smallstep_value _ v2 H2 _); clear H2
+           | _ => step || step_inversion is_value || t_invert_step
+           end;
+    eauto with smallstep values bsteplemmas;
+    eauto using is_nat_value_build_nat with values.
+Qed.
+
 Lemma star_smallstep_deterministic:
   forall t v,
     star small_step t v ->
@@ -510,6 +529,10 @@ Ltac t_invert_star :=
     H2: star small_step (tfold _) ?v |- _ =>
     poseNew (Mark H2 "inv fold");
     unshelve epose proof (star_smallstep_tfold_inv _ v H2 H1 _ eq_refl)
+  | H1: is_value ?v,
+    H2: star small_step (tsize _) ?v |- _ =>
+    poseNew (Mark H2 "inv tsize");
+    unshelve epose proof (star_smallstep_tsize_inv _ v H2 H1 _ eq_refl)
   | H1: is_value ?v,
     H2: star small_step (tunfold _) ?v |- _ =>
     poseNew (Mark H2 "inv unfold");

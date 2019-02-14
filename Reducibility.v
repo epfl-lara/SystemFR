@@ -58,6 +58,7 @@ Require Import Termination.ReducibilityFixRules.
 Require Import Termination.ReducibilityPolymorphism.
 Require Import Termination.ReducibilityRecRules.
 Require Import Termination.ReducibilityRecGenRules.
+Require Import Termination.ReducibilityPrimitiveSizeRules.
 
 Require Import Termination.StrictPositivity.
 Require Import Termination.StrictPositivityLemmas.
@@ -78,12 +79,14 @@ Opaque reducible_values.
 Opaque Nat.eq_dec.
 Opaque makeFresh.
 
+(*
 Ltac t_smallstep_infer :=
   match goal with
   | H: small_step ?t1 ?t2, H2: satisfies reducible_values _ ?l |- _ =>
     poseNew (Mark (l) "substitute_value");
     unshelve epose proof (small_step_subst t1 t2 l _ _ _)
   end.
+*)
 
 Ltac unfold_open :=
   repeat step || unfold open_reducible in * || t_instantiate_sat3.
@@ -237,6 +240,7 @@ Proof.
   - apply open_reducible_left; side_conditions.
   - apply open_reducible_right; side_conditions.
   - apply open_reducible_sum_match with y p; side_conditions.
+  - apply open_reducible_tsize with (erase_type A); side_conditions.
 
   (* subtyping *)
   - steps; choose_variables_subtype; side_conditions2.
@@ -269,7 +273,7 @@ Proof.
   - apply reducibility_equivalent_weaken with theta (erase_context gamma) x (erase_type T); side_conditions.
   - eauto using equivalent_trans.
   - apply equivalent_sym; eauto.
-  - apply equivalent_step; apply small_step_subst; eauto with values bwf.
+(*  - apply equivalent_step; apply small_step_subst; eauto with values bwf. *)
   - eapply equivalent_pair_eta; eauto.
   - many_tactics; t_closer.
   - eauto with b_equiv.

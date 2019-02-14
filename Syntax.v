@@ -27,6 +27,8 @@ Fixpoint pfv t tag: set nat :=
 
   | uu => nil
 
+  | tsize t => pfv t tag
+
   | notype_lambda t' => pfv t' tag
   | lambda T t' => pfv T tag ++ pfv t' tag
   | app t1 t2 => pfv t1 tag ++ pfv t2 tag
@@ -148,6 +150,8 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
 
   | uu => t
 
+  | tsize t => tsize (psubstitute t l tag)
+
   | notype_lambda t' => notype_lambda (psubstitute t' l tag)
   | lambda T t' => lambda (psubstitute T l tag) (psubstitute t' l tag)
   | app t1 t2 => app (psubstitute t1 l tag) (psubstitute t2 l tag)
@@ -239,6 +243,8 @@ Fixpoint open (k: nat) (t rep: tree) :=
 
   | uu => t
 
+  | tsize t => tsize (open k t rep)
+
   | pp t1 t2 => pp (open k t1 rep) (open k t2 rep)
   | pi1 t => pi1 (open k t rep)
   | pi2 t => pi2 (open k t rep)
@@ -316,6 +322,8 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | notype_inst t => notype_inst (topen k t rep)
 
   | uu => t
+
+  | tsize t => tsize (topen k t rep)
 
   | pp t1 t2 => pp (topen k t1 rep) (topen k t2 rep)
   | pi1 t => pi1 (topen k t rep)
@@ -395,6 +403,8 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
 
   | uu => t
 
+  | tsize t => tsize (tclose k t x)
+
   | pp t1 t2 => pp (tclose k t1 x) (tclose k t2 x)
   | pi1 t => pi1 (tclose k t x)
   | pi2 t => pi2 (tclose k t x)
@@ -464,6 +474,8 @@ Fixpoint wf t k :=
   | err => True
 
   | uu => True
+
+  | tsize t => wf t k
 
   | notype_lambda t' => wf t' (S k)
   | lambda T t' => wf T k /\ wf t' (S k)
@@ -539,6 +551,8 @@ Fixpoint twf t k :=
   | err => True
 
   | uu => True
+
+  | tsize t => twf t k
 
   | notype_lambda t' => twf t' k
   | lambda T t' => twf T k /\ twf t' k
@@ -620,6 +634,7 @@ Fixpoint twfs (gamma: list (nat * tree)) k :=
 
 Ltac tequality :=
   match goal with
+  | |- tsize _ = tsize _ => f_equal
   | |- app _ _ = app _ _ => f_equal
   | |- pp _ _ = pp _ _ => f_equal
   | |- lambda _ _ = lambda _ _ => f_equal

@@ -60,12 +60,6 @@ Opaque reducible_values.
 Opaque strictly_positive.
 Opaque makeFresh.
 
-Fixpoint build_nat (n: nat): tree :=
-  match n with
-  | 0 => zero
-  | S n => succ (build_nat n)
-  end.
-
 (*
 Definition generalizes T :=
   forall theta t,

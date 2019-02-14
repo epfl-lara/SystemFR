@@ -38,6 +38,8 @@ Inductive tree: Set :=
 
   | uu: tree
 
+  | tsize: tree -> tree
+
   | lambda: tree -> tree -> tree
   | notype_lambda: tree -> tree
   | app: tree -> tree -> tree
@@ -91,6 +93,8 @@ Fixpoint is_annotated_term t :=
   | err => True
 
   | uu => True
+
+  | tsize t => is_annotated_term t
 
   | lambda T t' => is_annotated_type T /\ is_annotated_term t'
   | app t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
@@ -163,6 +167,8 @@ Fixpoint is_erased_term t :=
 
   | uu => True
 
+  | tsize t => is_erased_term t
+
   | notype_lambda t' => is_erased_term t'
   | app t1 t2 => is_erased_term t1 /\ is_erased_term t2
 
@@ -231,6 +237,8 @@ Fixpoint tree_size t :=
 
   | uu => 0
 
+  | tsize t => 1 + tree_size t
+
   | notype_lambda t' => 1 + tree_size t'
   | lambda T t' => 1 + tree_size T + tree_size t'
   | app t1 t2 => 1 + tree_size t1 + tree_size t2
@@ -289,4 +297,10 @@ Fixpoint tree_size t :=
   | T_exists A B => 1 + tree_size A + tree_size B
   | T_abs T => 1 + tree_size T
   | T_rec n T0 Ts => 1 + tree_size n + tree_size T0 + tree_size Ts
+  end.
+
+Fixpoint build_nat (n: nat): tree :=
+  match n with
+  | 0 => zero
+  | S n => succ (build_nat n)
   end.

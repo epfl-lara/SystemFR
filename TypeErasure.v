@@ -14,6 +14,8 @@ Fixpoint erase_term (t: tree): tree :=
 
   | uu => uu
 
+  | tsize t => tsize (erase_term t)
+
   | lambda T t' => notype_lambda (erase_term t')
   | app t1 t2 => app (erase_term t1) (erase_term t2)
 

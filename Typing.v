@@ -443,6 +443,10 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       ->
       has_type tvars gamma (sum_match t tl tr) (T_let t (T_sum A B) T)
 
+| HTSize:
+    forall tvars gamma t A,
+      has_type tvars gamma t A ->
+      has_type tvars gamma (tsize t) T_nat
 
 with is_type: tvar_list -> context -> tree -> Prop :=
 | ITUnit:
@@ -889,6 +893,7 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     are_equal tvars gamma t1 t2 ->
     are_equal tvars gamma t2 t1
 
+(* not sound anymore when using size primitive
 | AEStep: forall tvars gamma t1 t2,
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
@@ -901,6 +906,7 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     is_context tvars gamma ->
     small_step (erase_term t1) (erase_term t2) ->
     are_equal tvars gamma t1 t2
+*)
 
 | AEPairExt: forall tvars gamma t A B,
     has_type tvars gamma t (T_prod A B) ->

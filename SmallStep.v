@@ -1,6 +1,7 @@
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
 Require Import Termination.TypeErasure.
+Require Import Termination.PrimitiveSize.
 
 Inductive is_value: tree -> Prop :=
 | IVUnit: is_value uu
@@ -24,6 +25,12 @@ Fixpoint is_nat_value (t: tree): Prop :=
   | succ t' => is_nat_value t'
   | _ => False
   end.
+
+Lemma is_nat_value_build_nat:
+  forall n, is_nat_value (build_nat n).
+Proof.
+  induction n; steps.
+Qed.
 
 Inductive small_step: tree -> tree -> Prop :=
 (* beta reduction *)
@@ -90,6 +97,9 @@ Inductive small_step: tree -> tree -> Prop :=
     forall v, is_value v ->
          small_step (tunfold (tfold v)) v
 
+| SPBetaSize:
+    forall v, is_value v -> small_step (tsize v) (build_nat (tsize_semantics v))
+
 (* reduction inside terms *)
 | SPTypeInst: forall t1 t2,
     small_step t1 t2 ->
@@ -148,6 +158,10 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPSumMatch: forall t1 t2 tl tr,
     small_step t1 t2 ->
     small_step (sum_match t1 tl tr) (sum_match t2 tl tr)
+
+| SPTSize: forall t1 t2,
+    small_step t1 t2 ->
+    small_step (tsize t1) (tsize t2)
 .
 
 Ltac t_invert_step :=
@@ -157,6 +171,7 @@ Ltac t_invert_step :=
   | H: small_step tfalse _ |- _ => inversion H; clear H
   | H: small_step ttrue _ |- _ => inversion H; clear H
   | H: small_step (succ _) _ |- _ => inversion H; clear H
+  | H: small_step (tsize _) _ |- _ => inversion H; clear H
   | H: small_step (fvar _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_inst _) _ |- _ => inversion H; clear H

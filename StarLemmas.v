@@ -266,3 +266,13 @@ Proof.
 Qed.
 
 Hint Resolve star_smallstep_sum_match: bsteplemmas.
+
+Lemma star_smallstep_tsize:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    star small_step (tsize t1) (tsize t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_tsize: bsteplemmas.
