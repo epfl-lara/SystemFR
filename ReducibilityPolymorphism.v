@@ -27,6 +27,7 @@ Require Import Termination.RedTactics.
 
 Require Import Termination.Freshness.
 
+Require Import Termination.WellFormed.
 Require Import Termination.FVLemmasLists.
 Require Import Termination.WFLemmasLists.
 

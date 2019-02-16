@@ -5,6 +5,7 @@ Require Import Termination.Tactics.
 Require Import Termination.WFLemmas.
 Require Import Termination.StarRelation.
 Require Import Termination.ListUtils.
+Require Import Termination.WellFormed.
 
 Lemma value_irred:
   forall v,
@@ -100,7 +101,7 @@ Qed.
 Lemma star_smallstep_err:
   forall t v,
     star small_step t v ->
-    t = err ->
+    t = notype_err ->
     is_value v ->
     False.
 Proof.
@@ -220,7 +221,7 @@ Hint Resolve star_smallstep_type_inst: bsteplemmas.
 Lemma star_smallstep_fold:
   forall t1 t1',
     star small_step t1 t1' ->
-    star small_step (tfold t1) (tfold t1').
+    star small_step (notype_tfold t1) (notype_tfold t1').
 Proof.
   induction 1; steps; eauto with smallstep.
 Qed.

@@ -13,8 +13,8 @@ Inductive is_value: tree -> Prop :=
 | IVLambda: forall t, is_value (notype_lambda t)
 | IVTypeAbs: forall t, is_value (type_abs t)
 | IVVar: forall x, is_value (fvar x term_var)
-| IVRefl: is_value trefl
-| IVFold: forall v, is_value v -> is_value (tfold v)
+| IVRefl: is_value notype_trefl
+| IVFold: forall v, is_value v -> is_value (notype_tfold v)
 | IVLeft: forall v, is_value v -> is_value (tleft v)
 | IVRight: forall v, is_value v -> is_value (tright v)
 .
@@ -73,8 +73,10 @@ Inductive small_step: tree -> tree -> Prop :=
       (notype_rec (succ v) t0 ts)
       (open 0 (open 1 ts v) (notype_lambda (notype_rec v t0 ts)))
 
+(* `notype_tfix` has a dummy hole which is used for type annotation in the `tfix` tree.
+   During evaluation, we fill it with a zero *)
 | SPBetaFix: forall ts,
-    small_step (notype_tfix ts) (open 0 ts (notype_lambda (notype_tfix ts)))
+    small_step (notype_tfix ts) (open 0 (open 1 ts zero) (notype_lambda (notype_tfix ts)))
 
 | SPBetaMatch0: forall t0 ts,
     small_step
@@ -95,7 +97,7 @@ Inductive small_step: tree -> tree -> Prop :=
 
 | SPBetaFold:
     forall v, is_value v ->
-         small_step (tunfold (tfold v)) v
+         small_step (tunfold (notype_tfold v)) v
 
 | SPBetaSize:
     forall v, is_value v -> small_step (tsize v) (build_nat (tsize_semantics v))
@@ -144,7 +146,7 @@ Inductive small_step: tree -> tree -> Prop :=
 
 | SPFold: forall t1 t2,
     small_step t1 t2 ->
-    small_step (tfold t1) (tfold t2)
+    small_step (notype_tfold t1) (notype_tfold t2)
 | SPUnfold: forall t1 t2,
     small_step t1 t2 ->
     small_step (tunfold t1) (tunfold t2)
@@ -166,7 +168,9 @@ Inductive small_step: tree -> tree -> Prop :=
 
 Ltac t_invert_step :=
   match goal with
-  | H: small_step err _ |- _ => inversion H
+  | H: small_step notype_err _ |- _ => inversion H
+  | H: small_step notype_trefl _ |- _ => inversion H
+  | H: small_step (err _) _ |- _ => inversion H
   | H: small_step zero _ |- _ => inversion H; clear H
   | H: small_step tfalse _ |- _ => inversion H; clear H
   | H: small_step ttrue _ |- _ => inversion H; clear H
@@ -175,13 +179,17 @@ Ltac t_invert_step :=
   | H: small_step (fvar _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_inst _) _ |- _ => inversion H; clear H
-  | H: small_step (tfold _) _ |- _ => inversion H; clear H
+  | H: small_step (notype_tfold _) _ |- _ => inversion H; clear H
+  | H: small_step (tfold _ _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold _) _ |- _ => inversion H; clear H
   | H: small_step (type_abs _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_lambda _) _ |- _ => inversion H; clear H
   | H: small_step (lambda _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_rec _ _ _) _ |- _ => inversion H; clear H
+  | H: small_step (tmatch _ _ _) _ |- _ => inversion H; clear H
+  | H: small_step (notype_tfix _) _ |- _ => inversion H; clear H
+  | H: small_step (tfix _ _) _ |- _ => inversion H; clear H
   | H: small_step (rec _ _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pp _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_tlet _ _) _ |- _ => inversion H; clear H

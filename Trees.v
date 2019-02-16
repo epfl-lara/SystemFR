@@ -34,7 +34,8 @@ Inductive tree: Set :=
   | T_rec: tree -> tree -> tree -> tree
 
   (* terms *)
-  | err: tree
+  | err: tree -> tree
+  | notype_err: tree
 
   | uu: tree
 
@@ -43,6 +44,8 @@ Inductive tree: Set :=
   | lambda: tree -> tree -> tree
   | notype_lambda: tree -> tree
   | app: tree -> tree -> tree
+
+  | forall_inst: tree -> tree -> tree
 
   | pp: tree -> tree -> tree
   | pi1: tree -> tree
@@ -68,14 +71,16 @@ Inductive tree: Set :=
   | type_inst: tree -> tree -> tree
   | notype_inst: tree -> tree
 
-  | tfold: tree -> tree
+  | notype_tfold: tree -> tree
+  | tfold: tree -> tree -> tree
   | tunfold: tree -> tree
 
   | tright: tree -> tree
   | tleft: tree -> tree
   | sum_match: tree -> tree -> tree -> tree
 
-  | trefl: tree
+  | notype_trefl: tree
+  | trefl: tree -> tree -> tree
 .
 
 Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
@@ -90,7 +95,8 @@ Fixpoint is_annotated_term t :=
   match t with
   | fvar y term_var => True
   | lvar _ term_var => True
-  | err => True
+  | err T => is_annotated_type T
+  | notype_err => True
 
   | uu => True
 
@@ -98,6 +104,8 @@ Fixpoint is_annotated_term t :=
 
   | lambda T t' => is_annotated_type T /\ is_annotated_term t'
   | app t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
+
+  | forall_inst t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
 
   | type_abs t => is_annotated_term t
   | type_inst t T => is_annotated_term t /\ is_annotated_type T
@@ -118,12 +126,11 @@ Fixpoint is_annotated_term t :=
   | tmatch t' t0 ts => is_annotated_term t' /\ is_annotated_term t0 /\ is_annotated_term ts
 
   | tfix T t' => is_annotated_type T /\ is_annotated_term t'
-  | notype_tfix t' => is_annotated_term t'
 
   | tlet t1 A t2 => is_annotated_term t1 /\ is_annotated_type A /\ is_annotated_term t2
-  | trefl => True
+  | trefl t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
 
-  | tfold t => is_annotated_term t
+  | tfold T t => is_annotated_type T /\ is_annotated_term t
   | tunfold t => is_annotated_term t
 
   | tleft t => is_annotated_term t
@@ -163,7 +170,7 @@ Fixpoint is_erased_term t :=
     match t with
   | fvar y term_var => True
   | lvar _ term_var => True
-  | err => True
+  | notype_err => True
 
   | uu => True
 
@@ -188,12 +195,12 @@ Fixpoint is_erased_term t :=
   | notype_tfix t' => is_erased_term t'
 
   | notype_tlet t1 t2 => is_erased_term t1 /\ is_erased_term t2
-  | trefl => True
+  | notype_trefl => True
 
   | type_abs t => is_erased_term t
   | notype_inst t => is_erased_term t
 
-  | tfold t => is_erased_term t
+  | notype_tfold t => is_erased_term t
   | tunfold t => is_erased_term t
 
   | tleft t => is_erased_term t
@@ -233,7 +240,8 @@ Fixpoint tree_size t :=
   match t with
   | fvar _ _ => 0
   | lvar _ _ => 0
-  | err => 0
+  | err t => 1 + tree_size t
+  | notype_err => 0
 
   | uu => 0
 
@@ -242,6 +250,8 @@ Fixpoint tree_size t :=
   | notype_lambda t' => 1 + tree_size t'
   | lambda T t' => 1 + tree_size T + tree_size t'
   | app t1 t2 => 1 + tree_size t1 + tree_size t2
+
+  | forall_inst t1 t2 => 1 + tree_size t1 + tree_size t2
 
   | pp t1 t2 => 1 + tree_size t1 + tree_size t2
   | pi1 t' => 1 + tree_size t'
@@ -266,13 +276,15 @@ Fixpoint tree_size t :=
 
   | notype_tlet t1 t2 => 1 + tree_size t1 + tree_size t2
   | tlet t1 A t2 => 1 + tree_size t1 + tree_size A + tree_size t2
-  | trefl => 0
+  | notype_trefl => 0
+  | trefl t1 t2 => 1 + tree_size t1 + tree_size t2
 
   | type_abs t => 1 + tree_size t
   | type_inst t T => 1 + tree_size t + tree_size T
   | notype_inst t => 1 + tree_size t
 
-  | tfold t => 1 + tree_size t
+  | notype_tfold t => 1 + tree_size t
+  | tfold T t => 1 + tree_size T + tree_size t
   | tunfold t => 1 + tree_size t
 
   | tright t => 1 + tree_size t

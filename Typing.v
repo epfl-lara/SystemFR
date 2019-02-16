@@ -9,6 +9,8 @@ Require Import Termination.AssocList.
 Require Import Termination.SmallStep.
 Require Import Termination.TypeErasure.
 Require Import Termination.StrictPositivity.
+Require Import Termination.WellFormed.
+Require Import Termination.NatUtils.
 
 Open Scope list_scope.
 
@@ -64,6 +66,12 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       is_type tvars gamma V ->
       has_type tvars gamma (type_inst t V) (topen 0 U V)
 
+| HTForallInst:
+    forall tvars gamma t1 t2 U V,
+      has_type tvars gamma t1 (T_forall U V) ->
+      has_type tvars gamma t2 U ->
+      has_type tvars gamma (forall_inst t1 t2) (T_let t2 U V)
+
 | HTPair:
     forall tvars gamma A B t1 t2,
       has_type tvars gamma t1 A ->
@@ -112,7 +120,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
     forall tvars gamma T,
       is_type tvars gamma T ->
       are_equal tvars gamma tfalse ttrue ->
-      has_type tvars gamma err T_bot
+      has_type tvars gamma (err T) T
 
 | HTZero:
     forall tvars gamma,
@@ -159,23 +167,22 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma (rec T tn t0 ts) (T_let tn T_nat T)
 
 | HTFix:
-    forall tvars gamma tn ts T n y p,
+    forall tvars gamma ts T n y p,
       ~(n ∈ fv_context gamma) ->
       ~(y ∈ fv_context gamma) ->
       ~(p ∈ fv_context gamma) ->
       ~(n ∈ fv T) ->
       ~(n ∈ fv ts) ->
-      ~(n ∈ fv tn) ->
       ~(y ∈ fv T) ->
       ~(y ∈ fv ts) ->
       ~(p ∈ fv T) ->
       ~(p ∈ fv ts) ->
-      ~(p ∈ fv tn) ->
       ~(n ∈ tvars) ->
       ~(y ∈ tvars) ->
       ~(p ∈ tvars) ->
       NoDup (n :: y :: p :: nil) ->
-      has_type tvars gamma tn T_nat ->
+      wf (erase_term ts) 1 ->
+      is_context tvars gamma ->
       is_type tvars ((n,T_nat) :: gamma) (open 0 T (term_fvar n)) ->
       has_type tvars (
         (p, T_equal (term_fvar y) (lambda T_unit (tfix T ts))) ::
@@ -183,15 +190,15 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
         (n, T_nat) ::
         gamma
       )
-        (open 0 ts (term_fvar y))
+        (open 0 (open 1 ts (fvar n term_var)) (term_fvar y))
         (open 0 T (succ (term_fvar n)))
       ->
       has_type tvars
                ((y, T_top) :: gamma)
-               (open 0 ts (fvar y term_var))
+               (open 0 (open 1 ts zero) (fvar y term_var))
                (open 0 T zero)
       ->
-      has_type tvars gamma (tfix T ts) (T_let tn T_nat T)
+      has_type tvars gamma (tfix T ts) (T_forall T_nat T)
 
 | HTMatch:
     forall tvars gamma tn t0 ts T n p,
@@ -290,7 +297,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
 | HTRefl:
     forall tvars gamma t1 t2,
       are_equal tvars gamma t1 t2 ->
-      has_type tvars gamma trefl (T_equal t1 t2)
+      has_type tvars gamma (trefl t1 t2) (T_equal t1 t2)
 
 | HTForall:
     forall tvars gamma t A U V x,
@@ -320,7 +327,17 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       ->
       has_type tvars gamma (tlet p (T_exists U V) t) T
 
-| HTUnfold:
+| HTUnfoldZ:
+    forall tvars gamma t n T0 Ts,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      are_equal tvars gamma n zero ->
+      has_type tvars gamma t (T_rec n T0 Ts) ->
+      has_type tvars gamma (tunfold t) T0
+
+| HTUnfoldS:
     forall tvars gamma t n T0 Ts,
       is_annotated_term n ->
       wf n 0 ->
@@ -328,11 +345,25 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       wf Ts 0 ->
       twf T0 0 ->
       twf Ts 1 ->
-      has_type tvars gamma t (T_rec (succ n) T0 Ts) ->
-      has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts))
+      are_equal tvars gamma (spositive n) ttrue ->
+      has_type tvars gamma t (T_rec n T0 Ts) ->
+      has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec (tpred n) T0 Ts))
 
 | HTFold:
-    forall tvars gamma t n T0 Ts,
+    forall tvars gamma t n pn T0 Ts p,
+      ~(p ∈ tvars) ->
+      ~(p ∈ support gamma) ->
+      ~(p ∈ fv t) ->
+      ~(p ∈ fv n) ->
+      ~(p ∈ fv T0) ->
+      ~(p ∈ fv Ts) ->
+      ~(pn ∈ tvars) ->
+      ~(pn ∈ support gamma) ->
+      ~(pn ∈ fv t) ->
+      ~(pn ∈ fv n) ->
+      ~(pn ∈ fv T0) ->
+      ~(pn ∈ fv Ts) ->
+      ~(p = pn) ->
       wf n 0 ->
       twf n 0 ->
       wf T0 0 ->
@@ -346,30 +377,12 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       is_annotated_type T0 ->
       is_annotated_type Ts ->
       has_type tvars gamma n T_nat ->
-      has_type tvars gamma t (topen 0 Ts (T_rec n T0 Ts)) ->
-      has_type tvars gamma (tfold t) (T_rec (succ n) T0 Ts)
-
-| HTUnfoldZ:
-    forall tvars gamma t T0 Ts,
-      wf T0 0 ->
-      wf Ts 0 ->
-      twf T0 0 ->
-      twf Ts 1 ->
-      has_type tvars gamma t (T_rec zero T0 Ts) ->
-      has_type tvars gamma (tunfold t) T0
-
-| HTFoldZ:
-    forall tvars gamma t T0 Ts,
-      wf T0 0 ->
-      twf T0 0 ->
-      wf Ts 0 ->
-      twf Ts 1 ->
-      subset (fv T0) (support gamma) ->
-      subset (fv Ts) (support gamma) ->
-      is_annotated_type T0 ->
-      is_annotated_type Ts ->
-      has_type tvars gamma t T0 ->
-      has_type tvars gamma (tfold t) (T_rec zero T0 Ts)
+      has_type tvars ((p, T_equal n zero) :: gamma) t T0 ->
+      has_type tvars
+               ((p, T_equal n (succ (fvar pn term_var))) :: (pn, T_nat) :: gamma)
+               t
+               (topen 0 Ts (T_rec (fvar pn term_var) T0 Ts)) ->
+      has_type tvars gamma (tfold (T_rec n T0 Ts) t) (T_rec n T0 Ts)
 
 | HTUnfoldGen:
     forall tvars gamma t T0 Ts X,
@@ -396,7 +409,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       is_subtype tvars gamma (topen 0 Ts (T_rec zero T0 Ts)) T0 ->
       strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
       has_type tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
-      has_type tvars gamma (tfold t) (intersect T0 Ts)
+      has_type tvars gamma (tfold (intersect T0 Ts) t) (intersect T0 Ts)
 
 | HTLeft:
     forall tvars gamma t A B,
@@ -942,9 +955,17 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     are_equal tvars gamma u' v' ->
     are_equal tvars gamma (pp u u') (pp v v')
 
-| AEFold: forall tvars gamma u v,
+| AEFold: forall tvars gamma u v T1 T2,
+    wf T1 0 ->
+    wf T2 0 ->
+    twf T1 0 ->
+    twf T2 0 ->
+    subset (fv T1) (support gamma) ->
+    subset (fv T2) (support gamma) ->
+    is_annotated_type T1 ->
+    is_annotated_type T2 ->
     are_equal tvars gamma u v ->
-    are_equal tvars gamma (tfold u) (tfold v)
+    are_equal tvars gamma (tfold T1 u) (tfold T2 v)
 
 | AEUnfold: forall tvars gamma u v,
     are_equal tvars gamma u v ->
@@ -954,9 +975,17 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
     has_type tvars gamma p (T_equal t1 t2) ->
     are_equal tvars gamma t1 t2
 
-| AEProof: forall tvars gamma p t1 t2,
+| AEProof: forall tvars gamma p t1 t2 t3 t4,
+    wf t3 0 ->
+    wf t4 0 ->
+    twf t3 0 ->
+    twf t4 0 ->
+    subset (fv t3) (support gamma) ->
+    subset (fv t4) (support gamma) ->
+    is_annotated_term t3 ->
+    is_annotated_term t4 ->
     has_type tvars gamma p (T_equal t1 t2) ->
-    are_equal tvars gamma p trefl
+    are_equal tvars gamma p (trefl t3 t4)
 
 | AEIte:
     forall tvars gamma t1 t2 t3 t x,
@@ -1056,9 +1085,9 @@ with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
       are_equal tvars (gamma1 ++ gamma2) t t'
 
 | AEError:
-    forall tvars gamma e T,
-      has_type tvars gamma e T ->
-      are_equal tvars gamma err e ->
+    forall tvars gamma e T1 T2,
+      has_type tvars gamma e T1 ->
+      are_equal tvars gamma (err T2) e ->
       are_equal tvars gamma ttrue tfalse
 
 | AESplitIte:
@@ -1181,7 +1210,6 @@ Scheme mut_has_type        := Induction for has_type    Sort Prop
 
 Combined Scheme mut_HT_IT_IC_IS_AE from
          mut_has_type, mut_is_type, mut_is_context, mut_is_subtype, mut_are_equal.
-
 
 Ltac t_invert_context :=
   match goal with

@@ -11,6 +11,8 @@ Require Import Termination.ErasedTermLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
+
 Require Import Termination.AssocList.
 
 Require Import Coq.Lists.List.

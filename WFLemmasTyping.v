@@ -11,6 +11,7 @@ Require Import Termination.Sets.
 Require Import Termination.TermList.
 Require Import Termination.ListUtils.
 Require Import Termination.Freshness.
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmasEval.
 
 Open Scope list_scope.

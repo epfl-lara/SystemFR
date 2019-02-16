@@ -8,6 +8,7 @@ Require Import Termination.Sets.
 Require Import Termination.ListUtils.
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
+Require Import Termination.WellFormed.
 
 Open Scope string_scope.
 Open Scope list_scope.

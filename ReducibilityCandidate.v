@@ -5,6 +5,7 @@ Require Import Termination.SmallStep.
 Require Import Termination.AssocList.
 Require Import Termination.TypeErasureLemmas.
 Require Import Termination.ErasedTermLemmas.
+Require Import Termination.WellFormed.
 
 Require Import PeanoNat.
 

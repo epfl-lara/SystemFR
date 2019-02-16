@@ -26,6 +26,7 @@ Require Import Termination.TermListLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -99,10 +100,10 @@ Proof.
 
   destruct t'0; steps.
 
-  - unshelve epose proof (H29 (l1 ++ (x,trefl) :: (y,trefl) :: lterms) _);
+  - unshelve epose proof (H29 (l1 ++ (x, notype_trefl) :: (y, notype_trefl) :: lterms) _);
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
-  - unshelve epose proof (H30 (l1 ++ (x,trefl) :: (y,trefl) :: (v,t'0) :: lterms) _);
+  - unshelve epose proof (H30 (l1 ++ (x, notype_trefl) :: (y, notype_trefl) :: (v,t'0) :: lterms) _);
       clear H29; clear H30; repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
 Qed.

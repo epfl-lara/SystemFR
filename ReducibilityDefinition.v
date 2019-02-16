@@ -13,6 +13,8 @@ Require Import Termination.Equivalence.
 Require Import Termination.StarInversions.
 Require Import Termination.TermList.
 Require Import Termination.TypeErasure.
+Require Import Termination.WellFormed.
+Require Import Termination.StarRelation.
 
 Require Import Termination.ReducibilityMeasure.
 Require Import Termination.ReducibilityCandidate.
@@ -129,7 +131,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
     closed_value v /\
     is_erased_term t1 /\
     is_erased_term t2 /\
-    v = trefl /\
+    v = notype_trefl /\
     equivalent t1 t2;
 
   reducible_values theta v (T_forall A B) :=
@@ -147,9 +149,9 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
   reducible_values theta v (T_rec n T0 Ts) :=
     closed_value v /\
     is_erased_term n /\ (
-      (exists v', v = tfold v' /\ star small_step n zero /\ reducible_values theta v' T0) \/
+      (exists v', v = notype_tfold v' /\ star small_step n zero /\ reducible_values theta v' T0) \/
       (exists n' v' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
-         v = tfold v' /\
+         v = notype_tfold v' /\
          ~(X ∈ pfv T0 type_var) /\
          ~(X ∈ pfv Ts type_var) /\
          ~(X ∈ support theta) /\
@@ -252,7 +254,11 @@ Ltac simp_red :=
     rewrite reducible_values_equation_48 in * ||
     rewrite reducible_values_equation_49 in * ||
     rewrite reducible_values_equation_50 in * ||
-    rewrite reducible_values_equation_51 in *
+    rewrite reducible_values_equation_51 in * ||
+    rewrite reducible_values_equation_52 in * ||
+    rewrite reducible_values_equation_53 in * ||
+    rewrite reducible_values_equation_54 in * ||
+    rewrite reducible_values_equation_55 in *
   ).
 
 Ltac top_level_unfold :=

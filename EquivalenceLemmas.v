@@ -275,9 +275,7 @@ Lemma equivalent_match_zero:
     star small_step n zero ->
     equivalent (tmatch n e1 e2) e1.
 Proof.
-  unfold equivalent in *; repeat step || t_invert_star || t_deterministic_star;
-    eauto using star_smallstep_trans with bsteplemmas smallstep.
-  eapply star_many_steps; try eassumption; eauto using value_irred;
+  unfold equivalent in *; repeat step || t_deterministic_star || t_invert_star;
     eauto using star_smallstep_trans with bsteplemmas smallstep.
 Qed.
 
@@ -302,8 +300,6 @@ Lemma equivalent_match_succ:
 Proof.
   unfold equivalent in *; repeat step || t_invert_star || t_deterministic_star;
     eauto using star_smallstep_trans with bsteplemmas smallstep.
-  eapply star_many_steps; try eassumption; eauto using value_irred;
-    eauto using star_smallstep_trans with bsteplemmas smallstep.
 Qed.
 
 Hint Resolve equivalent_match_succ: b_equiv.
@@ -324,7 +320,7 @@ Hint Resolve equivalent_match_succ2: b_equiv.
 Lemma equivalent_tfold_congr:
   forall t t',
     equivalent t t' ->
-    equivalent (tfold t) (tfold t').
+    equivalent (notype_tfold t) (notype_tfold t').
 Proof.
   unfold equivalent in *; repeat step || t_invert_star;
     eauto 7 using star_smallstep_trans with bsteplemmas smallstep.
@@ -339,10 +335,10 @@ Lemma equivalent_tunfold_congr:
 Proof.
   unfold equivalent in *; repeat step || t_invert_star.
 
-  - apply star_smallstep_trans with (tunfold (tfold v));
+  - apply star_smallstep_trans with (tunfold (notype_tfold v));
       eauto with smallstep;
       eauto with bsteplemmas values.
-  - apply star_smallstep_trans with (tunfold (tfold v));
+  - apply star_smallstep_trans with (tunfold (notype_tfold v));
       eauto with smallstep;
       eauto with bsteplemmas values.
 Qed.

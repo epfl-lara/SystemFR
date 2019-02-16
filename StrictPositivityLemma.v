@@ -17,6 +17,7 @@ Require Import Termination.OpenTOpen.
 
 Require Import Termination.SizeLemmas.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
 Require Import Termination.ErasedTermLemmas.

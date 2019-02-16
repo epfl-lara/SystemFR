@@ -26,6 +26,9 @@ Require Import Termination.TypeErasureLemmas.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
+Require Import Termination.NatUtils.
+
+Require Import Termination.WellFormed.
 
 Require Import Termination.Sets.
 Require Import Termination.SetLemmas.
@@ -201,6 +204,7 @@ Proof.
   - apply open_reducible_app; auto.
   - apply open_reducible_type_abs with X; eauto; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_inst; side_conditions.
+  - apply open_reducible_forall_inst; side_conditions.
   - eapply open_reducible_pp; auto.
   - eapply open_reducible_pi1; eauto.
   - eapply open_reducible_pi2; auto.
@@ -212,7 +216,8 @@ Proof.
   - apply open_reducible_zero.
   - apply open_reducible_succ; auto.
   - choose_variables; side_conditions.
-  - apply open_reducible_fix with n y p; side_conditions.
+  - apply open_reducible_fix with n y p;
+      repeat side_conditions || rewrite (open_none (erase_term ts) 1) in *.
   - choose_variables; side_conditions.
   - choose_variables; side_conditions.
   - unfold_open; tac1; eauto using reducible_values_exprs.
@@ -224,10 +229,9 @@ Proof.
   - apply open_reducible_refl; side_conditions.
   - apply open_reducible_forall with x (erase_type A); steps; side_conditions.
   - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
-  - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold; side_conditions.
-  - apply open_reducible_fold; side_conditions.
-  - repeat step || t_annotations. apply open_reducible_unfold_zero with (erase_type Ts); side_conditions.
-  - apply open_reducible_fold_zero; side_conditions.
+  - apply open_reducible_unfold_zero2 with (erase_type Ts) (erase_term n); side_conditions.
+  - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold2; unfold spositive; side_conditions.
+  - apply open_reducible_fold2 with p pn; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations.
     apply open_reducible_unfold_gen with X; side_conditions.
     change (fvar X type_var) with (erase_type (fvar X type_var)).

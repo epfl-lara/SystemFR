@@ -7,6 +7,7 @@ Require Import Termination.SmallStep.
 Require Import Termination.StarRelation.
 Require Import Termination.SubstitutionLemmas.
 Require Import Termination.PrimitiveSize.
+Require Import Termination.WellFormed.
 
 Lemma is_erased_term_twf:
   forall t k,

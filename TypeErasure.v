@@ -4,13 +4,15 @@ Require Import Termination.Syntax.
 Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 
+Require Import Coq.Strings.String.
+
 Open Scope list_scope.
 
 Fixpoint erase_term (t: tree): tree :=
   match t with
   | fvar y term_var => t
   | lvar y term_var => t
-  | err => err
+  | err T => notype_err
 
   | uu => uu
 
@@ -18,6 +20,8 @@ Fixpoint erase_term (t: tree): tree :=
 
   | lambda T t' => notype_lambda (erase_term t')
   | app t1 t2 => app (erase_term t1) (erase_term t2)
+
+  | forall_inst t1 t2 => erase_term t1
 
   | pp t1 t2 => pp (erase_term t1) (erase_term t2)
   | pi1 t' => pi1 (erase_term t')
@@ -33,14 +37,14 @@ Fixpoint erase_term (t: tree): tree :=
   | tmatch t' t0 ts => tmatch (erase_term t') (erase_term t0) (erase_term ts)
 
   | tlet t1 A t2 => notype_tlet (erase_term t1) (erase_term t2)
-  | trefl => trefl
+  | trefl t1 t2 => notype_trefl
 
   | type_abs t => type_abs (erase_term t)
   | type_inst t T => notype_inst (erase_term t)
 
   | tfix T t => notype_tfix (erase_term t)
 
-  | tfold t' => tfold (erase_term t')
+  | tfold T t' => notype_tfold (erase_term t')
   | tunfold t' => tunfold (erase_term t')
 
   | tleft t' => tleft (erase_term t')
@@ -95,3 +99,19 @@ Program Fixpoint erase_context (l: list (nat * tree)): list (nat * tree) :=
 
 Hint Resolve erase_term_erased: berased.
 Hint Resolve erase_type_erased: berased.
+
+Lemma tree_size_erase:
+  forall t, tree_size (erase_term t) <= tree_size t.
+Proof.
+  induction t; steps; eauto with omega.
+Qed.
+
+Ltac t_tree_size_erase :=
+  match goal with
+  | |- context[tree_size (erase_term ?t)] =>
+    poseNew (Mark 0 "tree_size");
+    pose proof (tree_size_erase t)
+  | H: context[tree_size (erase_term ?t)] |- _ =>
+    poseNew (Mark 0 "tree_size");
+    pose proof (tree_size_erase t)
+  end.

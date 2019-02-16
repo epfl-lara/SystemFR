@@ -5,6 +5,7 @@ Require Import Termination.SmallStep.
 Require Import Termination.ListUtils.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
+Require Import Termination.StarRelation.
 
 Require Import Coq.Strings.String.
 

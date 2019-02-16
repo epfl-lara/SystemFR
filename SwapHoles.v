@@ -2,6 +2,7 @@ Require Import Termination.Syntax.
 Require Import Termination.Tactics.
 Require Import Termination.TWFLemmas.
 Require Import Termination.ErasedTermLemmas.
+Require Import Termination.WellFormed.
 
 Require Import PeanoNat.
 Require Import Omega.
@@ -18,11 +19,15 @@ Fixpoint swap_type_holes t i j :=
     then lvar i type_var
     else t
   | lvar k term_var => t
-  | err => t
+
+  | notype_err => t
+  | err T => err (swap_type_holes T i j)
 
   | notype_lambda t' => notype_lambda (swap_type_holes t' i j)
   | lambda T t' => lambda (swap_type_holes T i j) (swap_type_holes t' i j)
   | app t1 t2 => app (swap_type_holes t1 i j) (swap_type_holes t2 i j)
+
+  | forall_inst t1 t2 => forall_inst (swap_type_holes t1 i j) (swap_type_holes t2 i j)
 
   | type_abs t => type_abs (swap_type_holes t (S i) (S j))
   | type_inst t T => type_inst (swap_type_holes t i j) (swap_type_holes T i j)
@@ -64,9 +69,12 @@ Fixpoint swap_type_holes t i j :=
       notype_tlet (swap_type_holes t1 i j) (swap_type_holes t2 i j)
   | tlet t1 T t2 =>
       tlet (swap_type_holes t1 i j) (swap_type_holes T i j) (swap_type_holes t2 i j)
-  | trefl => t
 
-  | tfold t => tfold (swap_type_holes t i j)
+  | trefl t1 t2 => trefl (swap_type_holes t1 i j) (swap_type_holes t2 i j)
+  | notype_trefl => t
+
+  | notype_tfold t => notype_tfold (swap_type_holes t i j)
+  | tfold T t => tfold (swap_type_holes T i j) (swap_type_holes t i j)
   | tunfold t => tunfold (swap_type_holes t i j)
 
   | tleft t' => tleft (swap_type_holes t' i j)

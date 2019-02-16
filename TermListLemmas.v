@@ -9,6 +9,7 @@ Require Import Termination.AssocList.
 Require Import Termination.TermList.
 Require Import Termination.ListUtils.
 Require Import Termination.SubstitutionLemmas.
+Require Import Termination.WellFormed.
 
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.

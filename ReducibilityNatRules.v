@@ -29,6 +29,7 @@ Require Import Termination.EquivalenceLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -183,10 +184,10 @@ Proof.
     eauto with berased.
 
   - (* zero *)
-    unshelve epose proof (H14 theta ((p,trefl) :: lterms) _ _ _); tac1.
+    unshelve epose proof (H14 theta ((p, notype_trefl) :: lterms) _ _ _); tac1.
 
   - (* successor *)
-    unshelve epose proof (H15 theta ((p,trefl) :: (n,n0) :: lterms) _ _ _); tac1.
+    unshelve epose proof (H15 theta ((p, notype_trefl) :: (n,n0) :: lterms) _ _ _); tac1.
 Qed.
 
 Lemma reducible_rec_induction:
@@ -312,6 +313,6 @@ Proof.
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  unshelve epose proof (H21 theta ((p,trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
+  unshelve epose proof (H21 theta ((p, notype_trefl) :: (y, tx) :: (n, n0) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 Qed.

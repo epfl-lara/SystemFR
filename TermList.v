@@ -9,6 +9,7 @@ Require Import Termination.Tactics.
 Require Import Termination.ListUtils.
 Require Import Termination.FVLemmas.
 Require Import Termination.SubstitutionLemmas.
+Require Import Termination.WellFormed.
 
 Open Scope list_scope.
 

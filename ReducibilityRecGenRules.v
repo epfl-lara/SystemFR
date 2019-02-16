@@ -41,6 +41,7 @@ Require Import Termination.RedTactics.
 
 Require Import Termination.Freshness.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.FVLemmasLists.
 Require Import Termination.WFLemmasLists.
@@ -95,7 +96,7 @@ Lemma fold_in_intersect:
     wf Ts 0 ->
     valid_interpretation theta ->
     reducible_values theta t (intersect T0 Ts) ->
-    exists v, closed_value v /\ t = tfold v.
+    exists v, closed_value v /\ t = notype_tfold v.
 Proof.
   unfold intersect;
     repeat match goal with
@@ -140,7 +141,7 @@ Lemma reducible_values_unfold_gen:
     is_erased_type T0 ->
     is_erased_type Ts ->
     valid_interpretation theta ->
-    reducible_values theta (tfold v) (intersect T0 Ts) ->
+    reducible_values theta (notype_tfold v) (intersect T0 Ts) ->
     reducible_values theta v (topen 0 Ts (intersect T0 Ts)).
 Proof.
   unfold intersect in *; repeat step.
@@ -245,7 +246,7 @@ Lemma reducible_values_fold_gen:
         reducible_values theta v (topen 0 Ts (T_rec zero T0 Ts)) ->
         reducible_values theta v T0) ->
     reducible_values theta v (topen 0 Ts (intersect T0 Ts)) ->
-    reducible_values theta (tfold v) (intersect T0 Ts).
+    reducible_values theta (notype_tfold v) (intersect T0 Ts).
 Proof.
   unfold intersect in *; repeat step.
   simp reducible_values; repeat step || (rewrite open_none in * by steps); try solve [ t_closing ].
@@ -295,11 +296,11 @@ Lemma reducible_fold_gen:
         reducible_values theta v (topen 0 Ts (T_rec zero T0 Ts)) ->
         reducible_values theta v T0) ->
     reducible theta t (topen 0 Ts (intersect T0 Ts)) ->
-    reducible theta (tfold t) (intersect T0 Ts).
+    reducible theta (notype_tfold t) (intersect T0 Ts).
 Proof.
   unfold reducible, reduces_to;
     repeat step.
-  exists (tfold t'); repeat step;
+  exists (notype_tfold t'); repeat step;
     try solve [ t_closing ];
     eauto using reducible_values_fold_gen;
     eauto with bsteplemmas.
@@ -327,7 +328,7 @@ Lemma open_reducible_fold_gen:
                                            (psubstitute Ts l term_var))) ->
             reducible_values theta v (psubstitute T0 l term_var))) ->
     open_reducible tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
-    open_reducible tvars gamma (tfold t) (intersect T0 Ts).
+    open_reducible tvars gamma (notype_tfold t) (intersect T0 Ts).
 Proof.
   unfold open_reducible; steps.
   apply reducible_fold_gen with X;

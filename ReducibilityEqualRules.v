@@ -59,7 +59,7 @@ Lemma equivalent_error:
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
     support theta = tvars ->
-    equivalent err (substitute t l) ->
+    equivalent notype_err (substitute t l) ->
     False.
 Proof.
   repeat step || t_instantiate_sat2 || unfold reducible, reduces_to, equivalent in *;
@@ -87,8 +87,8 @@ Lemma equivalent_split_bool:
     equivalent (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || simp_red || t_sat_cut || t_instantiate_sat3.
-  - unshelve epose proof (H8 (l1 ++ (x,trefl) :: l2) _); tac1.
-  - unshelve epose proof (H9 (l1 ++ (x,trefl) :: l2) _); tac1.
+  - unshelve epose proof (H8 (l1 ++ (x,notype_trefl) :: l2) _); tac1.
+  - unshelve epose proof (H9 (l1 ++ (x,notype_trefl) :: l2) _); tac1.
 Qed.
 
 Lemma equivalent_split_nat:
@@ -123,8 +123,8 @@ Proof.
     repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
   destruct t'0; steps.
 
-  - unshelve epose proof (H14 (l1 ++ (x,trefl) :: l2) _); tac1.
-  - unshelve epose proof (H15 (l1 ++ (x,trefl) :: (y, t'0) :: l2) _); tac1.
+  - unshelve epose proof (H14 (l1 ++ (x,notype_trefl) :: l2) _); tac1.
+  - unshelve epose proof (H15 (l1 ++ (x,notype_trefl) :: (y, t'0) :: l2) _); tac1.
 Qed.
 
 Lemma equivalent_pair_eta:
@@ -166,8 +166,8 @@ Lemma reducible_equivalent_ite:
      repeat step || apply equivalent_ite || t_instantiate_sat3 || simp_red ||
             t_deterministic_star || unfold reducible, reduces_to in *.
 
-   - unshelve epose proof (H8 ((x,trefl) :: l) _); tac1.
-   - unshelve epose proof (H9 ((x,trefl) :: l) _); tac1.
+   - unshelve epose proof (H8 ((x, notype_trefl) :: l) _); tac1.
+   - unshelve epose proof (H9 ((x, notype_trefl) :: l) _); tac1.
 Qed.
 
 Lemma reducible_equivalent_match:
@@ -199,8 +199,8 @@ Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_match; eauto; steps.
 
-  - unshelve epose proof (H12 ((p,trefl) :: l) _); tac1.
-  - unshelve epose proof (H13 ((p,trefl) :: (n,v') :: l) _); tac1.
+  - unshelve epose proof (H12 ((p,notype_trefl) :: l) _); tac1.
+  - unshelve epose proof (H13 ((p,notype_trefl) :: (n,v') :: l) _); tac1.
 Qed.
 
 Lemma reducible_equivalent_rec:
@@ -238,6 +238,6 @@ Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_rec; eauto; steps.
 
-  - unshelve epose proof (H13 ((p,trefl) :: l) _); tac1.
-  - unshelve epose proof (H14 ((p,trefl) :: (n,v') :: l) _); tac1.
+  - unshelve epose proof (H13 ((p,notype_trefl) :: l) _); tac1.
+  - unshelve epose proof (H14 ((p,notype_trefl) :: (n,v') :: l) _); tac1.
 Qed.

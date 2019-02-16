@@ -11,6 +11,8 @@ Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
 Require Import Termination.StarRelation.
 Require Import Termination.ErasedTermLemmas.
+Require Import Termination.WellFormed.
+Require Import Termination.WellFormed.
 
 Open Scope list_scope.
 

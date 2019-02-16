@@ -24,6 +24,7 @@ Require Import Termination.EquivalenceLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -67,7 +68,7 @@ Proof.
   eexists; steps; eauto.
   repeat step || simp_red; t_closer.
 
-  unshelve epose proof (H12 theta ((p,trefl) :: (x,t') :: lterms) _ _ _); tac1;
+  unshelve epose proof (H12 theta ((p, notype_trefl) :: (x,t') :: lterms) _ _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv;
     eauto using equivalent_true.
 Qed.
@@ -146,6 +147,6 @@ Lemma reducible_refine_subtype3:
 Proof.
   unfold open_reducible; repeat step || simp_red; eauto with bwf.
 
-  unshelve epose proof (H8 theta ((p,trefl) :: (x,t) :: l) _ _ _); tac1;
+  unshelve epose proof (H8 theta ((p, notype_trefl) :: (x,t) :: l) _ _ _); tac1;
     eauto using red_is_val, reducible_expr_value.
 Qed.

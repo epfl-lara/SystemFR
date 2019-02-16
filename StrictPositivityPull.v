@@ -45,6 +45,7 @@ Require Import Termination.StrictPositivity.
 Require Import Termination.StrictPositivityLemmas.
 Require Import Termination.StrictPositivityLemma.
 
+Require Import Termination.WellFormed.
 Require Import Termination.FVLemmas.
 
 Opaque makeFresh.

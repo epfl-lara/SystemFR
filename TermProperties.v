@@ -1,7 +1,8 @@
 Require Import Termination.Syntax.
 Require Import Termination.SmallStep.
 Require Import Termination.Tactics.
-Require Export Termination.StarRelation.
+Require Import Termination.StarRelation.
+Require Import Termination.WellFormed.
 
 Definition normalizing t: Prop :=
   pfv t term_var = nil /\

@@ -23,7 +23,9 @@ Require Import Termination.TypeErasureLemmas.
 Require Import Termination.ErasedTermLemmas.
 Require Import Termination.Trees.
 Require Import Termination.Sets.
+Require Import Termination.StarRelation.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
 

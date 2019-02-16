@@ -29,6 +29,7 @@ Require Import Termination.ReducibilityLetRules.
 Require Import Termination.ReducibilityLetTermRules.
 Require Import Termination.RedTactics.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -141,4 +142,22 @@ Lemma reducible_subtype_exists:
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red || t_deterministic_star; eauto.
+Qed.
+
+Lemma open_reducible_forall_inst:
+  forall (tvars : list nat) (gamma : context) (t1 t2 U V : tree),
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    wf t1 0 ->
+    wf t2 0 ->
+    subset (pfv t1 term_var) (support gamma) ->
+    subset (pfv t2 term_var) (support gamma) ->
+    open_reducible tvars gamma t1 (T_forall U V) ->
+    open_reducible tvars gamma t2 U ->
+    open_reducible tvars gamma t1 (T_let t2 U V).
+Proof.
+  repeat step || unfold open_reducible, reducible, reduces_to in * || simp_red ||
+         t_instantiate_sat3 || find_smallstep_value;
+    try t_closing;
+    eauto with bfv bwf.
 Qed.

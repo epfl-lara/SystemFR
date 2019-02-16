@@ -23,10 +23,12 @@ Require Import Termination.TypeErasureLemmas.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
+Require Import Termination.StarRelation.
 
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 

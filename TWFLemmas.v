@@ -6,6 +6,7 @@ Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 Require Import Termination.Sets.
 Require Import Termination.ListUtils.
+Require Import Termination.WellFormed.
 
 Open Scope string_scope.
 Open Scope list_scope.

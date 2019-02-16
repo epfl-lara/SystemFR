@@ -8,6 +8,7 @@ Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityLetRules.
 Require Import Termination.ReducibilityArrowRules.
 Require Import Termination.ReducibilityNatRules.
+Require Import Termination.ReducibilityQuantRules.
 Require Import Termination.RedTactics.
 
 Require Import Termination.Syntax.
@@ -30,6 +31,7 @@ Require Import Termination.EquivalenceLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -42,19 +44,19 @@ Lemma reducible_fix_induction:
     fv T = nil ->
     fv ts = nil ->
     wf T 1 ->
-    wf ts 1 ->
+    wf ts 2 ->
     is_nat_value v ->
     is_erased_term ts ->
     valid_interpretation theta ->
-    (forall tx, reducible_values theta tx T_top -> reducible theta (open 0 ts tx) (open 0 T zero)) ->
+    (forall tx, reducible_values theta tx T_top -> reducible theta (open 0 (open 1 ts zero) tx) (open 0 T zero)) ->
     (forall tx n,
        reducible_values theta n T_nat ->
        reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
        equivalent tx (notype_lambda (notype_tfix ts)) ->
        reducible theta
-         (open 0 ts tx)
+         (open 0 (open 1 ts zero) tx)
          (open 0 T (succ n))) ->
-    reducible theta (notype_tfix ts) (T_let v T_nat T).
+    reducible theta (notype_tfix ts) (open 0 T v).
 Proof.
   induction v; repeat step || simp_red || apply reducible_let.
 
@@ -75,66 +77,69 @@ Proof.
       repeat apply reducible_let || simp reducible_values ||
              apply reducible_intersection || tac1 ||
              (rewrite open_none by t_rewrite); eauto with berased.
-
-    apply reducible_let2 with T_nat; eauto with values.
 Qed.
 
-
 Lemma reducible_fix:
-  forall theta tn ts T,
+  forall theta ts T,
     fv T = nil ->
     fv ts = nil ->
     wf T 1 ->
-    wf ts 1 ->
+    wf ts 2 ->
     is_erased_term ts ->
     valid_interpretation theta ->
-    reducible theta tn T_nat ->
-    (forall tx, reducible_values theta tx T_top -> reducible theta (open 0 ts tx) (open 0 T zero)) ->
+    (forall tx,
+        reducible_values theta tx T_top ->
+        reducible theta (open 0 (open 1 ts zero) tx) (open 0 T zero)) ->
     (forall tx n,
        reducible_values theta n T_nat ->
        reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
        equivalent tx (notype_lambda (notype_tfix ts)) ->
        reducible theta
-         (open 0 ts tx)
+         (open 0 (open 1 ts zero) tx)
          (open 0 T (succ n))) ->
-    reducible theta (notype_tfix ts) (T_let tn T_nat T).
+    reducible theta (notype_tfix ts) (T_forall T_nat T).
 Proof.
   repeat step.
-  unfold reducible, reduces_to in H5; steps.
+  pose proof H5 as HH.
+  unfold reducible, reduces_to in HH; steps.
 
-  eapply reducible_let_backstep_expr; eauto; t_closer.
-  apply reducible_fix_induction; repeat step || simp_red;
-    repeat step; eauto with bfv bwf b_equiv.
+  apply reducible_forall with (open 0 T zero); steps.
+
+  - eapply backstep_reducible; repeat step || apply_any || simp reducible_values;
+      eauto with smallstep; try t_closing.
+
+  - apply reducible_fix_induction; repeat step || simp_red;
+     repeat step; eauto with bfv bwf b_equiv.
 Qed.
 
 Lemma open_reducible_fix:
-  forall tvars tn ts gamma T n y p,
+  forall tvars ts gamma T n y p,
     wf T 1 ->
     wf ts 1 ->
     subset (fv T) (support gamma) ->
     subset (fv ts) (support gamma) ->
-    ~(p ∈ fv tn) ->
     ~(p ∈ fv T) ->
     ~(p ∈ fv_context gamma) ->
     ~(y ∈ fv ts) ->
     ~(y ∈ fv T) ->
     ~(y ∈ fv_context gamma) ->
-    ~(n ∈ fv tn) ->
     ~(n ∈ fv ts) ->
     ~(n ∈ fv T) ->
     ~(n ∈ fv_context gamma) ->
     is_erased_term ts ->
     NoDup (n :: y :: p :: nil) ->
-    open_reducible tvars gamma tn T_nat ->
-    open_reducible tvars ((y, T_top) :: gamma) (open 0 ts (fvar y term_var)) (open 0 T zero) ->
+    open_reducible tvars
+                   ((y, T_top) :: gamma)
+                   (open 0 (open 1 ts zero) (fvar y term_var))
+                   (open 0 T zero) ->
     open_reducible tvars (
         (p, T_equal (fvar y term_var) (notype_lambda (notype_tfix ts))) ::
         (y, T_arrow T_unit (open 0 T (fvar n term_var))) ::
         (n, T_nat) ::
         gamma)
-      (open 0 ts (fvar y term_var))
+      (open 0 (open 1 ts zero) (fvar y term_var))
       (open 0 T (succ (fvar n term_var))) ->
-    open_reducible tvars gamma (notype_tfix ts) (T_let tn T_nat T).
+    open_reducible tvars gamma (notype_tfix ts) (T_forall T_nat T).
 Proof.
   unfold open_reducible in *; steps.
 
@@ -144,9 +149,9 @@ Proof.
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  - unshelve epose proof (H16 theta ((y,tx) :: lterms) _ _ _);
+  - unshelve epose proof (H13 theta ((y, tx) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 
-  - unshelve epose proof (H17 theta ((p,trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
+  - unshelve epose proof (H14 theta ((p, notype_trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 Qed.

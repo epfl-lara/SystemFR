@@ -22,6 +22,7 @@ Require Import Termination.ReducibilityLemmas.
 Require Import Termination.ReducibilityLetRules.
 Require Import Termination.RedTactics.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 

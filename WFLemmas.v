@@ -6,6 +6,7 @@ Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 Require Import Termination.Sets.
 Require Import Termination.ListUtils.
+Require Import Termination.WellFormed.
 
 Open Scope string_scope.
 Open Scope list_scope.
@@ -18,7 +19,7 @@ Proof.
            | _ => step
            | IH: forall x, _, H: wf ?t ?k |- wf ?t ?k1 => apply IH with k
            end;
-    try omega.
+    eauto with omega.
 Qed.
 
 Hint Resolve wf_monotone: bwf.

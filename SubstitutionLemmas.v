@@ -10,6 +10,7 @@ Require Import Termination.SmallStep.
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
 Require Import Termination.FVLemmas.
+Require Import Termination.WellFormed.
 
 Lemma substitute_nothing:
   forall t l tag,

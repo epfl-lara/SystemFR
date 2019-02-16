@@ -6,6 +6,7 @@ Require Import Termination.TermProperties.
 Require Import Termination.ListUtils.
 Require Import Termination.SizeLemmas.
 Require Import Termination.StarRelation.
+Require Import Termination.WellFormed.
 
 Lemma wf_nat_value:
   forall v, is_nat_value v -> wf v 0.

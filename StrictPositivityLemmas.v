@@ -309,10 +309,7 @@ Lemma strictly_positive_rename_aux:
     strictly_positive T' vars'.
 Proof.
   induction n; destruct T;
-    repeat (intuition auto) || cbn -[equal_with_relation] in * || simp_spos || destruct_tag; try omega;
-    match goal with
-    | H: equal_with_relation  _ _ ?T |- _ => is_var T; destruct T; simpl in H
-    end;
+    repeat (intuition auto) || simp_spos || destruct_tag || step_inversion equal_with_relation; try omega;
     repeat match goal with
            | H1: equal_with_relation ?rel ?T ?T',
              H2: strictly_positive ?T ?vars |-
@@ -320,11 +317,11 @@ Proof.
              apply IHn with T vars rel
            | _ => step || destruct_tag || simp_spos
            end;
-    try omega;
-    eauto using no_type_fvar_rename.
+    eauto using no_type_fvar_rename;
+    try omega.
 
   right.
-  exists (makeFresh ((X :: nil) :: pfv T'3 type_var :: nil));
+  exists (makeFresh ((X :: nil) :: pfv Ts' type_var :: nil));
     repeat step; try finisher.
 
   match goal with

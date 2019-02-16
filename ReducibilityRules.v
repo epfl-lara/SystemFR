@@ -26,6 +26,7 @@ Require Import Termination.EquivalenceLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -121,7 +122,7 @@ Lemma open_reducible_refl:
       support theta = tvars ->
       satisfies (reducible_values theta) gamma l ->
       equivalent (substitute t1 l) (substitute t2 l)) ->
-    open_reducible tvars gamma trefl (T_equal t1 t2).
+    open_reducible tvars gamma notype_trefl (T_equal t1 t2).
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_termlist || simp_red || eexists;

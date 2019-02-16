@@ -2,6 +2,7 @@ Require Import Termination.Tactics.
 Require Import Termination.Syntax.
 Require Import Termination.TermList.
 Require Import Termination.WFLemmas.
+Require Import Termination.WellFormed.
 
 Lemma satisfies_wfs:
   forall p lterms gamma k,

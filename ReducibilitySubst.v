@@ -21,6 +21,7 @@ Require Import Termination.ErasedTermLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 
 Require Import Termination.ReducibilityCandidate.
@@ -90,7 +91,7 @@ Proof.
   induction measure using measure_induction; destruct U;
     repeat match goal with
            | _ => progress (step || simp_red)
-           | _ => find_smallstep_value
+           | _ => find_smallstep_value || find_exists
            | _ => apply left_lex
            | _ => rewrite substitute_nothing5 in * by (steps; eauto with bfv)
            | _ => rewrite substitute_open2 in *  by repeat step || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased)

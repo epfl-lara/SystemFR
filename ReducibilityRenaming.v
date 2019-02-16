@@ -74,6 +74,11 @@ Ltac t_apply_ih2 :=
 
 Set Program Mode.
 
+Ltac t_bewr_constructor :=
+  match goal with
+  | |- equal_with_relation _ _ _ => constructor
+  end.
+
 Lemma reducible_rename_aux:
   forall measure T T' t (theta theta' : interpretation) rel,
     (size T, index T) = measure ->
@@ -94,7 +99,9 @@ Proof.
       | _ => t_instantiate_rel
       | _ => t_lookup_same
       | _ => t_equal_with_erased
+      | _ => step_inversion equal_with_relation
       | _ => t_apply_ih
+      | _ => find_exists || find_smallstep_value
       | H: is_erased_term ?t |- _ => rewrite (is_erased_subst t) in *
       | _ => apply erased_is_erased
       | _ => rewrite erased_term_tfv in *
@@ -207,12 +214,8 @@ Proof.
         eauto using in_remove_support;
         eauto using equivalent_rc_refl.
 
-  - (* case recursive type at n = 0 *)
-    exists v'; steps.
-    repeat step || t_apply_ih || apply left_lex; try omega.
-
   - (* case recursive type at n + 1 *)
-    unshelve eexists n', v', (makeFresh (pfv t0_2 type_var :: pfv t0_3 type_var ::  support theta' :: nil)), _, _; eauto;
+    unshelve eexists n', v', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ -> forall T T' t theta theta' rel, _ ,
@@ -234,19 +237,15 @@ Proof.
         unfold equivalent_rc ||
         apply equal_with_relation_refl ||
         (rewrite substitute_topen3 in * by steps) ||
-        t_apply_ih2;
+        t_apply_ih2 || t_bewr_constructor;
       try solve [ apply left_lex; omega ];
       try solve [ apply right_lex; apply lt_index_step; auto ];
       eauto using in_remove_support;
       eauto using reducibility_is_candidate;
       eauto with bfv.
 
-  - (* case recursive type at n = 0 *)
-    exists v'; steps.
-    repeat step || t_apply_ih || apply left_lex; try omega.
-
   - (* case recursive type at n + 1 *)
-   unshelve eexists n', v', (makeFresh (pfv T2 type_var :: pfv T3 type_var :: support theta :: nil)), _, _; eauto;
+   unshelve eexists n'0, v', (makeFresh (pfv T2 type_var :: pfv T3 type_var :: support theta :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ -> forall T T' t theta theta' rel, _ ,
@@ -274,7 +273,7 @@ Proof.
           rewrite (equal_with_relation_size _ _ _ H) in * by steps
         end ||
         (rewrite substitute_topen3 in * by steps) ||
-        t_apply_ih2;
+        t_apply_ih2 || t_bewr_constructor;
       try solve [ apply left_lex; omega ];
       try solve [ apply right_lex; apply lt_index_step; auto ];
       eauto using in_remove_support;

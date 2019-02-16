@@ -13,6 +13,9 @@ Require Import Termination.ListUtils.
 Require Import Termination.TermList.
 Require Import Termination.SmallStep.
 
+Require Import Termination.WellFormed.
+Require Import Termination.TypeErasure.
+
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasEval.
 
