@@ -9,7 +9,6 @@ Require Import Termination.SubstitutionLemmas.
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
 Require Import Termination.AssocList.
-Require Import Termination.TypeErasure.
 Require Import Termination.FVLemmasLists.
 Require Import Termination.EquivalenceLemmas.
 Require Import Termination.SubstitutionErase.
@@ -41,8 +40,8 @@ Ltac t_closing :=
 
 Ltac t_closer := try solve [ t_closing ].
 
-Ltac tac1 :=
-  repeat step || t_listutils || finisher || apply SatCons || simp_red ||
+Ltac tac0 :=
+  repeat step || t_listutils || finisher || apply SatCons ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
          (rewrite fv_subst_different_tag by (steps; eauto with bfv)) ||
          (rewrite substitute_nothing2 in * by t_rewrite) ||
@@ -57,6 +56,8 @@ Ltac tac1 :=
            eauto with btwf;
            eauto with berased;
            eauto 3 using NoDup_append with sets.
+
+Ltac tac1 := repeat tac0 || simp_red.
 
 Lemma instantiate_open_reducible:
   forall theta gamma t T lterms,

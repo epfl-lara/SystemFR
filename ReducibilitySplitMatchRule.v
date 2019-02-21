@@ -14,8 +14,6 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.Freshness.
 Require Import Termination.ListUtils.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.

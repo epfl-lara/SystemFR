@@ -76,6 +76,7 @@ Fixpoint swap_type_holes t i j :=
   | notype_tfold t => notype_tfold (swap_type_holes t i j)
   | tfold T t => tfold (swap_type_holes T i j) (swap_type_holes t i j)
   | tunfold t => tunfold (swap_type_holes t i j)
+  | tunfold_in t1 t2 => tunfold_in (swap_type_holes t1 i j) (swap_type_holes t2 i j)
 
   | tleft t' => tleft (swap_type_holes t' i j)
   | tright t' => tright (swap_type_holes t' i j)

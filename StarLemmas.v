@@ -238,6 +238,16 @@ Qed.
 
 Hint Resolve star_smallstep_unfold: bsteplemmas.
 
+Lemma star_smallstep_unfold_in:
+  forall t1 t1' t2,
+    star small_step t1 t1' ->
+    star small_step (tunfold_in t1 t2) (tunfold_in t1' t2).
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_unfold_in: bsteplemmas.
+
 Lemma star_smallstep_tleft:
   forall t1 t1',
     star small_step t1 t1' ->

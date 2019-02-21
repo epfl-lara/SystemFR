@@ -3,7 +3,6 @@ Require Import Termination.Sets.
 Require Import Termination.Tactics.
 Require Import Termination.SmallStep.
 Require Import Termination.AssocList.
-Require Import Termination.TypeErasureLemmas.
 Require Import Termination.ErasedTermLemmas.
 Require Import Termination.WellFormed.
 
@@ -37,20 +36,6 @@ Lemma valid_interpretation_cons:
 Proof.
   steps.
 Qed.
-
-(*
-Lemma in_valid_interpretation_closed: forall theta v X P,
-  valid_interpretation theta ->
-  lookup Nat.eq_dec theta X = Some P ->
-  P v ->
-  (is_value v /\ wf v 0 /\ twf v 0 /\ pfv v term_var = nil /\ pfv v type_var = nil).
-Proof.
-  induction theta as [ | p theta' IH ]; repeat unfold reducibility_candidate in * || step;
-    eauto;
-    try solve [ apply_any; steps ];
-    try solve [ eapply IH; steps; eauto ].
-Qed.
-*)
 
 Lemma in_valid_interpretation_erased: forall theta v X P,
   valid_interpretation theta ->
@@ -137,7 +122,6 @@ Ltac t_valid_interpretation_equiv :=
 
 Definition push_one (a: tree) (l: list (nat * (tree -> tree -> Prop))): interpretation :=
   mapValues (fun rc => rc a) l.
-
 Definition push_all (P: tree -> Prop) (l: list (nat * (tree -> tree -> Prop))): interpretation :=
   mapValues (fun (rc: tree -> tree -> Prop) (v: tree) => (forall a, P a -> rc a v)) l.
 
@@ -150,18 +134,6 @@ Proof.
   induction theta; steps.
 Qed.
 
-(*
-Lemma valid_interpretation_all:
-  forall (P: tree -> Prop) theta,
-    sat P ->
-    valid_pre_interpretation P theta ->
-    valid_interpretation (push_all P theta).
-Proof.
-  unfold sat; induction theta;
-    repeat step || unfold reducibility_candidate in * || instantiate_any.
-Qed.
-*)
-
 Lemma valid_interpretation_append:
   forall theta1 theta2,
     valid_interpretation theta1 ->
@@ -171,24 +143,8 @@ Proof.
   induction theta1; steps.
 Qed.
 
-(*
-Lemma valid_interpretation_all2:
-  forall theta theta' A,
-    non_empty theta A ->
-    valid_interpretation theta ->
-    valid_pre_interpretation (fun a => reducible_values theta a A) theta' ->
-    valid_interpretation (push_all (fun a => reducible_values theta a A) theta' ++ theta).
-Proof.
-  repeat step || apply valid_interpretation_append || apply valid_interpretation_all || unfold sat.
-Qed.
-*)
-
 Hint Resolve valid_interpretation_cons: b_valid_interp.
 Hint Resolve valid_interpretation_one: b_valid_interp.
 
-(*
-Hint Resolve valid_interpretation_all: b_valid_interp.
-Hint Resolve valid_interpretation_all2: b_valid_interp.
-*)
 Hint Resolve valid_interpretation_append: b_valid_interp.
 Hint Extern 1 => eapply valid_interpretation_one; eauto: b_valid_interp.

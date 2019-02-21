@@ -74,6 +74,7 @@ Inductive tree: Set :=
   | notype_tfold: tree -> tree
   | tfold: tree -> tree -> tree
   | tunfold: tree -> tree
+  | tunfold_in: tree -> tree -> tree
 
   | tright: tree -> tree
   | tleft: tree -> tree
@@ -131,6 +132,7 @@ Fixpoint is_annotated_term t :=
 
   | tfold T t => is_annotated_type T /\ is_annotated_term t
   | tunfold t => is_annotated_term t
+  | tunfold_in t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
 
   | tleft t => is_annotated_term t
   | tright t => is_annotated_term t
@@ -201,6 +203,7 @@ Fixpoint is_erased_term t :=
 
   | notype_tfold t => is_erased_term t
   | tunfold t => is_erased_term t
+  | tunfold_in t1 t2 => is_erased_term t1 /\ is_erased_term t2
 
   | tleft t => is_erased_term t
   | tright t => is_erased_term t
@@ -285,6 +288,7 @@ Fixpoint tree_size t :=
   | notype_tfold t => 1 + tree_size t
   | tfold T t => 1 + tree_size T + tree_size t
   | tunfold t => 1 + tree_size t
+  | tunfold_in t1 t2 => 1 + tree_size t1 + tree_size t2
 
   | tright t => 1 + tree_size t
   | tleft t => 1 + tree_size t

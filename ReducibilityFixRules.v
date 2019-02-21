@@ -239,7 +239,7 @@ Proof.
     eauto with bwf;
     eauto using reducible_unit.
 
-  unshelve epose proof (H20 a _ _);
+  unshelve epose proof (H21 a _ _);
     repeat step || simp reducible_values || rewrite open_tlt in * ||
            (progress rewrite open_shift in * by (steps; eauto with bwf)) ||
            (progress rewrite open_none in * by (steps; eauto with bwf));

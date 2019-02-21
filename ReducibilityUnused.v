@@ -12,8 +12,6 @@ Require Import Termination.ListUtils.
 Require Import Termination.SmallStep.
 Require Import Termination.StarRelation.
 Require Import Termination.SubstitutionLemmas.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
 Require Import Termination.Freshness.
 Require Import Termination.EquivalentWithRelation.
 Require Import Termination.IdRelation.

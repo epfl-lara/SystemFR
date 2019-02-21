@@ -3,7 +3,6 @@ Require Import Termination.Syntax.
 Require Import Termination.Tactics.
 Require Import Termination.AssocList.
 Require Import Termination.TreeLists.
-Require Import Termination.TypeErasure.
 
 Require Import PeanoNat.
 
@@ -32,14 +31,3 @@ Proof.
 Qed.
 
 Hint Resolve subst_erased_type: berased.
-
-(*
-Lemma subst_erase:
-  forall t l tag,
-    erased_terms l ->
-    psubstitute (erase_term t) l tag = erase_term (psubstitute t l tag).
-Proof.
-  induction t;
-    try solve [ steps ].
-  - steps.
-*)

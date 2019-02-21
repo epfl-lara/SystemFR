@@ -1,10 +1,11 @@
 Require Import Equations.Equations.
 
+Require Import Coq.Lists.List.
+
 Require Import PeanoNat.
 
 Require Import Termination.Trees.
 Require Import Termination.Tactics.
-Require Import Termination.TypeErasure.
 
 Fixpoint wf t k :=
   match t with
@@ -65,6 +66,7 @@ Fixpoint wf t k :=
   | tfold T t' => wf T k /\ wf t' k
   | notype_tfold t' => wf t' k
   | tunfold t' => wf t' k
+  | tunfold_in t1 t2 => wf t1 k /\ wf t2 (S k)
 
   | tleft t' => wf t' k
   | tright t' => wf t' k
@@ -149,6 +151,7 @@ Fixpoint twf t k :=
   | notype_tfold t => twf t k
   | tfold T t => twf T k /\ twf t k
   | tunfold t => twf t k
+  | tunfold_in t1 t2 => twf t1 k /\ twf t2 k
 
   | tleft t => twf t k
   | tright t => twf t k

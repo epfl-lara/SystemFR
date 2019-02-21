@@ -19,7 +19,6 @@ Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
-Require Import Termination.TypeErasureLemmas.
 
 Require Import Termination.Equivalence.
 Require Import Termination.EquivalenceLemmas.

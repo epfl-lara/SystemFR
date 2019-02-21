@@ -72,6 +72,22 @@ Qed.
 
 Hint Resolve defined_FV_HT_1_open_3_2: bfv2.
 
+Lemma defined_FV_HT_1_open_4_1:
+  forall tvars gamma t T k a b c d A B C D rep,
+    ~(a ∈ fv t) ->
+    ~(b ∈ fv t) ->
+    ~(c ∈ fv t) ->
+    ~(d ∈ fv t) ->
+    has_type tvars
+             ((a,A) :: (b,B) :: (c,C) :: (d,D) :: gamma)
+             (open k t rep) T ->
+    subset (pfv t term_var) (support gamma).
+Proof.
+  repeat step || p_fv || t_subset_open; eauto 3 with sets.
+Qed.
+
+Hint Resolve defined_FV_HT_1_open_4_1: bfv2.
+
 Lemma defined_FV_HT_1_open_2_1:
   forall tvars gamma t T i x y X Y rep,
     ~(x ∈ fv t) ->

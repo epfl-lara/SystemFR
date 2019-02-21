@@ -61,31 +61,6 @@ Opaque reducible_values.
 Opaque strictly_positive.
 Opaque makeFresh.
 
-(*
-Definition generalizes T :=
-  forall theta t,
-    reducible_values theta t (intersect T) <->
-    (exists n, forall m, m >= n -> reducible_values theta t (T_rec (build_nat m) T_top T)).
-
-Lemma generalizes_expr:
-  forall T theta t,
-    generalizes T ->
-    valid_interpretation theta ->
-    reducible theta t (intersect T) <->
-    (exists n, forall m, m >= n -> reducible theta t (T_rec (build_nat m) T_top T)).
-Proof.
-  unfold generalizes, reducible, reduces_to; steps.
-  - rewrite H in *; steps; eauto 6.
-  - eapply_any; eauto.
-  - unshelve epose proof (H1 n _); steps.
-    eexists; steps; eauto.
-    apply H; steps.
-    exists n; steps.
-    unshelve epose proof (H1 m _); repeat step || t_deterministic_star;
-      eauto using red_is_val.
-Qed.
-*)
-
 Set Program Mode.
 
 Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
@@ -129,6 +104,9 @@ Ltac t_instantiate_reducible3 :=
     poseNew (Mark (v,H3) "t_instantiate_reducible");
     unshelve epose proof (H3 v _ H1)
   end.
+
+
+(** Rules for unfold **)
 
 Lemma reducible_values_unfold_gen:
   forall T0 Ts theta v X,
@@ -230,6 +208,128 @@ Proof.
   eapply strictly_positive_rename_one; eauto;
     repeat step; try finisher.
 Qed.
+
+(** Rules for unfold_in **)
+
+Lemma reducible_unfold_in_gen:
+  forall T0 Ts theta t1 t2 X T,
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    wf t1 0 ->
+    wf t2 0 ->
+    pfv t1 term_var = nil ->
+    pfv t2 term_var = nil ->
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    ~(X ∈ pfv Ts type_var) ->
+    strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    valid_interpretation theta ->
+    reducible theta t1 (intersect T0 Ts) ->
+    (forall v,
+      equivalent t1 (notype_tfold v) ->
+      reducible_values theta v (topen 0 Ts (intersect T0 Ts)) ->
+      reducible theta (open 0 t2 v) T) ->
+    reducible theta (tunfold_in t1 t2) T.
+Proof.
+  intros.
+  match goal with
+  | H: reducible _ _ (intersect _ _) |- _ => unfold reducible, reduces_to in H
+  end.
+  repeat step || t_fold_in_intersect.
+  eapply star_backstep_reducible; eauto with bsteplemmas;
+    repeat step || t_listutils;
+    eauto with bwf btwf bfv berased.
+  unfold closed_value in *; steps.
+  eapply backstep_reducible; eauto with smallstep;
+    repeat step || t_listutils;
+    eauto with bwf btwf bfv berased;
+    try t_closing.
+  apply_any;
+    eauto using reducible_values_unfold_gen;
+    eauto with b_equiv.
+Qed.
+
+Lemma open_reducible_unfold_in_gen:
+  forall T0 Ts tvars gamma t1 t2 X T p y,
+    ~(p ∈ tvars) ->
+    ~(p ∈ pfv_context gamma term_var) ->
+    ~(p ∈ support gamma) ->
+    ~(p ∈ fv t1) ->
+    ~(p ∈ fv t2) ->
+    ~(p ∈ fv T0) ->
+    ~(p ∈ fv Ts) ->
+    ~(p ∈ fv T) ->
+    ~(y ∈ tvars) ->
+    ~(y ∈ pfv_context gamma term_var) ->
+    ~(y ∈ support gamma) ->
+    ~(y ∈ fv t1) ->
+    ~(y ∈ fv t2) ->
+    ~(y ∈ fv T0) ->
+    ~(y ∈ fv Ts) ->
+    ~(y ∈ fv T) ->
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    wf t1 0 ->
+    wf t2 0 ->
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    subset (pfv t1 term_var) (support gamma) ->
+    subset (pfv t2 term_var) (support gamma) ->
+    ~(p = y) ->
+    ~(X ∈ pfv Ts type_var) ->
+    strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    open_reducible tvars gamma t1 (intersect T0 Ts) ->
+    open_reducible tvars
+             ((p, T_equal t1 (notype_tfold (fvar y term_var))) ::
+              (y, topen 0 Ts (intersect T0 Ts)) ::
+              gamma)
+             (open 0 t2 (fvar y term_var)) T ->
+    open_reducible tvars gamma (tunfold_in t1 t2) T.
+Proof.
+  unfold open_reducible;
+    repeat step || rewrite substitute_topen;
+    eauto with btwf.
+
+  apply reducible_unfold_in_gen with
+    (psubstitute T0 lterms term_var)
+    (psubstitute Ts lterms term_var)
+    (makeFresh (
+      pfv (psubstitute Ts lterms term_var) type_var ::
+      pfv Ts type_var ::
+      nil
+    )); steps;
+    eauto with bwf;
+    eauto with btwf;
+    eauto with berased;
+    eauto with bfv;
+    try finisher.
+
+  - rewrite substitute_topen2;
+      repeat step;
+      eauto with btwf.
+
+    apply strictly_positive_subst;
+      repeat step || apply is_erased_type_topen; eauto with btwf; eauto with bfv.
+    eapply strictly_positive_rename_one; eauto;
+      repeat step; try finisher.
+
+  - unshelve epose proof (H31 theta ((p, notype_trefl) :: (y,v) :: lterms) _ _ _);
+      repeat match goal with
+             | |- reducible_values _ _ (T_equal _ _) => simp reducible_values
+             | _ => tac0
+             end.
+Qed.
+
+
+(** Fold Rules **)
 
 Lemma reducible_values_fold_gen:
   forall T0 Ts theta v X,

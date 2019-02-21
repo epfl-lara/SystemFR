@@ -15,7 +15,6 @@ Require Import Termination.AssocList.
 Require Import Termination.Freshness.
 Require Import Termination.TermList.
 Require Import Termination.SubstitutionLemmas.
-Require Import Termination.TypeErasure.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.

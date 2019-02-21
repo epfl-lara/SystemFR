@@ -13,6 +13,7 @@ Require Import Termination.WellFormed.
 Require Import Termination.NatUtils.
 Require Import Termination.NatCompare.
 Require Import Termination.LVarOperations.
+Require Import Termination.NatCompareErase.
 
 Open Scope list_scope.
 
@@ -383,6 +384,62 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t (T_rec n T0 Ts) ->
       has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec (tpred n) T0 Ts))
 
+| HTUnfoldIn:
+    forall tvars gamma t1 t2 n T0 Ts pn p1 p2 y T,
+      ~(p1 ∈ tvars) ->
+      ~(p1 ∈ support gamma) ->
+      ~(p1 ∈ fv t1) ->
+      ~(p1 ∈ fv t2) ->
+      ~(p1 ∈ fv n) ->
+      ~(p1 ∈ fv T0) ->
+      ~(p1 ∈ fv Ts) ->
+      ~(p1 ∈ fv T) ->
+      ~(p2 ∈ tvars) ->
+      ~(p2 ∈ support gamma) ->
+      ~(p2 ∈ fv t1) ->
+      ~(p2 ∈ fv t2) ->
+      ~(p2 ∈ fv n) ->
+      ~(p2 ∈ fv T0) ->
+      ~(p2 ∈ fv Ts) ->
+      ~(p2 ∈ fv T) ->
+      ~(pn ∈ tvars) ->
+      ~(pn ∈ support gamma) ->
+      ~(pn ∈ fv t1) ->
+      ~(pn ∈ fv t2) ->
+      ~(pn ∈ fv n) ->
+      ~(pn ∈ fv T0) ->
+      ~(pn ∈ fv Ts) ->
+      ~(pn ∈ fv T) ->
+      ~(y ∈ tvars) ->
+      ~(y ∈ support gamma) ->
+      ~(y ∈ fv t1) ->
+      ~(y ∈ fv t2) ->
+      ~(y ∈ fv n) ->
+      ~(y ∈ fv T0) ->
+      ~(y ∈ fv Ts) ->
+      ~(y ∈ fv T) ->
+      NoDup (p1 :: p2 :: pn :: y :: nil) ->
+      is_annotated_term n ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      wf n 0 ->
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      wf t2 0 ->
+      has_type tvars gamma t1 (T_rec n T0 Ts) ->
+      has_type tvars
+               ((p2, T_equal n zero) :: (p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) :: (y, T0) :: gamma)
+               (open 0 t2 (fvar y term_var)) T ->
+      has_type tvars
+               ((p2, T_equal n (succ (fvar pn term_var))) ::
+                (p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) ::
+                (y, topen 0 Ts (T_rec (fvar pn term_var) T0 Ts)) ::
+                (pn, T_nat) :: gamma)
+               (open 0 t2 (fvar y term_var)) T ->
+      has_type tvars gamma (tunfold_in t1 t2) T
+
 | HTFold:
     forall tvars gamma t n pn T0 Ts p,
       ~(p ∈ tvars) ->
@@ -428,6 +485,40 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
       has_type tvars gamma t (intersect T0 Ts) ->
       has_type tvars gamma (tunfold t) (topen 0 Ts (intersect T0 Ts))
+
+| HTUnfoldGenIn:
+    forall tvars gamma t1 t2 T0 Ts p y T X,
+      ~(p ∈ tvars) ->
+      ~(p ∈ support gamma) ->
+      ~(p ∈ fv t1) ->
+      ~(p ∈ fv t2) ->
+      ~(p ∈ fv T0) ->
+      ~(p ∈ fv Ts) ->
+      ~(p ∈ fv T) ->
+      ~(y ∈ tvars) ->
+      ~(y ∈ support gamma) ->
+      ~(y ∈ fv t1) ->
+      ~(y ∈ fv t2) ->
+      ~(y ∈ fv T0) ->
+      ~(y ∈ fv Ts) ->
+      ~(y ∈ fv T) ->
+      ~(X ∈ pfv Ts type_var) ->
+      strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      ~(p = y) ->
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      wf t2 0 ->
+      has_type tvars gamma t1 (intersect T0 Ts) ->
+      has_type tvars
+               ((p, T_equal t1 (tfold  (intersect T0 Ts) (fvar y term_var))) ::
+                (y, topen 0 Ts (intersect T0 Ts)) ::
+                gamma)
+               (open 0 t2 (fvar y term_var)) T ->
+      has_type tvars gamma (tunfold_in t1 t2) T
 
 | HTFoldGen:
     forall tvars gamma t T0 Ts X,

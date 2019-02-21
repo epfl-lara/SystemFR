@@ -4,8 +4,6 @@ Require Import Termination.Syntax.
 Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
 
 Require Import PeanoNat.
 
@@ -73,6 +71,7 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | notype_tfold t' => notype_tfold (map_indices k t' f)
   | tfold T t' => tfold (map_indices k T f) (map_indices k t' f)
   | tunfold t' => tunfold (map_indices k t' f)
+  | tunfold_in t1 t2 => tunfold_in (map_indices k t1 f) (map_indices (S k) t2 f)
 
   | tleft t' => tleft (map_indices k t' f)
   | tright t' => tright (map_indices k t' f)
@@ -149,19 +148,4 @@ Lemma psubstitute_map_indices:
 Proof.
   induction t; repeat step || tequality || rewrite map_nothing in *;
     eauto with bwf omega.
-Qed.
-
-Lemma erase_term_map_indices:
-  forall t i f,
-    erase_term (map_indices i t f) = map_indices i (erase_term t) f.
-Proof.
-  induction t; steps.
-Qed.
-
-Lemma erase_type_map_indices:
-  forall T i f,
-    erase_type (map_indices i T f) = map_indices i (erase_type T) f.
-Proof.
-  induction T; repeat step || tequality;
-    eauto using erase_term_map_indices.
 Qed.

@@ -12,7 +12,6 @@ Require Import Termination.SizeLemmas.
 Require Import Termination.Equivalence.
 Require Import Termination.StarInversions.
 Require Import Termination.TermList.
-Require Import Termination.TypeErasure.
 Require Import Termination.WellFormed.
 Require Import Termination.StarRelation.
 
@@ -258,7 +257,8 @@ Ltac simp_red :=
     rewrite reducible_values_equation_52 in * ||
     rewrite reducible_values_equation_53 in * ||
     rewrite reducible_values_equation_54 in * ||
-    rewrite reducible_values_equation_55 in *
+    rewrite reducible_values_equation_55 in * ||
+    rewrite reducible_values_equation_56 in *
   ).
 
 Ltac top_level_unfold :=

@@ -1,6 +1,5 @@
 Require Import Termination.Syntax.
 Require Import Termination.Tactics.
-Require Import Termination.TypeErasure.
 Require Import Termination.PrimitiveSize.
 
 Inductive is_value: tree -> Prop :=
@@ -98,6 +97,10 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPBetaFold:
     forall v, is_value v ->
          small_step (tunfold (notype_tfold v)) v
+| SPBetaFold2:
+    forall v t,
+      is_value v ->
+      small_step (tunfold_in (notype_tfold v) t) (open 0 t v)
 
 | SPBetaSize:
     forall v, is_value v -> small_step (tsize v) (build_nat (tsize_semantics v))
@@ -150,6 +153,9 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPUnfold: forall t1 t2,
     small_step t1 t2 ->
     small_step (tunfold t1) (tunfold t2)
+| SPUnfold2: forall t1 t2 t,
+    small_step t1 t2 ->
+    small_step (tunfold_in t1 t) (tunfold_in t2 t)
 
 | SPLeft: forall t1 t2,
     small_step t1 t2 ->
@@ -182,6 +188,7 @@ Ltac t_invert_step :=
   | H: small_step (notype_tfold _) _ |- _ => inversion H; clear H
   | H: small_step (tfold _ _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold _) _ |- _ => inversion H; clear H
+  | H: small_step (tunfold_in _ _) _ |- _ => inversion H; clear H
   | H: small_step (type_abs _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_lambda _) _ |- _ => inversion H; clear H

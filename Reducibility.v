@@ -79,7 +79,12 @@ Require Import Termination.FVLemmasTyping2.
 Require Import Termination.FVLemmasContext.
 
 Require Import Termination.NatCompare.
+Require Import Termination.NatCompareErase.
+
 Require Import Termination.LVarOperations.
+Require Import Termination.LVarOperationsErase.
+Require Import Termination.NoTypeFVarErased.
+
 
 Opaque reducible_values.
 Opaque Nat.eq_dec.
@@ -243,11 +248,16 @@ Proof.
   - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
   - apply open_reducible_unfold_zero2 with (erase_type Ts) (erase_term n); side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold2; unfold spositive; side_conditions.
+  - apply open_reducible_unfold_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 p2 pn y;
+      side_conditions.
   - apply open_reducible_fold2 with p pn; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations.
     apply open_reducible_unfold_gen with X; side_conditions.
     change (fvar X type_var) with (erase_type (fvar X type_var)).
     rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased; eauto 2 with bannot.
+  - apply open_reducible_unfold_in_gen with (erase_type T0) (erase_type Ts) X p y; side_conditions.
+    change (fvar X type_var) with (erase_type (fvar X type_var)).
+    rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased; eauto 2 with step_tactic bannot.
   - apply open_reducible_fold_gen with X; side_conditions.
     + change (fvar X type_var) with (erase_type (fvar X type_var)).
       rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;

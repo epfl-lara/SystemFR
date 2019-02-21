@@ -11,6 +11,7 @@ Require Import Termination.ErasedTermLemmas.
 Require Import Termination.TypeErasure.
 Require Import Termination.TypeErasureLemmas.
 Require Import Termination.AnnotatedTermLemmas.
+Require Import Termination.NoTypeFVarErased.
 
 Require Import Termination.AssocList.
 

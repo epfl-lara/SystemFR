@@ -18,8 +18,6 @@ Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.Equivalence.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.

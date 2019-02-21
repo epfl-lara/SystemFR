@@ -5,8 +5,6 @@ Require Import Termination.ErasedTermLemmas.
 Require Import Termination.ListUtils.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
 
 Definition no_type_fvar T vars :=
   forall X, X ∈ pfv T type_var -> X ∈ vars -> False.
@@ -76,12 +74,4 @@ Lemma no_type_fvar_subst:
 Proof.
   unfold no_type_fvar; repeat step || eapply_any;
     eauto using pfv_in_subst.
-Qed.
-
-Lemma no_type_fvar_erased:
-  forall T vars,
-    no_type_fvar T vars ->
-    no_type_fvar (erase_type T) vars.
-Proof.
-  unfold no_type_fvar; steps; eauto with bfv.
 Qed.

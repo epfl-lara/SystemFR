@@ -65,6 +65,7 @@ Fixpoint pfv t tag: set nat :=
   | notype_tfold t' => pfv t' tag
   | tfold T t' => pfv T tag ++ pfv t' tag
   | tunfold t' => pfv t' tag
+  | tunfold_in t1 t2 => pfv t1 tag ++ pfv t2 tag
 
   | tleft t' => pfv t' tag
   | tright t' => pfv t' tag
@@ -196,6 +197,7 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | notype_tfold t' => notype_tfold (psubstitute t' l tag)
   | tfold T t' => tfold (psubstitute T l tag) (psubstitute t' l tag)
   | tunfold t' => tunfold (psubstitute t' l tag)
+  | tunfold_in t1 t2 => tunfold_in (psubstitute t1 l tag) (psubstitute t2 l tag)
 
   | tleft t' => tleft (psubstitute t' l tag)
   | tright t' => tright (psubstitute t' l tag)
@@ -296,6 +298,7 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | notype_tfold t' => notype_tfold (open k t' rep)
   | tfold T t' => tfold (open k T rep) (open k t' rep)
   | tunfold t' => tunfold (open k t' rep)
+  | tunfold_in t1 t2 => tunfold_in (open k t1 rep) (open (S k) t2 rep)
 
   | tleft t' => tleft (open k t' rep)
   | tright t' => tright (open k t' rep)
@@ -383,6 +386,7 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | notype_tfold t => notype_tfold (topen k t rep)
   | tfold T t => tfold (topen k T rep) (topen k t rep)
   | tunfold t => tunfold (topen k t rep)
+  | tunfold_in t1 t2 => tunfold_in (topen k t1 rep) (topen k t2 rep)
 
   | tleft t' => tleft (topen k t' rep)
   | tright t' => tright (topen k t' rep)
@@ -469,6 +473,7 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | notype_tfold t => notype_tfold (tclose k t x)
   | tfold T t => tfold (tclose k T x) (tclose k t x)
   | tunfold t => tunfold (tclose k t x)
+  | tunfold_in t1 t2 => tunfold_in (tclose k t1 x) (tclose k t2 x)
 
   | tleft t' => tleft (tclose k t' x)
   | tright t' => tright (tclose k t' x)
@@ -493,52 +498,6 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | T_abs T => T_abs (tclose (S k) T x)
   | T_rec n T0 Ts => T_rec (tclose k n x) (tclose k T0 x) (tclose (S k) Ts x)
   end.
-
-Ltac tequality :=
-  match goal with
-  | |- err _ = err _ => f_equal
-  | |- tsize _ = tsize _ => f_equal
-  | |- app _ _ = app _ _ => f_equal
-  | |- pp _ _ = pp _ _ => f_equal
-  | |- trefl _ _ = trefl _ _ => f_equal
-  | |- lambda _ _ = lambda _ _ => f_equal
-  | |- forall_inst _ _ = forall_inst _ _ => f_equal
-  | |- notype_lambda _ = notype_lambda _ => f_equal
-  | |- pi1 _ = pi1 _ => f_equal
-  | |- pi2 _ = pi2 _ => f_equal
-  | |- succ _ = succ _ => f_equal
-  | |- ite _ _ _ = ite _ _ _ => f_equal
-  | |- rec _ _ _ _ = rec _ _ _ _ => f_equal
-  | |- notype_rec _ _ _ = notype_rec _ _ _ => f_equal
-  | |- tmatch _ _ _ = tmatch _ _ _ => f_equal
-  | |- tlet _ _ _ = tlet _ _ _ => f_equal
-  | |- notype_tlet _ _ = notype_tlet _ _ => f_equal
-  | |- type_abs _ = type_abs _ => f_equal
-  | |- type_inst _ _ = type_inst _ _ => f_equal
-  | |- notype_inst _ = notype_inst _ => f_equal
-  | |- tfix _ _ = tfix _ _ => f_equal
-  | |- notype_tfix _ = notype_tfix _ => f_equal
-  | |- tfold _ _ = tfold _ _ => f_equal
-  | |- notype_tfold _ = notype_tfold _ => f_equal
-  | |- tunfold _ = tunfold _ => f_equal
-  | |- tleft _ = tleft _ => f_equal
-  | |- tright _ = tright _ => f_equal
-  | |- sum_match _ _ _ = sum_match _ _ _ => f_equal
-
-  | |- T_refine _ _ = T_refine _ _ => f_equal
-  | |- T_prod _ _ = T_prod _ _ => f_equal
-  | |- T_arrow _ _ = T_arrow _ _ => f_equal
-  | |- T_sum _ _ = T_sum _ _ => f_equal
-  | |- T_let _ _ _ = T_let _ _ _ => f_equal
-  | |- T_singleton _ = T_singleton _ => f_equal
-  | |- T_intersection _ _ = T_intersection _ _ => f_equal
-  | |- T_union _ _ = T_union _ _ => f_equal
-  | |- T_equal _ _ = T_equal _ _ => f_equal
-  | |- T_forall _ _ = T_forall _ _ => f_equal
-  | |- T_exists _ _ = T_exists _ _ => f_equal
-  | |- T_abs _ = T_abs _ => f_equal
-  | |- T_rec _ _ _ = T_rec _ _ _ => f_equal
- end.
 
 Lemma fold_open_arrow:
   forall T1 T2 rep,

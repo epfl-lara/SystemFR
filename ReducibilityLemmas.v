@@ -18,8 +18,6 @@ Require Import Termination.FVLemmasEval.
 Require Import Termination.SmallStepSubstitutions.
 Require Import Termination.StarLemmas.
 Require Import Termination.StarInversions.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
 Require Import Termination.ErasedTermLemmas.
 Require Import Termination.Trees.
 Require Import Termination.Sets.
@@ -31,7 +29,6 @@ Require Import Termination.TWFLemmas.
 
 Require Import Termination.ReducibilityCandidate.
 Require Import Termination.ReducibilityDefinition.
-Require Import Termination.TypeErasure.
 
 Require Import Omega.
 

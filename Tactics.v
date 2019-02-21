@@ -33,6 +33,16 @@ Ltac is_construct t :=
     : exists x, x = t) in
   idtac) + fail.
 
+Ltac tequality :=
+  match goal with
+  | |- ?F _ = ?G _ => unify F G; is_construct F; f_equal
+  | |- ?F _ _ = ?G _ _ => unify F G; is_construct F; f_equal
+  | |- ?F _ _ _ = ?G _ _ _ => unify F G; is_construct F; f_equal
+  | |- ?F _ _ _ _ = ?G _ _ _ _ => unify F G; is_construct F; f_equal
+  | |- ?F _ _ _ _ _ = ?G _ _ _ _ _ => unify F G; is_construct F; f_equal
+  | |- ?F _ _ _ _ _ _ = ?G _ _ _ _ _ _ => unify F G; is_construct F; f_equal
+  end.
+
 (** Taken from Cpdt **)
 (** Succeed iff [x] is in the list [ls], represented with left-associated nested tuples. *)
 Ltac inList x ls :=
