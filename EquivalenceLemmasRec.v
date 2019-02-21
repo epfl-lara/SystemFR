@@ -15,8 +15,6 @@ Lemma equivalent_rec_zero:
 Proof.
   unfold equivalent in *; repeat step || t_invert_star || t_deterministic_star;
     eauto using star_smallstep_trans with bsteplemmas smallstep.
-  eapply star_many_steps; try eassumption; eauto using value_irred;
-    eauto using star_smallstep_trans with bsteplemmas smallstep.
 Qed.
 
 Hint Resolve equivalent_rec_zero: b_equiv.
@@ -40,8 +38,6 @@ Lemma equivalent_rec_succ:
                                        (notype_lambda (notype_rec v e1 e2))).
 Proof.
   unfold equivalent in *; repeat step || t_invert_star || t_deterministic_star;
-    eauto using star_smallstep_trans with bsteplemmas smallstep.
-  eapply star_many_steps; try eassumption; eauto using value_irred;
     eauto using star_smallstep_trans with bsteplemmas smallstep.
 Qed.
 

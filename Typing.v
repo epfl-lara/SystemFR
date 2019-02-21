@@ -11,6 +11,8 @@ Require Import Termination.TypeErasure.
 Require Import Termination.StrictPositivity.
 Require Import Termination.WellFormed.
 Require Import Termination.NatUtils.
+Require Import Termination.NatCompare.
+Require Import Termination.LVarOperations.
 
 Open Scope list_scope.
 
@@ -190,13 +192,45 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
         (n, T_nat) ::
         gamma
       )
-        (open 0 (open 1 ts (fvar n term_var)) (term_fvar y))
+        (open 0 (open 1 ts (succ (fvar n term_var))) (term_fvar y))
         (open 0 T (succ (term_fvar n)))
       ->
       has_type tvars
                ((y, T_top) :: gamma)
                (open 0 (open 1 ts zero) (fvar y term_var))
                (open 0 T zero)
+      ->
+      has_type tvars gamma (tfix T ts) (T_forall T_nat T)
+
+| HTFixStrongInduct:
+    forall tvars gamma ts T n y p,
+      ~(n ∈ fv_context gamma) ->
+      ~(y ∈ fv_context gamma) ->
+      ~(p ∈ fv_context gamma) ->
+      ~(n ∈ fv T) ->
+      ~(n ∈ fv ts) ->
+      ~(y ∈ fv T) ->
+      ~(y ∈ fv ts) ->
+      ~(p ∈ fv T) ->
+      ~(p ∈ fv ts) ->
+      ~(n ∈ tvars) ->
+      ~(y ∈ tvars) ->
+      ~(p ∈ tvars) ->
+      NoDup (n :: y :: p :: nil) ->
+      wf (erase_term ts) 1 ->
+      is_context tvars gamma ->
+      is_type tvars ((n,T_nat) :: gamma) (open 0 T (term_fvar n)) ->
+      has_type tvars (
+        (p, T_equal (term_fvar y) (lambda T_unit (tfix T ts))) ::
+        (y,
+          (T_forall
+             (T_refine T_nat (annotated_tlt (lvar 0 term_var) (fvar n term_var)))
+             (T_arrow T_unit (shift T)))) ::
+        (n, T_nat) ::
+        gamma
+      )
+        (open 0 (open 1 ts (fvar n term_var)) (term_fvar y))
+        (open 0 T (term_fvar n))
       ->
       has_type tvars gamma (tfix T ts) (T_forall T_nat T)
 

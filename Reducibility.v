@@ -78,9 +78,14 @@ Require Import Termination.FVLemmasTyping.
 Require Import Termination.FVLemmasTyping2.
 Require Import Termination.FVLemmasContext.
 
+Require Import Termination.NatCompare.
+Require Import Termination.LVarOperations.
+
 Opaque reducible_values.
 Opaque Nat.eq_dec.
 Opaque makeFresh.
+Opaque tlt.
+Opaque annotated_tlt.
 
 (*
 Ltac t_smallstep_infer :=
@@ -217,7 +222,14 @@ Proof.
   - apply open_reducible_succ; auto.
   - choose_variables; side_conditions.
   - apply open_reducible_fix with n y p;
-      repeat side_conditions || rewrite (open_none (erase_term ts) 1) in *.
+      repeat side_conditions ||
+             rewrite (open_none (erase_term ts) 1) in * ||
+             rewrite erase_term_open in * by (eauto 3 with bannot step_tactic).
+  - apply open_reducible_fix_strong_induction with n y p;
+      repeat side_conditions || rewrite tlt_erase in * ||
+             rewrite (open_none (erase_term ts) 1) in * ||
+             rewrite erase_type_map_indices in * ||
+             rewrite erase_term_open in * by (eauto 3 with bannot step_tactic).
   - choose_variables; side_conditions.
   - choose_variables; side_conditions.
   - unfold_open; tac1; eauto using reducible_values_exprs.

@@ -230,6 +230,17 @@ Ltac t_defined_HT_context :=
 
 Hint Extern 1 => t_defined_HT_context: bfv2.
 
+Lemma defined_IT_open:
+  forall tvars x gamma T A k rep,
+    is_type tvars ((x,A) :: gamma) (open k T rep) ->
+    ~(x ∈ pfv T term_var) ->
+    subset (pfv T term_var) (support gamma).
+Proof.
+  repeat step || p_fv || t_sets || t_subset_open; eauto 2 with sets.
+Qed.
+
+Hint Resolve defined_IT_open: bfv2.
+
 Lemma defined_IT_context:
   forall tvars x gamma T,
     is_type tvars gamma T ->

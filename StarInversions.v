@@ -509,6 +509,9 @@ Ltac t_invert_star :=
   | H1: is_value ?v1,
     H2: star small_step ?v1 ?v2 |- _ =>
     pose proof (star_smallstep_value v1 v2 H2 H1); clear H2
+  | H1: is_nat_value ?v1,
+    H2: star small_step ?v1 ?v2 |- _ =>
+    unshelve epose proof (star_smallstep_value v1 v2 H2 _); clear H2
   | H: star small_step (trefl _ _) ?v |- _ =>
     unshelve epose proof (star_smallstep_value _ v H _); clear H; eauto 2 with values
   | H: star small_step ttrue ?v |- _ =>
@@ -564,10 +567,18 @@ Ltac t_invert_star :=
     poseNew (Mark H2 "inv rec zero");
     unshelve epose proof (star_smallstep_rec_zero _ v H2 H1 _ _ eq_refl)
   | H1: is_value ?v,
+    H2: star small_step (notype_rec _ _ _) ?v |- _ =>
+    poseNew (Mark H2 "inv rec");
+    unshelve epose proof (star_smallstep_rec_inv _ v H2 H1 _ _ _ eq_refl)
+  | H1: is_value ?v,
     H2: star small_step (tmatch ?tn _ _) ?v,
     H3: star small_step ?tn zero |- _ =>
     poseNew (Mark H2 "inv match zero");
     unshelve epose proof (star_smallstep_match_zero _ v H2 H1 _ _ _ eq_refl H3)
+  | H1: is_value ?v,
+    H2: star small_step (tmatch zero _ _) ?v |- _ =>
+    poseNew (Mark H2 "inv match zero2");
+    unshelve epose proof (star_smallstep_match_zero _ v H2 H1 _ _ _ eq_refl _)
   | H1: is_value ?v,
     H2: star small_step (tmatch _ _ _) ?v |- _ =>
     poseNew (Mark H2 "inv match");

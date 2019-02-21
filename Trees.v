@@ -96,7 +96,6 @@ Fixpoint is_annotated_term t :=
   | fvar y term_var => True
   | lvar _ term_var => True
   | err T => is_annotated_type T
-  | notype_err => True
 
   | uu => True
 
