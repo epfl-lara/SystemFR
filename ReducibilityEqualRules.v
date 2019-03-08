@@ -20,6 +20,7 @@ Require Import Termination.EquivalenceLemmas.
 Require Import Termination.SubstitutionErase.
 Require Import Termination.TreeLists.
 Require Import Termination.TermListReducible.
+Require Import Termination.StarRelation.
 
 Require Import Termination.TermList.
 Require Import Termination.TermListLemmas.
@@ -27,6 +28,7 @@ Require Import Termination.TermListLemmas.
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasLists.
 
+Require Import Termination.WellFormed.
 Require Import Termination.WFLemmas.
 Require Import Termination.WFLemmasLists.
 
@@ -48,7 +50,8 @@ Lemma reducibility_equivalent_weaken:
     equivalent (substitute u l) (substitute v l).
 Proof.
   intros.
-  unfold open_reducible, subset in *; repeat step || step_inversion satisfies || tac1.
+  unfold open_reducible, subset in *;
+    repeat step || step_inversion satisfies || tac1.
 Qed.
 
 Lemma equivalent_error:
@@ -84,9 +87,10 @@ Lemma equivalent_split_bool:
     satisfies (reducible_values theta) (gamma1 ++ gamma2) l ->
     equivalent (substitute t l) (substitute t' l).
 Proof.
-  unfold open_reducible, reducible, reduces_to; repeat step || simp_red || t_sat_cut || t_instantiate_sat3.
-  - unshelve epose proof (H8 (l1 ++ (x,notype_trefl) :: l2) _); tac1.
-  - unshelve epose proof (H9 (l1 ++ (x,notype_trefl) :: l2) _); tac1.
+  unfold open_reducible, reducible, reduces_to;
+    repeat step || simp_red || t_sat_cut || t_instantiate_sat3 || t_sat_add;
+    eauto 2 with b_sat;
+    eauto 2 with b_equiv_subst.
 Qed.
 
 Lemma equivalent_split_nat:
@@ -119,10 +123,9 @@ Lemma equivalent_split_nat:
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
-  destruct t'0; steps.
-
-  - unshelve epose proof (H14 (l1 ++ (x,notype_trefl) :: l2) _); tac1.
-  - unshelve epose proof (H15 (l1 ++ (x,notype_trefl) :: (y, t'0) :: l2) _); tac1.
+  destruct t'0; repeat step || t_sat_add;
+    eauto 2 with b_sat;
+    eauto 2 with b_equiv_subst.
 Qed.
 
 Lemma equivalent_pair_eta:
@@ -162,10 +165,9 @@ Lemma reducible_equivalent_ite:
  Proof.
    unfold open_reducible;
      repeat step || apply equivalent_ite || t_instantiate_sat3 || simp_red ||
-            t_deterministic_star || unfold reducible, reduces_to in *.
-
-   - unshelve epose proof (H8 ((x, notype_trefl) :: l) _); tac1.
-   - unshelve epose proof (H9 ((x, notype_trefl) :: l) _); tac1.
+            t_deterministic_star || unfold reducible, reduces_to in * || t_sat_add;
+     eauto 2 with b_sat;
+     eauto 2 with b_equiv_subst.
 Qed.
 
 Lemma reducible_equivalent_match:
@@ -195,10 +197,10 @@ Lemma reducible_equivalent_match:
     equivalent (tmatch (substitute tn l) (substitute t0 l) (substitute ts l)) (substitute t l).
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
-  eapply equivalent_match; eauto; steps.
-
-  - unshelve epose proof (H12 ((p,notype_trefl) :: l) _); tac1.
-  - unshelve epose proof (H13 ((p,notype_trefl) :: (n,v') :: l) _); tac1.
+  eapply equivalent_match; eauto;
+    repeat step || t_sat_add;
+    eauto 2 with b_sat;
+    eauto 2 with b_equiv_subst.
 Qed.
 
 Lemma reducible_equivalent_rec:
@@ -234,8 +236,8 @@ Lemma reducible_equivalent_rec:
                (substitute t l).
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
-  eapply equivalent_rec; eauto; steps.
-
-  - unshelve epose proof (H13 ((p,notype_trefl) :: l) _); tac1.
-  - unshelve epose proof (H14 ((p,notype_trefl) :: (n,v') :: l) _); tac1.
+  eapply equivalent_rec; eauto;
+    repeat step || t_sat_add;
+    eauto 2 with b_sat;
+    eauto 2 with b_equiv_subst.
 Qed.
