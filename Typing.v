@@ -15,6 +15,7 @@ Require Import Termination.NatCompare.
 Require Import Termination.LVarOperations.
 Require Import Termination.NatCompareErase.
 Require Import Termination.BaseType.
+Require Import Termination.TypeOperations.
 
 Open Scope list_scope.
 
@@ -108,17 +109,32 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma tfalse T_bool
 
 | HTIte:
-    forall tvars gamma t1 t2 t3 T x,
+    forall tvars gamma b t1 t2 T x,
       ~(x ∈ fv_context gamma) ->
+      ~(x ∈ fv b) ->
       ~(x ∈ fv t1) ->
       ~(x ∈ fv t2) ->
-      ~(x ∈ fv t3) ->
       ~(x ∈ fv T) ->
       ~(x ∈ tvars) ->
-      has_type tvars gamma t1 T_bool ->
-      has_type tvars ((x, T_equal t1 ttrue) :: gamma) t2 T ->
-      has_type tvars ((x, T_equal t1 tfalse) :: gamma) t3 T ->
-      has_type tvars gamma (ite t1 t2 t3) T
+      has_type tvars gamma b T_bool ->
+      has_type tvars ((x, T_equal b ttrue) :: gamma) t1 T ->
+      has_type tvars ((x, T_equal b tfalse) :: gamma) t2 T ->
+      has_type tvars gamma (ite b t1 t2) T
+
+| HTIte2:
+    forall tvars gamma b t1 t2 T1 T2 T x,
+      ~(x ∈ fv_context gamma) ->
+      ~(x ∈ fv b) ->
+      ~(x ∈ fv t1) ->
+      ~(x ∈ fv t2) ->
+      ~(x ∈ fv T1) ->
+      ~(x ∈ fv T2) ->
+      ~(x ∈ tvars) ->
+      has_type tvars gamma b T_bool ->
+      has_type tvars ((x, T_equal b ttrue) :: gamma) t1 T1 ->
+      has_type tvars ((x, T_equal b tfalse) :: gamma) t2 T2 ->
+      T_ite b T1 T2 T ->
+      has_type tvars gamma (ite b t1 t2) T
 
 | HTErr:
     forall tvars gamma T,

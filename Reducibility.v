@@ -62,6 +62,7 @@ Require Import Termination.ReducibilityPolymorphism.
 Require Import Termination.ReducibilityRecRules.
 Require Import Termination.ReducibilityRecGenRules.
 Require Import Termination.ReducibilityPrimitiveSizeRules.
+Require Import Termination.ReducibilityIteTypeRules.
 
 Require Import Termination.StrictPositivity.
 Require Import Termination.StrictPositivityLemmas.
@@ -90,20 +91,16 @@ Require Import Termination.BaseTypeLemmas.
 Require Import Termination.BaseTypeSyntaxLemmas.
 Require Import Termination.BaseTypeErase.
 
+Require Import Termination.TypeOperations.
+Require Import Termination.TypeOperationsLemmas.
+Require Import Termination.TypeOperationsSyntaxLemmas.
+Require Import Termination.TypeOperationsErase.
+
 Opaque reducible_values.
 Opaque Nat.eq_dec.
 Opaque makeFresh.
 Opaque tlt.
 Opaque annotated_tlt.
-
-(*
-Ltac t_smallstep_infer :=
-  match goal with
-  | H: small_step ?t1 ?t2, H2: satisfies reducible_values _ ?l |- _ =>
-    poseNew (Mark (l) "substitute_value");
-    unshelve epose proof (small_step_subst t1 t2 l _ _ _)
-  end.
-*)
 
 Ltac unfold_open :=
   repeat step || unfold open_reducible in * || t_instantiate_sat3.
@@ -226,6 +223,7 @@ Proof.
   - apply open_reducible_ttrue.
   - apply open_reducible_tfalse.
   - apply open_reducible_ite with x; side_conditions.
+  - apply open_reducible_T_ite with (erase_type T1) (erase_type T2) x; side_conditions; eauto 2 using ite_type_erase.
   - unfold_open; repeat step || t_instantiate_sat3;  auto 3 using not_equivalent with falsity.
   - apply open_reducible_zero.
   - apply open_reducible_succ; auto.

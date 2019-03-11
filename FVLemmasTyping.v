@@ -23,6 +23,9 @@ Require Import Termination.FVLemmasEval.
 Require Import Termination.BaseType.
 Require Import Termination.BaseTypeSyntaxLemmas.
 
+Require Import Termination.TypeOperations.
+Require Import Termination.TypeOperationsSyntaxLemmas.
+
 Lemma subset_singleton_support:
   forall (gamma : context) (x : nat) T,
     lookup Nat.eq_dec gamma x = Some T ->
@@ -290,7 +293,7 @@ Lemma defined_FV:
 Proof.
   apply mut_HT_IT_IC_IS_AE;
     repeat match goal with
-    | _ => t_subset_open || t_pfv_base_type_subset
+    | _ => t_subset_open || t_pfv_base_type_subset || t_pfv_ite2
     | _ => step || apply subset_open2 || apply subset_topen2 || t_listutils
     | _ => progress rewrite subset_add
     | _ => progress rewrite supportAppend, fv_context_append in *

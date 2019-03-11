@@ -66,33 +66,33 @@ Proof.
 Qed.
 
 Lemma reducible_ite:
-  forall theta T t1 t2 t3,
+  forall theta T b t1 t2,
+    wf t1 0 ->
     wf t2 0 ->
-    wf t3 0 ->
+    pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
-    pfv t3 term_var = nil ->
+    is_erased_term t1 ->
     is_erased_term t2 ->
-    is_erased_term t3 ->
     valid_interpretation theta ->
-    reducible theta t1 T_bool ->
-    (equivalent t1 ttrue -> reducible theta t2 T) ->
-    (equivalent t1 tfalse -> reducible theta t3 T) ->
-    reducible theta (ite t1 t2 t3) T.
+    reducible theta b T_bool ->
+    (equivalent b ttrue -> reducible theta t1 T) ->
+    (equivalent b tfalse -> reducible theta t2 T) ->
+    reducible theta (ite b t1 t2) T.
 Proof.
-  intros theta T t1 t2 t3 WF2 WF3 FV2 FV3 H0 H1 H2 H3.
+  intros.
   match goal with
   | H: reducible _ _ T_bool |- _ =>
     unfold reducible, reduces_to, closed_term in H
   end; repeat step || simp reducible_values in *.
 
-  - apply star_backstep_reducible with (ite ttrue t2 t3); repeat step || t_listutils;
+  - apply star_backstep_reducible with (ite ttrue t1 t2); repeat step || t_listutils;
       auto with bsteplemmas; eauto with bfv; eauto with bwf.
     eapply backstep_reducible; repeat step || t_listutils;
       eauto 2 with smallstep;
       eauto with bfv;
       eauto with bwf;
       eauto with b_equiv.
-  - apply star_backstep_reducible with (ite tfalse t2 t3); repeat step || t_listutils;
+  - apply star_backstep_reducible with (ite tfalse t1 t2); repeat step || t_listutils;
       auto with bsteplemmas; eauto with bfv; eauto with bwf.
     eapply backstep_reducible; repeat step || t_listutils;
       eauto 2 with smallstep;
@@ -102,22 +102,22 @@ Proof.
 Qed.
 
 Lemma open_reducible_ite:
-  forall tvars gamma T t1 t2 t3 x,
+  forall tvars gamma T b t1 t2 x,
+    wf t1 0 ->
     wf t2 0 ->
-    wf t3 0 ->
+    subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
-    subset (fv t3) (support gamma) ->
-    ~(x ∈ fv t1) ->
+    ~(x ∈ fv b) ->
     ~(x ∈ fv T) ->
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ tvars) ->
+    is_erased_term b ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    is_erased_term t3 ->
-    open_reducible tvars gamma t1 T_bool ->
-    open_reducible tvars ((x, T_equal t1 ttrue) :: gamma) t2 T ->
-    open_reducible tvars ((x, T_equal t1 tfalse) :: gamma) t3 T ->
-    open_reducible tvars gamma (ite t1 t2 t3) T.
+    open_reducible tvars gamma b T_bool ->
+    open_reducible tvars ((x, T_equal b ttrue) :: gamma) t1 T ->
+    open_reducible tvars ((x, T_equal b tfalse) :: gamma) t2 T ->
+    open_reducible tvars gamma (ite b t1 t2) T.
 Proof.
   intros; unfold open_reducible; steps.
 

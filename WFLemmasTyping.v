@@ -15,6 +15,9 @@ Require Import Termination.WellFormed.
 Require Import Termination.WFLemmasEval.
 Require Import Termination.BaseTypeSyntaxLemmas.
 
+Require Import Termination.TypeOperations.
+Require Import Termination.TypeOperationsSyntaxLemmas.
+
 Open Scope list_scope.
 
 Lemma well_typed_wf:

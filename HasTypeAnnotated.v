@@ -14,6 +14,9 @@ Require Import Termination.AnnotatedTermLemmas.
 Require Import Termination.BaseType.
 Require Import Termination.BaseTypeSyntaxLemmas.
 
+Require Import Termination.TypeOperations.
+Require Import Termination.TypeOperationsSyntaxLemmas.
+
 Lemma annotations:
   (forall tvars gamma t T,
     has_type tvars gamma t T ->

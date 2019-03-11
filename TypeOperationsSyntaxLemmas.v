@@ -1,0 +1,112 @@
+Require Import Coq.Strings.String.
+
+Require Import Termination.Trees.
+Require Import Termination.Sets.
+Require Import Termination.Syntax.
+
+Require Import Termination.WellFormed.
+Require Import Termination.WFLemmas.
+Require Import Termination.TWFLemmas.
+
+Require Import Termination.FVLemmas.
+Require Import Termination.AnnotatedTermLemmas.
+Require Import Termination.Tactics.
+Require Import Termination.TypeOperations.
+Require Import Termination.ListUtils.
+
+Lemma is_annotated_type_ite:
+  forall b T1 T2 T,
+    T_ite b T1 T2 T ->
+    is_annotated_term b ->
+    is_annotated_type T1 ->
+    is_annotated_type T2 ->
+    is_annotated_type T.
+Proof.
+  induction 1; steps.
+Qed.
+
+Ltac t_is_annotated_type_ite :=
+  match goal with
+  | H: T_ite ?b ?T1 ?T2 ?T |- is_annotated_type ?T => apply is_annotated_type_ite with b T1 T2
+  end.
+
+Hint Extern 50 => t_is_annotated_type_ite: bannot.
+
+Lemma wf_ite:
+  forall b T1 T2 T,
+    T_ite b T1 T2 T ->
+    forall k,
+      wf b k ->
+      wf T1 k ->
+      wf T2 k ->
+      wf T k.
+Proof.
+  induction 1; steps; eauto with bwf.
+Qed.
+
+Ltac t_wf_ite :=
+  match goal with
+  | H: T_ite ?b ?T1 ?T2 ?T |- wf ?T _ => apply wf_ite with b T1 T2
+  end.
+
+Hint Extern 50 => t_wf_ite: bwf.
+
+Lemma twf_ite:
+  forall b T1 T2 T,
+    T_ite b T1 T2 T ->
+    forall k,
+      twf b k ->
+      twf T1 k ->
+      twf T2 k ->
+      twf T k.
+Proof.
+  induction 1; steps; eauto with btwf.
+Qed.
+
+Ltac t_twf_ite :=
+  match goal with
+  | H: T_ite ?b ?T1 ?T2 ?T |- twf ?T _ => apply twf_ite with b T1 T2
+  end.
+
+Hint Extern 50 => t_twf_ite: btwf.
+
+Lemma pfv_ite:
+  forall b T1 T2 T,
+    T_ite b T1 T2 T ->
+    forall x tag,
+      x ∈ pfv T tag ->
+      (x ∈ pfv b tag \/ x ∈ pfv T1 tag \/ x ∈ pfv T2 tag).
+Proof.
+  induction 1;
+    repeat match goal with
+           | _ => step || t_listutils
+           | H1: forall _ _, _ -> _, H2: _ ∈ _ |- _ => pose proof (H1 _ _ H2); clear H2
+           end.
+Qed.
+
+Ltac t_pfv_ite :=
+  match goal with
+  | H1: T_ite ?b ?T1 ?T2 ?T, H2: ?x ∈ pfv ?T ?tag |- _ =>
+    poseNew (Mark H2 "pfv_ite");
+    pose proof (pfv_ite _ _ _ _ H1 _ _ H2)
+  end.
+
+Hint Extern 50 => t_pfv_ite: bfv.
+
+Lemma pfv_ite2:
+  forall b T1 T2 T S tag,
+    T_ite b T1 T2 T ->
+    subset (pfv b tag) S ->
+    subset (pfv T1 tag) S ->
+    subset (pfv T2 tag) S ->
+    subset (pfv T tag) S.
+Proof.
+  unfold subset; repeat step || t_pfv_ite.
+Qed.
+
+Ltac t_pfv_ite2 :=
+  match goal with
+  | H: T_ite ?b ?T1 ?T2 ?T |- subset (pfv ?T _) _ => apply pfv_ite2 with b T1 T2
+  end.
+
+Hint Extern 50 => t_pfv_ite2: bfv.

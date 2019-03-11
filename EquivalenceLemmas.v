@@ -234,7 +234,6 @@ Proof.
     eauto using star_smallstep_trans with bsteplemmas smallstep.
 Qed.
 
-Hint Resolve equivalent_ite_true2: b_equiv.
 
 Lemma equivalent_ite_true3:
   forall b e1 e2 e,
@@ -245,8 +244,6 @@ Proof.
   steps.
   eauto using equivalent_ite_true, equivalent_sym, equivalent_trans.
 Qed.
-
-Hint Resolve equivalent_ite_true3: b_equiv.
 
 Lemma equivalent_ite_false:
   forall b e1 e2,
@@ -266,9 +263,66 @@ Proof.
   eauto using equivalent_ite_false, equivalent_sym, equivalent_trans.
 Qed.
 
+Lemma equivalent_ite_false3:
+  forall b e1 e2 e,
+    star small_step b tfalse ->
+    equivalent (ite b e1 e2) e ->
+    equivalent e2 e.
+Proof.
+  steps.
+  eauto using equivalent_ite_false, equivalent_sym, equivalent_trans.
+Qed.
+
 Hint Resolve equivalent_ite_true: b_equiv.
+Hint Resolve equivalent_ite_true2: b_equiv.
+Hint Resolve equivalent_ite_true3: b_equiv.
 Hint Resolve equivalent_ite_false: b_equiv.
 Hint Resolve equivalent_ite_false2: b_equiv.
+Hint Resolve equivalent_ite_false3: b_equiv.
+
+Lemma equivalent_ites_true:
+  forall b u1 v1 u2 v2,
+    star small_step b ttrue ->
+    equivalent (ite b u1 u2) (ite b v1 v2) ->
+    equivalent u1 v1.
+Proof.
+  eauto 4 using equivalent_trans, equivalent_sym with b_equiv.
+Qed.
+
+Hint Immediate equivalent_ites_true: b_equiv.
+
+Lemma equivalent_ites_true2:
+  forall b u1 v1 u2 v2,
+    star small_step b ttrue ->
+    equivalent u1 v1 ->
+    equivalent (ite b u1 u2) (ite b v1 v2).
+Proof.
+  eauto 4 using equivalent_trans, equivalent_sym with b_equiv.
+Qed.
+
+Hint Immediate equivalent_ites_true2: b_equiv.
+
+Lemma equivalent_ites_false:
+  forall b u1 v1 u2 v2,
+    star small_step b tfalse ->
+    equivalent (ite b u1 u2) (ite b v1 v2) ->
+    equivalent u2 v2.
+Proof.
+  eauto 4 using equivalent_trans, equivalent_sym with b_equiv.
+Qed.
+
+Hint Immediate equivalent_ites_false: b_equiv.
+
+Lemma equivalent_ites_false2:
+  forall b u1 v1 u2 v2,
+    star small_step b tfalse ->
+    equivalent u2 v2 ->
+    equivalent (ite b u1 u2) (ite b v1 v2).
+Proof.
+  eauto 5 using equivalent_trans, equivalent_sym with b_equiv.
+Qed.
+
+Hint Immediate equivalent_ites_false2: b_equiv.
 
 Lemma equivalent_match_zero:
   forall n e1 e2,
