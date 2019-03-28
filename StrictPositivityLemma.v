@@ -59,7 +59,7 @@ Lemma strictly_positive_push_forall_fvar:
     (forall a : tree,
         reducible_values theta a A ->
         reducible_values (push_one a pre_theta ++ theta) v (fvar X type_var)) ->
-    forall_implicate (fun a => reducible_values theta a A) pre_theta theta' ->
+    forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
     reducible_values (theta' ++ theta) v (fvar X type_var).
 Proof.
   unfold push_all, push_one;
@@ -67,7 +67,7 @@ Proof.
     repeat match goal with
            | _ => step || simp_red || t_instantiate_reducible || rewrite support_mapValues in * || t_listutils
            | _ => t_lookup_same || t_lookupor || t_lookup_rewrite || t_lookupMap2 || t_lookup
-           | _ => t_forall_implicate_apply || t_forall_implicate_support
+           | _ => t_forall_implies_apply || t_forall_implies_support
            end.
 Qed.
 
@@ -79,7 +79,7 @@ Ltac t_instantiate_reducible2 :=
     H1:reducible_values _ ?v ?T,
     H2:is_erased_term ?v,
     H3: forall a, _ -> reducible_values (push_one _ ?ptheta ++ ?theta) a ?T -> _,
-    H4: forall_implicate _ ?ptheta ?theta'
+    H4: forall_implies _ ?ptheta ?theta'
     |- _ => poseNew (Mark (v, H3) "t_instantiate_reducible2");
           unshelve epose proof (H3 v H2 _)
   end.
@@ -90,7 +90,7 @@ Ltac t_rewrite_support :=
   end.
 
 Ltac t_rewriter :=
-  repeat step || t_listutils || unfold no_type_fvar in * || t_forall_implicate_support ||
+  repeat step || t_listutils || unfold no_type_fvar in * || t_forall_implies_support ||
          t_fv_open ||
          (rewrite is_erased_term_tfv in * by (steps; eauto with berased)) ||
          rewrite support_push_all in * || rewrite support_push_one in *;
@@ -103,7 +103,7 @@ Ltac t_rewriter :=
 Ltac apply_induction H :=
   match goal with
   | H1: non_empty ?theta ?A,
-    H2: forall_implicate _ ?ptheta ?theta' |- reducible_values (?theta' ++ _) _ ?T =>
+    H2: forall_implies _ ?ptheta ?theta' |- reducible_values (?theta' ++ _) _ ?T =>
       apply H with (size T, index T) ptheta A
   end.
 
@@ -132,7 +132,7 @@ Lemma strictly_positive_push_forall_aux:
     (forall a,
       reducible_values theta a A ->
       reducible_values (push_one a pre_theta ++ theta) v T) ->
-    forall_implicate (fun a => reducible_values theta a A) pre_theta theta' ->
+    forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
     reducible_values (theta' ++ theta) v T.
 Proof.
   induction measure as [ PP HH ] using measure_induction; intros; t_instantiate_non_empty;
@@ -203,7 +203,7 @@ Proof.
 
     apply_induction HH;
       repeat
-        step || t_valid_interpretation_equiv || t_forall_implicate_equiv ||
+        step || t_valid_interpretation_equiv || t_forall_implies_equiv ||
         apply left_lex ||
         (progress autorewrite with bsize in * ) ||
         apply strictly_positive_swap ||
@@ -252,7 +252,7 @@ Proof.
 
       repeat
         rewrite reducible_unused_middle in * by (
-          repeat step || t_listutils || t_forall_implicate_support || t_rewrite_support ||
+          repeat step || t_listutils || t_forall_implies_support || t_rewrite_support ||
                  apply valid_interpretation_append ||
                  (eapply valid_interpretation_one; eauto) ||
                  apply no_type_fvar_in_topen ||
@@ -292,7 +292,7 @@ Proof.
       rewrite app_comm_cons.
       lazymatch goal with
       | H1: non_empty ?theta ?A,
-        H2: forall_implicate _ ?ptheta ?theta' |-
+        H2: forall_implies _ ?ptheta ?theta' |-
           reducible_values (((?X, fun t => reducible_values (?theta' ++ ?theta) t ?R) :: ?theta') ++ ?theta) _ ?T =>
           apply HH with (size T, index T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
       end;
@@ -335,7 +335,7 @@ Lemma strictly_positive_push_forall:
     (forall a,
       reducible_values theta a A ->
       reducible_values (push_one a pre_theta ++ theta) v T) ->
-    forall_implicate (fun a => reducible_values theta a A) pre_theta theta' ->
+    forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
     reducible_values (theta' ++ theta) v T.
 Proof.
   eauto using strictly_positive_push_forall_aux.

@@ -79,116 +79,6 @@ Proof.
   unfold non_empty; repeat step || exists v || apply reducible_unused2.
 Qed.
 
-(*
-Lemma reducible_unused_push_all1:
-  forall theta' P theta T v,
-    sat P ->
-    no_type_fvar T (support theta') ->
-    valid_pre_interpretation P theta' ->
-    valid_interpretation theta ->
-    reducible_values (push_all P theta' ++ theta) v T ->
-    reducible_values theta v T.
-Proof.
-  induction theta';
-    repeat step || (poseNew (Mark 0 "once"); eapply IHtheta') || t_reducible_unused3 ||
-           apply valid_interpretation_append || apply valid_interpretation_all || unfold sat in * ||
-           unfold reducibility_candidate in * || instantiate_any;
-    eauto with b_no_type_fvar.
-Qed.
-
-Lemma reducible_unused_push_all2:
-  forall theta' P theta T v,
-    sat P ->
-    no_type_fvar T (support theta') ->
-    valid_pre_interpretation P theta' ->
-    valid_interpretation theta ->
-    reducible_values theta v T ->
-    reducible_values (push_all P theta' ++ theta) v T.
-Proof.
-  induction theta';
-    repeat step || (poseNew (Mark 0 "once"); eapply IHtheta') || apply reducible_unused2 ||
-           apply valid_interpretation_append || apply valid_interpretation_all || unfold sat in * ||
-           unfold reducibility_candidate in * || instantiate_any;
-    eauto with b_no_type_fvar.
-Qed.
-
-Lemma reducible_unused_push_all:
-  forall theta' P theta T v,
-    sat P ->
-    no_type_fvar T (support theta') ->
-    valid_pre_interpretation P theta' ->
-    valid_interpretation theta -> (
-      reducible_values (push_all P theta' ++ theta) v T <->
-      reducible_values theta v T
-    ).
-Proof.
-  intuition auto; eauto using reducible_unused_push_all1, reducible_unused_push_all2.
-Qed.
-*)
-
-(*
-Lemma reducible_unused_push_one1:
-  forall theta' (P: tree -> Prop) a theta T v,
-    no_type_fvar T (support theta') ->
-    P a ->
-    valid_pre_interpretation P theta' ->
-    valid_interpretation theta ->
-    reducible_values (push_one a theta' ++ theta) v T ->
-    reducible_values theta v T.
-Proof.
-  induction theta';
-    repeat step || (poseNew (Mark 0 "once"); eapply IHtheta') || t_reducible_unused3 ||
-           apply valid_interpretation_append || eapply valid_interpretation_one || unfold sat in * ||
-           unfold reducibility_candidate in * || instantiate_any;
-    eauto with b_no_type_fvar.
-Qed.
-
-Lemma reducible_unused_push_one2:
-  forall theta' (P: tree -> Prop) theta T v a,
-    P a ->
-    no_type_fvar T (support theta') ->
-    valid_pre_interpretation P theta' ->
-    valid_interpretation theta ->
-    reducible_values theta v T ->
-    reducible_values (push_one a theta' ++ theta) v T.
-Proof.
-  induction theta';
-    repeat step || apply reducible_unused2 || apply valid_interpretation_append ||
-           (eapply valid_interpretation_one; eauto);
-    eauto with b_no_type_fvar;
-    try solve [ eapply IHtheta'; eauto with b_no_type_fvar ].
-Qed.
-
-Lemma reducible_unused_push_one:
-  forall theta' (P: tree -> Prop) theta T a v,
-    P a ->
-    no_type_fvar T (support theta') ->
-    valid_pre_interpretation P theta' ->
-    valid_interpretation theta -> (
-      reducible_values (push_one a theta' ++ theta) v T <->
-      reducible_values theta v T
-    ).
-Proof.
-  intuition auto; eauto using reducible_unused_push_one1, reducible_unused_push_one2.
-Qed.
-*)
-(*
-Ltac t_rewrite_push_one :=
-  match goal with
-  | H1: reducible_values ?theta ?a ?A,
-    H2: reducible_values (push_one ?a ?theta' ++ ?theta) ?v ?T |- _ =>
-      rewrite (reducible_unused_push_one _ (fun a => reducible_values theta a A)) in H2 by (
-        (repeat step || apply no_type_fvar_open || t_valid_pre_interpration_same);
-        try solve [ apply_any; assumption ]
-      )
-  | H1: reducible_values ?theta ?a ?A |-
-        reducible_values (push_one ?a ?theta' ++ ?theta) ?v ?T =>
-      rewrite (reducible_unused_push_one _ (fun a => reducible_values theta a A)) by (
-        (repeat step || apply no_type_fvar_open || t_valid_pre_interpration_same);
-        try solve [ apply_any; assumption ]
-      )
-  end.
-*)
 Lemma strictly_positive_open_aux:
   forall n T vars rep k,
     size T < n ->
@@ -430,19 +320,19 @@ Qed.
 
 Definition pre_interpretation := list (nat * (tree -> tree -> Prop)).
 
-Fixpoint forall_implicate (P: tree -> Prop) (pre_theta: pre_interpretation) (theta: interpretation) :=
+Fixpoint forall_implies (P: tree -> Prop) (pre_theta: pre_interpretation) (theta: interpretation) :=
   match pre_theta, theta with
   | nil, nil => True
   | (X,pre_rc) :: pre_theta', (Y,rc) :: theta' =>
       X = Y /\
-      forall_implicate P pre_theta' theta' /\
+      forall_implies P pre_theta' theta' /\
       forall (v: tree), (forall a, P a -> pre_rc a v) -> rc v
   | _, _ => False
   end.
 
-Lemma forall_implicate_apply:
+Lemma forall_implies_apply:
   forall P pre_theta theta X pre_rc rc v,
-    forall_implicate P pre_theta theta ->
+    forall_implies P pre_theta theta ->
     lookup Nat.eq_dec pre_theta X = Some pre_rc ->
     lookup Nat.eq_dec theta X = Some rc ->
     (forall a, P a -> pre_rc a v) ->
@@ -451,42 +341,42 @@ Proof.
   induction pre_theta; destruct theta; repeat step || eapply_any.
 Qed.
 
-Ltac t_forall_implicate_apply :=
+Ltac t_forall_implies_apply :=
   match goal with
-  | H1: forall_implicate ?P ?ptheta ?theta,
+  | H1: forall_implies ?P ?ptheta ?theta,
     H2: lookup _ ?ptheta ?X = Some ?prc,
     H3: lookup _ ?theta ?X = Some ?rc |- ?rc ?v =>
-    apply (forall_implicate_apply _ _ _ _ _ _ _ H1 H2 H3)
+    apply (forall_implies_apply _ _ _ _ _ _ _ H1 H2 H3)
   end.
 
-Lemma forall_implicate_support:
+Lemma forall_implies_support:
   forall P pre_theta theta,
-    forall_implicate P pre_theta theta ->
+    forall_implies P pre_theta theta ->
     support pre_theta = support theta.
 Proof.
   induction pre_theta; destruct theta; repeat step || f_equal.
 Qed.
 
-Ltac t_forall_implicate_support :=
+Ltac t_forall_implies_support :=
   match goal with
-  | H: forall_implicate ?P ?ptheta ?theta |- _ =>
-    poseNew (Mark (ptheta,theta) "forall_implicate_suppoft");
-    pose proof (forall_implicate_support _ _ _ H)
+  | H: forall_implies ?P ?ptheta ?theta |- _ =>
+    poseNew (Mark (ptheta,theta) "forall_implies_suppoft");
+    pose proof (forall_implies_support _ _ _ H)
   end.
 
-Lemma forall_implicate_equiv:
+Lemma forall_implies_equiv:
   forall P1 P2 ptheta theta,
-    forall_implicate P1 ptheta theta ->
+    forall_implies P1 ptheta theta ->
     (forall x, P1 x <-> P2 x) ->
-    forall_implicate P2 ptheta theta.
+    forall_implies P2 ptheta theta.
 Proof.
   induction ptheta; destruct theta; steps; eauto with beapply_any.
 Qed.
 
-Ltac t_forall_implicate_equiv :=
+Ltac t_forall_implies_equiv :=
   match goal with
-  | H1: forall_implicate ?P1 ?ptheta ?theta |- forall_implicate _ ?ptheta ?theta =>
-      apply forall_implicate_equiv with P1
+  | H1: forall_implies ?P1 ?ptheta ?theta |- forall_implies _ ?ptheta ?theta =>
+      apply forall_implies_equiv with P1
   end.
 
 Lemma strictly_positive_append_aux:
