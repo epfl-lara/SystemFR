@@ -9,7 +9,9 @@ Require Import SystemFR.WFLemmas.
 
 Require Import SystemFR.WFLemmasEval.
 Require Import SystemFR.TermProperties.
+
 Require Import SystemFR.Equivalence.
+Require Import SystemFR.EquivalenceLemmas.
 
 Require Import Coq.Strings.String.
 
@@ -165,4 +167,66 @@ Lemma tlt_complete:
     star small_step (tlt (build_nat a) (build_nat b)) ttrue.
 Proof.
   unfold tlt; induction a; destruct b; repeat step || eauto with omega || one_step.
+Qed.
+
+Lemma is_nat_value_buildable:
+  forall v, is_nat_value v ->
+    exists n, v = build_nat n.
+Proof.
+  induction 1; steps.
+  - exists 0; steps.
+  - exists (S n); steps.
+Qed.
+
+Ltac t_is_nat_value_buildable :=
+  match goal with
+  | H: is_nat_value ?v |- _ =>
+    poseNew (Mark v "is_nat_value_buildable");
+    pose proof (is_nat_value_buildable v H)
+  end.
+
+Lemma tree_size_build_nat:
+  forall n, tree_size (build_nat n) = n.
+Proof.
+  induction n; steps.
+Qed.
+
+Lemma tlt_complete2:
+  forall a b,
+    is_nat_value a ->
+    is_nat_value b ->
+    tree_size a < tree_size b ->
+    star small_step (tlt a b) ttrue.
+Proof.
+  repeat step || t_is_nat_value_buildable || apply tlt_complete || rewrite tree_size_build_nat in *.
+Qed.
+
+Lemma true_is_irred: irred ttrue.
+Proof.
+  unfold irred; repeat step || t_nostep.
+Qed.
+
+Lemma equivalent_tlt_steps:
+  forall t1 t2 v1 v2,
+    equivalent (tlt t1 t2) ttrue ->
+    star small_step t1 v1 ->
+    star small_step t2 v2 ->
+    is_nat_value v1 ->
+    is_nat_value v2 ->
+    equivalent (tlt v1 v2) ttrue.
+Proof.
+  unfold tlt; intros.
+  apply equivalent_star.
+  apply equivalent_true in H.
+  apply (star_many_steps _ (app
+           (notype_rec v1 (notype_lambda (tmatch (lvar 0 term_var) tfalse ttrue))
+              (notype_lambda
+                 (tmatch (lvar 0 term_var) tfalse (app (app (lvar 2 term_var) uu) (lvar 0 term_var)))))
+           t2)) in H; eauto with bsteplemmas; repeat step || unfold irred || t_nostep.
+  inversion H; repeat step || t_invert_step || t_nostep || step_inversion is_value.
+
+  - eapply Trans; eauto with smallstep; steps.
+    eapply star_many_steps; eauto with bsteplemmas values; eauto using true_is_irred.
+  - eapply Trans; eauto with smallstep; steps.
+    eapply star_many_steps; eauto with bsteplemmas values; eauto using true_is_irred.
 Qed.

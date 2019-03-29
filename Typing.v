@@ -10,6 +10,7 @@ Require Import SystemFR.SmallStep.
 Require Import SystemFR.TypeErasure.
 Require Import SystemFR.StrictPositivity.
 
+Require Import SystemFR.Polarity.
 Require Import SystemFR.NatUtils.
 Require Import SystemFR.NatCompare.
 Require Import SystemFR.LVarOperations.
@@ -1048,6 +1049,25 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_annotated_type Ts ->
       are_equal tvars gamma n1 n2 ->
       is_subtype tvars gamma (T_rec n1 T0 Ts) (T_rec n2 T0 Ts)
+
+| ISRecPos:
+    forall X tvars gamma n1 n2 T0 Ts,
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      subset (fv T0) (support gamma) ->
+      subset (fv Ts) (support gamma) ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      ~(X ∈ pfv T0 type_var) ->
+      ~(X ∈ pfv Ts type_var) ->
+      ~(X ∈ tvars) ->
+      has_polarities (topen 0 Ts (fvar X type_var)) ((X, Positive) :: nil) ->
+      are_equal tvars gamma (annotated_tlt n1 (succ n2)) ttrue ->
+      has_type tvars gamma n1 T_nat ->
+      is_subtype tvars gamma (topen 0 Ts (T_rec zero T0 Ts)) T0 ->
+      is_subtype tvars gamma (T_rec n2 T0 Ts) (T_rec n1 T0 Ts)
 
 with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,

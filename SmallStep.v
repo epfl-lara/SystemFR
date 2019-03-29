@@ -1,6 +1,7 @@
 Require Import SystemFR.Syntax.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.PrimitiveSize.
+Require Import SystemFR.StarRelation.
 
 Inductive is_value: tree -> Prop :=
 | IVUnit: is_value uu
@@ -24,6 +25,25 @@ Inductive is_nat_value: tree -> Prop :=
 | INVSucc: forall v, is_nat_value v -> is_nat_value (succ v).
 
 Hint Constructors is_nat_value: b_inv.
+
+Ltac t_is_value t :=
+  unify t zero ||
+  unify t uu ||
+  unify t tfalse ||
+  unify t ttrue ||
+  match goal with
+  | H: is_value t |- _ => idtac
+  | H: is_nat_value t |- _ => idtac
+  | _ => match t with
+        | succ ?v => t_is_value v
+        | pp ?v1 ?v2 => t_is_value v1; t_is_value v2
+        | fvar _ term_var => idtac
+        | notype_lambda _ => idtac
+        | notype_tfold ?v => t_is_value v
+        | tleft ?v => t_is_value v
+        | tright ?v => t_is_value v
+        end
+  end.
 
 Ltac t_invert_nat_value :=
   match goal with

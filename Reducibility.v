@@ -34,6 +34,10 @@ Require Import SystemFR.SetLemmas.
 Require Import SystemFR.Equivalence.
 Require Import SystemFR.EquivalenceLemmas.
 
+Require Import SystemFR.Polarity.
+Require Import SystemFR.PolarityErase.
+Require Import SystemFR.PolarityLemmas.
+
 Require Import SystemFR.RedTactics.
 Require Import SystemFR.RedTactics2.
 Require Import SystemFR.ReducibilityCandidate.
@@ -62,12 +66,14 @@ Require Import SystemFR.ReducibilityFixRules.
 Require Import SystemFR.ReducibilityTypeRefineRules.
 Require Import SystemFR.ReducibilityRecGenRules.
 Require Import SystemFR.ReducibilityIteTypeRules.
+Require Import SystemFR.ReducibilityRecPos.
 
 Require Import SystemFR.StrictPositivity.
 Require Import SystemFR.StrictPositivityLemmas.
 Require Import SystemFR.StrictPositivityErased.
 
 Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WFLemmasLists.
 Require Import SystemFR.WFLemmasTyping.
 
 Require Import SystemFR.TWFLemmas.
@@ -77,6 +83,7 @@ Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasTyping.
 Require Import SystemFR.FVLemmasTyping2.
 Require Import SystemFR.FVLemmasContext.
+Require Import SystemFR.FVLemmasLists.
 
 Require Import SystemFR.NatCompare.
 Require Import SystemFR.NatCompareErase.
@@ -311,6 +318,13 @@ Proof.
   - eapply reducible_subtype_forall; eauto.
   - eapply reducible_subtype_exists; eauto.
   - eapply reducible_values_rec_equivalent; eauto with berased.
+  - apply reducible_values_rec_pos with (psubstitute (erase_term n2) l term_var) X;
+      eauto with berased;
+        repeat side_conditions || t_instantiate_sat3 || t_pfv_in_subst || t_substitutions ||
+               rewrite tlt_erase in * ||
+               rewrite psubstitute_tlt in * ||
+               apply_any;
+        eauto using has_polarities_subst_erase.
 
   (* equality *)
   - eauto 2 with b_equiv.

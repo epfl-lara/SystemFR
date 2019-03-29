@@ -466,6 +466,15 @@ Proof.
   induction 1; repeat step || t_nostep.
 Qed.
 
+Ltac t_star_smallstep_from_value :=
+  match goal with
+  | H: star small_step ?v _ |- _ =>
+    t_is_value v;
+    unshelve epose proof (star_smallstep_value _ _ H _);
+    eauto with values;
+    clear H
+  end.
+
 Lemma star_smallstep_tsize_inv:
   forall t v,
     star small_step t v ->
