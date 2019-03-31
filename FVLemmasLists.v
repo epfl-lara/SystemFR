@@ -102,3 +102,13 @@ Proof.
     repeat step || t_listutils;
     eauto using closed_mapping_fv with falsity.
 Qed.
+
+Ltac t_pfv_in_subst :=
+  match goal with
+  | H: _ ∈ pfv (psubstitute _ _ term_var) type_var |- _ =>
+      poseNew (Mark H "pfv_in_subst");
+      unshelve epose proof (pfv_in_subst _ _ _ _ _ _ H)
+  | H: _ ∈ pfv (psubstitute _ _ type_var) term_var |- _ =>
+      poseNew (Mark H "pfv_in_subst");
+      unshelve epose proof (pfv_in_subst _ _ _ _ _ _ H)
+  end.

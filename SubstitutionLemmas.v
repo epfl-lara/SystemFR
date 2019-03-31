@@ -9,7 +9,6 @@ Require Import Termination.Sets.
 Require Import Termination.SmallStep.
 Require Import Termination.WFLemmas.
 Require Import Termination.TWFLemmas.
-Require Import Termination.FVLemmas.
 Require Import Termination.WellFormed.
 
 Lemma substitute_nothing:
@@ -108,7 +107,6 @@ Qed.
 
 Lemma substitute_append:
   forall l1 l2 t tag,
-    NoDup (l1 ++ l2) ->
     pclosed_mapping l1 tag ->
     psubstitute t (l1 ++ l2) tag = psubstitute (psubstitute t l1 tag) l2 tag.
 Proof.
@@ -261,6 +259,31 @@ Proof.
            end.
 Qed.
 
+Lemma NoDup_cons:
+  forall l (x : nat) (rep : tree),
+    NoDup l ->
+    ~(x ∈ l) ->
+    NoDup (l ++ x :: nil).
+Proof.
+  induction l; repeat step || t_listutils || step_inversion NoDup.
+Qed.
+
+Lemma substitute_cons4:
+  forall l t x rep tag,
+    ~(x ∈ support l) ->
+    pclosed_mapping l tag ->
+    psubstitute t ((x,rep) :: l) tag =
+    psubstitute (psubstitute t l tag) ((x,rep) :: nil) tag.
+Proof.
+  intros.
+  rewrite (subst_permutation _ _ (l ++ ((x,rep) :: nil)));
+    repeat step || unfold equivalent_subst || t_lookup ||
+           (progress rewrite obvious_lookup in * by steps) ||
+           (rewrite substitute_append by steps) ||
+           t_lookupor;
+    eauto with blookup.
+Qed.
+
 Definition weak_equivalent_subst { T } (vars: list nat) (l1 l2: list (nat * T)): Prop :=
   forall s t,
     s ∈ vars -> (
@@ -322,6 +345,16 @@ Proof.
   unfold weak_equivalent_subst; steps.
   - erewrite lookup_remove2 in H1; steps; eauto.
   - erewrite lookup_remove2; steps; eauto.
+Qed.
+
+Lemma substitute_skip_one:
+  forall l t x1 x2 e1 e2 tag,
+    ~(x2 ∈ pfv t tag) ->
+    psubstitute t ((x1, e1) :: (x2, e2) :: l) tag = psubstitute t ((x1,e1) :: l) tag.
+Proof.
+  intros.
+  rewrite cons_app.
+  rewrite substitute_skip; steps.
 Qed.
 
 Lemma obvious_equivalence:

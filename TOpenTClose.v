@@ -16,6 +16,24 @@ Open Scope list_scope.
 
 Opaque Nat.eq_dec.
 
+Lemma open_close:
+  forall t rep x k,
+    wf t k ->
+    open k (close k t x) rep = psubstitute t ((x, rep) :: nil) term_var.
+Proof.
+  induction t;
+    repeat step || tequality || t_listutils; eauto with omega.
+Qed.
+
+Lemma open_close2:
+  forall t x k,
+    wf t k ->
+    open k (close k t x) (fvar x term_var) = t.
+Proof.
+  induction t;
+    repeat step || tequality || t_listutils; eauto with omega.
+Qed.
+
 Lemma topen_tclose:
   forall T rep x k,
     twf T k ->
@@ -25,10 +43,14 @@ Proof.
     repeat step || tequality || t_listutils; eauto with omega.
 Qed.
 
-(*
-  topen 0 (topen 1 A (topen 0 B R)) R =
-  topen k (tclose 0 (topen 1 A (topen 0 B X))) R
-*)
+Lemma topen_tclose2:
+  forall T X k,
+    twf T k ->
+    topen k (tclose k T X) (fvar X type_var) = T.
+Proof.
+  induction T;
+    repeat step || tequality || t_listutils; eauto with omega.
+Qed.
 
 Lemma topen_twice:
   forall A B R X k,

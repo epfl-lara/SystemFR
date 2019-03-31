@@ -52,16 +52,19 @@ Ltac t_closing :=
 
 Ltac t_closer := try solve [ t_closing ].
 
+Ltac t_rewriting :=
+  (rewrite fv_subst_different_tag by (steps; eauto with bfv)) ||
+  (rewrite substitute_nothing2 in * by t_rewrite) ||
+  (rewrite substitute_open3 in * by t_rewrite) ||
+  (rewrite substitute_topen3 in * by t_rewrite) ||
+  (rewrite substitute_skip in * by t_rewrite) ||
+  (rewrite substitute_open in * by t_rewrite) ||
+  (rewrite substitute_topen in * by t_rewrite).
+
 Ltac tac0 :=
   repeat step || t_listutils || finisher || apply SatCons ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
-         (rewrite fv_subst_different_tag by (steps; eauto with bfv)) ||
-         (rewrite substitute_nothing2 in * by t_rewrite) ||
-         (rewrite substitute_open3 in * by t_rewrite) ||
-         (rewrite substitute_topen3 in * by t_rewrite) ||
-         (rewrite substitute_skip in * by t_rewrite) ||
-         (rewrite substitute_open in * by t_rewrite) ||
-         (rewrite substitute_topen in * by t_rewrite);
+           t_rewriting ||
            t_closer;
            eauto with b_equiv;
            eauto with bwf bfv;

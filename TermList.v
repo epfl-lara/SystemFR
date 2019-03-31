@@ -82,45 +82,6 @@ Qed.
 
 Hint Resolve satisfies_same_support: btermlist.
 
-(* FIXME: needs to be adapted for type substitutions
-
-Lemma satisfies_subst:
-  forall (P: term -> term -> Prop) gamma1 gamma2 l1 l2 x rep T ltypes,
-    support gamma1 = support l1 ->
-    support gamma2 = support l2 ->
-    ~(x ∈ fv T) ->
-    ~(x ∈ fv_context gamma2) ->
-    ~(x ∈ support l1) ->
-    ~(x ∈ support l2) ->
-    ~(x ∈ support ltypes) ->
-    (forall z, z ∈ support l1 -> z ∈ fv T -> False) ->
-    (forall z, z ∈ support l1 -> z ∈ fv rep -> False) ->
-    fv (substitute rep l2) = nil ->
-    wf (substitute rep l2) 0 ->
-    P (substitute rep l2) (substitute T (l2 ++ ltypes)) ->
-    satisfies P (substitute_context gamma1 ((x,rep) :: nil) ++ gamma2) (l1 ++ l2) ltypes ->
-    satisfies P (gamma1 ++ (x,T) :: gamma2) (l1 ++ (x, substitute rep (l1 ++ l2)) :: l2) ltypes.
-Proof.
-  induction gamma1; repeat step.
-  - destruct l1; repeat step || constructor.
-  - destruct l1 as [ | z zs ] eqn:LL;
-      repeat match goal with
-             | _ => step || t_listutils || step_inversion satisfies || constructor
-             | _ => unfold subset in *
-             end; eauto with bfv.
-
-    + rewrite substitute_nothing2; steps; eauto.
-      rewrite <- substitute_cons3 in *.
-      erewrite subst_permutation; eauto.
-      eapply obvious_equivalence3.
-
-
-      eauto using obvious_equivalence3.
-    + rewrite substitute_nothing2; steps; eauto.
-      apply IHgamma1; repeat step || step_inversion NoDup; eauto.
-Qed.
-*)
-
 Ltac t_instantiate_sat :=
   match goal with
   | H1: forall lterms, satisfies ?P ?G lterms -> _,
@@ -140,6 +101,16 @@ Ltac t_termlist :=
       poseNew (Mark (p,T) "satisfies");
       pose proof (satisfies_lookup _ _ _ H3 _ _ _ H1 H2)
   end.
+
+Lemma var_in_support:
+  forall x P gamma l,
+    satisfies P gamma l ->
+    ~(x ∈ support gamma) ->
+    x ∈ support l ->
+    False.
+Proof.
+  repeat step || t_termlist.
+Qed.
 
 Ltac t_satisfies :=
   match goal with
