@@ -43,6 +43,7 @@ Require Import Termination.ListUtils.
 Require Import Termination.TOpenTClose.
 Require Import Termination.NoTypeFVar.
 Require Import Termination.StrictPositivity.
+Require Import Termination.NoTypeFVarLemmas.
 
 Require Import Termination.FVLemmas.
 
@@ -160,35 +161,6 @@ Ltac t_red_is_val :=
     eauto with bapply_any.
 
 Hint Extern 50 => solve [ t_red_is_val ]: b_red_is_val.
-
-(*
-Lemma sat_p:
-  forall P theta a A,
-    reducible_values theta a A ->
-    (forall a, P a <-> reducible_values theta a A) ->
-    sat P.
-Proof.
-  unfold sat; steps; eauto with bapply_any.
-Qed.
-*)
-
-Definition similar_sets (rel: M nat nat) (vars vars': list nat): Prop :=
-  forall x y,
-    lookup Nat.eq_dec rel x = Some y ->
-    lookup Nat.eq_dec (swap rel) y = Some x ->
-    (x ∈ vars <-> y ∈ vars').
-
-Lemma no_type_fvar_rename:
-  forall T T' vars vars' rel,
-    no_type_fvar T vars ->
-    equal_with_relation rel T T' ->
-    similar_sets rel vars vars' ->
-    no_type_fvar T' vars'.
-Proof.
-  unfold no_type_fvar, similar_sets;
-    repeat step || t_equal_with_relation_pfv2 || t_lookup_same;
-    eauto with beapply_any.
-Qed.
 
 Lemma strictly_positive_rename_aux:
   forall n T T' vars vars' rel,

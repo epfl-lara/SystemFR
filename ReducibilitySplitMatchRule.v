@@ -96,12 +96,12 @@ Proof.
            t_termlist || step_inversion satisfies ||
            simp_red.
 
-  destruct t'0; steps.
+  t_invert_nat_value; steps.
 
   - unshelve epose proof (H29 (l1 ++ (x, notype_trefl) :: (y, notype_trefl) :: lterms) _);
       repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
-  - unshelve epose proof (H30 (l1 ++ (x, notype_trefl) :: (y, notype_trefl) :: (v,t'0) :: lterms) _);
+  - unshelve epose proof (H30 (l1 ++ (x, notype_trefl) :: (y, notype_trefl) :: (v,v0) :: lterms) _);
       clear H29; clear H30; repeat tac1 || step_inversion NoDup;
       eauto 2 using satisfies_drop.
 Qed.

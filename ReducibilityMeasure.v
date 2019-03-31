@@ -18,16 +18,34 @@ Definition index (T: tree): option tree :=
   | _ => None
   end.
 
-Equations nat_value_to_nat (v: tree) (p: is_nat_value v): nat :=
-  nat_value_to_nat zero _ => 0;
-  nat_value_to_nat (succ v') _ => S (nat_value_to_nat v' _).
+Set Program Mode.
+
+Fixpoint nat_value_to_nat (v: tree) (p: is_nat_value v): nat :=
+  match v with
+  | zero  => 0
+  | succ v' => S (nat_value_to_nat v' _)
+  | _ => False_rec nat _
+  end.
+
+Ltac destruct_is_nat_value :=
+  match goal with
+  | H: is_nat_value ?v |- _ =>
+     is_var v;
+     destruct H
+  end.
+
+Ltac t_nat_value_to_nat :=
+  repeat program_simpl || step || step_inversion is_nat_value;
+    try solve [ destruct_is_nat_value; repeat step ].
+
+Solve Obligations with t_nat_value_to_nat.
 
 Fail Next Obligation.
 
 Lemma nat_value_to_nat_fun:
   forall v p1 p2, nat_value_to_nat v p1 = nat_value_to_nat v p2.
 Proof.
-  induction v; repeat step || simp nat_value_to_nat in *.
+  induction v; repeat step || step_inversion is_nat_value.
 Qed.
 
 Definition lt_index (i1 i2: option tree) :=
@@ -51,7 +69,7 @@ Lemma acc_ind:
     star small_step n v ->
     Acc lt_index (Some n).
 Proof.
-  induction m; destruct v; steps; try omega.
+  induction m; destruct p; steps; try omega.
   - apply Acc_intro; repeat step || tlu || t_deterministic_star || simp nat_value_to_nat in *; try omega.
   - apply Acc_intro; repeat step || tlu || t_deterministic_star || simp nat_value_to_nat in *.
     apply IHm with v1 p1; steps.
@@ -123,5 +141,7 @@ Lemma lt_index_step:
     lt_index (Some v) (Some t).
 Proof.
   unfold lt_index; right.
-  unshelve eexists v, t, v, (succ v), _, _; steps.
+  unshelve eexists v, t, v, (succ v), _, _; steps;
+    eauto with b_inv;
+    eauto using nat_value_to_nat_succ.
 Qed.

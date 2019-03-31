@@ -9,6 +9,7 @@ Require Import Termination.WFLemmas.
 Require Import Termination.WellFormed.
 Require Import Termination.WFLemmasEval.
 Require Import Termination.TermProperties.
+Require Import Termination.Equivalence.
 
 Require Import Coq.Strings.String.
 
@@ -59,13 +60,14 @@ Lemma tlt_a_zero:
     False.
 Proof.
   assert (is_value ttrue); steps.
-  unfold tlt in *; destruct a;
+  unfold tlt in *;
     repeat step || t_invert_star || t_star_smallstep_app_onestep.
 Qed.
 
 Ltac t_tlt_a_zero :=
   match goal with
   | H: star small_step (tlt ?a zero) ttrue |- _ =>
+    poseNew (Mark 0 "t_tlt_a_zero");
     apply False_ind; apply tlt_a_zero with a
   end.
 
@@ -75,7 +77,7 @@ Lemma tlt_zero_b:
     star small_step (tlt zero b) ttrue ->
     1 <= tree_size b.
 Proof.
-  destruct b; repeat step || t_tlt_a_zero;
+  destruct 1; repeat step || t_tlt_a_zero;
     eauto with omega.
 Qed.
 
@@ -92,39 +94,45 @@ Lemma open_is_nat_value_wf:
     wf rep 0 ->
     wf (open i v rep) j.
 Proof.
-  induction v; steps.
+  induction 1; steps.
 Qed.
 
 Hint Resolve open_is_nat_value_wf: bwf.
 
 Lemma tlt_sound:
-  forall a b,
+  forall a,
     is_nat_value a ->
-    is_nat_value b ->
+    forall b, is_nat_value b ->
     star small_step (tlt a b) ttrue ->
     tree_size a < tree_size b.
 Proof.
-  induction a; steps; eauto using tlt_zero_b.
-  destruct b; repeat step || t_tlt_a_zero.
+  induction 1; steps; eauto using tlt_zero_b.
+  destruct H0; repeat step || t_tlt_a_zero; eauto with b_inv.
   assert (is_value ttrue); steps.
   assert (is_value zero); steps.
+  apply le_n_S.
+  apply_any; steps; eauto with values.
   unfold tlt in *;
-    repeat step || apply le_n_S || apply_any || t_invert_star ||
-           (rewrite open_none in * by (repeat step; eauto with bwf)) ||
+    repeat step || t_invert_star ||
+           (rewrite open_none in * by (repeat step; eauto with bwf b_inv)) ||
            t_star_smallstep_app_onestep;
     eauto with values.
 
-  eapply star_many_steps in H24; eauto with smallstep bsteplemmas; repeat step || unfold irred || t_invert_step.
+  eapply star_many_steps in H24; eauto with smallstep bsteplemmas;
+    repeat step || unfold irred || t_invert_step.
   apply star_smallstep_app_l; steps.
   eapply Trans; eauto using SPBetaApp with values;
-    repeat step || (rewrite open_none in * by (repeat step; eauto with bwf)).
+    repeat step || (rewrite open_none in * by (repeat step; eauto with bwf b_inv)).
 Qed.
 
 Ltac t_tlt_sound :=
   match goal with
   | H: star small_step (tlt ?a ?b) ttrue |- _ =>
     poseNew (Mark (a,b) "tlt_sound");
-    unshelve epose proof (tlt_sound a b _ _ H)
+    unshelve epose proof (tlt_sound a _ b _ H)
+  | H: equivalent (tlt ?a ?b) ttrue |- _ =>
+    poseNew (Mark (a,b) "tlt_sound");
+    unshelve epose proof (tlt_sound a _ b _ _)
   end.
 
 Lemma open_tlt:

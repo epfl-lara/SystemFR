@@ -21,7 +21,8 @@ Lemma nat_value_fv:
   forall v tag,
     is_nat_value v -> pfv v tag = nil.
 Proof.
-  induction v; repeat step || t_listutils.
+  induction 1;
+    repeat step || t_listutils.
 Qed.
 
 Hint Immediate nat_value_fv: bfv.

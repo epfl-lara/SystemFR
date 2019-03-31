@@ -60,12 +60,12 @@ Ltac t_apply_ih2 :=
   lazymatch goal with
   | IH: forall m, _ -> forall T T' t theta theta' l, _ ,
     H1: reducible_values ?theta' ?t ?T',
-    H2: equivalent_with_relation ?rel ?theta ?theta' |-
+    H2: equivalent_with_relation ?rel ?theta ?theta' _ |-
       reducible_values ?theta ?t ?T =>
         unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
   | IH: forall m, _ -> forall T T' t theta theta' l, _ ,
     H1: reducible_values ?theta ?t ?T,
-    H2: equivalent_with_relation ?rel ?theta ?theta' |-
+    H2: equivalent_with_relation ?rel ?theta ?theta' _ |-
       reducible_values ?theta' ?t ?T' =>
         unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
   end.
@@ -82,7 +82,7 @@ Lemma reducible_rename_aux:
     (size T, index T) = measure ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
-    equivalent_with_relation rel theta theta' ->
+    equivalent_with_relation rel theta theta' equivalent_rc ->
     equal_with_relation rel T T' ->
     (
       reducible_values theta t T <->
@@ -210,7 +210,8 @@ Proof.
           (rewrite substitute_topen3 in * by steps);
         try omega;
         eauto using in_remove_support;
-        eauto using equivalent_rc_refl.
+        eauto using equivalent_rc_refl;
+        eauto 2 using equivalent_rc_sym.
 
   - (* case recursive type at n + 1 *)
     unshelve eexists n', v', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
@@ -276,7 +277,8 @@ Proof.
       try solve [ apply right_lex; apply lt_index_step; auto ];
       eauto using in_remove_support;
       eauto using reducibility_is_candidate;
-      eauto with bfv.
+      eauto with bfv;
+      try solve [ apply_any; assumption ].
 Qed.
 
 Lemma reducible_rename :
@@ -284,7 +286,7 @@ Lemma reducible_rename :
     reducible_values theta t T ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
-    equivalent_with_relation rel theta theta' ->
+    equivalent_with_relation rel theta theta' equivalent_rc ->
     equal_with_relation rel T T' ->
     reducible_values theta' t T'     .
 Proof.
@@ -307,8 +309,7 @@ Proof.
            apply equal_with_relation_topen ||
            apply equal_with_idrel ||
            unfold equivalent_with_relation;
-           eauto using equivalent_rc_refl;
-           eauto using equivalent_rc_at_refl.
+           eauto using equivalent_at_refl, equivalent_rc_refl.
 Qed.
 
 Lemma reducible_rename_one_rc:
@@ -329,8 +330,7 @@ Proof.
            apply equal_with_relation_topen ||
            apply equal_with_idrel ||
            unfold equivalent_with_relation;
-           eauto using equivalent_rc_refl;
-           eauto using equivalent_rc_at_refl.
+           eauto using equivalent_rc_refl, equivalent_at_refl.
 Qed.
 
 Lemma reducible_rename_permute:
@@ -349,6 +349,5 @@ Proof.
     repeat step || apply valid_interpretation_append || apply equal_with_relation_topen;
     eauto using equal_with_idrel.
 
-  +
-  apply equivalent_with_relation_permute2; steps.
+  apply equivalent_with_relation_permute2; steps; eauto using equivalent_rc_refl.
 Qed.

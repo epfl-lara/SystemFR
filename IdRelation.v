@@ -86,18 +86,11 @@ Proof.
   unfold equivalent_rc; steps.
 Qed.
 
-Lemma equivalent_rc_at_right:
-  forall x y theta t,
-    x <> y ->
-    equivalent_rc_at theta ((x,t) :: theta) y y.
-Proof.
-  unfold equivalent_rc_at; steps; eauto using equivalent_rc_refl.
-Qed.
-
 Lemma equivalent_with_idrel:
-  forall l x theta t,
+  forall T (l: list nat) (x: nat) theta t (equiv: T -> T -> Prop),
     (x ∈ l -> False) ->
-    equivalent_with_relation (idrel l) theta ((x,t) :: theta).
+    (forall v, equiv v v) ->
+    equivalent_with_relation (idrel l) theta ((x,t) :: theta) equiv.
 Proof.
   unfold equivalent_with_relation;
     repeat step || t_lookup ||
@@ -107,21 +100,14 @@ Proof.
            rewrite range_swap in * ||
            (rewrite idrel_lookup in * by auto) ||
            (rewrite idrel_lookup_swap_fail in * by auto) ||
-           apply equivalent_rc_at_right.
-Qed.
-
-Lemma equivalent_rc_at_left:
-  forall x y theta t,
-    x <> y ->
-    equivalent_rc_at ((x,t) :: theta) theta y y.
-Proof.
-  unfold equivalent_rc_at; steps; eauto using equivalent_rc_refl.
+           apply equivalent_at_right.
 Qed.
 
 Lemma equivalent_with_idrel2:
-  forall l x theta t,
+  forall T (l: list nat) (x: nat) theta t (equiv: T -> T -> Prop),
     (x ∈ l -> False) ->
-    equivalent_with_relation (idrel l) ((x,t) :: theta) theta.
+    (forall v, equiv v v) ->
+    equivalent_with_relation (idrel l) ((x,t) :: theta) theta equiv.
 Proof.
   unfold equivalent_with_relation;
     repeat step || t_lookup ||
@@ -131,7 +117,7 @@ Proof.
            rewrite range_swap in * ||
            (rewrite idrel_lookup in * by auto) ||
            (rewrite idrel_lookup_swap_fail in * by auto) ||
-           apply equivalent_rc_at_left.
+           apply equivalent_at_left.
 Qed.
 
 Ltac t_idrel :=
@@ -143,14 +129,17 @@ Ltac t_idrel :=
   (rewrite idrel_lookup_swap_fail in * by auto).
 
 Lemma equivalent_with_relation_permute:
-  forall theta1 theta2 (RC : tree -> Prop) M l,
+  forall T theta1 theta2 v M l (equiv: T -> T -> Prop),
     ~(M ∈ support theta1) ->
+    (forall v, equiv v v) ->
     equivalent_with_relation
       ((M, M) :: idrel l)
-        (theta1 ++ (M, RC) :: theta2)
-        ((M, RC) :: theta1 ++ theta2).
+      (theta1 ++ (M, v) :: theta2)
+      ((M, v) :: theta1 ++ theta2)
+      equiv
+.
 Proof.
-  unfold equivalent_with_relation, equivalent_rc_at;
+  unfold equivalent_with_relation, equivalent_at;
     repeat match goal with
            | |- exists r, Some ?R = Some r /\ _ => exists R
            | |- exists r, _ /\ equivalent_rc r ?R => exists R
@@ -160,7 +149,7 @@ Proof.
                  rewrite obvious_lookup in * by steps ||
                  t_lookupor || t_lookup_same
            end;
-    eauto using equivalent_rc_refl.
+    eauto.
 Qed.
 
 Lemma idrel_lookup2:
@@ -181,14 +170,17 @@ Proof.
 Qed.
 
 Lemma equivalent_with_relation_permute2:
-  forall theta1 theta2 (RC : tree -> Prop) X Y l,
+  forall T theta1 theta2 v X Y l (equiv: T -> T -> Prop),
     ~(X ∈ support theta1) ->
+    (forall v, equiv v v) ->
     equivalent_with_relation
       ((Y, X) :: idrel l)
-        ((Y, RC) :: theta1 ++ theta2)
-        (theta1 ++ (X, RC) :: theta2).
+      ((Y, v) :: theta1 ++ theta2)
+      (theta1 ++ (X, v) :: theta2)
+      equiv
+.
 Proof.
-  unfold equivalent_with_relation, equivalent_rc_at;
+  unfold equivalent_with_relation, equivalent_at;
     repeat match goal with
            | |- exists r, Some ?R = Some r /\ _ => exists R
            | |- exists r, _ /\ equivalent_rc r ?R => exists R
@@ -198,5 +190,5 @@ Proof.
                  rewrite obvious_lookup in * by steps ||
                  t_lookupor || t_lookup_same
            end;
-    eauto using equivalent_rc_refl.
+    eauto.
 Qed.

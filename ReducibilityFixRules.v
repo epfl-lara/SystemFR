@@ -247,12 +247,11 @@ Proof.
 Qed.
 
 Lemma reducible_fix_induction:
-  forall theta T v ts,
+  forall v, is_nat_value v -> forall theta T ts,
     fv T = nil ->
     fv ts = nil ->
     wf T 1 ->
     wf ts 1 ->
-    is_nat_value v ->
     is_erased_term ts ->
     valid_interpretation theta ->
     (forall tx, reducible_values theta tx T_top -> reducible theta (open 0 ts tx) (open 0 T zero)) ->
@@ -265,7 +264,7 @@ Lemma reducible_fix_induction:
          (open 0 T (succ n))) ->
     reducible theta (notype_tfix ts) (open 0 T v).
 Proof.
-  induction v; repeat step || simp_red || apply reducible_let.
+  induction 1; repeat step || simp_red.
 
   - (* zero *)
     eapply backstep_reducible; eauto using small_step_fix_open;

@@ -12,12 +12,16 @@ Require Import Termination.Freshness.
 Require Import Termination.ListUtils.
 Require Import Termination.TermList.
 Require Import Termination.SmallStep.
+Require Import Termination.StrictPositivity.
 
 Require Import Termination.WellFormed.
 Require Import Termination.TypeErasure.
 
 Require Import Termination.FVLemmas.
 Require Import Termination.FVLemmasEval.
+
+Require Import Termination.BaseType.
+Require Import Termination.BaseTypeSyntaxLemmas.
 
 Lemma subset_singleton_support:
   forall (gamma : context) (x : nat) T,
@@ -286,7 +290,7 @@ Lemma defined_FV:
 Proof.
   apply mut_HT_IT_IC_IS_AE;
     repeat match goal with
-    | _ => t_subset_open
+    | _ => t_subset_open || t_pfv_base_type_subset
     | _ => step || apply subset_open2 || apply subset_topen2 || t_listutils
     | _ => progress rewrite subset_add
     | _ => progress rewrite supportAppend, fv_context_append in *

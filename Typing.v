@@ -14,6 +14,7 @@ Require Import Termination.NatUtils.
 Require Import Termination.NatCompare.
 Require Import Termination.LVarOperations.
 Require Import Termination.NatCompareErase.
+Require Import Termination.BaseType.
 
 Open Scope list_scope.
 
@@ -536,6 +537,18 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
       has_type tvars gamma (tfold (intersect T0 Ts) t) (intersect T0 Ts)
 
+| HTFoldGen2:
+    forall tvars gamma t T0 Ts X,
+      wf Ts 0 ->
+      twf Ts 1 ->
+      subset (fv Ts) (support gamma) ->
+      base_type X (topen 0 Ts (fvar X type_var)) T0 ->
+      is_annotated_type Ts ->
+      ~(X ∈ pfv Ts type_var) ->
+      strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+      has_type tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
+      has_type tvars gamma (tfold (intersect T0 Ts) t) (intersect T0 Ts)
+
 | HTLeft:
     forall tvars gamma t A B,
       has_type tvars gamma t A ->
@@ -980,33 +993,6 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       are_equal tvars gamma n1 n2 ->
       is_subtype tvars gamma (T_rec n1 T0 Ts) (T_rec n2 T0 Ts)
 
-(* These are not true anymore with the new definition
-| ISRecBase:
-    forall tvars gamma T0 Ts,
-      wf T0 0 ->
-      wf Ts 0 ->
-      twf T0 0 ->
-      twf Ts 1 ->
-      subset (fv T0) (support gamma) ->
-      subset (fv Ts) (support gamma) ->
-      is_annotated_type T0 ->
-      is_annotated_type Ts ->
-      is_context tvars gamma ->
-      is_subtype tvars gamma T0 (T_rec zero T0 Ts)
-
-| ISRecBase2:
-    forall tvars gamma T0 Ts,
-      wf T0 0 ->
-      wf Ts 0 ->
-      twf T0 0 ->
-      twf Ts 1 ->
-      subset (fv T0) (support gamma) ->
-      subset (fv Ts) (support gamma) ->
-      is_annotated_type T0 ->
-      is_annotated_type Ts ->
-      is_context tvars gamma ->
-      is_subtype tvars gamma (T_rec zero T0 Ts) T0
-*)
 with are_equal: tvar_list -> context -> tree -> tree -> Prop :=
 | AERefl: forall tvars gamma t,
     subset (fv t) (support gamma) ->

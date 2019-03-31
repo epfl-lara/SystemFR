@@ -13,6 +13,7 @@ Require Import Termination.ListUtils.
 Require Import Termination.Freshness.
 Require Import Termination.WellFormed.
 Require Import Termination.WFLemmasEval.
+Require Import Termination.BaseTypeSyntaxLemmas.
 
 Open Scope list_scope.
 

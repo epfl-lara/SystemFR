@@ -13,6 +13,9 @@ Require Import Termination.ListUtils.
 Require Import Termination.Freshness.
 Require Import Termination.WellFormed.
 
+Require Import Termination.BaseType.
+Require Import Termination.BaseTypeSyntaxLemmas.
+
 Open Scope list_scope.
 
 Lemma well_typed_twf:

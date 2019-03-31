@@ -18,17 +18,21 @@ Inductive is_value: tree -> Prop :=
 | IVRight: forall v, is_value v -> is_value (tright v)
 .
 
-Fixpoint is_nat_value (t: tree): Prop :=
-  match t with
-  | zero => True
-  | succ t' => is_nat_value t'
-  | _ => False
+Inductive is_nat_value: tree -> Prop :=
+| INVZero: is_nat_value zero
+| INVSucc: forall v, is_nat_value v -> is_nat_value (succ v).
+
+Hint Constructors is_nat_value: b_inv.
+
+Ltac t_invert_nat_value :=
+  match goal with
+  | H: is_nat_value _ |- _ => inversion H
   end.
 
 Lemma is_nat_value_build_nat:
   forall n, is_nat_value (build_nat n).
 Proof.
-  induction n; steps.
+  induction n; steps; eauto with b_inv.
 Qed.
 
 Inductive small_step: tree -> tree -> Prop :=
@@ -260,7 +264,7 @@ Lemma is_nat_value_value:
     is_nat_value v ->
     is_value v.
 Proof.
-  induction v; steps; eauto with values.
+  induction 1; steps; eauto with values.
 Qed.
 
 Hint Resolve is_nat_value_value: values.
@@ -270,7 +274,7 @@ Lemma is_nat_value_erased:
     is_nat_value v ->
     is_erased_term v.
 Proof.
-  induction v; steps.
+  induction 1; steps.
 Qed.
 
 Hint Resolve is_nat_value_erased: berased.

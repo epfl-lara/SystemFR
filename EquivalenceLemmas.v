@@ -153,7 +153,7 @@ Lemma equivalent_match:
     (forall v', v = succ v' -> equivalent (open 0 ts v') t) ->
     equivalent (tmatch tn t0 ts) t.
 Proof.
-  unfold equivalent in *; intros; destruct v; repeat step || t_invert_star;
+  unfold equivalent in *; intros; inversion H; repeat step || t_invert_star;
     eauto using star_smallstep_trans with bsteplemmas smallstep;
     eauto 3 using star_smallstep_match_zero;
     eauto 4 using star_smallstep_match_succ, is_nat_value_value;
@@ -172,7 +172,7 @@ Lemma equivalent_rec:
                       t) ->
     equivalent (notype_rec tn t0 ts) t.
 Proof.
-  unfold equivalent in *; intros; destruct v; repeat step || t_invert_star;
+  unfold equivalent in *; intros; inversion H; repeat step || t_invert_star;
     eauto using star_smallstep_trans with bsteplemmas smallstep;
     eauto 3 using star_smallstep_rec_zero2;
     eauto 4 using star_smallstep_rec_succ2, is_nat_value_value;

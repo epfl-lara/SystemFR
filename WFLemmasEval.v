@@ -11,7 +11,7 @@ Require Import Termination.WellFormed.
 Lemma wf_nat_value:
   forall v, is_nat_value v -> wf v 0.
 Proof.
-  induction v; steps.
+  induction 1; steps.
 Qed.
 
 Hint Resolve wf_nat_value: bwf.
@@ -19,7 +19,7 @@ Hint Resolve wf_nat_value: bwf.
 Lemma twf_nat_value:
   forall v, is_nat_value v -> twf v 0.
 Proof.
-  induction v; steps.
+  induction 1; steps.
 Qed.
 
 Hint Resolve twf_nat_value: btwf.

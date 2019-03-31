@@ -123,7 +123,7 @@ Lemma equivalent_split_nat:
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
-  destruct t'0; repeat step || t_sat_add;
+  destruct H22; repeat step || t_sat_add;
     eauto 2 with b_sat;
     eauto 2 with b_equiv_subst.
 Qed.
@@ -198,9 +198,9 @@ Lemma reducible_equivalent_match:
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_match; eauto;
-    repeat step || t_sat_add;
-    eauto 2 with b_sat;
-    eauto 2 with b_equiv_subst.
+    repeat step || t_sat_add || step_inversion is_nat_value;
+      eauto 2 with b_sat;
+      eauto 2 with b_equiv_subst.
 Qed.
 
 Lemma reducible_equivalent_rec:
@@ -237,7 +237,7 @@ Lemma reducible_equivalent_rec:
 Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_rec; eauto;
-    repeat step || t_sat_add;
+    repeat step || t_sat_add || step_inversion is_nat_value;
     eauto 2 with b_sat;
     eauto 2 with b_equiv_subst.
 Qed.

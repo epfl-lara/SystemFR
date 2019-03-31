@@ -55,6 +55,10 @@ Require Import Termination.StrictPositivityPush.
 Require Import Termination.StrictPositivityPull.
 Require Import Termination.StrictPositivitySubst.
 
+Require Import Termination.BaseType.
+Require Import Termination.BaseTypeLemmas.
+Require Import Termination.BaseTypeSyntaxLemmas.
+
 Require Import Omega.
 
 Opaque reducible_values.
@@ -62,8 +66,6 @@ Opaque strictly_positive.
 Opaque makeFresh.
 
 Set Program Mode.
-
-Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
 
 Lemma fold_in_intersect:
   forall theta t T0 Ts,
@@ -355,7 +357,8 @@ Proof.
     repeat step; eauto using non_empty_nat;
       eauto with bwf.
 
-  destruct a; repeat step || simp_red;
+  simp reducible_values in H10.
+  t_invert_nat_value; repeat step || simp_red;
     try solve [ t_closing ];
     eauto with smallstep.
   - (* case a = 0, we use the decreasing property *)
@@ -363,9 +366,9 @@ Proof.
     unshelve epose proof (H11 zero _);
       repeat step || simp_red || rewrite open_none in * by steps.
   - (* case a = n+1 *)
-    right; exists a, v, (makeFresh (
+    right; exists v0, v, (makeFresh (
                      support theta ::
-                     pfv a type_var ::
+                     pfv v0 type_var ::
                      pfv T0 type_var ::
                      pfv Ts type_var ::
                      (X :: nil) ::
@@ -378,7 +381,7 @@ Proof.
       try finisher;
       eauto with bwf btwf.
 
-    unshelve epose proof (H11 a _); repeat step || simp_red || rewrite open_none in * by steps.
+    unshelve epose proof (H11 v0 _); repeat step || simp_red || rewrite open_none in * by steps.
 Qed.
 
 Lemma reducible_fold_gen:
@@ -444,3 +447,30 @@ Proof.
       eauto with bfv.
   - rewrite substitute_topen in H12; eauto with btwf.
 Qed.
+
+Lemma open_reducible_fold_gen2:
+  forall T0 Ts tvars gamma t X,
+    wf T0 0 ->
+    wf Ts 0 ->
+    twf T0 0 ->
+    twf Ts 1 ->
+    ~(X ∈ pfv Ts type_var) ->
+    strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    base_type X (topen 0 Ts (fvar X type_var)) T0 ->
+    open_reducible tvars gamma t (topen 0 Ts (intersect T0 Ts)) ->
+    open_reducible tvars gamma (notype_tfold t) (intersect T0 Ts).
+Proof.
+  intros; apply open_reducible_fold_gen with X; steps.
+  apply base_type_approx with X (topen 0 Ts (fvar X type_var))
+    (fun v => reducible_values theta v (T_rec zero (psubstitute T0 l term_var) (psubstitute Ts l term_var))); eauto with bwf bfv;
+    eauto using reducibility_is_candidate.
+  rewrite <- substitute_topen2; steps; eauto with btwf.
+  apply reducibility_subst_head2;
+    repeat step || t_listutils || apply reducibility_is_candidate ||
+           rewrite fv_subst_different_tag in * by (steps; eauto with bfv);
+    eauto with bfv bwf btwf berased;
+    eauto using reducibility_is_candidate.
+Qed.
+

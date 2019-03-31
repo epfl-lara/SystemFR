@@ -7,22 +7,22 @@ Require Import Termination.SetLemmas.
 
 Require Import PeanoNat.
 
-Definition M X Y := list (X * Y).
+Definition map X Y := list (X * Y).
 Definition decidable X := forall (x1 x2: X), { x1 = x2 } + { x1 <> x2 }.
 
-Fixpoint support {X Y} (m: M X Y): list X :=
+Fixpoint support {X Y} (m: map X Y): list X :=
   match m with
   | nil => nil
   | (x,_) :: m' => x :: support m'
   end.
 
-Fixpoint range {X Y} (m: M X Y): list Y :=
+Fixpoint range {X Y} (m: map X Y): list Y :=
   match m with
   | nil => nil
-  | (_,y) :: m' => y :: range m'
+  | (_, y) :: m' => y :: range m'
   end.
 
-Fixpoint lookup {X Y} (eq_dec: decidable X) (m: M X Y) (x: X): option Y :=
+Fixpoint lookup {X Y} (eq_dec: decidable X) (m: map X Y) (x: X): option Y :=
   match m with
   | nil => None
   | (a,b) :: m' =>
@@ -31,7 +31,7 @@ Fixpoint lookup {X Y} (eq_dec: decidable X) (m: M X Y) (x: X): option Y :=
     else lookup eq_dec m' x
   end.
 
-Fixpoint lookupRest {X Y} (eq_dec: decidable X) (m: M X Y) x: option (Y * M X Y) :=
+Fixpoint lookupRest {X Y} (eq_dec: decidable X) (m: map X Y) x: option (Y * map X Y) :=
   match m with
   | nil => None
   | (y,tau) :: m' =>
@@ -41,7 +41,7 @@ Fixpoint lookupRest {X Y} (eq_dec: decidable X) (m: M X Y) x: option (Y * M X Y)
   end.
 
 Lemma lookupRestSuffix:
-  forall X Y eq_dec (m: M X Y) x (y: Y) suffix,
+  forall X Y eq_dec (m: map X Y) x (y: Y) suffix,
     lookupRest eq_dec m x = Some (y,suffix) ->
     exists m', m = (m' ++ suffix).
 Proof.
@@ -54,7 +54,7 @@ Qed.
 Hint Immediate lookupRestSuffix.
 
 Lemma lookupRestLookup:
-  forall X Y eq_dec (m: M X Y) x y suffix,
+  forall X Y eq_dec (m: map X Y) x y suffix,
     lookupRest eq_dec m x = Some (y,suffix) ->
     lookup eq_dec m x = Some y.
 Proof.
@@ -64,7 +64,7 @@ Qed.
 Hint Immediate lookupRestLookup.
 
 Lemma lookupLookupRest:
-  forall X Y eq_dec (m: M X Y) x y,
+  forall X Y eq_dec (m: map X Y) x y,
     lookup eq_dec m x = Some y ->
     exists suffix,
       lookupRest eq_dec m x = Some (y,suffix).
@@ -74,18 +74,18 @@ Qed.
 
 
 (* fresh s gamma holds if variable x does not appear in the context gamma *)
-Definition fresh { X Y } (m: M X Y) x := ~(x ∈ support m).
+Definition fresh { X Y } (m: map X Y) x := ~(x ∈ support m).
 Hint Unfold fresh.
 
 Lemma lookupSupport:
-  forall X Y eq_dec (m: M X Y) (x: X) (y: Y),
+  forall X Y eq_dec (m: map X Y) (x: X) (y: Y),
     lookup eq_dec m x = Some y -> x ∈ support m.
 Proof.
   induction m; steps; eauto.
 Qed.
 
 Lemma supportAppend:
-  forall X Y (m1 m2: M X Y),
+  forall X Y (m1 m2: map X Y),
     support (m1 ++ m2) = support m1 ++ support m2.
 Proof.
   induction m1; steps.
@@ -93,13 +93,13 @@ Qed.
 
 Hint Rewrite supportAppend: blistutils.
 
-Fixpoint mapValues {X Y Z} (f: Y -> Z) (l: list (prod X Y)) :=
+Fixpoint mapValues {X Y Z} (f: Y -> Z) (l: map X Y) :=
   match l with
   | nil => nil
   | (x,T) :: l' => (x, f T) :: mapValues f l'
   end.
 
-Lemma lookupNoneSupport: forall X Y eq_dec (m: M X Y) x,
+Lemma lookupNoneSupport: forall X Y eq_dec (m: map X Y) x,
   ~(x ∈ support m) ->
   lookup eq_dec m x = None.
 Proof.
@@ -109,7 +109,7 @@ Qed.
 Hint Immediate lookupNoneSupport.
 
 Lemma lookupNoneSupport2:
-  forall X Y eq_dec (m: M X Y) x,
+  forall X Y eq_dec (m: map X Y) x,
     lookup eq_dec m x = None ->
     x ∈ support m ->
     False.
@@ -120,7 +120,7 @@ Qed.
 Hint Immediate lookupNoneSupport2.
 
 Lemma lookupSomeSupport:
-  forall X Y eq_dec (m: M X Y) x A,
+  forall X Y eq_dec (m: map X Y) x A,
     lookup eq_dec m x = Some A ->
     x ∈ support m.
 Proof.
@@ -130,7 +130,7 @@ Qed.
 Hint Immediate lookupSomeSupport.
 
 Lemma lookupRange:
-  forall X Y eq_dec (m: M X Y) x y,
+  forall X Y eq_dec (m: map X Y) x y,
     lookup eq_dec m x = Some y ->
     y ∈ range m.
 Proof.
@@ -138,7 +138,7 @@ Proof.
 Qed.
 
 Lemma lookupNoneAppend1:
-  forall X Y eq_dec (l1 l2: M X Y) x,
+  forall X Y eq_dec (l1 l2: map X Y) x,
     lookup eq_dec (l1 ++ l2) x = None ->
     lookup eq_dec l1 x = None.
 Proof.
@@ -146,7 +146,7 @@ Proof.
 Qed.
 
 Lemma lookupNoneAppend2:
-  forall X Y eq_dec (l1 l2: M X Y) x,
+  forall X Y eq_dec (l1 l2: map X Y) x,
     lookup eq_dec (l1 ++ l2) x = None ->
     lookup eq_dec l2 x = None.
 Proof.
@@ -154,7 +154,7 @@ Proof.
 Qed.
 
 Lemma lookupAppendNoDup:
-  forall X Y eq_dec (l1 l2: M X Y) x,
+  forall X Y eq_dec (l1 l2: map X Y) x,
     x ∈ support l2 ->
     ~(x ∈ support l1) ->
     lookup eq_dec l2 x = lookup eq_dec (l1 ++ l2)%list x.
@@ -165,7 +165,7 @@ Qed.
 Hint Resolve lookupAppendNoDup: blookup.
 
 Lemma lookupAppendOr:
-  forall X Y eq_dec (l1 l2: M X Y) x,
+  forall X Y eq_dec (l1 l2: map X Y) x,
     lookup eq_dec (l1 ++ l2) x = lookup eq_dec l1 x \/
     (
       lookup eq_dec l1 x = None /\
@@ -176,7 +176,7 @@ Proof.
 Qed.
 
 Lemma lookupWeaken:
-  forall X Y eq_dec (l1 l2: M X Y) x t,
+  forall X Y eq_dec (l1 l2: map X Y) x t,
     lookup eq_dec l1 x = Some t ->
     lookup eq_dec (l1 ++ l2) x = Some t.
 Proof.
@@ -186,7 +186,7 @@ Qed.
 Hint Resolve lookupWeaken: blookup.
 
 Lemma lookupAppendNone:
-  forall X Y eq_dec (l1 l2: M X Y) x,
+  forall X Y eq_dec (l1 l2: map X Y) x,
     lookup eq_dec l1 x = None ->
     lookup eq_dec l2 x = None ->
     lookup eq_dec (l1 ++ l2) x = None.
@@ -197,7 +197,7 @@ Qed.
 Hint Resolve lookupAppendNone: blookup.
 
 Lemma lookupRight:
-  forall X Y eq_dec (l1 l2: M X Y) x,
+  forall X Y eq_dec (l1 l2: map X Y) x,
     lookup eq_dec l1 x = None ->
     lookup eq_dec (l1 ++ l2) x = lookup eq_dec l2 x.
 Proof.
@@ -207,7 +207,7 @@ Qed.
 Hint Resolve lookupRight: blookup.
 
 Lemma lookupRight2:
-  forall X Y eq_dec (l1 l2: M X Y) x r,
+  forall X Y eq_dec (l1 l2: map X Y) x r,
     lookup eq_dec l1 x = None ->
     lookup eq_dec l2 x = r ->
     lookup eq_dec (l1 ++ l2) x = r.
@@ -215,7 +215,7 @@ Proof.
   induction l1; steps.
 Qed.
 
-Lemma lookupNil: forall X Y eq_dec (m: M X Y) x,
+Lemma lookupNil: forall X Y eq_dec (m: map X Y) x,
   @lookup X Y eq_dec nil x = None.
 Proof.
   steps.
@@ -226,7 +226,7 @@ Hint Rewrite lookupNil: blookup.
 Lemma lookupMap:
   forall X Y Z
          (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
-         (m: M X Y) (f: Y -> Z) x,
+         (m: map X Y) (f: Y -> Z) x,
     lookup eq_dec (mapValues f m) x = option_map f (lookup eq_dec m x).
 Proof.
   induction m; steps.
@@ -367,7 +367,7 @@ Ltac t_lookup_same :=
 Lemma lookupMap2:
   forall X Y Z
          (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
-         (m: M X Y) (f: Y -> Z) x z,
+         (m: map X Y) (f: Y -> Z) x z,
     lookup eq_dec (mapValues f m) x = Some z ->
     exists y, lookup eq_dec m x = Some y /\ f y  = z.
 Proof.
@@ -388,7 +388,7 @@ Ltac t_lookup_rewrite :=
   end.
 
 Lemma support_mapValues:
-  forall X Y Z (f: Y -> Z) (l: M X Y), support (mapValues f l) = support l.
+  forall X Y Z (f: Y -> Z) (l: map X Y), support (mapValues f l) = support l.
 Proof.
   induction l; steps.
 Qed.

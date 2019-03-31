@@ -62,7 +62,7 @@ Lemma reducible_values_succ:
     reducible_values theta v T_nat ->
     reducible_values theta (succ v) T_nat.
 Proof.
-  repeat step || simp_red.
+  repeat step || simp_red; eauto with b_inv.
 Qed.
 
 Lemma reducible_succ:
@@ -72,7 +72,8 @@ Lemma reducible_succ:
     reducible theta (succ t) T_nat.
 Proof.
   unfold reducible, reduces_to; steps.
-  exists (succ t'); repeat step || simp_red; eauto with bsteplemmas.
+  exists (succ t'); repeat step || simp_red; eauto with bsteplemmas;
+    eauto with b_inv.
 Qed.
 
 Lemma reducible_nat_value:
@@ -81,7 +82,7 @@ Lemma reducible_nat_value:
     valid_interpretation theta ->
     reducible_values theta v T_nat.
 Proof.
-  induction v; repeat step;
+  induction 1; repeat step;
     eauto using reducible_value_zero;
     eauto using reducible_values_succ.
 Qed.
@@ -92,7 +93,7 @@ Lemma reducible_nat:
     valid_interpretation theta ->
     reducible theta v T_nat.
 Proof.
-  induction v; repeat step;
+  induction 1; repeat step;
     eauto using reducible_zero;
     eauto using reducible_succ.
 Qed.
@@ -132,13 +133,13 @@ Proof.
     repeat step || t_listutils || simp reducible_values in *; t_closer;
       eauto with bsteplemmas.
 
-  destruct t'; steps.
+  t_invert_nat_value; steps.
 
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
       repeat step || t_listutils; eauto with b_equiv; eauto with bfv.
   - (* succ v *)
-    apply backstep_reducible with (open 0 ts t');
+    apply backstep_reducible with (open 0 ts v);
       repeat step || t_listutils || apply reducible_nat_value ||
       match goal with
       | H: forall n, _ -> _ -> reducible _ _ _ |-  _ => apply H
@@ -191,25 +192,26 @@ Proof.
 Qed.
 
 Lemma reducible_rec_induction:
-  forall theta T v t0 ts,
-    fv T = nil ->
-    fv ts = nil ->
-    wf T 1 ->
-    wf ts 2 ->
+  forall v,
     is_nat_value v ->
-    is_erased_term ts ->
-    valid_interpretation theta ->
-    reducible theta t0 (open 0 T zero) ->
-     (forall n tx,
-        reducible_values theta n T_nat ->
-        reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
-        equivalent tx (notype_lambda (notype_rec n t0 ts)) ->
-        reducible theta
-          (open 0 (open 1 ts n) tx)
-          (open 0 T (succ n))) ->
-    reducible theta (notype_rec v t0 ts) (T_let v T_nat T).
+    forall theta T t0 ts,
+       fv T = nil ->
+       fv ts = nil ->
+       wf T 1 ->
+       wf ts 2 ->
+       is_erased_term ts ->
+       valid_interpretation theta ->
+       reducible theta t0 (open 0 T zero) ->
+        (forall n tx,
+           reducible_values theta n T_nat ->
+           reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
+           equivalent tx (notype_lambda (notype_rec n t0 ts)) ->
+           reducible theta
+             (open 0 (open 1 ts n) tx)
+             (open 0 T (succ n))) ->
+       reducible theta (notype_rec v t0 ts) (T_let v T_nat T).
 Proof.
-  induction v; repeat step || simp_red || apply reducible_let.
+  induction 1; repeat step || simp_red || apply reducible_let; eauto 2 with b_inv.
 
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;

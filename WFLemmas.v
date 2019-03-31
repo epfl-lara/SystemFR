@@ -118,3 +118,4 @@ Proof.
 Qed.
 
 Hint Resolve wf_subst: bwf.
+

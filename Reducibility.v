@@ -85,6 +85,10 @@ Require Import Termination.LVarOperations.
 Require Import Termination.LVarOperationsErase.
 Require Import Termination.NoTypeFVarErased.
 
+Require Import Termination.BaseType.
+Require Import Termination.BaseTypeLemmas.
+Require Import Termination.BaseTypeSyntaxLemmas.
+Require Import Termination.BaseTypeErase.
 
 Opaque reducible_values.
 Opaque Nat.eq_dec.
@@ -263,6 +267,15 @@ Proof.
       rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
         eauto 2 with bannot step_tactic.
     + apply H; steps. rewrite substitute_topen; steps; eauto with btwf.
+  - apply open_reducible_fold_gen2 with X; side_conditions;
+      eauto 3 with bwf bwft step_tactic;
+      eauto 4 with btwf step_tactic.
+    + change (fvar X type_var) with (erase_type (fvar X type_var)).
+      rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
+        eauto 2 with bannot step_tactic.
+    + change (fvar X type_var) with (erase_type (fvar X type_var)).
+      rewrite <- erase_type_topen; repeat step || apply base_type_erase.
+    + rewrite erase_type_topen in *; (steps; eauto 3 with bannot step_tactic).
   - apply open_reducible_left; side_conditions.
   - apply open_reducible_right; side_conditions.
   - apply open_reducible_sum_match with y p; side_conditions.
@@ -292,9 +305,9 @@ Proof.
   - simp_red; steps; t_closer.
   - eapply reducible_subtype_forall; eauto.
   - eapply reducible_subtype_exists; eauto.
+  - eapply reducible_values_rec_equivalent; eauto with berased.
 
   (* equality *)
-  - eapply reducible_values_rec_equivalent; eauto with berased.
   - eauto 2 with b_equiv.
   - apply reducibility_equivalent_weaken with theta (erase_context gamma) x (erase_type T); side_conditions.
   - eauto using equivalent_trans.
@@ -324,3 +337,4 @@ Proof.
   - apply equivalent_split_match with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) (erase_term e1) (erase_term e2) (erase_term e) x y v; split_tactic; eauto.
   - apply equivalent_split_rec with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) (erase_term e1) (erase_term e2) (erase_term e) x y v; split_tactic; eauto.
 Qed.
+

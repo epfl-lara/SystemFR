@@ -59,7 +59,7 @@ Proof.
     eauto with berased.
   - left; exists v'; steps; eapply star_many_steps; eauto; unfold irred; repeat step || t_invert_step.
   - right. unshelve eexists n', v', X, _, _; steps;
-             eauto using is_nat_value_value, value_irred, star_many_steps.
+             eauto using is_nat_value_value, value_irred, star_many_steps with values.
 Qed.
 
 Lemma reducible_values_rec_backstep:
@@ -261,7 +261,7 @@ Lemma reducible_trec:
 Proof.
   unfold reducible, reduces_to; repeat step || simp_red.
   - exists zero; steps.
-  - exists (succ n'); steps.
+  - exists (succ n'); steps; eauto with b_inv.
 Qed.
 
 Ltac t_reducible_trec :=
@@ -509,20 +509,20 @@ Proof.
 
   unfold reducible, reduces_to in H21; repeat step || simp_red.
 
-  destruct t'; steps.
+  t_invert_nat_value; steps.
 
   - apply reducible_rec_equivalent with zero; eauto using equivalent_sym with b_equiv; t_closing.
     apply reducible_fold_zero; steps; eauto with bwf btwf berased.
     unshelve epose proof (H17 theta ((p, notype_trefl) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 
-  - apply reducible_rec_equivalent with (succ t'); eauto using equivalent_sym with b_equiv; t_closing.
+  - apply reducible_rec_equivalent with (succ v); eauto using equivalent_sym with b_equiv; t_closing.
     apply reducible_fold; steps;
       eauto with bwf;
       eauto 3 with btwf;
       eauto with berased;
       try solve [ unfold reducible, reduces_to; repeat step || simp_red || eexists; try t_closing; eauto with smallstep ].
-    unshelve epose proof (H18 theta ((p, notype_trefl) :: (pn, t') :: lterms) _ _ _);
+    unshelve epose proof (H18 theta ((p, notype_trefl) :: (pn, v) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in *.
 Qed.
 
