@@ -1,10 +1,10 @@
-Require Import Termination.Syntax.
-Require Import Termination.Sets.
-Require Import Termination.Tactics.
-Require Import Termination.SmallStep.
-Require Import Termination.AssocList.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.WellFormed.
 
 Require Import PeanoNat.
 

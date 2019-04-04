@@ -1,10 +1,10 @@
 Require Import Coq.Lists.List.
 Require Import Omega.
 
-Require Import Termination.Tactics.
-Require Import Termination.ListUtils.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Sets.
+Require Import SystemFR.AssocList.
 
 Open Scope list_scope.
 

@@ -1,9 +1,9 @@
-Require Import Termination.Trees.
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.WellFormed.
-Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasLists.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WFLemmasLists.
 
 Require Import PeanoNat.
 

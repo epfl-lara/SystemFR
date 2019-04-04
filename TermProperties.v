@@ -1,8 +1,8 @@
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.Tactics.
-Require Import Termination.StarRelation.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.WellFormed.
 
 Definition normalizing t: Prop :=
   pfv t term_var = nil /\

@@ -1,22 +1,22 @@
 Require Import Coq.Strings.String.
 
-Require Import Termination.Syntax.
-Require Import Termination.Sets.
-Require Import Termination.ListUtils.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.WFLemmas.
-Require Import Termination.TermProperties.
-Require Import Termination.SmallStep.
-Require Import Termination.SizeLemmas.
-Require Import Termination.Equivalence.
-Require Import Termination.StarInversions.
-Require Import Termination.TermList.
-Require Import Termination.WellFormed.
-Require Import Termination.StarRelation.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Sets.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.TermList.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.StarRelation.
 
-Require Import Termination.ReducibilityMeasure.
-Require Import Termination.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityMeasure.
+Require Import SystemFR.ReducibilityCandidate.
 
 Require Import Equations.Equations.
 Require Import Equations.Subterm.

@@ -1,28 +1,28 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.SizeLemmas.
-Require Import Termination.Sets.
-Require Import Termination.ListUtils.
-Require Import Termination.ErasedTermLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.Sets.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.ErasedTermLemmas.
 
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityUnused.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.RedTactics.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityUnused.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.RedTactics.
 
-Require Import Termination.SubstitutionLemmas.
+Require Import SystemFR.SubstitutionLemmas.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasLists.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasLists.
 
-Require Import Termination.WellFormed.
+Require Import SystemFR.WellFormed.
 
-Require Import Termination.BaseType.
+Require Import SystemFR.BaseType.
 
 Require Import Omega.
 

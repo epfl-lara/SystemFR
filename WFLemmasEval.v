@@ -1,12 +1,12 @@
-Require Import Termination.WFLemmas.
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.TermProperties.
-Require Import Termination.ListUtils.
-Require Import Termination.SizeLemmas.
-Require Import Termination.StarRelation.
-Require Import Termination.WellFormed.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.WellFormed.
 
 Lemma wf_nat_value:
   forall v, is_nat_value v -> wf v 0.

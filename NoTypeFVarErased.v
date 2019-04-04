@@ -1,10 +1,10 @@
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
-Require Import Termination.Trees.
-Require Import Termination.Tactics.
-Require Import Termination.NoTypeFVar.
-Require Import Termination.Syntax.
-Require Import Termination.Sets.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.TypeErasureLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.NoTypeFVar.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Sets.
 
 Lemma no_type_fvar_erased:
   forall T vars,

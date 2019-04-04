@@ -1,10 +1,10 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
 
 Inductive base_type: nat -> tree -> tree -> Prop :=
 | BTNat: forall X, base_type X T_nat T_nat

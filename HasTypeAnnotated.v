@@ -1,21 +1,21 @@
 Require Import Coq.Strings.String.
 
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
-Require Import Termination.Syntax.
-Require Import Termination.Trees.
-Require Import Termination.TreeLists.
-Require Import Termination.Typing.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
-Require Import Termination.AnnotatedTermLemmas.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.TypeErasureLemmas.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Trees.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.Typing.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.AnnotatedTermLemmas.
 
-Require Import Termination.BaseType.
-Require Import Termination.BaseTypeSyntaxLemmas.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.BaseTypeSyntaxLemmas.
 
-Require Import Termination.TypeOperations.
-Require Import Termination.TypeOperationsSyntaxLemmas.
+Require Import SystemFR.TypeOperations.
+Require Import SystemFR.TypeOperationsSyntaxLemmas.
 
 Lemma annotations:
   (forall tvars gamma t T,

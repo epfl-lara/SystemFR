@@ -1,9 +1,9 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.ListUtils.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
 
 Lemma in_subset:
   forall {T} (l1 l2: list T) (x: T),

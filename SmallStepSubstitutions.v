@@ -2,11 +2,11 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.SmallStep.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.AssocList.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.AssocList.
 
 Fixpoint are_values (l: list (nat * tree)) :=
   match l with

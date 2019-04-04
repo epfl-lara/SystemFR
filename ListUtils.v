@@ -1,5 +1,5 @@
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
 
 Require Import Omega.
 

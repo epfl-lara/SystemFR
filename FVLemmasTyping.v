@@ -2,29 +2,29 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.Sets.
-Require Import Termination.SetLemmas.
-Require Import Termination.Typing.
-Require Import Termination.AssocList.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.Freshness.
-Require Import Termination.ListUtils.
-Require Import Termination.TermList.
-Require Import Termination.SmallStep.
-Require Import Termination.StrictPositivity.
+Require Import SystemFR.Sets.
+Require Import SystemFR.SetLemmas.
+Require Import SystemFR.Typing.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.TermList.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.StrictPositivity.
 
-Require Import Termination.WellFormed.
-Require Import Termination.TypeErasure.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.TypeErasure.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasEval.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasEval.
 
-Require Import Termination.BaseType.
-Require Import Termination.BaseTypeSyntaxLemmas.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.BaseTypeSyntaxLemmas.
 
-Require Import Termination.TypeOperations.
-Require Import Termination.TypeOperationsSyntaxLemmas.
+Require Import SystemFR.TypeOperations.
+Require Import SystemFR.TypeOperationsSyntaxLemmas.
 
 Lemma subset_singleton_support:
   forall (gamma : context) (x : nat) T,

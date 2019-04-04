@@ -2,22 +2,22 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.TWFLemmas.
-Require Import Termination.Typing.
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.AssocList.
-Require Import Termination.Sets.
-Require Import Termination.TermList.
-Require Import Termination.ListUtils.
-Require Import Termination.Freshness.
-Require Import Termination.WellFormed.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.Typing.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Sets.
+Require Import SystemFR.TermList.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.WellFormed.
 
-Require Import Termination.BaseType.
-Require Import Termination.BaseTypeSyntaxLemmas.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.BaseTypeSyntaxLemmas.
 
-Require Import Termination.TypeOperations.
-Require Import Termination.TypeOperationsSyntaxLemmas.
+Require Import SystemFR.TypeOperations.
+Require Import SystemFR.TypeOperationsSyntaxLemmas.
 
 Open Scope list_scope.
 

@@ -1,6 +1,6 @@
-Require Import Termination.Tactics.
-Require Import Termination.Trees.
-Require Import Termination.AssocList.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Trees.
+Require Import SystemFR.AssocList.
 
 Open Scope list_scope.
 

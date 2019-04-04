@@ -1,15 +1,15 @@
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.StarInversions.
-Require Import Termination.StarRelation.
-Require Import Termination.StarLemmas.
-Require Import Termination.SmallStep.
-Require Import Termination.Tactics.
-Require Import Termination.WFLemmas.
-Require Import Termination.WellFormed.
-Require Import Termination.WFLemmasEval.
-Require Import Termination.TermProperties.
-Require Import Termination.Equivalence.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.StarLemmas.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WFLemmasEval.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.Equivalence.
 
 Require Import Coq.Strings.String.
 

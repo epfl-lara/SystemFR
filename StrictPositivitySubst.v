@@ -1,19 +1,19 @@
-Require Import Termination.StrictPositivity.
-Require Import Termination.StrictPositivityLemmas.
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.SizeLemmas.
-Require Import Termination.NoTypeFVar.
-Require Import Termination.Sets.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasLists.
+Require Import SystemFR.StrictPositivity.
+Require Import SystemFR.StrictPositivityLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.NoTypeFVar.
+Require Import SystemFR.Sets.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasLists.
 
-Require Import Termination.WellFormed.
+Require Import SystemFR.WellFormed.
 
-Require Import Termination.AssocList.
+Require Import SystemFR.AssocList.
 
 Require Import Coq.Lists.List.
 

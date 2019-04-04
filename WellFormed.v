@@ -4,8 +4,8 @@ Require Import Coq.Lists.List.
 
 Require Import PeanoNat.
 
-Require Import Termination.Trees.
-Require Import Termination.Tactics.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Tactics.
 
 Fixpoint wf t k :=
   match t with

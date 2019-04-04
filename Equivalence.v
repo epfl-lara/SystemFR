@@ -1,7 +1,7 @@
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.StarRelation.
-Require Import Termination.AssocList.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.AssocList.
 
 Definition equivalent t1 t2 :=
   (forall v, is_value v ->

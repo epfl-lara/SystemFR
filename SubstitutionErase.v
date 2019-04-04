@@ -1,8 +1,8 @@
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.TreeLists.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.TreeLists.
 
 Require Import PeanoNat.
 

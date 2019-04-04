@@ -1,5 +1,5 @@
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
 
 Definition spositive (a: tree): tree :=
   tmatch a tfalse ttrue.

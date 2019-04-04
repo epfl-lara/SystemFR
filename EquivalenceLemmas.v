@@ -1,10 +1,10 @@
-Require Import Termination.Equivalence.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.StarInversions.
-Require Import Termination.StarRelation.
-Require Import Termination.SmallStep.
-Require Import Termination.StarLemmas.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.StarLemmas.
 
 Require Import Coq.Strings.String.
 

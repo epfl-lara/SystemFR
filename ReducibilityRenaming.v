@@ -4,33 +4,33 @@ Require Import Equations.Subterm.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.TermList.
-Require Import Termination.AssocList.
-Require Import Termination.SizeLemmas.
-Require Import Termination.ListUtils.
-Require Import Termination.SmallStep.
-Require Import Termination.StarRelation.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.Freshness.
-Require Import Termination.Equivalence.
-Require Import Termination.IdRelation.
-Require Import Termination.SetLemmas.
-Require Import Termination.EqualWithRelation.
-Require Import Termination.EquivalentWithRelation.
-Require Import Termination.ErasedTermLemmas.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.TermList.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.IdRelation.
+Require Import SystemFR.SetLemmas.
+Require Import SystemFR.EqualWithRelation.
+Require Import SystemFR.EquivalentWithRelation.
+Require Import SystemFR.ErasedTermLemmas.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasLists.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasLists.
 
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.ReducibilityMeasure.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.ReducibilityMeasure.
 
-Require Import Termination.RedTactics.
+Require Import SystemFR.RedTactics.
 
 Require Import PeanoNat.
 

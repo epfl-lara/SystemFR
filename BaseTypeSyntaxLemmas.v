@@ -1,13 +1,13 @@
-Require Import Termination.WellFormed.
-Require Import Termination.WFLemmas.
-Require Import Termination.BaseType.
-Require Import Termination.Tactics.
-Require Import Termination.TWFLemmas.
-Require Import Termination.AnnotatedTermLemmas.
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Sets.
-Require Import Termination.ListUtils.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.AnnotatedTermLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Sets.
+Require Import SystemFR.ListUtils.
 
 Lemma wf_base_type:
   forall X A B,

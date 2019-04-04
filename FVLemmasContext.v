@@ -2,20 +2,20 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.Sets.
-Require Import Termination.SetLemmas.
-Require Import Termination.Typing.
-Require Import Termination.AssocList.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.Freshness.
-Require Import Termination.ListUtils.
-Require Import Termination.SmallStep.
-Require Import Termination.TermList.
+Require Import SystemFR.Sets.
+Require Import SystemFR.SetLemmas.
+Require Import SystemFR.Typing.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.TermList.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasEval.
-Require Import Termination.FVLemmasTyping.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasEval.
+Require Import SystemFR.FVLemmasTyping.
 
 Lemma context_right:
   forall tvars gamma1 gamma2,

@@ -1,9 +1,9 @@
-Require Import Termination.Trees.
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.LVarOperations.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.LVarOperations.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.TypeErasureLemmas.
 
 Require Import PeanoNat.
 

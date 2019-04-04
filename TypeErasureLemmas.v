@@ -1,18 +1,18 @@
 Require Import Coq.Program.Tactics.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.TypeErasure.
-Require Import Termination.Sets.
-Require Import Termination.ListUtils.
-Require Import Termination.SmallStep.
-Require Import Termination.WFLemmas.
-Require Import Termination.TWFLemmas.
-Require Import Termination.StarRelation.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.WellFormed.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.Sets.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WellFormed.
 
 Open Scope list_scope.
 

@@ -1,13 +1,13 @@
 Require Import Coq.Strings.String.
 
-Require Import Termination.AssocList.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.ListUtils.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.ListUtils.
 
-Require Import Termination.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityCandidate.
 
 Require Import PeanoNat.
 

@@ -1,11 +1,11 @@
-Require Import Termination.Tactics.
-Require Import Termination.TermProperties.
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.ListUtils.
-Require Import Termination.StarLemmas.
-Require Import Termination.StarInversions.
-Require Import Termination.StarRelation.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.StarLemmas.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.StarRelation.
 
 Require Import Coq.Strings.String.
 

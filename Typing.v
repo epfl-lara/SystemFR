@@ -1,21 +1,21 @@
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 
-Require Import Termination.Syntax.
-Require Import Termination.ListUtils.
-Require Import Termination.Sets.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.SmallStep.
-Require Import Termination.TypeErasure.
-Require Import Termination.StrictPositivity.
-Require Import Termination.WellFormed.
-Require Import Termination.NatUtils.
-Require Import Termination.NatCompare.
-Require Import Termination.LVarOperations.
-Require Import Termination.NatCompareErase.
-Require Import Termination.BaseType.
-Require Import Termination.TypeOperations.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.StrictPositivity.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.NatUtils.
+Require Import SystemFR.NatCompare.
+Require Import SystemFR.LVarOperations.
+Require Import SystemFR.NatCompareErase.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.TypeOperations.
 
 Open Scope list_scope.
 

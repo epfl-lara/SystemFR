@@ -1,7 +1,7 @@
-Require Import Termination.Tactics.
-Require Import Termination.Trees.
-Require Import Termination.TypeErasure.
-Require Import Termination.NatCompare.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Trees.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.NatCompare.
 
 Definition annotated_tlt (a: tree) (b: tree) :=
   app

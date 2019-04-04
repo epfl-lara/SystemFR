@@ -1,13 +1,13 @@
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.WFLemmas.
-Require Import Termination.TWFLemmas.
-Require Import Termination.ListUtils.
-Require Import Termination.SmallStep.
-Require Import Termination.StarRelation.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.PrimitiveSize.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.PrimitiveSize.
+Require Import SystemFR.WellFormed.
 
 Lemma is_erased_term_twf:
   forall t k,

@@ -1,6 +1,6 @@
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.SwapHoles.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SwapHoles.
 
 Require Import Omega.
 

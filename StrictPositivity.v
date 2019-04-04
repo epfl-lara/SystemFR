@@ -2,11 +2,11 @@ Require Import Equations.Equations.
 
 Require Import Omega.
 
-Require Import Termination.Sets.
-Require Import Termination.Syntax.
-Require Import Termination.SizeLemmas.
-Require Import Termination.NoTypeFVar.
-Require Import Termination.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.NoTypeFVar.
+Require Import SystemFR.Tactics.
 
 Equations strictly_positive (T: tree) (vars: list nat): Prop
     by wf (size T) lt :=

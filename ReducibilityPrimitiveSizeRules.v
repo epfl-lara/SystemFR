@@ -1,19 +1,19 @@
 Require Import Equations.Equations.
 
-Require Import Termination.Tactics.
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.TermList.
-Require Import Termination.AssocList.
-Require Import Termination.StarRelation.
-Require Import Termination.SmallStep.
-Require Import Termination.PrimitiveSize.
-Require Import Termination.StarLemmas.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.TermList.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.PrimitiveSize.
+Require Import SystemFR.StarLemmas.
 
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.RedTactics.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.RedTactics.
 
 Opaque reducible_values.
 

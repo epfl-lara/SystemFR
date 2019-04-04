@@ -6,46 +6,46 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.StarInversions.
-Require Import Termination.StarRelation.
-Require Import Termination.SmallStep.
-Require Import Termination.Syntax.
-Require Import Termination.Trees.
-Require Import Termination.Tactics.
-Require Import Termination.Equivalence.
-Require Import Termination.OpenTOpen.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.OpenTOpen.
 
-Require Import Termination.SizeLemmas.
+Require Import SystemFR.SizeLemmas.
 
-Require Import Termination.WFLemmas.
-Require Import Termination.TWFLemmas.
-Require Import Termination.ErasedTermLemmas.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.ErasedTermLemmas.
 
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.RedTactics.
-Require Import Termination.ReducibilityMeasure.
-Require Import Termination.ReducibilitySubst.
-Require Import Termination.ReducibilityRenaming.
-Require Import Termination.ReducibilityUnused.
-Require Import Termination.RedTactics2.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.RedTactics.
+Require Import SystemFR.ReducibilityMeasure.
+Require Import SystemFR.ReducibilitySubst.
+Require Import SystemFR.ReducibilityRenaming.
+Require Import SystemFR.ReducibilityUnused.
+Require Import SystemFR.RedTactics2.
 
-Require Import Termination.IdRelation.
-Require Import Termination.EqualWithRelation.
+Require Import SystemFR.IdRelation.
+Require Import SystemFR.EqualWithRelation.
 
-Require Import Termination.EquivalentWithRelation.
-Require Import Termination.AssocList.
-Require Import Termination.Sets.
-Require Import Termination.Freshness.
-Require Import Termination.SwapHoles.
-Require Import Termination.ListUtils.
-Require Import Termination.TOpenTClose.
-Require Import Termination.NoTypeFVar.
-Require Import Termination.StrictPositivity.
-Require Import Termination.NoTypeFVarLemmas.
+Require Import SystemFR.EquivalentWithRelation.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.SwapHoles.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.TOpenTClose.
+Require Import SystemFR.NoTypeFVar.
+Require Import SystemFR.StrictPositivity.
+Require Import SystemFR.NoTypeFVarLemmas.
 
-Require Import Termination.FVLemmas.
+Require Import SystemFR.FVLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.

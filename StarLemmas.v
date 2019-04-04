@@ -1,11 +1,11 @@
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.TermProperties.
-Require Import Termination.Tactics.
-Require Import Termination.WFLemmas.
-Require Import Termination.StarRelation.
-Require Import Termination.ListUtils.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.WellFormed.
 
 Lemma value_irred:
   forall v,

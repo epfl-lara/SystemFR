@@ -1,4 +1,4 @@
-Require Import Termination.Tactics.
+Require Import SystemFR.Tactics.
 
 Inductive fv_tag: Set := term_var | type_var.
 

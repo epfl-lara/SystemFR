@@ -1,8 +1,8 @@
 Require Import Coq.Program.Tactics.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
 
 Require Import Coq.Strings.String.
 

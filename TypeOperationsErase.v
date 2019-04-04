@@ -1,20 +1,20 @@
 Require Import Coq.Strings.String.
 
-Require Import Termination.Trees.
-Require Import Termination.Sets.
-Require Import Termination.Syntax.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Syntax.
 
-Require Import Termination.WellFormed.
-Require Import Termination.WFLemmas.
-Require Import Termination.TWFLemmas.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.TWFLemmas.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.AnnotatedTermLemmas.
-Require Import Termination.Tactics.
-Require Import Termination.TypeOperations.
-Require Import Termination.ListUtils.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.AnnotatedTermLemmas.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.TypeOperations.
+Require Import SystemFR.ListUtils.
 
-Require Import Termination.TypeErasure.
+Require Import SystemFR.TypeErasure.
 
 Lemma ite_type_erase:
   forall b T1 T2 T, T_ite b T1 T2 T ->

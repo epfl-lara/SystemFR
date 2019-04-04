@@ -1,11 +1,11 @@
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.Syntax.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasLists.
-Require Import Termination.ListUtils.
-Require Import Termination.AssocList.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasLists.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.AssocList.
 
 Lemma close_nothing:
   forall x t k,

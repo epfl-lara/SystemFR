@@ -3,13 +3,13 @@ Require Import Coq.Lists.List.
 Require Import Coq.Init.Datatypes.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.ListUtils.
-Require Import Termination.AssocList.
-Require Import Termination.Sets.
-Require Import Termination.SetLemmas.
-Require Import Termination.FVLemmas.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Sets.
+Require Import SystemFR.SetLemmas.
+Require Import SystemFR.FVLemmas.
 
 Lemma fv_close1:
   forall t k x,

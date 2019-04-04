@@ -1,8 +1,8 @@
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.Tactics.
-Require Import Termination.StarRelation.
-Require Import Termination.StarInversions.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.StarInversions.
 
 Require Import Equations.Equations.
 Require Import Equations.Subterm.

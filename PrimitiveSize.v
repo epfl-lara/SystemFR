@@ -1,6 +1,6 @@
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
 
 (* always 0 for non-values *)
 Fixpoint tsize_semantics t: nat :=

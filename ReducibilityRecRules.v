@@ -3,48 +3,48 @@ Require Import Equations.Equations.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.Sets.
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.TermList.
-Require Import Termination.SmallStep.
-Require Import Termination.AssocList.
-Require Import Termination.EquivalenceLemmas.
-Require Import Termination.ListUtils.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.StarRelation.
-Require Import Termination.SizeLemmas.
-Require Import Termination.StarLemmas.
-Require Import Termination.TypeErasure.
-Require Import Termination.SubstitutionErase.
-Require Import Termination.TreeLists.
-Require Import Termination.TermListReducible.
-Require Import Termination.StarInversions.
-Require Import Termination.EquivalentWithRelation.
-Require Import Termination.TermProperties.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.NatUtils.
-Require Import Termination.FVLemmas.
-Require Import Termination.TermListLemmas.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.TermList.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.EquivalenceLemmas.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.StarLemmas.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.SubstitutionErase.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.TermListReducible.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.EquivalentWithRelation.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.NatUtils.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.TermListLemmas.
 
-Require Import Termination.Equivalence.
-Require Import Termination.EquivalenceLemmas.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.EquivalenceLemmas.
 
-Require Import Termination.EqualWithRelation.
+Require Import SystemFR.EqualWithRelation.
 
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.ReducibilityRenaming.
-Require Import Termination.ReducibilityUnused.
-Require Import Termination.ReducibilitySubst.
-Require Import Termination.RedTactics.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.ReducibilityRenaming.
+Require Import SystemFR.ReducibilityUnused.
+Require Import SystemFR.ReducibilitySubst.
+Require Import SystemFR.RedTactics.
 
-Require Import Termination.Freshness.
+Require Import SystemFR.Freshness.
 
-Require Import Termination.WellFormed.
-Require Import Termination.FVLemmasLists.
-Require Import Termination.WFLemmasLists.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.FVLemmasLists.
+Require Import SystemFR.WFLemmasLists.
 
 Opaque reducible_values.
 Opaque makeFresh.

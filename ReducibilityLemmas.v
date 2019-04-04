@@ -2,33 +2,33 @@ Require Import Coq.Strings.String.
 
 Require Import Equations.Equations.
 
-Require Import Termination.AssocList.
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.SmallStep.
-Require Import Termination.TermProperties.
-Require Import Termination.SizeLemmas.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.SmallStepIrredLemmas.
-Require Import Termination.TermList.
-Require Import Termination.ListUtils.
-Require Import Termination.SizeLemmas.
-Require Import Termination.WFLemmasEval.
-Require Import Termination.FVLemmasEval.
-Require Import Termination.SmallStepSubstitutions.
-Require Import Termination.StarLemmas.
-Require Import Termination.StarInversions.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.Trees.
-Require Import Termination.Sets.
-Require Import Termination.StarRelation.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.SmallStepIrredLemmas.
+Require Import SystemFR.TermList.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.WFLemmasEval.
+Require Import SystemFR.FVLemmasEval.
+Require Import SystemFR.SmallStepSubstitutions.
+Require Import SystemFR.StarLemmas.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Sets.
+Require Import SystemFR.StarRelation.
 
-Require Import Termination.WellFormed.
-Require Import Termination.WFLemmas.
-Require Import Termination.TWFLemmas.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.TWFLemmas.
 
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
 
 Require Import Omega.
 

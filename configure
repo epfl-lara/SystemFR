@@ -1,1 +1,1 @@
-coq_makefile -Q . Termination *.v -o Makefile TIMED = true TIMEFMT = "\"\$*: %es\""
+coq_makefile -Q . SystemFR *.v -o Makefile TIMED = true TIMEFMT = "\"\$*: %es\""

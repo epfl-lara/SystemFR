@@ -1,6 +1,6 @@
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.PrimitiveSize.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.PrimitiveSize.
 
 Inductive is_value: tree -> Prop :=
 | IVUnit: is_value uu

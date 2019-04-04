@@ -1,13 +1,13 @@
 Require Import Coq.Strings.String.
 
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
-Require Import Termination.Syntax.
-Require Import Termination.Trees.
-Require Import Termination.TreeLists.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.TypeErasureLemmas.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Trees.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.AssocList.
 
 Lemma annotated_term_type:
   forall t,

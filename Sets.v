@@ -2,7 +2,7 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.Tactics.
+Require Import SystemFR.Tactics.
 
 Definition set (T: Type) := list T.
 

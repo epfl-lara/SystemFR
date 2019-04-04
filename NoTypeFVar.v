@@ -1,10 +1,10 @@
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.Syntax.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.ListUtils.
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasLists.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasLists.
 
 Definition no_type_fvar T vars :=
   forall X, X ∈ pfv T type_var -> X ∈ vars -> False.

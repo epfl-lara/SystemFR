@@ -1,14 +1,14 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.BaseType.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.TypeErasureLemmas.
 
 Lemma base_type_erase:
   forall X A B,

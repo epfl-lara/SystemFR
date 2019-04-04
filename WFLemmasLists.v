@@ -1,8 +1,8 @@
-Require Import Termination.Tactics.
-Require Import Termination.Syntax.
-Require Import Termination.TermList.
-Require Import Termination.WFLemmas.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.TermList.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WellFormed.
 
 Lemma satisfies_wfs:
   forall p lterms gamma k,

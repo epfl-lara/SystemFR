@@ -1,8 +1,8 @@
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
-Require Import Termination.NoTypeFVar.
-Require Import Termination.EqualWithRelation.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.NoTypeFVar.
+Require Import SystemFR.EqualWithRelation.
 
 Require Import PeanoNat.
 

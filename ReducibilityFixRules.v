@@ -2,42 +2,42 @@ Require Import Equations.Equations.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.ReducibilityLetRules.
-Require Import Termination.ReducibilityArrowRules.
-Require Import Termination.ReducibilityNatRules.
-Require Import Termination.ReducibilityQuantRules.
-Require Import Termination.ReducibilityPairRules.
-Require Import Termination.RedTactics.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.ReducibilityLetRules.
+Require Import SystemFR.ReducibilityArrowRules.
+Require Import SystemFR.ReducibilityNatRules.
+Require Import SystemFR.ReducibilityQuantRules.
+Require Import SystemFR.ReducibilityPairRules.
+Require Import SystemFR.RedTactics.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.SmallStep.
-Require Import Termination.ListUtils.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
-Require Import Termination.Freshness.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.TermList.
-Require Import Termination.StarRelation.
-Require Import Termination.StarInversions.
-Require Import Termination.SetLemmas.
-Require Import Termination.SubstitutionErase.
-Require Import Termination.NatCompare.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Sets.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.TermList.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.SetLemmas.
+Require Import SystemFR.SubstitutionErase.
+Require Import SystemFR.NatCompare.
 
-Require Import Termination.Equivalence.
-Require Import Termination.EquivalenceLemmas.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.EquivalenceLemmas.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasLists.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasLists.
 
-Require Import Termination.WellFormed.
-Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasLists.
+Require Import SystemFR.WellFormed.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WFLemmasLists.
 
-Require Import Termination.LVarOperations.
+Require Import SystemFR.LVarOperations.
 
 Require Import Omega.
 

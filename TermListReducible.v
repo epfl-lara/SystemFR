@@ -1,15 +1,15 @@
-Require Import Termination.Trees.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.TermList.
-Require Import Termination.SubstitutionErase.
-Require Import Termination.TreeLists.
-Require Import Termination.Sets.
+Require Import SystemFR.Trees.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.TermList.
+Require Import SystemFR.SubstitutionErase.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.Sets.
 
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
 
 Require Import PeanoNat.
 

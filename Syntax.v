@@ -3,11 +3,11 @@ Require Import Coq.Lists.List.
 
 Require Import PeanoNat.
 
-Require Import Termination.ListUtils.
-Require Import Termination.AssocList.
-Require Import Termination.Tactics.
-Require Export Termination.Trees.
-Require Import Termination.Sets.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Tactics.
+Require Export SystemFR.Trees.
+Require Import SystemFR.Sets.
 
 Lemma tag_eq_dec:
   forall tag1 tag2: fv_tag, { tag1 = tag2 } + { tag1 <> tag2 }.

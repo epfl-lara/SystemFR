@@ -4,97 +4,97 @@ Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.Syntax.
-Require Import Termination.Typing.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.StarRelation.
-Require Import Termination.TermList.
-Require Import Termination.Freshness.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.SmallStep.
-Require Import Termination.SmallStepSubstitutions.
-Require Import Termination.StarLemmas.
-Require Import Termination.StarInversions.
-Require Import Termination.Freshness.
-Require Import Termination.ListUtils.
-Require Import Termination.Trees.
-Require Import Termination.HasTypeAnnotated.
-Require Import Termination.TreeLists.
-Require Import Termination.TypeErasure.
-Require Import Termination.TypeErasureLemmas.
-Require Import Termination.SubstitutionErase.
-Require Import Termination.TreeLists.
-Require Import Termination.TermListReducible.
-Require Import Termination.NatUtils.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Typing.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.TermList.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.SmallStepSubstitutions.
+Require Import SystemFR.StarLemmas.
+Require Import SystemFR.StarInversions.
+Require Import SystemFR.Freshness.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.Trees.
+Require Import SystemFR.HasTypeAnnotated.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.TypeErasure.
+Require Import SystemFR.TypeErasureLemmas.
+Require Import SystemFR.SubstitutionErase.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.TermListReducible.
+Require Import SystemFR.NatUtils.
 
-Require Import Termination.WellFormed.
+Require Import SystemFR.WellFormed.
 
-Require Import Termination.Sets.
-Require Import Termination.SetLemmas.
+Require Import SystemFR.Sets.
+Require Import SystemFR.SetLemmas.
 
-Require Import Termination.Equivalence.
-Require Import Termination.EquivalenceLemmas.
+Require Import SystemFR.Equivalence.
+Require Import SystemFR.EquivalenceLemmas.
 
-Require Import Termination.RedTactics.
-Require Import Termination.RedTactics2.
-Require Import Termination.ReducibilityCandidate.
-Require Import Termination.ReducibilityDefinition.
-Require Import Termination.ReducibilityLemmas.
-Require Import Termination.ReducibilityRules.
-Require Import Termination.ReducibilityLetRules.
-Require Import Termination.ReducibilityArrowRules.
-Require Import Termination.ReducibilityPairRules.
-Require Import Termination.ReducibilityBoolRules.
-Require Import Termination.ReducibilityLetTermRules.
-Require Import Termination.ReducibilityRefineRules.
-Require Import Termination.ReducibilitySetOpsRules.
-Require Import Termination.ReducibilityQuantRules.
-Require Import Termination.ReducibilityEqualRules.
-Require Import Termination.ReducibilitySubtypeRules.
-Require Import Termination.ReducibilitySplitIteRule.
-Require Import Termination.ReducibilitySplitMatchRule.
-Require Import Termination.ReducibilitySplitRecRule.
-Require Import Termination.ReducibilityNatRules.
-Require Import Termination.ReducibilitySumRules.
-Require Import Termination.ReducibilityFixRules.
-Require Import Termination.ReducibilityPolymorphism.
-Require Import Termination.ReducibilityRecRules.
-Require Import Termination.ReducibilityRecGenRules.
-Require Import Termination.ReducibilityPrimitiveSizeRules.
-Require Import Termination.ReducibilityIteTypeRules.
+Require Import SystemFR.RedTactics.
+Require Import SystemFR.RedTactics2.
+Require Import SystemFR.ReducibilityCandidate.
+Require Import SystemFR.ReducibilityDefinition.
+Require Import SystemFR.ReducibilityLemmas.
+Require Import SystemFR.ReducibilityRules.
+Require Import SystemFR.ReducibilityLetRules.
+Require Import SystemFR.ReducibilityArrowRules.
+Require Import SystemFR.ReducibilityPairRules.
+Require Import SystemFR.ReducibilityBoolRules.
+Require Import SystemFR.ReducibilityLetTermRules.
+Require Import SystemFR.ReducibilityRefineRules.
+Require Import SystemFR.ReducibilitySetOpsRules.
+Require Import SystemFR.ReducibilityQuantRules.
+Require Import SystemFR.ReducibilityEqualRules.
+Require Import SystemFR.ReducibilitySubtypeRules.
+Require Import SystemFR.ReducibilitySplitIteRule.
+Require Import SystemFR.ReducibilitySplitMatchRule.
+Require Import SystemFR.ReducibilitySplitRecRule.
+Require Import SystemFR.ReducibilityNatRules.
+Require Import SystemFR.ReducibilitySumRules.
+Require Import SystemFR.ReducibilityFixRules.
+Require Import SystemFR.ReducibilityPolymorphism.
+Require Import SystemFR.ReducibilityRecRules.
+Require Import SystemFR.ReducibilityRecGenRules.
+Require Import SystemFR.ReducibilityPrimitiveSizeRules.
+Require Import SystemFR.ReducibilityIteTypeRules.
 
-Require Import Termination.StrictPositivity.
-Require Import Termination.StrictPositivityLemmas.
-Require Import Termination.StrictPositivityErased.
+Require Import SystemFR.StrictPositivity.
+Require Import SystemFR.StrictPositivityLemmas.
+Require Import SystemFR.StrictPositivityErased.
 
-Require Import Termination.WFLemmas.
-Require Import Termination.WFLemmasTyping.
+Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WFLemmasTyping.
 
-Require Import Termination.TWFLemmas.
-Require Import Termination.TWFLemmasTyping.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.TWFLemmasTyping.
 
-Require Import Termination.FVLemmas.
-Require Import Termination.FVLemmasTyping.
-Require Import Termination.FVLemmasTyping2.
-Require Import Termination.FVLemmasContext.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasTyping.
+Require Import SystemFR.FVLemmasTyping2.
+Require Import SystemFR.FVLemmasContext.
 
-Require Import Termination.NatCompare.
-Require Import Termination.NatCompareErase.
+Require Import SystemFR.NatCompare.
+Require Import SystemFR.NatCompareErase.
 
-Require Import Termination.LVarOperations.
-Require Import Termination.LVarOperationsErase.
-Require Import Termination.NoTypeFVarErased.
+Require Import SystemFR.LVarOperations.
+Require Import SystemFR.LVarOperationsErase.
+Require Import SystemFR.NoTypeFVarErased.
 
-Require Import Termination.BaseType.
-Require Import Termination.BaseTypeLemmas.
-Require Import Termination.BaseTypeSyntaxLemmas.
-Require Import Termination.BaseTypeErase.
+Require Import SystemFR.BaseType.
+Require Import SystemFR.BaseTypeLemmas.
+Require Import SystemFR.BaseTypeSyntaxLemmas.
+Require Import SystemFR.BaseTypeErase.
 
-Require Import Termination.TypeOperations.
-Require Import Termination.TypeOperationsLemmas.
-Require Import Termination.TypeOperationsSyntaxLemmas.
-Require Import Termination.TypeOperationsErase.
+Require Import SystemFR.TypeOperations.
+Require Import SystemFR.TypeOperationsLemmas.
+Require Import SystemFR.TypeOperationsSyntaxLemmas.
+Require Import SystemFR.TypeOperationsErase.
 
 Opaque reducible_values.
 Opaque Nat.eq_dec.

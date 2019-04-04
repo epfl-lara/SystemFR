@@ -1,4 +1,4 @@
-Require Import Termination.Trees.
+Require Import SystemFR.Trees.
 
 Inductive T_ite (b: tree): tree -> tree -> tree -> Prop :=
 | IteUnit:

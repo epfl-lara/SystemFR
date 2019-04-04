@@ -1,14 +1,14 @@
-Require Import Termination.Sets.
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.SmallStep.
-Require Import Termination.TermProperties.
-Require Import Termination.FVLemmas.
-Require Import Termination.ListUtils.
-Require Import Termination.SizeLemmas.
-Require Import Termination.StarRelation.
-Require Import Termination.SetLemmas.
-Require Import Termination.PrimitiveSize.
+Require Import SystemFR.Sets.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.SetLemmas.
+Require Import SystemFR.PrimitiveSize.
 
 Require Import Coq.Strings.String.
 

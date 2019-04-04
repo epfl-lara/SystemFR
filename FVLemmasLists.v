@@ -2,14 +2,14 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.TermProperties.
-Require Import Termination.Sets.
-Require Import Termination.AssocList.
-Require Import Termination.FVLemmas.
-Require Import Termination.TermList.
-Require Import Termination.ListUtils.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.TermProperties.
+Require Import SystemFR.Sets.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.TermList.
+Require Import SystemFR.ListUtils.
 
 Lemma satisfies_closed_mapping:
   forall P lterms gamma tag,

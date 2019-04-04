@@ -1,9 +1,9 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import Termination.Tactics.
-Require Import Termination.Sets.
-Require Import Termination.SetLemmas.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.Sets.
+Require Import SystemFR.SetLemmas.
 
 Require Import PeanoNat.
 

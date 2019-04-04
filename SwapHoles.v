@@ -1,8 +1,8 @@
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.TWFLemmas.
-Require Import Termination.ErasedTermLemmas.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.WellFormed.
 
 Require Import PeanoNat.
 Require Import Omega.

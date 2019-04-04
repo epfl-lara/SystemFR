@@ -1,15 +1,15 @@
 Require Import Coq.Strings.String.
 Require Import Omega.
 
-Require Import Termination.Syntax.
-Require Import Termination.Tactics.
-Require Import Termination.AssocList.
-Require Import Termination.Sets.
-Require Import Termination.ListUtils.
-Require Import Termination.TWFLemmas.
-Require Import Termination.SubstitutionLemmas.
-Require Import Termination.FVLemmas.
-Require Import Termination.WellFormed.
+Require Import SystemFR.Syntax.
+Require Import SystemFR.Tactics.
+Require Import SystemFR.AssocList.
+Require Import SystemFR.Sets.
+Require Import SystemFR.ListUtils.
+Require Import SystemFR.TWFLemmas.
+Require Import SystemFR.SubstitutionLemmas.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.WellFormed.
 
 Open Scope string_scope.
 Open Scope list_scope.
