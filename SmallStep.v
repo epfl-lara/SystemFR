@@ -330,3 +330,12 @@ Ltac hyp_value v :=
   end.
 
 Ltac t_not_hyp_value t := tryif hyp_value t then fail else idtac.
+
+Definition closed_term t :=
+  pfv t term_var = nil /\
+  wf t 0 /\
+  is_erased_term t.
+
+Definition closed_value v :=
+  closed_term v /\
+  is_value v.

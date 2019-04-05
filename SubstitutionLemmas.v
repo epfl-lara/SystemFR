@@ -9,7 +9,7 @@ Require Import SystemFR.Sets.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.WellFormed.
+
 
 Lemma substitute_nothing:
   forall t l tag,

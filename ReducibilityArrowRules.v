@@ -22,7 +22,7 @@ Require Import SystemFR.ReducibilityLemmas.
 Require Import SystemFR.ReducibilityLetRules.
 Require Import SystemFR.RedTactics.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -43,7 +43,7 @@ Lemma reducible_lambda:
     pfv t term_var = nil ->
     pfv t type_var = nil ->
     valid_interpretation theta ->
-    (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (T_let u U V)) ->
+    (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (T_let u V)) ->
     reducible_values theta (notype_lambda t) (T_arrow U V).
 Proof.
   repeat step || t_listutils || simp reducible_values in * || unfold closed_value, closed_term ||
@@ -88,7 +88,7 @@ Lemma reducible_app:
     valid_interpretation theta ->
     reducible theta t1 (T_arrow U V) ->
     reducible theta t2 U ->
-    reducible theta (app t1 t2) (T_let t2 U V).
+    reducible theta (app t1 t2) (T_let t2 V).
 Proof.
   intros theta U V t1 t2 H1 H2.
   unfold reducible, reduces_to in *;
@@ -134,7 +134,7 @@ Lemma open_reducible_app:
   forall tvars gamma U V t1 t2,
     open_reducible tvars gamma t1 (T_arrow U V) ->
     open_reducible tvars gamma t2 U ->
-    open_reducible tvars gamma (app t1 t2) (T_let t2 U V).
+    open_reducible tvars gamma (app t1 t2) (T_let t2 V).
 Proof.
   unfold open_reducible in *; steps;
     eauto using reducible_app.

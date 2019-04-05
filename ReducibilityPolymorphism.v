@@ -27,7 +27,7 @@ Require Import SystemFR.RedTactics.
 
 Require Import SystemFR.Freshness.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.FVLemmasLists.
 Require Import SystemFR.WFLemmasLists.
 

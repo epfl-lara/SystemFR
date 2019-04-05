@@ -29,7 +29,7 @@ Require Import SystemFR.EquivalenceLemmas.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -209,9 +209,9 @@ Lemma reducible_rec_induction:
            reducible theta
              (open 0 (open 1 ts n) tx)
              (open 0 T (succ n))) ->
-       reducible theta (notype_rec v t0 ts) (T_let v T_nat T).
+       reducible theta (notype_rec v t0 ts) (T_let v T).
 Proof.
-  induction 1; repeat step || simp_red || apply reducible_let; eauto 2 with b_inv.
+  induction 1; repeat step || simp_red || apply reducible_let with T_nat; eauto 2 with b_inv.
 
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
@@ -235,11 +235,11 @@ Proof.
       eauto using reducible_nat_value.
 
     apply reducible_lambda;
-      repeat apply reducible_let || simp reducible_values ||
+      repeat apply reducible_let with T_unit || simp reducible_values ||
              apply reducible_intersection || tac1 ||
              (rewrite open_none by t_rewrite); eauto with berased.
 
-    apply reducible_let2 with T_nat; eauto with values.
+    apply reducible_let2; eauto with values.
 Qed.
 
 Lemma reducible_rec:
@@ -260,7 +260,7 @@ Lemma reducible_rec:
         reducible theta
           (open 0 (open 1 ts n) tx)
           (open 0 T (succ n))) ->
-    reducible theta (notype_rec tn t0 ts) (T_let tn T_nat T).
+    reducible theta (notype_rec tn t0 ts) (T_let tn T).
 Proof.
   repeat step.
   unfold reducible, reduces_to in H6; steps.
@@ -305,7 +305,7 @@ Lemma open_reducible_rec:
         gamma)
       (open 0 (open 1 ts (term_fvar n)) (term_fvar y))
       (open 0 T (succ (term_fvar n))) ->
-    open_reducible tvars gamma (notype_rec tn t0 ts) (T_let tn T_nat T).
+    open_reducible tvars gamma (notype_rec tn t0 ts) (T_let tn T).
 Proof.
   unfold open_reducible in *; steps.
 

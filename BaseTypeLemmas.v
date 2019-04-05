@@ -20,8 +20,6 @@ Require Import SystemFR.SubstitutionLemmas.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
-
 Require Import SystemFR.BaseType.
 
 Require Import Omega.

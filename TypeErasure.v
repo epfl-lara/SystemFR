@@ -27,6 +27,9 @@ Fixpoint erase_term (t: tree): tree :=
   | pi1 t' => pi1 (erase_term t')
   | pi2 t' => pi2 (erase_term t')
 
+  | because t1 t2 => erase_term t1
+  | get_proof_in t1 t2 => notype_tlet uu (erase_term t2)
+
   | ttrue => ttrue
   | tfalse => tfalse
   | ite t1 t2 t3 => ite (erase_term t1) (erase_term t2) (erase_term t3)
@@ -63,10 +66,11 @@ Fixpoint erase_type (T: tree): tree :=
   | T_bool => T
   | T_nat => T
   | T_refine A p => T_refine (erase_type A) (erase_term p)
+  | T_type_refine A B => T_type_refine (erase_type A) (erase_type B)
   | T_prod A B => T_prod (erase_type A) (erase_type B)
   | T_arrow A B => T_arrow (erase_type A) (erase_type B)
   | T_sum A B => T_sum (erase_type A) (erase_type B)
-  | T_let t A B => T_let (erase_term t) (erase_type A) (erase_type B)
+  | T_let t B => T_let (erase_term t) (erase_type B)
   | T_singleton t => T_singleton (erase_term t)
   | T_intersection A B => T_intersection (erase_type A) (erase_type B)
   | T_union A B => T_union (erase_type A) (erase_type B)

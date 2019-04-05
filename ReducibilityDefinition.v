@@ -12,7 +12,7 @@ Require Import SystemFR.SizeLemmas.
 Require Import SystemFR.Equivalence.
 Require Import SystemFR.StarInversions.
 Require Import SystemFR.TermList.
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.StarRelation.
 
 Require Import SystemFR.ReducibilityMeasure.
@@ -22,15 +22,6 @@ Require Import Equations.Equations.
 Require Import Equations.Subterm.
 
 Require Import Omega.
-
-Definition closed_term t :=
-  pfv t term_var = nil /\
-  wf t 0 /\
-  is_erased_term t.
-
-Definition closed_value v :=
-  closed_term v /\
-  is_value v.
 
 Definition reduces_to (P: tree -> Prop) (t: tree) :=
   closed_term t /\
@@ -97,7 +88,12 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
     wf p 1 /\
     star small_step (open 0 p v) ttrue;
 
-  reducible_values theta v (T_let a A B) :=
+  reducible_values theta v (T_type_refine T1 T2) :=
+    exists (_: closed_value v),
+      reducible_values theta v T1 /\
+      exists p, reducible_values theta p (open 0 T2 v);
+
+  reducible_values theta v (T_let a B) :=
     closed_value v /\
     exists a' (_: is_erased_term a'),
       is_erased_term a /\
@@ -164,7 +160,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
 .
 
 Ltac t_reducibility_definition :=
-  repeat step || autorewrite with bsize;
+  repeat step || autorewrite with bsize || unfold closed_value, closed_term in *;
     eauto using left_lex with omega;
     eauto using right_lex, lt_index_step.
 
@@ -257,7 +253,10 @@ Ltac simp_red :=
   rewrite reducible_values_equation_53 in * ||
   rewrite reducible_values_equation_54 in * ||
   rewrite reducible_values_equation_55 in * ||
-  rewrite reducible_values_equation_56 in *.
+  rewrite reducible_values_equation_56 in * ||
+  rewrite reducible_values_equation_57 in * ||
+  rewrite reducible_values_equation_58 in * ||
+  rewrite reducible_values_equation_59 in *.
 
 Ltac top_level_unfold :=
   match goal with

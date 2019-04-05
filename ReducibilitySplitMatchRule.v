@@ -24,7 +24,7 @@ Require Import SystemFR.TermListLemmas.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 

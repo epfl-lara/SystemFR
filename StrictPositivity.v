@@ -25,8 +25,8 @@ Equations strictly_positive (T: tree) (vars: list nat): Prop
   strictly_positive (T_forall T1 T2) vars := no_type_fvar T1 vars /\ strictly_positive T2 vars;
   strictly_positive (T_sum T1 T2) vars := strictly_positive T1 vars /\ strictly_positive T2 vars;
   strictly_positive (T_refine T p) vars := strictly_positive T vars;
-  strictly_positive (T_let t T1 T2) vars :=
-    strictly_positive T1 vars /\ strictly_positive T2 vars;
+  strictly_positive (T_type_refine T1 T2) vars := no_type_fvar T1 vars /\ no_type_fvar T2 vars;
+  strictly_positive (T_let t T2) vars := strictly_positive T2 vars;
   strictly_positive (T_singleton _) _ := True;
   strictly_positive (T_intersection T1 T2) _ :=
     strictly_positive T1 vars /\ strictly_positive T2 vars;
@@ -107,4 +107,7 @@ Ltac simp_spos :=
   rewrite strictly_positive_equation_53 in * ||
   rewrite strictly_positive_equation_54 in * ||
   rewrite strictly_positive_equation_55 in * ||
-  rewrite strictly_positive_equation_56 in *.
+  rewrite strictly_positive_equation_56 in * ||
+  rewrite strictly_positive_equation_57 in * ||
+  rewrite strictly_positive_equation_58 in * ||
+  rewrite strictly_positive_equation_59.

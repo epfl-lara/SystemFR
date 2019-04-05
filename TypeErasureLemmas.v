@@ -11,8 +11,8 @@ Require Import SystemFR.WFLemmas.
 Require Import SystemFR.TWFLemmas.
 Require Import SystemFR.StarRelation.
 Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.WellFormed.
-Require Import SystemFR.WellFormed.
+
+
 
 Open Scope list_scope.
 

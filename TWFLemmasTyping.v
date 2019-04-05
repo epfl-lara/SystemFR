@@ -11,7 +11,7 @@ Require Import SystemFR.Sets.
 Require Import SystemFR.TermList.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.Freshness.
-Require Import SystemFR.WellFormed.
+
 
 Require Import SystemFR.BaseType.
 Require Import SystemFR.BaseTypeSyntaxLemmas.

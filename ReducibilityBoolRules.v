@@ -22,7 +22,7 @@ Require Import SystemFR.TermListReducible.
 Require Import SystemFR.Sets.
 Require Import SystemFR.SetLemmas.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 

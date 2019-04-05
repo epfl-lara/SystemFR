@@ -14,7 +14,6 @@ Require Import SystemFR.TermList.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.StrictPositivity.
 
-Require Import SystemFR.WellFormed.
 Require Import SystemFR.TypeErasure.
 
 Require Import SystemFR.FVLemmas.

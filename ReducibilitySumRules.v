@@ -28,7 +28,7 @@ Require Import SystemFR.EquivalenceLemmas.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -115,12 +115,12 @@ Lemma open_reducible_sum_match:
                    ((p, T_equal t (tright (fvar y term_var))) :: (y, T2) :: gamma)
                    (open 0 tr (fvar y term_var))
                    (open 0 T (tright (fvar y term_var))) ->
-    open_reducible tvars gamma (sum_match t tl tr) (T_let t (T_sum T1 T2) T).
+    open_reducible tvars gamma (sum_match t tl tr) (T_let t T).
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold || simp_red.
 
   - eapply reducible_let_backstep_expr; eauto; t_closer.
-    apply reducible_let; repeat step || simp_red; eauto.
+    apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var)); repeat step || simp_red; eauto.
 
     unshelve epose proof (H24 theta ((p, notype_trefl) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star.
@@ -131,7 +131,7 @@ Proof.
       repeat step || t_listutils; t_closer.
 
   - eapply reducible_let_backstep_expr; eauto; t_closer.
-    apply reducible_let; repeat step || simp_red; eauto.
+    apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var)); repeat step || simp_red; eauto.
 
     unshelve epose proof (H25 theta ((p, notype_trefl) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star.

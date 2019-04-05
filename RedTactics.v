@@ -23,7 +23,7 @@ Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasEval.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasEval.
 Require Import SystemFR.WFLemmasLists.

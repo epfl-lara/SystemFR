@@ -143,6 +143,10 @@ Proof.
         H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t ?T' => right
       | H1: equal_with_relation _ ?T' ?T,
         H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t ?T' => right
+      | H1: equal_with_relation _ ?T ?T',
+        H: reducible_values _ ?t (open _ ?T _) |- exists _, reducible_values _ _ (open _ ?T' _) => exists t
+      | H1: equal_with_relation _ ?T' ?T,
+        H: reducible_values _ ?t (open _ ?T _) |- exists _, reducible_values _ _ (open _ ?T' _) => exists t
       | H: star small_step _ zero |- _ \/ _ => left
       | H: star small_step _ (succ _) |- _ => right
       | H1: equal_with_relation ?rel ?T ?T' |- exists X, (X ∈ ?L -> False) /\ _ =>
@@ -156,7 +160,8 @@ Proof.
       eauto with bwf;
       eauto with bfv;
       try solve [ eapply equivalent_rc_left; eauto 1 ];
-      try solve [ eapply equivalent_rc_right; eauto 1 ].
+      try solve [ eapply equivalent_rc_right; eauto 1 ];
+      t_closer.
 
     - instantiate_any. eapply reduces_to_equiv; eauto 1; steps.
       lazymatch goal with

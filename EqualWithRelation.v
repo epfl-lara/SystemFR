@@ -57,6 +57,7 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel t1 t1' ->
       equal_with_relation rel t2 t2' ->
       equal_with_relation rel (forall_inst t1 t2) (forall_inst t1' t2')
+
 | EWRPP:
     forall t1 t1' t2 t2',
       equal_with_relation rel t1 t1' ->
@@ -70,6 +71,18 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
     forall t t',
       equal_with_relation rel t t' ->
       equal_with_relation rel (pi2 t) (pi2 t')
+
+| EWRBecause:
+    forall t1 t1' t2 t2',
+      equal_with_relation rel t1 t1' ->
+      equal_with_relation rel t2 t2' ->
+      equal_with_relation rel (because t1 t2) (because t1' t2')
+| EWRGetProof:
+    forall t1 t1' t2 t2',
+      equal_with_relation rel t1 t1' ->
+      equal_with_relation rel t2 t2' ->
+      equal_with_relation rel (get_proof_in t1 t2) (get_proof_in t1' t2')
+
 | EWRTrue:
     equal_with_relation rel ttrue ttrue
 | EWRFalse:
@@ -190,11 +203,18 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
     equal_with_relation rel T_bool T_bool
 | EWRNat:
     equal_with_relation rel T_nat T_nat
+
 | EWRRefine:
     forall t t' T T',
       equal_with_relation rel T T' ->
       equal_with_relation rel t t' ->
       equal_with_relation rel (T_refine T t) (T_refine T' t')
+| EWRTypeRefine:
+    forall A A' B B',
+      equal_with_relation rel A A' ->
+      equal_with_relation rel B B' ->
+      equal_with_relation rel (T_type_refine A B) (T_type_refine A' B')
+
 | EWRProd:
     forall A A' B B',
       equal_with_relation rel A A' ->
@@ -211,11 +231,10 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel B B' ->
       equal_with_relation rel (T_sum A B) (T_sum A' B')
 | EWRTLet:
-    forall t t' A A' B B',
+    forall t t' B B',
       equal_with_relation rel t t' ->
-      equal_with_relation rel A A' ->
       equal_with_relation rel B B' ->
-      equal_with_relation rel (T_let t A B) (T_let t' A' B')
+      equal_with_relation rel (T_let t B) (T_let t' B')
 | EWRSingleton:
     forall t t',
       equal_with_relation rel t t' ->

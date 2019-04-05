@@ -27,7 +27,7 @@ Require Import SystemFR.ReducibilityLetRules.
 Require Import SystemFR.ReducibilityLetTermRules.
 Require Import SystemFR.RedTactics.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -121,7 +121,7 @@ Lemma reducible_subtype_forall:
     support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->
     reducible_values theta t0 (T_forall (substitute T1 l) (substitute T2 l)) ->
-    reducible_values theta t0 (T_let (substitute t l) (substitute T1 l) (substitute T2 l)).
+    reducible_values theta t0 (T_let (substitute t l) (substitute T2 l)).
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red.
@@ -135,7 +135,7 @@ Lemma reducible_subtype_exists:
     valid_interpretation theta ->
     support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->
-    reducible_values theta t0 (T_let (substitute t l) (substitute T1 l) (substitute T2 l)) ->
+    reducible_values theta t0 (T_let (substitute t l) (substitute T2 l)) ->
     reducible_values theta t0 (T_exists (substitute T1 l) (substitute T2 l)).
 Proof.
   unfold open_reducible, reducible, reduces_to;
@@ -152,7 +152,7 @@ Lemma open_reducible_forall_inst:
     subset (pfv t2 term_var) (support gamma) ->
     open_reducible tvars gamma t1 (T_forall U V) ->
     open_reducible tvars gamma t2 U ->
-    open_reducible tvars gamma t1 (T_let t2 U V).
+    open_reducible tvars gamma t1 (T_let t2 V).
 Proof.
   repeat step || unfold open_reducible, reducible, reduces_to in * || simp_red ||
          t_instantiate_sat3 || find_smallstep_value;

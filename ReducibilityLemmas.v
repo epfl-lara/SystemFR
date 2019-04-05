@@ -23,7 +23,7 @@ Require Import SystemFR.Trees.
 Require Import SystemFR.Sets.
 Require Import SystemFR.StarRelation.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.TWFLemmas.
 

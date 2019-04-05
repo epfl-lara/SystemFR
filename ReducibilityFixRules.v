@@ -33,7 +33,7 @@ Require Import SystemFR.EquivalenceLemmas.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -281,7 +281,7 @@ Proof.
       eauto 2 with b_equiv.
 
     apply reducible_lambda;
-      repeat apply reducible_let || simp reducible_values ||
+      repeat apply reducible_let with T_unit || simp reducible_values ||
              apply reducible_intersection || tac1 ||
              (rewrite open_none by t_rewrite); eauto with berased.
 Qed.

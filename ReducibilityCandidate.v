@@ -4,7 +4,7 @@ Require Import SystemFR.Tactics.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.AssocList.
 Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.WellFormed.
+
 
 Require Import PeanoNat.
 

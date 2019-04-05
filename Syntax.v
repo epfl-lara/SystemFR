@@ -44,6 +44,9 @@ Fixpoint pfv t tag: set nat :=
   | pi1 t' => pfv t' tag
   | pi2 t' => pfv t' tag
 
+  | because t1 t2 => pfv t1 tag ++ pfv t2 tag
+  | get_proof_in t1 t2 => pfv t1 tag ++ pfv t2 tag
+
   | ttrue => nil
   | tfalse => nil
   | ite t1 t2 t3 => pfv t1 tag ++ pfv t2 tag ++ pfv t3 tag
@@ -75,10 +78,11 @@ Fixpoint pfv t tag: set nat :=
   | T_bool => nil
   | T_nat => nil
   | T_refine A p => pfv A tag ++ pfv p tag
+  | T_type_refine A B => pfv A tag ++ pfv B tag
   | T_prod A B => pfv A tag ++ pfv B tag
   | T_arrow A B => pfv A tag ++ pfv B tag
   | T_sum A B => pfv A tag ++ pfv B tag
-  | T_let t A B => pfv t tag ++ pfv A tag ++ pfv B tag
+  | T_let t B => pfv t tag ++ pfv B tag
   | T_singleton t => pfv t tag
   | T_intersection A B => pfv A tag ++ pfv B tag
   | T_union A B => pfv A tag ++ pfv B tag
@@ -173,6 +177,9 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | pi1 t' => pi1 (psubstitute t' l tag)
   | pi2 t' => pi2 (psubstitute t' l tag)
 
+  | because t1 t2 => because (psubstitute t1 l tag) (psubstitute t2 l tag)
+  | get_proof_in t1 t2 => get_proof_in (psubstitute t1 l tag) (psubstitute t2 l tag)
+
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (psubstitute t1 l tag) (psubstitute t2 l tag) (psubstitute t3 l tag)
@@ -210,7 +217,8 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | T_arrow T1 T2 => T_arrow (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_sum T1 T2 => T_sum (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_refine T p => T_refine (psubstitute T l tag) (psubstitute p l tag)
-  | T_let t A B => T_let (psubstitute t l tag) (psubstitute A l tag) (psubstitute B l tag)
+  | T_type_refine T1 T2 => T_type_refine (psubstitute T1 l tag) (psubstitute T2 l tag)
+  | T_let t B => T_let (psubstitute t l tag) (psubstitute B l tag)
   | T_singleton t => T_singleton (psubstitute t l tag)
   | T_intersection T1 T2 => T_intersection (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_union T1 T2 => T_union (psubstitute T1 l tag) (psubstitute T2 l tag)
@@ -238,6 +246,196 @@ Fixpoint psubstitute_context (gamma: context) (l: list (nat * tree)) tag: contex
 Definition substitute_context (gamma: context) (l: list (nat * tree)): context :=
   psubstitute_context gamma l term_var.
 
+Fixpoint wf t k :=
+  match t with
+  | fvar _ _ => True
+  | lvar i term_var => i < k
+  | lvar i type_var => True
+
+  | notype_err => True
+  | err T => wf T k
+
+  | uu => True
+
+  | tsize t => wf t k
+
+  | notype_lambda t' => wf t' (S k)
+  | lambda T t' => wf T k /\ wf t' (S k)
+  | app t1 t2 => wf t1 k /\ wf t2 k
+
+  | forall_inst t1 t2 => wf t1 k /\ wf t2 k
+
+  | type_abs t => wf t k
+  | type_inst t T => wf t k /\ wf T k
+  | notype_inst t => wf t k
+
+  | pp t1 t2 => wf t1 k /\ wf t2 k
+  | pi1 t => wf t k
+  | pi2 t => wf t k
+
+  | because t1 t2 => wf t1 k /\ wf t2 k
+  | get_proof_in t1 t2 => wf t1 k /\ wf t2 (S k)
+
+  | ttrue => True
+  | tfalse => True
+  | ite t1 t2 t3 => wf t1 k /\ wf t2 k /\ wf t3 k
+
+  | zero => True
+  | succ t' => wf t' k
+  | notype_rec t' t1 t2 =>
+      wf t' k /\
+      wf t1 k /\
+      wf t2 (S (S k))
+  | rec T t' t1 t2 =>
+      wf T (S k) /\
+      wf t' k /\
+      wf t1 k /\
+      wf t2 (S (S k))
+  | tmatch t' t1 t2 =>
+      wf t' k /\
+      wf t1 k /\
+      wf t2 (S k)
+
+  | tfix T t' => wf T (S k) /\ wf t' (S (S k))
+  | notype_tfix t' => wf t' (S (S k))
+
+  | notype_tlet t1 t2 => wf t1 k /\ wf t2 (S k)
+  | tlet t1 T t2 => wf t1 k /\ wf T k /\ wf t2 (S k)
+
+  | notype_trefl => True
+  | trefl t1 t2 => wf t1 k /\ wf t2 k
+
+  | tfold T t' => wf T k /\ wf t' k
+  | notype_tfold t' => wf t' k
+  | tunfold t' => wf t' k
+  | tunfold_in t1 t2 => wf t1 k /\ wf t2 (S k)
+
+  | tleft t' => wf t' k
+  | tright t' => wf t' k
+  | sum_match t' tl tr => wf t' k /\ wf tl (S k) /\ wf tr (S k)
+
+  | T_unit => True
+  | T_bool => True
+  | T_nat => True
+  | T_prod T1 T2 => wf T1 k /\ wf T2 (S k)
+  | T_arrow T1 T2 => wf T1 k /\ wf T2 (S k)
+  | T_sum T1 T2 => wf T1 k /\ wf T2 k
+  | T_refine T p => wf T k /\ wf p (S k)
+  | T_type_refine T1 T2 => wf T1 k /\ wf T2 (S k)
+  | T_let t B => wf t k /\ wf B (S k)
+  | T_singleton t => wf t k
+  | T_intersection T1 T2 => wf T1 k /\ wf T2 k
+  | T_union T1 T2 => wf T1 k /\ wf T2 k
+  | T_top => True
+  | T_bot => True
+  | T_equal t1 t2 => wf t1 k /\ wf t2 k
+  | T_forall T1 T2 => wf T1 k /\ wf T2 (S k)
+  | T_exists T1 T2 => wf T1 k /\ wf T2 (S k)
+  | T_abs T => wf T k
+  | T_rec n T0 Ts => wf n k /\ wf T0 k /\ wf Ts k
+  end.
+
+Fixpoint twf t k :=
+  match t with
+  | fvar _ _ => True
+  | lvar i type_var => i < k
+  | lvar i term_var => True
+
+  | err T => twf T k
+  | notype_err => True
+
+  | uu => True
+
+  | tsize t => twf t k
+
+  | notype_lambda t' => twf t' k
+  | lambda T t' => twf T k /\ twf t' k
+  | app t1 t2 => twf t1 k /\ twf t2 k
+
+  | forall_inst t1 t2 => twf t1 k /\ twf t2 k
+
+  | type_abs t => twf t (S k)
+  | type_inst t T => twf t k /\ twf T k
+  | notype_inst t => twf t k
+
+  | pp t1 t2 => twf t1 k /\ twf t2 k
+  | pi1 t => twf t k
+  | pi2 t => twf t k
+
+  | because t1 t2 => twf t1 k /\ twf t2 k
+  | get_proof_in t1 t2 => twf t1 k /\ twf t2 k
+
+  | ttrue => True
+  | tfalse => True
+  | ite t1 t2 t3 => twf t1 k /\ twf t2 k /\ twf t3 k
+
+  | zero => True
+  | succ t' => twf t' k
+  | notype_rec t' t1 t2 =>
+      twf t' k /\
+      twf t1 k /\
+      twf t2 k
+  | rec T t' t1 t2 =>
+      twf T k /\
+      twf t' k /\
+      twf t1 k /\
+      twf t2 k
+  | tmatch t' t1 t2 =>
+      twf t' k /\
+      twf t1 k /\
+      twf t2 k
+
+  | tfix T t' => twf T k /\ twf t' k
+  | notype_tfix t' => twf t' k
+
+  | notype_tlet t1 t2 => twf t1 k /\ twf t2 k
+  | tlet t1 T t2 => twf t1 k /\ twf T k /\ twf t2 k
+
+  | notype_trefl => True
+  | trefl t1 t2 => twf t1 k /\ twf t2 k
+
+  | notype_tfold t => twf t k
+  | tfold T t => twf T k /\ twf t k
+  | tunfold t => twf t k
+  | tunfold_in t1 t2 => twf t1 k /\ twf t2 k
+
+  | tleft t => twf t k
+  | tright t => twf t k
+  | sum_match t' tl tr => twf t' k /\ twf tl k /\ twf tr k
+
+  | T_unit => True
+  | T_bool => True
+  | T_nat => True
+  | T_prod T1 T2 => twf T1 k /\ twf T2 k
+  | T_arrow T1 T2 => twf T1 k /\ twf T2 k
+  | T_sum T1 T2 => twf T1 k /\ twf T2 k
+  | T_refine T p => twf T k /\ twf p k
+  | T_type_refine T1 T2 => twf T1 k /\ twf T2 k
+  | T_let t B => twf t k /\ twf B k
+  | T_singleton t => twf t k
+  | T_intersection T1 T2 => twf T1 k /\ twf T2 k
+  | T_union T1 T2 => twf T1 k /\ twf T2 k
+  | T_top => True
+  | T_bot => True
+  | T_equal t1 t2 => twf t1 k /\ twf t2 k
+  | T_forall T1 T2 => twf T1 k /\ twf T2 k
+  | T_exists T1 T2 => twf T1 k /\ twf T2 k
+  | T_abs T => twf T (S k)
+  | T_rec n T0 Ts => twf n k /\ twf T0 k /\ twf Ts (S k)
+  end.
+
+Fixpoint wfs (gamma: list (nat * tree)) k :=
+  match gamma with
+  | nil => True
+  | (x,A) :: gamma' => wf A k /\ wfs gamma' k
+  end.
+
+Fixpoint twfs (gamma: list (nat * tree)) k :=
+  match gamma with
+  | nil => True
+  | (x,A) :: gamma' => twf A k /\ twfs gamma' k
+  end.
+
 Fixpoint open (k: nat) (t rep: tree) :=
   match t with
   | fvar _ _ => t
@@ -263,6 +461,9 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | pp t1 t2 => pp (open k t1 rep) (open k t2 rep)
   | pi1 t => pi1 (open k t rep)
   | pi2 t => pi2 (open k t rep)
+
+  | because t1 t2 => because (open k t1 rep) (open k t2 rep)
+  | get_proof_in t1 t2 => get_proof_in (open k t1 rep) (open (S k) t2 rep)
 
   | ttrue => t
   | tfalse => t
@@ -311,7 +512,8 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | T_arrow T1 T2 => T_arrow (open k T1 rep) (open (S k) T2 rep)
   | T_sum T1 T2 => T_sum (open k T1 rep) (open k T2 rep)
   | T_refine T p => T_refine (open k T rep) (open (S k) p rep)
-  | T_let t A B => T_let (open k t rep) (open k A rep) (open (S k) B rep)
+  | T_type_refine T1 T2 => T_type_refine (open k T1 rep) (open (S k) T2 rep)
+  | T_let t B => T_let (open k t rep) (open (S k) B rep)
   | T_singleton t => T_singleton (open k t rep)
   | T_intersection T1 T2 => T_intersection (open k T1 rep) (open k T2 rep)
   | T_union T1 T2 => T_union (open k T1 rep) (open k T2 rep)
@@ -349,6 +551,9 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | pp t1 t2 => pp (close k t1 x) (close k t2 x)
   | pi1 t => pi1 (close k t x)
   | pi2 t => pi2 (close k t x)
+
+  | because t1 t2 => because (close k t1 x) (close k t2 x)
+  | get_proof_in t1 t2 => get_proof_in (close k t1 x) (close (S k) t2 x)
 
   | ttrue => t
   | tfalse => t
@@ -397,7 +602,8 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | T_arrow T1 T2 => T_arrow (close k T1 x) (close (S k) T2 x)
   | T_sum T1 T2 => T_sum (close k T1 x) (close k T2 x)
   | T_refine T p => T_refine (close k T x) (close (S k) p x)
-  | T_let t A B => T_let (close k t x) (close k A x) (close (S k) B x)
+  | T_type_refine T1 T2 => T_type_refine (close k T1 x) (close (S k) T2 x)
+  | T_let t B => T_let (close k t x) (close (S k) B x)
   | T_singleton t => T_singleton (close k t x)
   | T_intersection T1 T2 => T_intersection (close k T1 x) (close k T2 x)
   | T_union T1 T2 => T_union (close k T1 x) (close k T2 x)
@@ -436,6 +642,9 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | pp t1 t2 => pp (topen k t1 rep) (topen k t2 rep)
   | pi1 t => pi1 (topen k t rep)
   | pi2 t => pi2 (topen k t rep)
+
+  | because t1 t2 => because (topen k t1 rep) (topen k t2 rep)
+  | get_proof_in t1 t2 => get_proof_in (topen k t1 rep) (topen k t2 rep)
 
   | ttrue => t
   | tfalse => t
@@ -485,7 +694,8 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | T_arrow T1 T2 => T_arrow (topen k T1 rep) (topen k T2 rep)
   | T_sum T1 T2 => T_sum (topen k T1 rep) (topen k T2 rep)
   | T_refine T p => T_refine (topen k T rep) (topen k p rep)
-  | T_let t A B => T_let (topen k t rep) (topen k A rep) (topen k B rep)
+  | T_type_refine T1 T2 => T_type_refine (topen k T1 rep) (topen k T2 rep)
+  | T_let t B => T_let (topen k t rep) (topen k B rep)
   | T_singleton t => T_singleton (topen k t rep)
   | T_intersection T1 T2 => T_intersection (topen k T1 rep) (topen k T2 rep)
   | T_union T1 T2 => T_union (topen k T1 rep) (topen k T2 rep)
@@ -524,6 +734,9 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | pp t1 t2 => pp (tclose k t1 x) (tclose k t2 x)
   | pi1 t => pi1 (tclose k t x)
   | pi2 t => pi2 (tclose k t x)
+
+  | because t1 t2 => because (tclose k t1 x) (tclose k t2 x)
+  | get_proof_in t1 t2 => get_proof_in (tclose k t1 x) (tclose k t2 x)
 
   | ttrue => t
   | tfalse => t
@@ -572,7 +785,8 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | T_arrow T1 T2 => T_arrow (tclose k T1 x) (tclose k T2 x)
   | T_sum T1 T2 => T_sum (tclose k T1 x) (tclose k T2 x)
   | T_refine T p => T_refine (tclose k T x) (tclose k p x)
-  | T_let t A B => T_let (tclose k t x) (tclose k A x) (tclose k B x)
+  | T_type_refine T1 T2 => T_type_refine (tclose k T1 x) (tclose k T2 x)
+  | T_let t B => T_let (tclose k t x) (tclose k B x)
   | T_singleton t => T_singleton (tclose k t x)
   | T_intersection T1 T2 => T_intersection (tclose k T1 x) (tclose k T2 x)
   | T_union T1 T2 => T_union (tclose k T1 x) (tclose k T2 x)

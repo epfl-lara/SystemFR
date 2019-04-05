@@ -19,7 +19,7 @@ Require Import SystemFR.ErasedTermLemmas.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 
 Require Import SystemFR.ReducibilityCandidate.
@@ -113,6 +113,8 @@ Proof.
            | |- _ \/ (exists v, tright ?v' = tright v /\ _) => right; exists v'
            | H: reducible_values ?theta ?a ?U |- exists x _, reducible_values ?theta x (psubstitute ?U _ _) /\ _ => exists a
            | H: reducible_values ?theta ?a (psubstitute ?U _ _) |- exists x _, reducible_values ?theta x ?U /\ _ => exists a
+           | H: reducible_values ?theta ?a ?U |- exists x, reducible_values ?theta x (psubstitute ?U _ _) => exists a
+           | H: reducible_values ?theta ?a (psubstitute ?U _ _) |- exists x, reducible_values ?theta x ?U => exists a
            | H1: forall a, _ -> reducible_values _ _ _ -> _,
              H2: is_erased_term ?a  |- _ =>
                poseNew (Mark H1 "instantiate");

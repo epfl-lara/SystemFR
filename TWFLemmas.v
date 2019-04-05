@@ -6,7 +6,7 @@ Require Import SystemFR.Tactics.
 Require Import SystemFR.AssocList.
 Require Import SystemFR.Sets.
 Require Import SystemFR.ListUtils.
-Require Import SystemFR.WellFormed.
+Require Import SystemFR.SmallStep.
 
 Open Scope string_scope.
 Open Scope list_scope.

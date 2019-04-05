@@ -9,7 +9,7 @@ Require Import SystemFR.AssocList.
 Require Import SystemFR.TermList.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.WellFormed.
+
 
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.

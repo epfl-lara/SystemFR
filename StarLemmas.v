@@ -5,7 +5,7 @@ Require Import SystemFR.Tactics.
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.StarRelation.
 Require Import SystemFR.ListUtils.
-Require Import SystemFR.WellFormed.
+
 
 Lemma value_irred:
   forall v,

@@ -9,7 +9,7 @@ Require Import SystemFR.AssocList.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.TypeErasure.
 Require Import SystemFR.StrictPositivity.
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.NatUtils.
 Require Import SystemFR.NatCompare.
 Require Import SystemFR.LVarOperations.
@@ -49,7 +49,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
     forall tvars gamma t1 t2 U V,
       has_type tvars gamma t1 (T_arrow U V) ->
       has_type tvars gamma t2 U ->
-      has_type tvars gamma (app t1 t2) (T_let t2 U V)
+      has_type tvars gamma (app t1 t2) (T_let t2 V)
 
 | HTTypeLambda:
     forall tvars gamma t T X,
@@ -75,12 +75,12 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
     forall tvars gamma t1 t2 U V,
       has_type tvars gamma t1 (T_forall U V) ->
       has_type tvars gamma t2 U ->
-      has_type tvars gamma (forall_inst t1 t2) (T_let t2 U V)
+      has_type tvars gamma (forall_inst t1 t2) (T_let t2 V)
 
 | HTPair:
     forall tvars gamma A B t1 t2,
       has_type tvars gamma t1 A ->
-      has_type tvars gamma t2 (T_let t1 A B) ->
+      has_type tvars gamma t2 (T_let t1 B) ->
       has_type tvars gamma (pp t1 t2) (T_prod A B)
 
 | HTPi1:
@@ -91,7 +91,27 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
 | HTPi2:
     forall tvars gamma t A B,
       has_type tvars gamma t (T_prod A B) ->
-      has_type tvars gamma (pi2 t) (T_let (pi1 t) A B)
+      has_type tvars gamma (pi2 t) (T_let (pi1 t) B)
+
+| HTBecause:
+    forall tvars gamma A B t1 t2,
+      has_type tvars gamma t1 A ->
+      has_type tvars gamma t2 (T_let t1 B) ->
+      has_type tvars gamma (because t1 t2) (T_type_refine A B)
+
+| HTGetProofIn:
+    forall tvars gamma t1 t2 A B T x,
+      ~(x ∈ tvars) ->
+      ~(x ∈ fv_context gamma) ->
+      ~(x ∈ fv t1) ->
+      ~(x ∈ fv t2) ->
+      ~(x ∈ fv T) ->
+      ~(x ∈ fv A) ->
+      ~(x ∈ fv B) ->
+      wf (erase_term t2) 0 ->
+      has_type tvars gamma t1 (T_type_refine A B) ->
+      has_type tvars ((x, T_let t1 B) :: gamma) (open 0 t2 (term_fvar x)) T ->
+      has_type tvars gamma (get_proof_in t1 t2) T
 
 | HTUnit:
     forall tvars gamma,
@@ -184,7 +204,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
         (open 0 (open 1 ts (term_fvar n)) (term_fvar y))
         (open 0 T (succ (term_fvar n)))
       ->
-      has_type tvars gamma (rec T tn t0 ts) (T_let tn T_nat T)
+      has_type tvars gamma (rec T tn t0 ts) (T_let tn T)
 
 | HTFix:
     forall tvars gamma ts T n y p,
@@ -316,6 +336,21 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t1 A ->
       has_type tvars ((p,T_equal (term_fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (term_fvar x)) B ->
       has_type tvars gamma (tlet t1 A t2) B
+
+| HTLet2:
+    forall tvars gamma t1 t2 x p A B,
+      ~(x ∈ support gamma) ->
+      ~(p ∈ support gamma) ->
+      ~(x = p) ->
+      ~(x ∈ fv t2) ->
+      ~(p ∈ fv t2) ->
+      ~(x ∈ fv B) ->
+      ~(p ∈ fv B) ->
+      ~(x ∈ tvars) ->
+      ~(p ∈ tvars) ->
+      has_type tvars gamma t1 A ->
+      has_type tvars ((p,T_equal (term_fvar x) t1) :: (x,A) :: gamma) (open 0 t2 (term_fvar x)) (open 0 B (term_fvar x)) ->
+      has_type tvars gamma (tlet t1 A t2) (T_let t1 B)
 
 | HTSingleton:
     forall tvars gamma t1 t2 T,
@@ -608,7 +643,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
         (open 0 tr (fvar y term_var))
         (open 0 T (tright (fvar y term_var)))
       ->
-      has_type tvars gamma (sum_match t tl tr) (T_let t (T_sum A B) T)
+      has_type tvars gamma (sum_match t tl tr) (T_let t T)
 
 | HTSize:
     forall tvars gamma t A,
@@ -667,7 +702,7 @@ with is_type: tvar_list -> context -> tree -> Prop :=
       is_type tvars gamma A ->
       has_type tvars gamma t1 A ->
       is_type tvars ((p, T_equal (term_fvar x) t1) :: (x,A) :: gamma) (open 0 B (term_fvar x)) ->
-      is_type tvars gamma (T_let t1 A B)
+      is_type tvars gamma (T_let t1 B)
 
 | ITSingleton:
     forall tvars gamma t,
@@ -844,7 +879,7 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_type tvars gamma T ->
       is_type tvars ((x,A) :: gamma) (open 0 B (term_fvar x)) ->
       has_type tvars ((x,T) :: gamma) (pi1 (term_fvar x)) A ->
-      has_type tvars ((x,T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) A B) ->
+      has_type tvars ((x,T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) B) ->
       is_subtype tvars gamma T (T_prod A B)
 
 | ISRefine:
@@ -918,31 +953,31 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_subtype tvars
                  ((p, T_equal (term_fvar x) t) :: (x,A) :: gamma)
                  (open 0 B (term_fvar x)) T ->
-      is_subtype tvars gamma (T_let t A B) T
+      is_subtype tvars gamma (T_let t B) T
 
 | ISLetEqual:
     forall tvars gamma t t' A B,
       are_equal tvars gamma t t' ->
       is_type tvars gamma A ->
-      is_type tvars gamma (T_let t A B) ->
-      is_type tvars gamma (T_let t' A B) ->
-      is_subtype tvars gamma (T_let t A B) (T_let t' A B)
+      is_type tvars gamma (T_let t B) ->
+      is_type tvars gamma (T_let t' B) ->
+      is_subtype tvars gamma (T_let t B) (T_let t' B)
 
 | ISLetOpen:
     forall tvars gamma v A B,
       is_value (erase_term v) ->
       has_type tvars gamma v A ->
-      is_type tvars gamma (T_let v A B) ->
+      is_type tvars gamma (T_let v B) ->
       is_type tvars gamma (open 0 B v) ->
-      is_subtype tvars gamma (T_let v A B) (open 0 B v)
+      is_subtype tvars gamma (T_let v B) (open 0 B v)
 
 | ISLetOpen2:
     forall tvars gamma v A B,
       is_value (erase_term v) ->
       has_type tvars gamma v A ->
-      is_type tvars gamma (T_let v A B) ->
+      is_type tvars gamma (T_let v B) ->
       is_type tvars gamma (open 0 B v) ->
-      is_subtype tvars gamma (open 0 B v) (T_let v A B)
+      is_subtype tvars gamma (open 0 B v) (T_let v B)
 
 | ISBot:
     forall tvars gamma T,
@@ -985,7 +1020,7 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       ~(x ∈ tvars) ->
       has_type tvars gamma t T1 ->
       is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
-      is_subtype tvars gamma (T_forall T1 T2) (T_let t T1 T2)
+      is_subtype tvars gamma (T_forall T1 T2) (T_let t T2)
 
 | ISExists:
     forall tvars gamma t T1 T2 x,
@@ -994,7 +1029,7 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       ~(x ∈ tvars) ->
       has_type tvars gamma t T1 ->
       is_type tvars ((x,T1) :: gamma) (open 0 T2 (term_fvar x)) ->
-      is_subtype tvars gamma (T_let t T1 T2) (T_exists T1 T2)
+      is_subtype tvars gamma (T_let t T2) (T_exists T1 T2)
 
 | ISRec:
     forall tvars gamma n1 n2 T0 Ts,

@@ -27,10 +27,9 @@ Inductive T_ite (b: tree): tree -> tree -> tree -> Prop :=
       T_ite b B1 B2 B ->
       T_ite b (T_sum A1 B1) (T_sum A2 B2) (T_sum A B)
 | IteTLet:
-    forall A1 A2 A B1 B2 B t1 t2,
-      T_ite b A1 A2 A ->
+    forall B1 B2 B t1 t2,
       T_ite b B1 B2 B ->
-      T_ite b (T_let t1 A1 B1) (T_let t2 A2 B2) (T_let (ite b t1 t2) A B)
+      T_ite b (T_let t1 B1) (T_let t2 B2) (T_let (ite b t1 t2) B)
 | IteSingleton:
     forall t t',
       T_ite b (T_singleton t) (T_singleton t') (T_singleton (ite b t t'))

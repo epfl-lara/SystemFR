@@ -26,7 +26,7 @@ Require Import SystemFR.StarRelation.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -92,7 +92,7 @@ Lemma reducible_ext_pair:
     is_value v ->
     valid_interpretation theta ->
     reducible theta (pi1 v) A ->
-    reducible theta (pi2 v) (T_let (pi1 v) A B) ->
+    reducible theta (pi2 v) (T_let (pi1 v) B) ->
     exists a b,
       v = pp a b /\
       reducible_values theta a A /\
@@ -125,7 +125,7 @@ Lemma subtype_prod2:
     valid_interpretation theta ->
     support theta = tvars ->
     open_reducible tvars ((x, T) :: gamma) (pi1 (term_fvar x)) A ->
-    open_reducible tvars ((x, T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) A B) ->
+    open_reducible tvars ((x, T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) B) ->
     satisfies (reducible_values theta) gamma l ->
     reducible_values theta v (substitute T l) ->
     reducible_values theta v (T_prod (substitute A l) (substitute B l)).

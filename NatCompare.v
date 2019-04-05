@@ -6,7 +6,7 @@ Require Import SystemFR.StarLemmas.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.WFLemmas.
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmasEval.
 Require Import SystemFR.TermProperties.
 Require Import SystemFR.Equivalence.

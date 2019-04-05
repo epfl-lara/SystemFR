@@ -1,7 +1,6 @@
 Require Import SystemFR.Trees.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.Syntax.
-Require Import SystemFR.WellFormed.
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -36,6 +35,9 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | pp t1 t2 => pp (map_indices k t1 f) (map_indices k t2 f)
   | pi1 t => pi1 (map_indices k t f)
   | pi2 t => pi2 (map_indices k t f)
+
+  | because t1 t2 => because (map_indices k t1 f) (map_indices k t2 f)
+  | get_proof_in t1 t2 => get_proof_in (map_indices k t1 f) (map_indices (S k) t2 f)
 
   | ttrue => t
   | tfalse => t
@@ -84,7 +86,8 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | T_arrow T1 T2 => T_arrow (map_indices k T1 f) (map_indices (S k) T2 f)
   | T_sum T1 T2 => T_sum (map_indices k T1 f) (map_indices k T2 f)
   | T_refine T p => T_refine (map_indices k T f) (map_indices (S k) p f)
-  | T_let t A B => T_let (map_indices k t f) (map_indices k A f) (map_indices (S k) B f)
+  | T_type_refine T1 T2 => T_type_refine (map_indices k T1 f) (map_indices (S k) T2 f)
+  | T_let t B => T_let (map_indices k t f) (map_indices (S k) B f)
   | T_singleton t => T_singleton (map_indices k t f)
   | T_intersection T1 T2 => T_intersection (map_indices k T1 f) (map_indices k T2 f)
   | T_union T1 T2 => T_union (map_indices k T1 f) (map_indices k T2 f)

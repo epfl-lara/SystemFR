@@ -25,7 +25,7 @@ Require Import SystemFR.ErasedTermLemmas.
 Require Import SystemFR.Sets.
 Require Import SystemFR.SetLemmas.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasEval.
 Require Import SystemFR.WFLemmasLists.

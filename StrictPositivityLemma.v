@@ -17,7 +17,7 @@ Require Import SystemFR.OpenTOpen.
 
 Require Import SystemFR.SizeLemmas.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.TWFLemmas.
 Require Import SystemFR.ErasedTermLemmas.
@@ -109,10 +109,9 @@ Ltac apply_induction H :=
 
 Ltac find_exists3 :=
   match goal with
-  | H1: reducible_values ?theta ?a ?T1,
-    H2: reducible_values ?theta ?v (open 0 ?T2 ?a)
-    |- _ =>
-    exists a
+  | H: reducible_values _ ?v ?T
+    |- exists x, reducible_values _ x ?T =>
+    exists v
   end.
 
 Lemma strictly_positive_push_forall_aux:
@@ -137,7 +136,7 @@ Lemma strictly_positive_push_forall_aux:
 Proof.
   induction measure as [ PP HH ] using measure_induction; intros; t_instantiate_non_empty;
     destruct T; try destruct_tag;
-    eauto with b_push;
+    eauto 2 with b_push;
     repeat match goal with
     | |- closed_term _ => solve [ t_closing; eauto with bfv bwf b_valid_interp ]
     | |- wf _ _ => solve [ t_closing; repeat step || apply wf_open ]
@@ -158,7 +157,8 @@ Proof.
       apply strictly_positive_open ||
       apply left_lex ||
       find_exists ||
-      find_exists2 ||
+      find_exists3 ||
+      find_exists2 || (* must be after find_exists3 *)
       ( progress autorewrite with bsize in * ) ||
       (rewrite reducible_unused_many in * by t_rewriter) ||
       (rewrite open_topen in * by (steps; eauto with btwf; eauto with bwf)) ||
@@ -171,7 +171,8 @@ Proof.
     try solve [ apply twf_open; eauto with btwf ];
     eauto with b_red_is_val;
     eauto using no_type_fvar_strictly_positive;
-    try solve [ apply_any; assumption ].
+    try solve [ apply_any; assumption ];
+    eauto with btwf2.
 
   (** Polymorphic type **)
   - exists (makeFresh (

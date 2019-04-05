@@ -1,4 +1,3 @@
-Require Import SystemFR.WellFormed.
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.BaseType.
 Require Import SystemFR.Tactics.

@@ -45,7 +45,7 @@ Require Import SystemFR.StrictPositivity.
 Require Import SystemFR.StrictPositivityLemmas.
 Require Import SystemFR.StrictPositivityLemma.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.FVLemmas.
 
 Opaque makeFresh.

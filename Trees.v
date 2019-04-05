@@ -21,7 +21,8 @@ Inductive tree: Set :=
   | T_prod: tree -> tree -> tree
   | T_sum: tree -> tree -> tree
   | T_refine: tree -> tree -> tree
-  | T_let: tree -> tree -> tree -> tree
+  | T_type_refine: tree -> tree -> tree
+  | T_let: tree -> tree -> tree
   | T_singleton: tree -> tree
   | T_intersection: tree -> tree -> tree
   | T_union: tree -> tree -> tree
@@ -50,6 +51,9 @@ Inductive tree: Set :=
   | pp: tree -> tree -> tree
   | pi1: tree -> tree
   | pi2: tree -> tree
+
+  | because: tree -> tree -> tree
+  | get_proof_in: tree -> tree -> tree
 
   | ttrue: tree
   | tfalse: tree
@@ -114,6 +118,9 @@ Fixpoint is_annotated_term t :=
   | pi1 t' => is_annotated_term t'
   | pi2 t' => is_annotated_term t'
 
+  | because t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
+  | get_proof_in t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
+
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => is_annotated_term t1 /\ is_annotated_term t2 /\ is_annotated_term t3
@@ -148,10 +155,11 @@ with is_annotated_type T :=
   | T_bool => True
   | T_nat => True
   | T_refine A p => is_annotated_type A /\ is_annotated_term p
+  | T_type_refine A B => is_annotated_type A /\ is_annotated_type B
   | T_prod A B => is_annotated_type A /\ is_annotated_type B
   | T_arrow A B => is_annotated_type A /\ is_annotated_type B
   | T_sum A B => is_annotated_type A /\ is_annotated_type B
-  | T_let t A B => is_annotated_term t /\ is_annotated_type A /\ is_annotated_type B
+  | T_let t B => is_annotated_term t /\ is_annotated_type B
   | T_singleton t => is_annotated_term t
   | T_intersection A B => is_annotated_type A /\ is_annotated_type B
   | T_union A B => is_annotated_type A /\ is_annotated_type B
@@ -183,6 +191,9 @@ Fixpoint is_erased_term t :=
   | pp t1 t2 => is_erased_term t1 /\ is_erased_term t2
   | pi1 t' => is_erased_term t'
   | pi2 t' => is_erased_term t'
+
+  | because t1 t2 => is_erased_term t1 /\ is_erased_term t2
+  | get_proof_in t1 t2 => is_erased_term t1 /\ is_erased_term t2
 
   | ttrue => True
   | tfalse => True
@@ -220,10 +231,11 @@ Fixpoint is_erased_type T :=
   | T_bool => True
   | T_nat => True
   | T_refine A p => is_erased_type A /\ is_erased_term p
+  | T_type_refine A B => is_erased_type A /\ is_erased_type B
   | T_prod A B => is_erased_type A /\ is_erased_type B
   | T_arrow A B => is_erased_type A /\ is_erased_type B
   | T_sum A B => is_erased_type A /\ is_erased_type B
-  | T_let t A B => is_erased_term t /\ is_erased_type A /\ is_erased_type B
+  | T_let t B => is_erased_term t /\ is_erased_type B
   | T_singleton t => is_erased_term t
   | T_intersection A B => is_erased_type A /\ is_erased_type B
   | T_union A B => is_erased_type A /\ is_erased_type B
@@ -258,6 +270,9 @@ Fixpoint tree_size t :=
   | pp t1 t2 => 1 + tree_size t1 + tree_size t2
   | pi1 t' => 1 + tree_size t'
   | pi2 t' => 1 + tree_size t'
+
+  | because t1 t2 => 1 + tree_size t1 + tree_size t2
+  | get_proof_in t1 t2 => 1 + tree_size t1 + tree_size t2
 
   | ttrue => 0
   | tfalse => 0
@@ -298,10 +313,11 @@ Fixpoint tree_size t :=
   | T_bool => 0
   | T_nat => 0
   | T_refine A p => 1 + tree_size A + tree_size p
+  | T_type_refine A B => 1 + tree_size A + tree_size B
   | T_prod A B => 1 + tree_size A + tree_size B
   | T_arrow A B => 1 + tree_size A + tree_size B
   | T_sum A B => 1 + tree_size A + tree_size B
-  | T_let t A B => 1 + tree_size t + tree_size A + tree_size B
+  | T_let t B => 1 + tree_size t + tree_size B
   | T_singleton t => 1 + tree_size t
   | T_intersection A B => 1 + tree_size A + tree_size B
   | T_union A B => 1 + tree_size A + tree_size B

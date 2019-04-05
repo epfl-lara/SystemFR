@@ -28,7 +28,7 @@ Require Import SystemFR.RedTactics.
 Require Import SystemFR.TermList.
 Require Import SystemFR.TermListLemmas.
 
-Require Import SystemFR.WellFormed.
+
 Require Import SystemFR.WFLemmas.
 Require Import SystemFR.WFLemmasLists.
 
@@ -42,7 +42,7 @@ Lemma reducible_val_let:
     valid_interpretation theta ->
     reducible_values theta a A ->
     reducible_values theta b (open 0 B a) ->
-    reducible_values theta b (T_let a A B).
+    reducible_values theta b (T_let a B).
 Proof.
   repeat step || simp reducible_values in *; eauto using reducible_values_closed.
   exists a; steps; eauto using red_is_val; eauto with berased.
@@ -53,27 +53,27 @@ Lemma reducible_let:
     valid_interpretation theta ->
     reducible_values theta a A ->
     reducible theta b (open 0 B a) ->
-    reducible theta b (T_let a A B).
+    reducible theta b (T_let a B).
 Proof.
   steps.
   eauto using reducible_val_let, reducible_values_exprs.
 Qed.
 
 Lemma reducible_val_let2:
-  forall theta A B a b,
+  forall theta B a b,
     valid_interpretation theta ->
     is_value a ->
-    reducible_values theta b (T_let a A B) ->
+    reducible_values theta b (T_let a B) ->
     reducible_values theta b (open 0 B a).
 Proof.
   repeat step || simp reducible_values in * || t_values_info2 || t_invert_star.
 Qed.
 
 Lemma reducible_let2:
-  forall theta A B a b,
+  forall theta B a b,
     valid_interpretation theta ->
     is_value a ->
-    reducible theta b (T_let a A B) ->
+    reducible theta b (T_let a B) ->
     reducible theta b (open 0 B a).
 Proof.
   eauto using reducible_val_let2, reducible_values_exprs.
@@ -84,7 +84,7 @@ Lemma reducible_unused_let:
     wf B 0 ->
     valid_interpretation theta ->
     reducible_values theta a A ->
-    reducible_values theta t (T_let a A B) ->
+    reducible_values theta t (T_let a B) ->
     reducible_values theta t B.
 Proof.
   repeat step || simp reducible_values in * || t_values_info2 || t_invert_star.
@@ -96,17 +96,17 @@ Lemma reducible_unused_let_expr:
     wf B 0 ->
     valid_interpretation theta ->
     reducible_values theta a A ->
-    reducible theta t (T_let a A B) ->
+    reducible theta t (T_let a B) ->
     reducible theta t B.
 Proof.
   eauto using reducible_unused_let, reducible_values_exprs.
 Qed.
 
 Lemma reducible_let_smallstep_values:
-  forall theta t1 t2 A B v,
+  forall theta t1 t2 B v,
     star small_step t1 t2 ->
-    reducible_values theta v (T_let t1 A B) ->
-    reducible_values theta v (T_let t2 A B).
+    reducible_values theta v (T_let t1 B) ->
+    reducible_values theta v (T_let t2 B).
 Proof.
   repeat step || simp reducible_values in *.
   exists a'; steps; eauto with berased.
@@ -114,34 +114,34 @@ Proof.
 Qed.
 
 Lemma reducible_let_smallstep_expr:
-  forall theta t1 t2 A B t,
+  forall theta t1 t2 B t,
     valid_interpretation theta ->
     star small_step t1 t2 ->
-    reducible theta t (T_let t1 A B) ->
-    reducible theta t (T_let t2 A B).
+    reducible theta t (T_let t1 B) ->
+    reducible theta t (T_let t2 B).
 Proof.
   eauto using reducible_let_smallstep_values, reducible_values_exprs.
 Qed.
 
 Lemma reducible_let_backstep_values:
-  forall theta t1 t2 A B v,
+  forall theta t1 t2 B v,
     valid_interpretation theta ->
     is_erased_term t1 ->
     star small_step t1 t2 ->
-    reducible_values theta v (T_let t2 A B) ->
-    reducible_values theta v (T_let t1 A B).
+    reducible_values theta v (T_let t2 B) ->
+    reducible_values theta v (T_let t1 B).
 Proof.
   repeat step || simp reducible_values in *.
   exists a'; steps; eauto using star_smallstep_trans.
 Qed.
 
 Lemma reducible_let_backstep_expr:
-  forall theta t1 t2 A B t,
+  forall theta t1 t2 B t,
     valid_interpretation theta ->
     is_erased_term t1 ->
     star small_step t1 t2 ->
-    reducible theta t (T_let t2 A B) ->
-    reducible theta t (T_let t1 A B).
+    reducible theta t (T_let t2 B) ->
+    reducible theta t (T_let t1 B).
 Proof.
   eauto using reducible_let_backstep_values, reducible_values_exprs.
 Qed.
@@ -168,7 +168,7 @@ Lemma reducible_subtype_let_left:
        reducible_values theta v (substitute (open 0 B (term_fvar x)) l) ->
        reducible_values theta v (substitute T l)) ->
     satisfies (reducible_values theta) gamma l ->
-    reducible_values theta v (T_let (substitute t l) (substitute A l) (substitute B l)) ->
+    reducible_values theta v (T_let (substitute t l) (substitute B l)) ->
     reducible_values theta v (substitute T l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
@@ -178,11 +178,11 @@ Proof.
 Qed.
 
 Lemma reducible_subtype_let_open:
-  forall theta (gamma : context) v A B t l,
+  forall theta (gamma : context) v B t l,
     is_value v ->
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
-    reducible_values theta t (T_let (substitute v l) (substitute A l) (substitute B l)) ->
+    reducible_values theta t (T_let (substitute v l) (substitute B l)) ->
     reducible_values theta t (substitute (open 0 B v) l).
 Proof.
   steps.
@@ -199,7 +199,7 @@ Lemma reducible_subtype_let_open2:
     forall t l,
       satisfies (reducible_values theta) gamma l ->
       reducible_values theta t (substitute (open 0 B v) l) ->
-      reducible_values theta t (T_let (substitute v l) (substitute A l) (substitute B l)).
+      reducible_values theta t (T_let (substitute v l) (substitute B l)).
 Proof.
   steps.
   unfold open_reducible in *; rewrite substitute_open in *; steps; eauto with bwf.

@@ -28,8 +28,6 @@ Require Import SystemFR.TreeLists.
 Require Import SystemFR.TermListReducible.
 Require Import SystemFR.NatUtils.
 
-Require Import SystemFR.WellFormed.
-
 Require Import SystemFR.Sets.
 Require Import SystemFR.SetLemmas.
 
@@ -63,6 +61,7 @@ Require Import SystemFR.ReducibilityRecRules.
 Require Import SystemFR.ReducibilityRecGenRules.
 Require Import SystemFR.ReducibilityPrimitiveSizeRules.
 Require Import SystemFR.ReducibilityIteTypeRules.
+Require Import SystemFR.ReducibilityTypeRefineRules.
 
 Require Import SystemFR.StrictPositivity.
 Require Import SystemFR.StrictPositivityLemmas.
@@ -212,13 +211,18 @@ Proof.
   - apply open_reducible_var; auto using in_erased_context.
   - apply open_reducible_weaken; side_conditions.
   - apply open_reducible_lambda with x; side_conditions.
-  - apply open_reducible_app; auto.
+  - apply open_reducible_app with (erase_type U); auto.
   - apply open_reducible_type_abs with X; eauto; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_inst; side_conditions.
-  - apply open_reducible_forall_inst; side_conditions.
+  - eapply open_reducible_forall_inst; side_conditions.
   - eapply open_reducible_pp; auto.
   - eapply open_reducible_pi1; eauto.
-  - eapply open_reducible_pi2; auto.
+  - eapply open_reducible_pi2; eauto.
+  - eapply open_reducible_type_refine; eauto.
+  - apply open_reducible_get_proof_in with (erase_term t1) (erase_type A) (erase_type B) x;
+      repeat side_conditions ||
+             rewrite (open_none (erase_term t2) 0) in * ||
+             rewrite erase_term_open in * by (eauto 3 with bannot step_tactic).
   - apply open_reducible_unit.
   - apply open_reducible_ttrue.
   - apply open_reducible_tfalse.
@@ -241,6 +245,7 @@ Proof.
   - choose_variables; side_conditions.
   - unfold_open; tac1; eauto using reducible_values_exprs.
   - choose_variables; side_conditions.
+  - apply open_reducible_let2 with (erase_type A) x p; side_conditions.
   - eapply open_reducible_singleton; side_conditions.
   - eapply open_reducible_equal; side_conditions.
   - apply open_reducible_intersection; side_conditions.
@@ -276,7 +281,7 @@ Proof.
     + rewrite erase_type_topen in *; (steps; eauto 3 with bannot step_tactic).
   - apply open_reducible_left; side_conditions.
   - apply open_reducible_right; side_conditions.
-  - apply open_reducible_sum_match with y p; side_conditions.
+  - apply open_reducible_sum_match with (erase_type A) (erase_type B) y p; side_conditions.
   - apply open_reducible_tsize with (erase_type A); side_conditions.
 
   (* subtyping *)
@@ -335,4 +340,3 @@ Proof.
   - apply equivalent_split_match with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) (erase_term e1) (erase_term e2) (erase_term e) x y v; split_tactic; eauto.
   - apply equivalent_split_rec with (support theta) theta (erase_context gamma1) (erase_context gamma2) (erase_term n) (erase_term e1) (erase_term e2) (erase_term e) x y v; split_tactic; eauto.
 Qed.
-

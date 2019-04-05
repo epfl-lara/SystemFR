@@ -6,7 +6,7 @@ Require Import SystemFR.TermProperties.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.SizeLemmas.
 Require Import SystemFR.StarRelation.
-Require Import SystemFR.WellFormed.
+
 
 Lemma wf_nat_value:
   forall v, is_nat_value v -> wf v 0.

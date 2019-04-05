@@ -9,7 +9,7 @@ Require Import SystemFR.ListUtils.
 Require Import SystemFR.TWFLemmas.
 Require Import SystemFR.SubstitutionLemmas.
 Require Import SystemFR.FVLemmas.
-Require Import SystemFR.WellFormed.
+
 
 Open Scope string_scope.
 Open Scope list_scope.

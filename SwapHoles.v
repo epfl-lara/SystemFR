@@ -2,7 +2,7 @@ Require Import SystemFR.Syntax.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.TWFLemmas.
 Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.WellFormed.
+
 
 Require Import PeanoNat.
 Require Import Omega.
@@ -40,6 +40,9 @@ Fixpoint swap_type_holes t i j :=
   | pp t1 t2 => pp (swap_type_holes t1 i j) (swap_type_holes t2 i j)
   | pi1 t => pi1 (swap_type_holes t i j)
   | pi2 t => pi2 (swap_type_holes t i j)
+
+  | because t1 t2 => because (swap_type_holes t1 i j) (swap_type_holes t2 i j)
+  | get_proof_in t1 t2 => get_proof_in (swap_type_holes t1 i j) (swap_type_holes t2 i j)
 
   | ttrue => t
   | tfalse => t
@@ -89,7 +92,8 @@ Fixpoint swap_type_holes t i j :=
   | T_arrow T1 T2 => T_arrow (swap_type_holes T1 i j) (swap_type_holes T2 i j)
   | T_sum T1 T2 => T_sum (swap_type_holes T1 i j) (swap_type_holes T2 i j)
   | T_refine T p => T_refine (swap_type_holes T i j) (swap_type_holes p i j)
-  | T_let t A B => T_let (swap_type_holes t i j) (swap_type_holes A i j) (swap_type_holes B i j)
+  | T_type_refine T1 T2 => T_type_refine (swap_type_holes T1 i j) (swap_type_holes T2 i j)
+  | T_let t B => T_let (swap_type_holes t i j) (swap_type_holes B i j)
   | T_singleton t => T_singleton (swap_type_holes t i j)
   | T_intersection T1 T2 => T_intersection (swap_type_holes T1 i j) (swap_type_holes T2 i j)
   | T_union T1 T2 => T_union (swap_type_holes T1 i j) (swap_type_holes T2 i j)
