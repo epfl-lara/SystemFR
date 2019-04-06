@@ -14,19 +14,14 @@ Open Scope list_scope.
 Lemma wf_monotone:
   forall t, forall k k', wf t k -> k <= k' -> wf t k'.
 Proof.
-  induction t;
-    repeat match goal with
-           | _ => step
-           | IH: forall x, _, H: wf ?t ?k |- wf ?t ?k1 => apply IH with k
-           end;
-    eauto with omega.
+  induction t; steps; eauto 2 with omega.
 Qed.
 
 Hint Resolve wf_monotone: bwf.
 
 Lemma wf_monotone2: forall t, forall k, wf t k -> wf t (S k).
 Proof.
-  eauto with bwf.
+  eauto 3 with bwf.
 Qed.
 
 Hint Immediate wf_monotone2: bwf.

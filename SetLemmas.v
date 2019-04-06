@@ -143,7 +143,7 @@ Lemma subset_union3:
     (subset A1 B /\ subset A2 B) <->
     subset (A1 ++ A2) B.
 Proof.
-  repeat step || eauto with sets || unfold subset in *.
+  steps; eauto 2 with sets.
 Qed.
 
 Lemma subset_add:
