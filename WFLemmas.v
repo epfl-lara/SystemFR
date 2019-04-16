@@ -37,7 +37,7 @@ Lemma open_none:
   forall t k rep, wf t k -> open k t rep = t.
 Proof.
   induction t;
-    try solve [ repeat light || tequality || step; try omega ].
+    try solve [ repeat light || t_equality || step; try omega ].
 Qed.
 
 Lemma wfs_lookup:

@@ -18,6 +18,8 @@ Inductive is_value: tree -> Prop :=
 | IVRight: forall v, is_value v -> is_value (tright v)
 .
 
+Hint Constructors is_value: values.
+
 Inductive is_nat_value: tree -> Prop :=
 | INVZero: is_nat_value zero
 | INVSucc: forall v, is_nat_value v -> is_nat_value (succ v).
@@ -176,43 +178,25 @@ Inductive small_step: tree -> tree -> Prop :=
     small_step (tsize t1) (tsize t2)
 .
 
+Hint Constructors small_step: smallstep.
+
 Ltac t_invert_step :=
   match goal with
-  | H: small_step notype_err _ |- _ => inversion H
-  | H: small_step notype_trefl _ |- _ => inversion H
-  | H: small_step (err _) _ |- _ => inversion H
-  | H: small_step zero _ |- _ => inversion H; clear H
-  | H: small_step tfalse _ |- _ => inversion H; clear H
-  | H: small_step ttrue _ |- _ => inversion H; clear H
-  | H: small_step (succ _) _ |- _ => inversion H; clear H
-  | H: small_step (tsize _) _ |- _ => inversion H; clear H
-  | H: small_step (fvar _) _ |- _ => inversion H; clear H
+  | _ => step_inversion small_step
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_inst _) _ |- _ => inversion H; clear H
-  | H: small_step (notype_tfold _) _ |- _ => inversion H; clear H
-  | H: small_step (tfold _ _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold_in _ _) _ |- _ => inversion H; clear H
-  | H: small_step (type_abs _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H
-  | H: small_step (notype_lambda _) _ |- _ => inversion H; clear H
-  | H: small_step (lambda _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_rec _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (tmatch _ _ _) _ |- _ => inversion H; clear H
-  | H: small_step (notype_tfix _) _ |- _ => inversion H; clear H
-  | H: small_step (tfix _ _) _ |- _ => inversion H; clear H
-  | H: small_step (rec _ _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pp _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_tlet _ _) _ |- _ => inversion H; clear H
-  | H: small_step (tlet _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pi1 _) _ |- _ => inversion H; clear H
   | H: small_step (pi2 _) _ |- _ => inversion H; clear H
-  | H: small_step (tleft _) _ |- _ => inversion H; clear H
-  | H: small_step (tright _) _ |- _ => inversion H; clear H
   | H: small_step (sum_match _ _ _) _ |- _ => inversion H; clear H
+  | H: small_step (tsize _) _ |- _ => inversion H; clear H
   end.
-
-Hint Extern 50 => t_invert_step: smallstep.
 
 Lemma evaluate_step:
   forall v,
@@ -223,7 +207,7 @@ Lemma evaluate_step:
 Proof.
   induction 1;
     repeat
-      step || step_inversion small_step || step_inversion is_value || t_invert_step;
+      step || step_inversion is_value || t_invert_step;
     eauto.
 Qed.
 
@@ -243,7 +227,7 @@ Lemma evaluate_step3:
       t = notype_lambda e ->
       False.
 Proof.
-  induction 1; steps.
+  steps; t_invert_step.
 Qed.
 
 Lemma evaluate_step4:
@@ -253,11 +237,8 @@ Lemma evaluate_step4:
       t = type_abs e ->
       False.
 Proof.
-  induction 1; steps.
+  steps; t_invert_step.
 Qed.
-
-Hint Constructors is_value: values.
-Hint Constructors small_step: smallstep.
 
 Lemma is_nat_value_value:
   forall v,
@@ -267,7 +248,7 @@ Proof.
   induction 1; steps; eauto with values.
 Qed.
 
-Hint Resolve is_nat_value_value: values.
+Hint Immediate is_nat_value_value: values.
 
 Lemma is_nat_value_erased:
   forall v,
@@ -277,21 +258,17 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve is_nat_value_erased: berased.
+Hint Immediate is_nat_value_erased: berased.
 
 Ltac t_nostep :=
   match goal with
   | H: is_value err |- _ => inversion H
   | H1: is_value ?v,
     H2: small_step ?v ?t |- _ =>
-    apply False_ind; apply evaluate_step with v t
+    apply False_ind; apply evaluate_step with v t; auto 2
   | H1: is_nat_value ?v,
     H2: small_step ?v ?t |- _ =>
     apply False_ind; apply evaluate_step with v t; eauto 2 with values
-  | H: small_step (notype_lambda ?e) ?t2 |- _ =>
-    apply False_ind; apply evaluate_step3 with (notype_lambda e) t2 e; auto with values
-  | H: small_step (type_abs ?e) ?t2 |- _ =>
-    apply False_ind; apply evaluate_step4 with (type_abs e) t2 e
   | H1: is_value ?v1,
     H2: is_value ?v2,
     H3: small_step (pp ?v1 ?v2) ?t |- _ =>
@@ -299,27 +276,28 @@ Ltac t_nostep :=
   | H1: is_value ?v,
     H3: small_step (succ ?v) ?t |- _ =>
     apply False_ind; apply evaluate_step with (succ v) t; auto with values
+  | _ => t_invert_step; fail
   end.
 
-Hint Resolve evaluate_step2: smallstep.
-Hint Resolve evaluate_step3: smallstep.
-Hint Extern 50 => t_nostep: smallstep.
+Hint Immediate evaluate_step2: smallstep.
+Hint Immediate evaluate_step3: smallstep.
 
 Lemma deterministic_step:
-  forall t1 t2 t3,
+  forall t1 t2,
     small_step t1 t2 ->
-    small_step t1 t3 ->
-    t2 = t3.
+    forall t3,
+      small_step t1 t3 ->
+      t2 = t3.
 Proof.
-  induction t1; inversion 1; inversion 1; repeat steps || tequality;
-    eauto 3 with step_tactic values smallstep.
+  induction 1; repeat step || t_equality;
+    try solve [ repeat step || t_invert_step || t_nostep || t_equality ].
 Qed.
 
 Ltac t_deterministic_step :=
   match goal with
   | H1: small_step ?t1 ?t2,
     H2: small_step ?t1 ?t3 |- _ =>
-    pose proof (deterministic_step _ _ _ H1 H2); clear H2
+    pose proof (deterministic_step _ _ H1 _ H2); clear H2
   end.
 
 Hint Extern 50 => t_deterministic_step: smallstep.

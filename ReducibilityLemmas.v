@@ -208,16 +208,6 @@ Ltac t_values_info2 :=
     pose proof (red_is_val _ _ _ H2 H1)
   end.
 
-Lemma smallstep_norm:
-  forall t,
-    normalizing t ->
-    forall t',
-      small_step t t' ->
-      normalizing t'.
-Proof.
-  t_reduction; eauto using closed_term_smallstep.
-Qed.
-
 Lemma smallstep_reducible_aux:
   forall n theta t T,
     size T < n ->
@@ -334,7 +324,6 @@ Ltac guess_red :=
   | H: star small_step ?t1 ?t2 |- exists t, star small_step ?t1 t /\ _ =>
     exists t2
   end.
-
 
 Lemma reducible_values_list:
   forall theta l gamma,

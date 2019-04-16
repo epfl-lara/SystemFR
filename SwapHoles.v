@@ -114,7 +114,7 @@ Lemma open_swap:
     topen j1 (topen j2 t rep2) rep1 =
     topen j1 (topen j2 (swap_type_holes t j1 j2) rep1) rep2).
 Proof.
-  induction t; repeat step || tequality || rewrite topen_none; eauto with btwf omega.
+  induction t; repeat step || t_equality || rewrite topen_none; eauto with btwf omega.
 Qed.
 
 Lemma swap_nothing:
@@ -124,7 +124,7 @@ Lemma swap_nothing:
     k <= j ->
     swap_type_holes T i j = T.
 Proof.
-  induction T; repeat step || tequality; eauto with omega.
+  induction T; repeat step || t_equality; eauto with omega.
 Qed.
 
 Lemma is_erased_swap:
@@ -189,7 +189,7 @@ Lemma topen_swap:
     topen i (swap_type_holes T j i) rep =
     swap_type_holes (topen j T rep) j i.
 Proof.
-  induction T; repeat step || tequality || rewrite (swap_nothing _ 0);
+  induction T; repeat step || t_equality || rewrite (swap_nothing _ 0);
     try omega.
 Qed.
 
@@ -201,6 +201,6 @@ Lemma topen_swap2:
     topen k (swap_type_holes T j i) rep =
     swap_type_holes (topen k T rep) j i.
 Proof.
-  induction T; repeat step || tequality || rewrite (swap_nothing _ 0);
+  induction T; repeat step || t_equality || rewrite (swap_nothing _ 0);
     try omega.
 Qed.

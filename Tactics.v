@@ -33,7 +33,7 @@ Ltac is_construct t :=
     : exists x, x = t) in
   idtac) + fail.
 
-Ltac tequality :=
+Ltac t_equality :=
   match goal with
   | |- ?F _ = ?G _ => unify F G; is_construct F; f_equal
   | |- ?F _ _ = ?G _ _ => unify F G; is_construct F; f_equal

@@ -13,7 +13,7 @@ Lemma close_nothing:
     close k t x = t.
 Proof.
   induction t;
-    repeat step || tequality || t_listutils.
+    repeat step || t_equality || t_listutils.
 Qed.
 
 Lemma close_nothing2:
@@ -31,7 +31,7 @@ Lemma substitute_close:
     psubstitute (close k t x) l tag = close k (psubstitute t l tag) x.
 Proof.
   induction t;
-    repeat step || tequality || t_lookup || rewrite close_nothing2 by (steps; eauto with bfv).
+    repeat step || t_equality || t_lookup || rewrite close_nothing2 by (steps; eauto with bfv).
 Qed.
 
 Lemma tclose_nothing:
@@ -40,7 +40,7 @@ Lemma tclose_nothing:
     tclose k t x = t.
 Proof.
   induction t;
-    repeat step || tequality || t_listutils.
+    repeat step || t_equality || t_listutils.
 Qed.
 
 Lemma tclose_nothing2:
@@ -58,5 +58,5 @@ Lemma substitute_tclose:
     psubstitute (tclose k t x) l tag = tclose k (psubstitute t l tag) x.
 Proof.
   induction t;
-    repeat step || tequality || t_lookup || rewrite tclose_nothing2 by (steps; eauto with bfv).
+    repeat step || t_equality || t_lookup || rewrite tclose_nothing2 by (steps; eauto with bfv).
 Qed.

@@ -107,7 +107,7 @@ Lemma open_shift:
     wf t (S k) ->
     open (S k) (map_indices k t S) rep = open k t rep.
 Proof.
-  induction t; repeat step || tequality; try omega.
+  induction t; repeat step || t_equality; try omega.
 Qed.
 
 Lemma wf_map_succ:
@@ -141,7 +141,7 @@ Lemma map_nothing:
     wf t i ->
     map_indices i t f = t.
 Proof.
-  induction t; repeat step || tequality; eauto with omega.
+  induction t; repeat step || t_equality; eauto with omega.
 Qed.
 
 Lemma psubstitute_map_indices:
@@ -149,6 +149,6 @@ Lemma psubstitute_map_indices:
     wfs l 0 ->
     psubstitute (map_indices i t f) l tag = map_indices i (psubstitute t l tag) f.
 Proof.
-  induction t; repeat step || tequality || rewrite map_nothing in *;
+  induction t; repeat step || t_equality || rewrite map_nothing in *;
     eauto with bwf omega.
 Qed.

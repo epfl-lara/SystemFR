@@ -22,7 +22,7 @@ Lemma open_close:
     open k (close k t x) rep = psubstitute t ((x, rep) :: nil) term_var.
 Proof.
   induction t;
-    repeat step || tequality || t_listutils; eauto with omega.
+    repeat step || t_equality || t_listutils; eauto with omega.
 Qed.
 
 Lemma open_close2:
@@ -31,7 +31,7 @@ Lemma open_close2:
     open k (close k t x) (fvar x term_var) = t.
 Proof.
   induction t;
-    repeat step || tequality || t_listutils; eauto with omega.
+    repeat step || t_equality || t_listutils; eauto with omega.
 Qed.
 
 Lemma topen_tclose:
@@ -40,7 +40,7 @@ Lemma topen_tclose:
     topen k (tclose k T x) rep = psubstitute T ((x, rep) :: nil) type_var.
 Proof.
   induction T;
-    repeat step || tequality || t_listutils; eauto with omega.
+    repeat step || t_equality || t_listutils; eauto with omega.
 Qed.
 
 Lemma topen_tclose2:
@@ -49,7 +49,7 @@ Lemma topen_tclose2:
     topen k (tclose k T X) (fvar X type_var) = T.
 Proof.
   induction T;
-    repeat step || tequality || t_listutils; eauto with omega.
+    repeat step || t_equality || t_listutils; eauto with omega.
 Qed.
 
 Lemma topen_twice:
@@ -62,7 +62,7 @@ Lemma topen_twice:
       topen k (topen (S k) A (topen 0 B R)) R =
       topen k (tclose k (topen (S k) A (topen 0 B (fvar X type_var))) X) R.
 Proof.
-  induction A; repeat step || tequality || apply_any || t_listutils;
+  induction A; repeat step || t_equality || apply_any || t_listutils;
     eauto with btwf omega.
   - rewrite topen_tclose;
       repeat step || t_fv_open || t_listutils || apply twf_topen;

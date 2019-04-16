@@ -72,8 +72,8 @@ Lemma star_smallstep_app_inv_irred2:
 Proof.
   induction 1; unfold irred; repeat step.
   - exists t2; steps; eauto with smallstep values.
-  - inversion H; repeat step || unshelve eauto 3 with smallstep;
-      eauto with step_tactic smallstep.
+  - inversion H; repeat step || t_nostep;
+      eauto 4 with smallstep.
 Qed.
 
 Lemma star_smallstep_app_inv_irred3:
@@ -279,9 +279,9 @@ Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
   - inversion H; repeat step.
-    + exists zero; repeat step; eauto with smallstep.
-    + exists (succ v); steps; repeat step; eauto with smallstep.
-    + exists v1; steps; repeat step; eauto with smallstep.
+    + exists zero; repeat step || t_nostep; eauto 2 with smallstep.
+    + exists (succ v); steps; repeat step || t_invert_step || t_nostep; eauto 3 with smallstep.
+    + exists v1; steps; repeat step; eauto 2 with smallstep.
 Qed.
 
 Lemma star_smallstep_match_inv_irred:
@@ -298,8 +298,8 @@ Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
   - inversion H; repeat step.
-    + exists zero; repeat step; eauto with smallstep.
-    + exists (succ v); steps; repeat step; eauto with smallstep.
+    + exists zero; repeat step || t_nostep; eauto with smallstep.
+    + exists (succ v); steps; repeat step || t_invert_step || t_nostep; eauto with smallstep.
     + exists v1; steps; repeat step; eauto with smallstep.
 Qed.
 

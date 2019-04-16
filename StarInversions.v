@@ -248,8 +248,8 @@ Lemma star_smallstep_rec_succ:
 Proof.
   induction 1;
     repeat match goal with
-           | _ => step || step_inversion is_value || t_invert_step
-           end; eauto 2 with smallstep.
+           | _ => step || step_inversion is_value || t_invert_step || t_nostep
+           end.
 Qed.
 
 Hint Resolve normalizing_pair: bsteplemmas.
@@ -463,7 +463,7 @@ Lemma star_smallstep_value:
     is_value v1 ->
     v1 = v2.
 Proof.
-  induction 1; steps; eauto with smallstep.
+  induction 1; repeat step || t_nostep.
 Qed.
 
 Lemma star_smallstep_tsize_inv:
@@ -494,7 +494,7 @@ Lemma star_smallstep_deterministic:
       v = v'.
 Proof.
   induction 1; steps; eauto using star_smallstep_value with smallstep.
-  inversion H3; repeat step || t_deterministic_step; eauto with smallstep.
+  inversion H3; repeat step || t_deterministic_step || t_nostep.
 Qed.
 
 Lemma star_smallstep_app_onestep:
@@ -505,7 +505,7 @@ Lemma star_smallstep_app_onestep:
     star small_step (open 0 t v1) v2.
 Proof.
   inversion 1; repeat step || step_inversion is_value small_step.
-  inversion H0; steps; eauto with smallstep.
+  inversion H0; repeat step || t_nostep.
 Qed.
 
 Ltac t_deterministic_star :=

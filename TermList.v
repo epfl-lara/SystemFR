@@ -87,6 +87,9 @@ Ltac t_instantiate_sat :=
   | H1: forall lterms, satisfies ?P ?G lterms -> _,
     H2: satisfies ?P ?G _ |- _ =>
       pose proof (H1 _ H2); clear H1
+  | H1: forall g lterms, satisfies ?P _ lterms -> _,
+    H2: satisfies ?P _ _ |- _ =>
+      pose proof (H1 _ _ H2); clear H1
 end.
 
 Ltac t_termlist :=
@@ -126,11 +129,6 @@ Proof.
   induction gamma1; destruct l1; repeat step || step_inversion satisfies; eauto.
 Qed.
 
-Ltac f_equal_cons :=
-  match goal with
-  | |- cons _ _ = cons _ _ => f_equal
-  end.
-
 Lemma satisfies_cut:
   forall p gamma1 gamma2 lterms,
     satisfies p (gamma1 ++ gamma2) lterms ->
@@ -143,12 +141,9 @@ Proof.
   induction gamma1; destruct lterms; steps; repeat step || step_inversion satisfies.
   - exists nil, nil; steps.
   - exists nil, ((n,t) :: lterms);
-      repeat step || t_termlist || apply SatCons || f_equal_cons;  eauto with btermlist.
-  -  match goal with
-     | H: forall gamma2 lterms, _, H2: satisfies _ _ _ |- _ =>
-       pose proof (H _ _ H2); steps
-     end.
-     exists ((n,t) :: l1), l2; repeat step.
+      repeat step || t_termlist || apply SatCons;  eauto with btermlist.
+  - t_instantiate_sat; steps.
+    exists ((n,t) :: l1), l2; repeat step.
 Qed.
 
 Ltac t_sat_cut :=

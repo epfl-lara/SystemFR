@@ -23,7 +23,7 @@ Proof.
                    t_listutils ||
                    (rewrite in_app_iff in *) ||
                    unfold fv in * ||
-                   tequality ||
+                   t_equality ||
                    apply_any
                   )
            | x: nat, H: _ |- _ => apply H with x
@@ -36,7 +36,7 @@ Lemma substitute_nothing2:
     psubstitute t ((x,e) :: l) tag = psubstitute t l tag.
 Proof.
   induction t;
-    repeat step || (rewrite in_app_iff in *) || tequality || apply_any.
+    repeat step || (rewrite in_app_iff in *) || t_equality || apply_any.
 Qed.
 
 Lemma substitute_nothing3:
@@ -80,7 +80,7 @@ Proof.
   induction t;
     repeat match goal with
            | H: _ = nil |- _ => rewrite H in *
-           | _ => step || tequality || rewrite substitute_nothing4
+           | _ => step || t_equality || rewrite substitute_nothing4
            end; eauto.
 Qed.
 
@@ -93,7 +93,7 @@ Proof.
   induction t;
     repeat match goal with
            | H: _ = nil |- _ => rewrite H in *
-           | _ => step || tequality || rewrite substitute_nothing
+           | _ => step || t_equality || rewrite substitute_nothing
            end; eauto.
 Qed.
 
@@ -142,7 +142,7 @@ Proof.
   induction t;
     repeat match goal with
            | |- ?t = open ?k ?t ?rep => symmetry; apply open_none
-           | _ => step || tequality
+           | _ => step || t_equality
            end; eauto with bwf.
 Qed.
 
@@ -157,7 +157,7 @@ Proof.
   induction t;
     repeat match goal with
            | |- ?t = topen ?k ?t ?rep => symmetry; apply topen_none
-           | _ => step || tequality
+           | _ => step || t_equality
            end; eauto with btwf.
 Qed.
 
@@ -253,7 +253,7 @@ Lemma subst_permutation:
 Proof.
   unfold equivalent_subst; induction t;
     repeat match goal with
-           | _ => step || tequality
+           | _ => step || t_equality
            | H: forall x, _ |- _ => rewrite H in *
            | H: forall x, _ |- _ => rewrite <- H in * (* careful with non-termination :) *)
            end.
@@ -324,7 +324,7 @@ Lemma weak_subst_permutation:
 Proof.
   unfold weak_equivalent_subst; induction t;
     repeat match goal with
-           | _ => step || tequality || t_listutils
+           | _ => step || t_equality || t_listutils
            | _ => solve [ rewrite_any; steps ]
            | _ => solve [ rewrite_back_any; steps ]
            | _ => solve [

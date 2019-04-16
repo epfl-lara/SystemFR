@@ -52,7 +52,7 @@ Ltac t_closing :=
 
 Ltac t_closer := try solve [ t_closing ].
 
-Ltac t_rewriting :=
+Ltac t_substitutions :=
   (rewrite fv_subst_different_tag by (steps; eauto with bfv)) ||
   (rewrite substitute_nothing2 in * by t_rewrite) ||
   (rewrite substitute_open3 in * by t_rewrite) ||
@@ -64,7 +64,7 @@ Ltac t_rewriting :=
 Ltac tac0 :=
   repeat step || t_listutils || finisher || apply SatCons ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
-           t_rewriting ||
+           t_substitutions ||
            t_closer;
            eauto with b_equiv;
            eauto with bwf bfv;
@@ -94,8 +94,8 @@ Ltac find_smallstep_value :=
 
 Ltac find_smallstep_value2 :=
   match goal with
-  | H: star small_step _ ?v |- exists v, star small_step ?t v /\ _ => exists v
-  | H: star small_step _ ?v |- exists x _, _ /\ _ /\ star small_step ?t x /\ _ => exists v
+  | H: star small_step _ ?v |- exists v, star small_step _ v /\ _ => exists v
+  | H: star small_step _ ?v |- exists x _, _ /\ _ /\ star small_step _ x /\ _ => exists v
   end.
 
 Ltac find_exists :=
@@ -104,6 +104,12 @@ Ltac find_exists :=
   | |- exists x, notype_tfold ?v = notype_tfold x /\ _ => exists v
   | |- (exists x, tleft ?v = tleft x /\ _) \/ _  => left; exists v
   | |- _ \/ (exists x, tright ?v = tright x /\ _)  => right; exists v
+  end.
+
+Ltac find_exists_open :=
+  match goal with
+  | H: reducible_values _ ?t (open _ ?T _) |- exists _, reducible_values _ _ (open _ ?T' _) => exists t
+  | H: reducible_values _ ?t (open _ ?T _) |- exists _, reducible_values _ _ (open _ ?T' _) => exists t
   end.
 
 Ltac find_reducible_value :=
@@ -176,6 +182,17 @@ Ltac t_reduces_to :=
   | H: reduces_to ?P ?t |- reduces_to ?P' ?t => apply (reduces_to_equiv P P' t H)
   end.
 
+Ltac t_reduces_to2 :=
+  match goal with
+  | H1: reducible_values _ ?a _,
+    H2: forall a, _ ->
+            reducible_values ?theta a _ ->
+            reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _
+      |- reduces_to _ _ =>
+    poseNew (Mark (H1,H2) "t_reduces_to2");
+    apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T a))
+  end.
+
 Ltac t_instantiate_reducible :=
   match goal with
   | H1: reducible_values _ ?v ?T, H2: is_erased_term ?v, H3: forall a, _ -> _ -> _ |- _ =>
@@ -184,6 +201,13 @@ Ltac t_instantiate_reducible :=
   | H1: reducible_values _ ?v ?T, H2: forall a, _ -> _ |- _ =>
     poseNew (Mark (v,H2) "t_instantiate_reducible");
     pose proof (H2 v H1)
+  end.
+
+Ltac t_instantiate_reducible_erased :=
+  match goal with
+  | H2: is_erased_term ?v, H3: forall a, _ -> _ -> _ |- _ =>
+    poseNew (Mark (v,H2) "t_instantiate_reducible");
+    unshelve epose proof (H3 v H2 _)
   end.
 
 Ltac t_instantiate_rc :=

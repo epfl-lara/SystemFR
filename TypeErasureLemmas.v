@@ -173,7 +173,7 @@ Lemma erase_term_open:
     erase_term (open k t1 t2) = open k (erase_term t1) (erase_term t2).
 Proof.
   induction t1;
-    try solve [ repeat step || tequality ].
+    try solve [ repeat step || t_equality ].
 Qed.
 
 Lemma erase_type_open:
@@ -183,7 +183,7 @@ Lemma erase_type_open:
     erase_type (open k T t) = open k (erase_type T) (erase_term t).
 Proof.
   induction T; try destruct f;
-    try solve [ repeat step || rewrite erase_term_open in * || tequality ].
+    try solve [ repeat step || rewrite erase_term_open in * || t_equality ].
 Qed.
 
 Lemma erase_term_topen:
@@ -192,7 +192,7 @@ Lemma erase_term_topen:
     erase_term (topen k t1 t2) = erase_term t1.
 Proof.
   induction t1;
-    try solve [ repeat step || tequality ].
+    try solve [ repeat step || t_equality ].
 Qed.
 
 Lemma topen_erase_term:
@@ -210,5 +210,5 @@ Lemma erase_type_topen:
     erase_type (topen k T1 T2) = topen k (erase_type T1) (erase_type T2).
 Proof.
   induction T1;
-    repeat step || rewrite erase_term_topen in * || tequality || rewrite topen_erase_term in *.
+    repeat step || rewrite erase_term_topen in * || t_equality || rewrite topen_erase_term in *.
 Qed.

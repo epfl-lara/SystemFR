@@ -22,6 +22,6 @@ Lemma erase_type_map_indices:
   forall T i f,
     erase_type (map_indices i T f) = map_indices i (erase_type T) f.
 Proof.
-  induction T; repeat step || tequality;
+  induction T; repeat step || t_equality;
     eauto using erase_term_map_indices.
 Qed.

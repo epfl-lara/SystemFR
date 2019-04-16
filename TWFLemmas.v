@@ -42,7 +42,7 @@ Lemma topen_none:
   forall t k rep, twf t k -> topen k t rep = t.
 Proof.
   induction t;
-    repeat step || tequality; try omega.
+    repeat step || t_equality; try omega.
 Qed.
 
 Lemma twfs_lookup:

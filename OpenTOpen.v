@@ -20,7 +20,7 @@ Lemma open_topen:
     open k1 (topen k2 t rep2) rep1 = topen k2 (open k1 t rep1) rep2.
 Proof.
   induction t;
-    repeat step || tequality || apply_any ||
+    repeat step || t_equality || apply_any ||
       (rewrite topen_none by (steps;eauto with btwf omega)) ||
       (rewrite open_none by (steps;eauto with bwf omega));
         eauto with bwf btwf omega.
