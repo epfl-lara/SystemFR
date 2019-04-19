@@ -130,8 +130,6 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel t2 t2' ->
       equal_with_relation rel (tlet t1 T t2) (tlet t1' T' t2')
 
-| EWRNoTypeRefl:
-    equal_with_relation rel notype_trefl notype_trefl
 | EWRRefl:
     forall t1 t1' t2 t2',
       equal_with_relation rel t1 t1' ->

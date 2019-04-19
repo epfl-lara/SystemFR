@@ -315,7 +315,7 @@ Proof.
   - apply reducibility_equivalent_weaken with theta (erase_context gamma) x (erase_type T); side_conditions.
   - eauto using equivalent_trans.
   - apply equivalent_sym; eauto.
-(*  - apply equivalent_step; apply small_step_subst; eauto with values bwf. *)
+  - apply equivalent_step; apply small_step_subst; eauto with values bwf.
   - eapply equivalent_pair_eta; eauto.
   - many_tactics; t_closer.
   - eauto with b_equiv.

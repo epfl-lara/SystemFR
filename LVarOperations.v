@@ -67,7 +67,6 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
       notype_tlet (map_indices k t1 f) (map_indices (S k) t2 f)
   | tlet t1 T t2 =>
       tlet (map_indices k t1 f) (map_indices k T f) (map_indices (S k) t2 f)
-  | notype_trefl => t
   | trefl t1 t2 => trefl (map_indices k t1 f) (map_indices k t2 f)
 
   | notype_tfold t' => notype_tfold (map_indices k t' f)

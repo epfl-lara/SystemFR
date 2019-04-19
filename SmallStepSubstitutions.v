@@ -7,6 +7,9 @@ Require Import SystemFR.Tactics.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.SubstitutionLemmas.
 Require Import SystemFR.AssocList.
+Require Import SystemFR.Sets.
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasEval.
 
 Fixpoint are_values (l: list (nat * tree)) :=
   match l with
@@ -34,7 +37,6 @@ Qed.
 
 Hint Resolve is_value_subst: values.
 
-(* Not true anymore when introducing a size primitive
 Lemma small_step_subst:
   forall t t' l,
     small_step t t' ->
@@ -44,6 +46,9 @@ Lemma small_step_subst:
 Proof.
   induction 1; steps; eauto using is_value_subst with values smallstep;
     repeat rewrite substitute_open; steps; eauto using is_value_subst with smallstep bwf.
+  - rewrite substitute_nothing5; steps.
+    rewrite substitute_nothing5; eauto with smallstep; repeat step;
+      eauto using is_nat_value_build_nat with bfv.
 Qed.
 
 Ltac t_smallstep_subst :=
@@ -53,4 +58,3 @@ Ltac t_smallstep_subst :=
     poseNew (Mark (t1,t2,l) "small_step_subst");
     unshelve epose proof (small_step_subst t1 t2 l H _ _)
   end.
-*)

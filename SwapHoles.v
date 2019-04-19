@@ -74,7 +74,6 @@ Fixpoint swap_type_holes t i j :=
       tlet (swap_type_holes t1 i j) (swap_type_holes T i j) (swap_type_holes t2 i j)
 
   | trefl t1 t2 => trefl (swap_type_holes t1 i j) (swap_type_holes t2 i j)
-  | notype_trefl => t
 
   | notype_tfold t => notype_tfold (swap_type_holes t i j)
   | tfold T t => tfold (swap_type_holes T i j) (swap_type_holes t i j)

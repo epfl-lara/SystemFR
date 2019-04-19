@@ -32,8 +32,8 @@ Lemma reducible_tsize:
     reducible theta (tsize t) T_nat.
 Proof.
   unfold reducible, reduces_to; repeat step.
-  eexists (build_nat (tsize_semantics t')); steps; eauto using reducible_values_tsize;
-    eauto 6 using star_smallstep_trans, red_is_val with bsteplemmas smallstep.
+  eexists (build_nat (tsize_semantics t')); steps; eauto using reducible_values_tsize.
+  eauto 7 using star_smallstep_trans, red_is_val with bsteplemmas smallstep bfv.
 Qed.
 
 Lemma open_reducible_tsize:

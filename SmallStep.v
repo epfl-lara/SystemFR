@@ -12,7 +12,6 @@ Inductive is_value: tree -> Prop :=
 | IVLambda: forall t, is_value (notype_lambda t)
 | IVTypeAbs: forall t, is_value (type_abs t)
 | IVVar: forall x, is_value (fvar x term_var)
-| IVRefl: is_value notype_trefl
 | IVFold: forall v, is_value v -> is_value (notype_tfold v)
 | IVLeft: forall v, is_value v -> is_value (tleft v)
 | IVRight: forall v, is_value v -> is_value (tright v)
@@ -109,7 +108,10 @@ Inductive small_step: tree -> tree -> Prop :=
       small_step (tunfold_in (notype_tfold v) t) (open 0 t v)
 
 | SPBetaSize:
-    forall v, is_value v -> small_step (tsize v) (build_nat (tsize_semantics v))
+    forall v,
+      is_value v ->
+      pfv v term_var = nil ->
+      small_step (tsize v) (build_nat (tsize_semantics v))
 
 (* reduction inside terms *)
 | SPTypeInst: forall t1 t2,

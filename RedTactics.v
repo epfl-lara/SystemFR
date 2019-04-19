@@ -237,7 +237,7 @@ Lemma satisfies_insert_nat_succ:
     is_nat_value v ->
     satisfies (reducible_values theta)
               (gamma1 ++ (x, T_equal b (succ (fvar y term_var))) :: (y, T_nat) :: gamma2)
-              (l1 ++ (x, notype_trefl) :: (y, v) :: l2).
+              (l1 ++ (x, uu) :: (y, v) :: l2).
 Proof.
   tac1.
 Qed.
@@ -257,7 +257,7 @@ Lemma satisfies_cons_nat_succ:
     is_nat_value v ->
     satisfies (reducible_values theta)
               ((x, T_equal b (succ (fvar y term_var))) :: (y, T_nat) :: gamma)
-              ((x, notype_trefl) :: (y, v) :: l).
+              ((x, uu) :: (y, v) :: l).
 Proof.
   tac1.
 Qed.
@@ -279,7 +279,7 @@ Lemma satisfies_insert2:
     ~(x ∈ pfv_context gamma2 term_var) ->
     closed_term t ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equal b t) :: gamma2)
-              (l1 ++ (x, notype_trefl) :: l2).
+              (l1 ++ (x, uu) :: l2).
 Proof.
   unfold closed_term; repeat tac1 || rewrite (substitute_nothing5 t) by steps.
 Qed.
@@ -297,7 +297,7 @@ Lemma satisfies_insert3:
     closed_term t ->
     satisfies (reducible_values theta)
               ((x, T_equal b t) :: gamma)
-              ((x, notype_trefl) :: l).
+              ((x, uu) :: l).
 Proof.
   unfold closed_term; repeat tac1 || rewrite (substitute_nothing5 t) by steps.
 Qed.
@@ -349,8 +349,8 @@ Lemma equivalent_cons_succ:
     ~(n = p) ->
     is_nat_value v ->
     satisfies P gamma l ->
-    equivalent (psubstitute (open 0 ts (fvar n term_var)) ((p, notype_trefl) :: (n, v) :: l) term_var)
-               (psubstitute t ((p, notype_trefl) :: (n, v) :: l) term_var) ->
+    equivalent (psubstitute (open 0 ts (fvar n term_var)) ((p, uu) :: (n, v) :: l) term_var)
+               (psubstitute t ((p, uu) :: (n, v) :: l) term_var) ->
     equivalent (open 0 (psubstitute ts l term_var) v) (psubstitute t l term_var).
 Proof.
   tac0.
@@ -370,8 +370,8 @@ Lemma equivalent_cons2:
     equivalent
       (psubstitute
          (open 0 (open 1 ts (fvar n term_var)) (notype_lambda (notype_rec (fvar n term_var) t0 ts)))
-         ((p, notype_trefl) :: (n, v) :: l) term_var)
-      (psubstitute t ((p, notype_trefl) :: (n, v) :: l) term_var) ->
+         ((p, uu) :: (n, v) :: l) term_var)
+      (psubstitute t ((p, uu) :: (n, v) :: l) term_var) ->
     equivalent
       (open 0 (open 1 (psubstitute ts l term_var) v)
             (notype_lambda (notype_rec v (psubstitute t0 l term_var) (psubstitute ts l term_var))))
@@ -392,7 +392,7 @@ Ltac t_sat_cons_equal_smallstep :=
     H1: satisfies ?P ?G ?L,
     H2: star small_step (psubstitute ?b ?L term_var) ?t |- _ =>
       poseNew (Mark (X,H0) "t_instantiate_insert");
-      unshelve epose proof (H0 ((X, notype_trefl) :: L) _)
+      unshelve epose proof (H0 ((X, uu) :: L) _)
   end.
 
 Ltac t_sat_insert_equal_smallstep :=
@@ -401,7 +401,7 @@ Ltac t_sat_insert_equal_smallstep :=
     H1: satisfies ?P (?G1 ++ ?G2) (?L1 ++ ?L2),
     H2: star small_step (psubstitute ?b ?L2 term_var) ?t |- _ =>
       poseNew (Mark (X,H0) "t_instantiate_insert");
-      unshelve epose proof (H0 (L1 ++ (X, notype_trefl) :: L2) _)
+      unshelve epose proof (H0 (L1 ++ (X, uu) :: L2) _)
   end.
 
 Ltac t_sat_cons_equal_succ :=
@@ -410,7 +410,7 @@ Ltac t_sat_cons_equal_succ :=
     H1: satisfies ?P ?G ?L,
     H2: star small_step (psubstitute ?b ?L term_var) (succ ?t) |- _ =>
       poseNew (Mark (X,H0) "t_instantiate_insert");
-      unshelve epose proof (H0 ((X, notype_trefl) :: (Y, t) :: L) _)
+      unshelve epose proof (H0 ((X, uu) :: (Y, t) :: L) _)
   end.
 
 Ltac t_sat_insert_equal_succ :=
@@ -419,7 +419,7 @@ Ltac t_sat_insert_equal_succ :=
     H1: satisfies ?P (?G1 ++ ?G2) (?L1 ++ ?L2),
     H2: star small_step (psubstitute ?b ?L2 term_var) (succ ?t) |- _ =>
       poseNew (Mark (X,H0) "t_instantiate_insert");
-      unshelve epose proof (H0 (L1 ++ (X, notype_trefl) :: (Y, t) :: L2) _)
+      unshelve epose proof (H0 (L1 ++ (X, uu) :: (Y, t) :: L2) _)
   end.
 
 Ltac t_sat_add :=

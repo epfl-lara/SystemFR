@@ -225,7 +225,7 @@ Proof.
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  unshelve epose proof (H13 theta ((p, notype_trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _) as HH;
+  unshelve epose proof (H13 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _) as HH;
     repeat
       tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any ||
       rewrite pfv_tlt in * || rewrite pfv_map_indices in * ||
@@ -360,6 +360,6 @@ Proof.
   - unshelve epose proof (H13 theta ((y, tx) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 
-  - unshelve epose proof (H14 theta ((p, notype_trefl) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
+  - unshelve epose proof (H14 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 Qed.

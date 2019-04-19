@@ -122,7 +122,7 @@ Proof.
   - eapply reducible_let_backstep_expr; eauto; t_closer.
     apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var)); repeat step || simp_red; eauto.
 
-    unshelve epose proof (H24 theta ((p, notype_trefl) :: (y,v') :: lterms) _ _ _);
+    unshelve epose proof (H24 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star.
 
     eapply star_backstep_reducible; eauto with bsteplemmas;
@@ -133,7 +133,7 @@ Proof.
   - eapply reducible_let_backstep_expr; eauto; t_closer.
     apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var)); repeat step || simp_red; eauto.
 
-    unshelve epose proof (H25 theta ((p, notype_trefl) :: (y,v') :: lterms) _ _ _);
+    unshelve epose proof (H25 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star.
 
     eapply star_backstep_reducible; eauto with bsteplemmas;

@@ -84,7 +84,6 @@ Inductive tree: Set :=
   | tleft: tree -> tree
   | sum_match: tree -> tree -> tree -> tree
 
-  | notype_trefl: tree
   | trefl: tree -> tree -> tree
 .
 
@@ -207,7 +206,6 @@ Fixpoint is_erased_term t :=
   | notype_tfix t' => is_erased_term t'
 
   | notype_tlet t1 t2 => is_erased_term t1 /\ is_erased_term t2
-  | notype_trefl => True
 
   | type_abs t => is_erased_term t
   | notype_inst t => is_erased_term t
@@ -293,7 +291,6 @@ Fixpoint tree_size t :=
 
   | notype_tlet t1 t2 => 1 + tree_size t1 + tree_size t2
   | tlet t1 A t2 => 1 + tree_size t1 + tree_size A + tree_size t2
-  | notype_trefl => 0
   | trefl t1 t2 => 1 + tree_size t1 + tree_size t2
 
   | type_abs t => 1 + tree_size t

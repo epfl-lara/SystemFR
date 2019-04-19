@@ -107,7 +107,7 @@ Proof.
    repeat step || top_level_unfold || t_values_info2 || t_deterministic_star || t_termlist || t_instantiate_sat4;
       eauto with bwf; eauto using subset_same with bfv;
         eauto with berased.
-  - unshelve epose proof (H15 theta ((p, notype_trefl) :: (x,t') :: lterms) _ _); tac1;
+  - unshelve epose proof (H15 theta ((p, uu) :: (x,t') :: lterms) _ _); tac1;
       eauto 3 using equivalent_sym with b_equiv;
       eauto with berased.
 Qed.
@@ -183,7 +183,7 @@ Proof.
    repeat step || top_level_unfold || t_values_info2 || t_deterministic_star || t_termlist || t_instantiate_sat4;
       eauto with bwf; eauto using subset_same with bfv;
         eauto with berased.
-  - unshelve epose proof (H15 theta ((p, notype_trefl) :: (x,t') :: lterms) _ _); tac1;
+  - unshelve epose proof (H15 theta ((p, uu) :: (x,t') :: lterms) _ _); tac1;
       eauto 3 using equivalent_sym with b_equiv;
       eauto with berased.
 Qed.

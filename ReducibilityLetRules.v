@@ -173,7 +173,7 @@ Lemma reducible_subtype_let_left:
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || simp_red || t_instantiate_sat3 || t_deterministic_star.
-  unshelve epose proof (H13 v ((p, notype_trefl) :: (x,t') :: l) _ _); tac1;
+  unshelve epose proof (H13 v ((p, uu) :: (x,t') :: l) _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv.
 Qed.
 

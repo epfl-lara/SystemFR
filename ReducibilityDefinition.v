@@ -126,7 +126,7 @@ Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): 
     closed_value v /\
     is_erased_term t1 /\
     is_erased_term t2 /\
-    v = notype_trefl /\
+    v = uu /\
     equivalent t1 t2;
 
   reducible_values theta v (T_forall A B) :=
@@ -255,8 +255,7 @@ Ltac simp_red :=
   rewrite reducible_values_equation_55 in * ||
   rewrite reducible_values_equation_56 in * ||
   rewrite reducible_values_equation_57 in * ||
-  rewrite reducible_values_equation_58 in * ||
-  rewrite reducible_values_equation_59 in *.
+  rewrite reducible_values_equation_58 in *.
 
 Ltac top_level_unfold :=
   match goal with

@@ -513,7 +513,7 @@ Proof.
 
   - apply reducible_rec_equivalent with zero; eauto using equivalent_sym with b_equiv; t_closing.
     apply reducible_fold_zero; steps; eauto with bwf btwf berased.
-    unshelve epose proof (H17 theta ((p, notype_trefl) :: lterms) _ _ _);
+    unshelve epose proof (H17 theta ((p, uu) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 
   - apply reducible_rec_equivalent with (succ v); eauto using equivalent_sym with b_equiv; t_closing.
@@ -522,7 +522,7 @@ Proof.
       eauto 3 with btwf;
       eauto with berased;
       try solve [ unfold reducible, reduces_to; repeat step || simp_red || eexists; try t_closing; eauto with smallstep ].
-    unshelve epose proof (H18 theta ((p, notype_trefl) :: (pn, v) :: lterms) _ _ _);
+    unshelve epose proof (H18 theta ((p, uu) :: (pn, v) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in *.
 Qed.
 
@@ -670,9 +670,9 @@ Proof.
     eauto with bfv;
     eauto with berased.
 
-  - unshelve epose proof (H51 theta ((p2, notype_trefl) :: (p1, notype_trefl) :: (y, v) :: lterms) _ _ _);
+  - unshelve epose proof (H51 theta ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat step_inversion NoDup || tac1.
-  - unshelve epose proof (H52 theta ((p2, notype_trefl) :: (p1, notype_trefl) :: (y, v) :: (pn, pn0) :: lterms) _ _ _);
+  - unshelve epose proof (H52 theta ((p2, uu) :: (p1, uu) :: (y, v) :: (pn, pn0) :: lterms) _ _ _);
       repeat match goal with
              | |- reducible_values _ _ T_nat => simp reducible_values
              | |- reducible_values _ _ (T_equal _ _) => simp reducible_values

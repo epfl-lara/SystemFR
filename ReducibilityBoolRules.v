@@ -126,6 +126,6 @@ Proof.
     eauto using subset_same with bfv;
     eauto with berased.
 
-  - unshelve epose proof (H11 _ ((x, notype_trefl) :: lterms) _ _ _); tac1.
-  - unshelve epose proof (H12 _ ((x, notype_trefl) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H11 _ ((x, uu) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H12 _ ((x, uu) :: lterms) _ _ _); tac1.
 Qed.

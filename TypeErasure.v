@@ -40,7 +40,7 @@ Fixpoint erase_term (t: tree): tree :=
   | tmatch t' t0 ts => tmatch (erase_term t') (erase_term t0) (erase_term ts)
 
   | tlet t1 A t2 => notype_tlet (erase_term t1) (erase_term t2)
-  | trefl t1 t2 => notype_trefl
+  | trefl t1 t2 => uu
 
   | type_abs t => type_abs (erase_term t)
   | type_inst t T => notype_inst (erase_term t)

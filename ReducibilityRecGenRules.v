@@ -323,7 +323,7 @@ Proof.
     eapply strictly_positive_rename_one; eauto;
       repeat step; try finisher.
 
-  - unshelve epose proof (H31 theta ((p, notype_trefl) :: (y,v) :: lterms) _ _ _);
+  - unshelve epose proof (H31 theta ((p, uu) :: (y,v) :: lterms) _ _ _);
       repeat match goal with
              | |- reducible_values _ _ (T_equal _ _) => simp reducible_values
              | _ => tac0

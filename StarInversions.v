@@ -606,7 +606,7 @@ Ltac t_invert_star :=
     unshelve epose proof (star_smallstep_unfold_in_inv _ v H2 H1 _ _ eq_refl)
   | H: star small_step (notype_lambda _) _ |- _ => inversion H; clear H
   | H: star small_step notype_err _ |- _ => inversion H; clear H
-  | H: star small_step notype_trefl _ |- _ => inversion H; clear H
+  | H: star small_step uu _ |- _ => inversion H; clear H
   | _ => t_invert_step
   end.
 
