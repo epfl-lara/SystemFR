@@ -53,31 +53,11 @@ Opaque Nat.eq_dec.
 Opaque reducible_values.
 Opaque strictly_positive.
 
-Lemma strictly_positive_push_forall_fvar:
-  forall (n : nat) theta theta' (pre_theta : list (nat * (tree -> tree -> Prop))) X (A : tree) v,
-    non_empty theta A ->
-    (forall a : tree,
-        reducible_values theta a A ->
-        reducible_values (push_one a pre_theta ++ theta) v (fvar X type_var)) ->
-    forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
-    reducible_values (theta' ++ theta) v (fvar X type_var).
-Proof.
-  unfold push_all, push_one;
-  intros; t_instantiate_non_empty;
-    repeat match goal with
-           | _ => step || simp_red || t_instantiate_reducible || rewrite support_mapValues in * || t_listutils
-           | _ => t_lookup_same || t_lookupor || t_lookup_rewrite || t_lookupMap2 || t_lookup
-           | _ => t_forall_implies_apply || t_forall_implies_support
-           end.
-Qed.
-
-Hint Resolve strictly_positive_push_forall_fvar: b_push.
-
 Ltac t_instantiate_reducible2 :=
   match goal with
   | H0: no_type_fvar ?T (support ?theta'),
-    H1:reducible_values _ ?v ?T,
-    H2:is_erased_term ?v,
+    H1: reducible_values _ ?v ?T,
+    H2: is_erased_term ?v,
     H3: forall a, _ -> reducible_values (push_one _ ?ptheta ++ ?theta) a ?T -> _,
     H4: forall_implies _ ?ptheta ?theta'
     |- _ => poseNew (Mark (v, H3) "t_instantiate_reducible2");
@@ -102,8 +82,8 @@ Ltac t_rewriter :=
 
 Ltac apply_induction H :=
   match goal with
-  | H1: non_empty ?theta ?A,
-    H2: forall_implies _ ?ptheta ?theta' |- reducible_values (?theta' ++ _) _ ?T =>
+    H2: forall_implies (fun _ => reducible_values _ _ ?A) ?ptheta ?theta' |-
+      reducible_values (?theta' ++ _) _ ?T =>
       apply H with (size T, index T) ptheta A
   end.
 
@@ -114,9 +94,8 @@ Ltac find_exists3 :=
     exists v
   end.
 
-Lemma strictly_positive_push_forall_aux:
-  forall measure T pre_theta theta theta' A v,
-    (size T, index T) = measure ->
+Definition sp_push_forall_prop T: Prop :=
+  forall pre_theta theta theta' A v,
     wf T 0 ->
     twf T 0 ->
     wf A 0 ->
@@ -133,11 +112,31 @@ Lemma strictly_positive_push_forall_aux:
       reducible_values (push_one a pre_theta ++ theta) v T) ->
     forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
     reducible_values (theta' ++ theta) v T.
+
+Definition sp_push_forall_prop_aux m T: Prop := (size T, index T) = m -> sp_push_forall_prop T.
+
+Definition sp_push_forall_until m: Prop := forall m', m' << m -> forall T', sp_push_forall_prop_aux m' T'.
+
+Hint Unfold sp_push_forall_prop: u_push.
+Hint Unfold sp_push_forall_until: u_push.
+Hint Unfold sp_push_forall_prop_aux: u_push.
+
+Lemma sp_push_forall_fvar: forall m n f, sp_push_forall_prop_aux m (fvar n f).
 Proof.
-  induction measure as [ PP HH ] using measure_induction; intros; t_instantiate_non_empty;
-    destruct T; try destruct_tag;
-    eauto 2 with b_push;
+  autounfold with u_push;
+  unfold push_all, push_one;
+  intros; t_instantiate_non_empty;
     repeat match goal with
+           | _ => step || simp_red || t_instantiate_reducible || rewrite support_mapValues in * || t_listutils
+           | _ => t_lookup_same || t_lookupor || t_lookup_rewrite || t_lookupMap2 || t_lookup
+           | _ => t_forall_implies_apply || t_forall_implies_support
+           end.
+Qed.
+
+Hint Immediate sp_push_forall_fvar: b_push.
+
+Ltac t_spos_proof HH :=
+      repeat match goal with
     | |- closed_term _ => solve [ t_closing; eauto with bfv bwf b_valid_interp ]
     | |- wf _ _ => solve [ t_closing; repeat step || apply wf_open ]
     | H: star small_step _ zero |- _ \/ _ => left
@@ -162,7 +161,6 @@ Proof.
       ( progress autorewrite with bsize in * ) ||
       (rewrite reducible_unused_many in * by t_rewriter) ||
       (rewrite open_topen in * by (steps; eauto with btwf; eauto with bwf)) ||
-      (rewrite no_type_lvar_topen in * by (repeat step || apply no_type_lvar_open || apply is_erased_type_open; eauto with btwf)) ||
       apply_induction HH
     end;
     try omega;
@@ -174,64 +172,183 @@ Proof.
     try solve [ apply_any; assumption ];
     eauto with btwf2.
 
-  (** Polymorphic type **)
-  - exists (makeFresh (
-           support theta ::
-           support pre_theta ::
-           support theta' ::
-           pfv A type_var ::
-           pfv T type_var ::
-           nil));
-      repeat step || finisher || t_instantiate_rc || find_smallstep_value || t_listutils;
-        try solve [ repeat unfold closed_term, closed_value in * || step ].
+Lemma sp_push_forall_arrow:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_arrow T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+Qed.
 
-    lazymatch goal with
-    | |- reducible_values ((?X,?RC) :: ?g1 ++ ?g2) _ (topen 0 ?T ?rep) =>
-      apply reducible_rename with (topen 0 T rep) (g1 ++ (X,RC) :: g2)
-                                  (idrel (X :: support g1 ++ support g2 ++ pfv T type_var))
-    end;
-      repeat step || apply valid_interpretation_append || t_deterministic_star ||
-             apply push_all_is_candidate || apply equivalent_with_relation_permute ||
-             apply equal_with_relation_refl2 ||
-             rewrite idrel_lookup || t_fv_open ||
-             rewrite idrel_lookup_swap || t_fv_open ||
-             t_listutils;
-        eauto with b_valid_interp;
-        eauto using reducibility_is_candidate;
-        try solve [ unfold equivalent_rc; steps; eauto ];
-        try finisher;
-        eauto with b_red_is_val.
+Hint Immediate sp_push_forall_arrow: b_push.
 
-    apply_induction HH;
-      repeat
-        step || t_valid_interpretation_equiv || t_forall_implies_equiv ||
-        apply left_lex ||
-        (progress autorewrite with bsize in * ) ||
-        apply strictly_positive_swap ||
-        apply twf_topen ||
-        apply is_erased_type_topen ||
-        apply non_empty_extend ||
-        t_deterministic_star ||
-        apply strictly_positive_topen ||
-        apply wf_topen;
+Lemma sp_push_forall_prod:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_prod T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_prod: b_push.
+
+Lemma sp_push_forall_sum:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_sum T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  - find_exists; t_spos_proof H.
+  - find_exists; t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_sum: b_push.
+
+Lemma sp_push_forall_refine:
+  forall m T b, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_refine T b).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_refine: b_push.
+
+Lemma sp_push_forall_type_refine:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_type_refine T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  - t_spos_proof H.
+  - t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_type_refine: b_push.
+
+Lemma sp_push_forall_let:
+  forall m t T, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_let t T).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_let: b_push.
+
+Lemma sp_push_forall_intersection:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_intersection T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  - t_spos_proof H.
+  - t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_intersection: b_push.
+
+Lemma sp_push_forall_union:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_union T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  - t_spos_proof H.
+  - t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_union: b_push.
+
+Lemma sp_push_forall_forall:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_forall T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_forall: b_push.
+
+Lemma sp_push_forall_exists:
+  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_exists T1 T2).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+Qed.
+
+Hint Immediate sp_push_forall_exists: b_push.
+
+Lemma sp_push_forall_abs:
+  forall m T, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_abs T).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    repeat step || simp_red || simp_spos.
+  t_spos_proof H.
+
+  exists (makeFresh (
+         support theta ::
+         support pre_theta ::
+         support theta' ::
+         pfv A type_var ::
+         pfv T type_var ::
+         nil));
+    repeat step || finisher || t_instantiate_rc || find_smallstep_value || t_listutils;
+      try solve [ repeat unfold closed_term, closed_value in * || step ].
+
+  lazymatch goal with
+  | |- reducible_values ((?X,?RC) :: ?g1 ++ ?g2) _ (topen 0 ?T ?rep) =>
+    apply reducible_rename with (topen 0 T rep) (g1 ++ (X,RC) :: g2)
+                                (idrel (X :: support g1 ++ support g2 ++ pfv T type_var))
+  end;
+    repeat step || apply valid_interpretation_append || t_deterministic_star ||
+           apply push_all_is_candidate || apply equivalent_with_relation_permute ||
+           apply equal_with_relation_refl2 ||
+           rewrite idrel_lookup || t_fv_open ||
+           rewrite idrel_lookup_swap || t_fv_open ||
+           t_listutils;
+      eauto with b_valid_interp;
+      eauto using reducibility_is_candidate;
+      try solve [ unfold equivalent_rc; steps; eauto ];
       try finisher;
-      eauto with bwf btwf omega berased;
-      eauto 2 using red_is_val with step_tactic;
-      eauto with b_red_is_val;
-      try solve [ apply_any; assumption ].
+      eauto with b_red_is_val.
 
-    + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
-    + apply reducible_unused3 in H29; repeat step; try finisher; eauto with bapply_any.
-    + apply reducible_unused3 in H29;
-        repeat step || t_instantiate_reducible || t_deterministic_star ||
-               t_instantiate_rc || simp_red || unfold reduces_to in *;
-        try finisher; eauto with bapply_any;
-          eauto with b_red_is_val.
-      apply reducible_rename_permute with X1; repeat step || rewrite support_push_one in *;
-        eauto with b_valid_interp;
-        try finisher.
-    + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
-    + apply reducible_unused3 in H29; steps; try finisher; eauto with bapply_any.
+  apply_induction H;
+    repeat
+      step || t_valid_interpretation_equiv || t_forall_implies_equiv ||
+      apply left_lex ||
+      (progress autorewrite with bsize in * ) ||
+      apply strictly_positive_swap ||
+      apply twf_topen ||
+      apply is_erased_type_topen ||
+      apply non_empty_extend ||
+      t_deterministic_star ||
+      apply strictly_positive_topen ||
+      apply wf_topen;
+    try finisher;
+    eauto with bwf btwf omega berased;
+    eauto 2 using red_is_val with step_tactic;
+    eauto with b_red_is_val;
+    try solve [ apply_any; assumption ].
+
+  + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
+  + apply reducible_unused3 in H30; repeat step; try finisher; eauto with bapply_any.
+  + apply reducible_unused3 in H30;
+      repeat step || t_instantiate_reducible || t_deterministic_star ||
+             t_instantiate_rc || simp_red || unfold reduces_to in *;
+      try finisher; eauto with bapply_any;
+        eauto with b_red_is_val.
+    apply reducible_rename_permute with X1; repeat step || rewrite support_push_one in *;
+      eauto with b_valid_interp;
+      try finisher.
+  + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
+  + apply reducible_unused3 in H30; steps; try finisher; eauto with bapply_any.
+Qed.
+
+Hint Immediate sp_push_forall_abs: b_push.
+
+Lemma sp_push_forall_rec:
+  forall m n T0 Ts, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_rec n T0 Ts).
+Proof.
+  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+    t_spos_proof H.
 
   (** Recursive type at n+1: case where the variables do not appear in the recursive type **)
   - right.
@@ -240,8 +357,8 @@ Proof.
                        support pre_theta ::
                        support theta' ::
                        pfv A type_var ::
-                       pfv T2 type_var ::
-                       pfv T3 type_var ::
+                       pfv T0 type_var ::
+                       pfv Ts type_var ::
                        pfv n'0 type_var ::
                        nil));
       repeat step || simp_red || t_listutils ||
@@ -279,8 +396,8 @@ Proof.
                        support pre_theta ::
                        support theta' ::
                        pfv A type_var ::
-                       pfv T2 type_var ::
-                       pfv T3 type_var ::
+                       pfv T0 type_var ::
+                       pfv Ts type_var ::
                        pfv n'0 type_var ::
                        nil));
       repeat step || simp_red || t_listutils ||
@@ -295,7 +412,7 @@ Proof.
       | H1: non_empty ?theta ?A,
         H2: forall_implies _ ?ptheta ?theta' |-
           reducible_values (((?X, fun t => reducible_values (?theta' ++ ?theta) t ?R) :: ?theta') ++ ?theta) _ ?T =>
-          apply HH with (size T, index T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
+          apply H with (size T, index T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
       end;
         repeat
           step || apply left_lex || autorewrite with bsize in * || t_deterministic_star ||
@@ -309,35 +426,28 @@ Proof.
       + eapply strictly_positive_rename_one; eauto;
           repeat step;
           try finisher.
-      + simp reducible_values in H37;
+      + simp reducible_values in H38;
           repeat step || t_deterministic_star.
         eapply reducible_rename_one; eauto;
           repeat step; eauto using reducibility_is_candidate with b_valid_interp;
             try finisher.
       + (* We apply one last time the induction hypothesis for rec(n) *)
-        apply_induction HH;
+        apply_induction H;
           repeat step || apply right_lex || simp_spos; eauto using lt_index_step;
             eauto with bwf btwf berased.
 Qed.
 
-Lemma strictly_positive_push_forall:
-  forall T pre_theta theta theta' A v,
-    wf T 0 ->
-    twf T 0 ->
-    wf A 0 ->
-    twf A 0 ->
-    valid_interpretation theta ->
-    valid_interpretation theta' ->
-    non_empty theta A ->
-    valid_pre_interpretation (fun a => reducible_values theta a A) pre_theta ->
-    strictly_positive T (support theta') ->
-    is_erased_type A ->
-    is_erased_type T ->
-    (forall a,
-      reducible_values theta a A ->
-      reducible_values (push_one a pre_theta ++ theta) v T) ->
-    forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
-    reducible_values (theta' ++ theta) v T.
+Hint Immediate sp_push_forall_rec: b_push.
+
+Lemma strictly_positive_push_forall_aux: forall m T, sp_push_forall_prop_aux m T.
 Proof.
-  eauto using strictly_positive_push_forall_aux.
+  induction m using measure_induction; destruct T;
+    eauto 2 with b_push;
+    try solve [ autounfold with u_push; intros; t_instantiate_non_empty; repeat step || simp_red ].
+Qed.
+
+Lemma strictly_positive_push_forall: forall T, sp_push_forall_prop T.
+Proof.
+  intros.
+  eapply strictly_positive_push_forall_aux; eauto 1.
 Qed.

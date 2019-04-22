@@ -207,7 +207,7 @@ Proof.
   repeat step || t_reduces_to || t_reduces_to2 || t_prove_reduces_to || t_induct_all.
 Qed.
 
-Lemma reducible_rename_fvar: forall m n f, renamable_prop_IH m -> renamable_prop m (fvar n f).
+Lemma reducible_rename_fvar: forall m n f, renamable_prop m (fvar n f).
 Proof.
   unfold renamable_prop;
   repeat step || destruct_tag || step_inversion equal_with_relation || simp_red || t_lookup || t_lookup_same || t_instantiate_rel;
