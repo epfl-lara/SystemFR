@@ -84,6 +84,8 @@ Fixpoint swap_type_holes t i j :=
   | tright t' => tright (swap_type_holes t' i j)
   | sum_match t' tl tr => sum_match (swap_type_holes t' i j) (swap_type_holes tl i j) (swap_type_holes tr i j)
 
+  | typecheck t T => typecheck (swap_type_holes t i j) (swap_type_holes T i j)
+
   | T_unit => t
   | T_bool => t
   | T_nat => t

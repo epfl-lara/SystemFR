@@ -84,10 +84,14 @@ Inductive tree: Set :=
   | tleft: tree -> tree
   | sum_match: tree -> tree -> tree -> tree
 
+  | typecheck: tree -> tree -> tree
+
   | trefl: tree -> tree -> tree
 .
 
+(* types defined in terms out of the previous types *)
 Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
+Definition typeability t T := T_intersection (T_singleton t) T.
 
 Definition term_fvar s := fvar s term_var.
 Definition type_fvar s := fvar s type_var.
@@ -143,6 +147,8 @@ Fixpoint is_annotated_term t :=
   | tleft t => is_annotated_term t
   | tright t => is_annotated_term t
   | sum_match t tl tr => is_annotated_term t /\ is_annotated_term tl /\ is_annotated_term tr
+
+  | typecheck t T => is_annotated_term t /\ is_annotated_type T
 
   | _ => False
   end
@@ -305,6 +311,8 @@ Fixpoint tree_size t :=
   | tright t => 1 + tree_size t
   | tleft t => 1 + tree_size t
   | sum_match t tl tr => 1 + tree_size t + tree_size tl + tree_size tr
+
+  | typecheck t T => 1 + tree_size t + tree_size T
 
   | T_unit => 0
   | T_bool => 0

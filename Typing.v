@@ -77,6 +77,11 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma t2 U ->
       has_type tvars gamma (forall_inst t1 t2) (T_let t2 V)
 
+| HTTypeability:
+    forall tvars gamma t T,
+      has_type tvars gamma t T ->
+      has_type tvars gamma (typecheck t T) (typeability t T)
+
 | HTPair:
     forall tvars gamma A B t1 t2,
       has_type tvars gamma t1 A ->

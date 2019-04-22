@@ -55,13 +55,13 @@ Require Import SystemFR.ReducibilitySplitMatchRule.
 Require Import SystemFR.ReducibilitySplitRecRule.
 Require Import SystemFR.ReducibilityNatRules.
 Require Import SystemFR.ReducibilitySumRules.
-Require Import SystemFR.ReducibilityFixRules.
 Require Import SystemFR.ReducibilityPolymorphism.
 Require Import SystemFR.ReducibilityRecRules.
-Require Import SystemFR.ReducibilityRecGenRules.
 Require Import SystemFR.ReducibilityPrimitiveSizeRules.
-Require Import SystemFR.ReducibilityIteTypeRules.
+Require Import SystemFR.ReducibilityFixRules.
 Require Import SystemFR.ReducibilityTypeRefineRules.
+Require Import SystemFR.ReducibilityRecGenRules.
+Require Import SystemFR.ReducibilityIteTypeRules.
 
 Require Import SystemFR.StrictPositivity.
 Require Import SystemFR.StrictPositivityLemmas.
@@ -215,6 +215,8 @@ Proof.
   - apply open_reducible_type_abs with X; eauto; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_inst; side_conditions.
   - eapply open_reducible_forall_inst; side_conditions.
+  - apply open_reducible_intersection; steps.
+    eapply open_reducible_singleton; side_conditions; eauto with b_equiv.
   - eapply open_reducible_pp; auto.
   - eapply open_reducible_pi1; eauto.
   - eapply open_reducible_pi2; eauto.

@@ -78,6 +78,8 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | tright t' => tright (map_indices k t' f)
   | sum_match t' tl tr => sum_match (map_indices k t' f) (map_indices (S k) tl f) (map_indices (S k) tr f)
 
+  | typecheck t T => typecheck (map_indices k t f) (map_indices k T f)
+
   | T_unit => t
   | T_bool => t
   | T_nat => t

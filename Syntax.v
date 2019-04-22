@@ -73,6 +73,8 @@ Fixpoint pfv t tag: set nat :=
   | tright t' => pfv t' tag
   | sum_match t' tl tr => pfv t' tag ++ pfv tl tag ++ pfv tr tag
 
+  | typecheck t T => pfv t tag ++ pfv T tag
+
   | T_unit => nil
   | T_bool => nil
   | T_nat => nil
@@ -208,6 +210,8 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | tright t' => tright (psubstitute t' l tag)
   | sum_match t' tl tr => sum_match (psubstitute t' l tag) (psubstitute tl l tag) (psubstitute tr l tag)
 
+  | typecheck t T => typecheck (psubstitute t l tag) (psubstitute T l tag)
+
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -311,6 +315,8 @@ Fixpoint wf t k :=
   | tright t' => wf t' k
   | sum_match t' tl tr => wf t' k /\ wf tl (S k) /\ wf tr (S k)
 
+  | typecheck t T => wf t k /\ wf T k
+
   | T_unit => True
   | T_bool => True
   | T_nat => True
@@ -398,6 +404,8 @@ Fixpoint twf t k :=
   | tleft t => twf t k
   | tright t => twf t k
   | sum_match t' tl tr => twf t' k /\ twf tl k /\ twf tr k
+
+  | typecheck t T => twf t k /\ twf T k
 
   | T_unit => True
   | T_bool => True
@@ -500,6 +508,8 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | tright t' => tright (open k t' rep)
   | sum_match t' tl tr => sum_match (open k t' rep) (open (S k) tl rep) (open (S k) tr rep)
 
+  | typecheck t T => typecheck (open k t rep) (open k T rep)
+
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -588,6 +598,8 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | tleft t' => tleft (close k t' x)
   | tright t' => tright (close k t' x)
   | sum_match t' tl tr => sum_match (close k t' x) (close (S k) tl x) (close (S k) tr x)
+
+  | typecheck t T => typecheck (close k t x) (close k T x)
 
   | T_unit => t
   | T_bool => t
@@ -680,6 +692,8 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | tright t' => tright (topen k t' rep)
   | sum_match t' tl tr => sum_match (topen k t' rep) (topen k tl rep) (topen k tr rep)
 
+  | typecheck t T => typecheck (topen k t rep) (topen k T rep)
+
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -770,6 +784,8 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | tright t' => tright (tclose k t' x)
   | sum_match t' tl tr => sum_match (tclose k t' x) (tclose k tl x) (tclose k tr x)
 
+  | typecheck t T => typecheck (tclose k t x) (tclose k T x)
+
   | T_unit => t
   | T_bool => t
   | T_nat => t
@@ -790,17 +806,3 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | T_abs T => T_abs (tclose (S k) T x)
   | T_rec n T0 Ts => T_rec (tclose k n x) (tclose k T0 x) (tclose (S k) Ts x)
   end.
-
-Lemma fold_open_arrow:
-  forall T1 T2 rep,
-    T_arrow (open 0 T1 rep) (open 1 T2 rep) = open 0 (T_arrow T1 T2) rep.
-Proof.
-  reflexivity.
-Qed.
-
-Lemma fold_open_refine:
-  forall T p rep,
-    T_refine (open 0 T rep) (open 1 p rep) = open 0 (T_refine T p) rep.
-Proof.
-  reflexivity.
-Qed.

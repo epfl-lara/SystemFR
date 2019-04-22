@@ -55,6 +55,8 @@ Fixpoint erase_term (t: tree): tree :=
   | tright t' => tright (erase_term t')
   | sum_match t' tl tr => sum_match (erase_term t') (erase_term tl) (erase_term tr)
 
+  | typecheck t T => erase_term t
+
   | _ => uu
   end.
 
@@ -104,19 +106,3 @@ Program Fixpoint erase_context (l: list (nat * tree)): list (nat * tree) :=
 
 Hint Resolve erase_term_erased: berased.
 Hint Resolve erase_type_erased: berased.
-
-Lemma tree_size_erase:
-  forall t, tree_size (erase_term t) <= tree_size t.
-Proof.
-  induction t; steps; eauto with omega.
-Qed.
-
-Ltac t_tree_size_erase :=
-  match goal with
-  | |- context[tree_size (erase_term ?t)] =>
-    poseNew (Mark 0 "tree_size");
-    pose proof (tree_size_erase t)
-  | H: context[tree_size (erase_term ?t)] |- _ =>
-    poseNew (Mark 0 "tree_size");
-    pose proof (tree_size_erase t)
-  end.

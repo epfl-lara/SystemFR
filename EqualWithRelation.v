@@ -195,6 +195,12 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel (sum_match t1 t2 t3) (sum_match t1' t2' t3')
 
 
+| EWRTypeCheck:
+    forall t t' T T',
+      equal_with_relation rel t t' ->
+      equal_with_relation rel T T' ->
+      equal_with_relation rel (typecheck t T) (typecheck t' T')
+
 | EWRUnit:
     equal_with_relation rel T_unit T_unit
 | EWRBool:
