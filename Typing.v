@@ -117,7 +117,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       wf (erase_term t2) 0 ->
       has_type tvars gamma t1 (T_type_refine A B) ->
       has_type tvars ((x, T_let t1 B) :: gamma) (open 0 t2 (term_fvar x)) T ->
-      has_type tvars gamma (get_proof_in t1 t2) T
+      has_type tvars gamma (get_refinement_witness t1 t2) T
 
 | HTUnit:
     forall tvars gamma,

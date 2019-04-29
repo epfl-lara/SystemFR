@@ -37,7 +37,7 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | pi2 t => pi2 (map_indices k t f)
 
   | because t1 t2 => because (map_indices k t1 f) (map_indices k t2 f)
-  | get_proof_in t1 t2 => get_proof_in (map_indices k t1 f) (map_indices (S k) t2 f)
+  | get_refinement_witness t1 t2 => get_refinement_witness (map_indices k t1 f) (map_indices (S k) t2 f)
 
   | ttrue => t
   | tfalse => t

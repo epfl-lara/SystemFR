@@ -229,7 +229,7 @@ Proof.
   - eapply open_reducible_pi1; eauto.
   - eapply open_reducible_pi2; eauto.
   - eapply open_reducible_type_refine; eauto.
-  - apply open_reducible_get_proof_in with (erase_term t1) (erase_type A) (erase_type B) x;
+  - apply open_reducible_get_refinement_witness with (erase_term t1) (erase_type A) (erase_type B) x;
       repeat side_conditions ||
              rewrite (open_none (erase_term t2) 0) in * ||
              rewrite erase_term_open in * by (eauto 3 with bannot step_tactic).

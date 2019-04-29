@@ -42,7 +42,7 @@ Fixpoint swap_type_holes t i j :=
   | pi2 t => pi2 (swap_type_holes t i j)
 
   | because t1 t2 => because (swap_type_holes t1 i j) (swap_type_holes t2 i j)
-  | get_proof_in t1 t2 => get_proof_in (swap_type_holes t1 i j) (swap_type_holes t2 i j)
+  | get_refinement_witness t1 t2 => get_refinement_witness (swap_type_holes t1 i j) (swap_type_holes t2 i j)
 
   | ttrue => t
   | tfalse => t

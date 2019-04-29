@@ -53,7 +53,7 @@ Inductive tree: Set :=
   | pi2: tree -> tree
 
   | because: tree -> tree -> tree
-  | get_proof_in: tree -> tree -> tree
+  | get_refinement_witness: tree -> tree -> tree
 
   | ttrue: tree
   | tfalse: tree
@@ -123,7 +123,7 @@ Fixpoint is_annotated_term t :=
   | pi2 t' => is_annotated_term t'
 
   | because t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
-  | get_proof_in t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
+  | get_refinement_witness t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
 
   | ttrue => True
   | tfalse => True
@@ -200,7 +200,7 @@ Fixpoint is_erased_term t :=
   | pi2 t' => is_erased_term t'
 
   | because t1 t2 => is_erased_term t1 /\ is_erased_term t2
-  | get_proof_in t1 t2 => is_erased_term t1 /\ is_erased_term t2
+  | get_refinement_witness t1 t2 => is_erased_term t1 /\ is_erased_term t2
 
   | ttrue => True
   | tfalse => True
@@ -279,7 +279,7 @@ Fixpoint tree_size t :=
   | pi2 t' => 1 + tree_size t'
 
   | because t1 t2 => 1 + tree_size t1 + tree_size t2
-  | get_proof_in t1 t2 => 1 + tree_size t1 + tree_size t2
+  | get_refinement_witness t1 t2 => 1 + tree_size t1 + tree_size t2
 
   | ttrue => 0
   | tfalse => 0

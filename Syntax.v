@@ -45,7 +45,7 @@ Fixpoint pfv t tag: set nat :=
   | pi2 t' => pfv t' tag
 
   | because t1 t2 => pfv t1 tag ++ pfv t2 tag
-  | get_proof_in t1 t2 => pfv t1 tag ++ pfv t2 tag
+  | get_refinement_witness t1 t2 => pfv t1 tag ++ pfv t2 tag
 
   | ttrue => nil
   | tfalse => nil
@@ -180,7 +180,7 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | pi2 t' => pi2 (psubstitute t' l tag)
 
   | because t1 t2 => because (psubstitute t1 l tag) (psubstitute t2 l tag)
-  | get_proof_in t1 t2 => get_proof_in (psubstitute t1 l tag) (psubstitute t2 l tag)
+  | get_refinement_witness t1 t2 => get_refinement_witness (psubstitute t1 l tag) (psubstitute t2 l tag)
 
   | ttrue => t
   | tfalse => t
@@ -278,7 +278,7 @@ Fixpoint wf t k :=
   | pi2 t => wf t k
 
   | because t1 t2 => wf t1 k /\ wf t2 k
-  | get_proof_in t1 t2 => wf t1 k /\ wf t2 (S k)
+  | get_refinement_witness t1 t2 => wf t1 k /\ wf t2 (S k)
 
   | ttrue => True
   | tfalse => True
@@ -369,7 +369,7 @@ Fixpoint twf t k :=
   | pi2 t => twf t k
 
   | because t1 t2 => twf t1 k /\ twf t2 k
-  | get_proof_in t1 t2 => twf t1 k /\ twf t2 k
+  | get_refinement_witness t1 t2 => twf t1 k /\ twf t2 k
 
   | ttrue => True
   | tfalse => True
@@ -471,7 +471,7 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | pi2 t => pi2 (open k t rep)
 
   | because t1 t2 => because (open k t1 rep) (open k t2 rep)
-  | get_proof_in t1 t2 => get_proof_in (open k t1 rep) (open (S k) t2 rep)
+  | get_refinement_witness t1 t2 => get_refinement_witness (open k t1 rep) (open (S k) t2 rep)
 
   | ttrue => t
   | tfalse => t
@@ -563,7 +563,7 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | pi2 t => pi2 (close k t x)
 
   | because t1 t2 => because (close k t1 x) (close k t2 x)
-  | get_proof_in t1 t2 => get_proof_in (close k t1 x) (close (S k) t2 x)
+  | get_refinement_witness t1 t2 => get_refinement_witness (close k t1 x) (close (S k) t2 x)
 
   | ttrue => t
   | tfalse => t
@@ -656,7 +656,7 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | pi2 t => pi2 (topen k t rep)
 
   | because t1 t2 => because (topen k t1 rep) (topen k t2 rep)
-  | get_proof_in t1 t2 => get_proof_in (topen k t1 rep) (topen k t2 rep)
+  | get_refinement_witness t1 t2 => get_refinement_witness (topen k t1 rep) (topen k t2 rep)
 
   | ttrue => t
   | tfalse => t
@@ -750,7 +750,7 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | pi2 t => pi2 (tclose k t x)
 
   | because t1 t2 => because (tclose k t1 x) (tclose k t2 x)
-  | get_proof_in t1 t2 => get_proof_in (tclose k t1 x) (tclose k t2 x)
+  | get_refinement_witness t1 t2 => get_refinement_witness (tclose k t1 x) (tclose k t2 x)
 
   | ttrue => t
   | tfalse => t

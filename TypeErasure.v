@@ -28,7 +28,7 @@ Fixpoint erase_term (t: tree): tree :=
   | pi2 t' => pi2 (erase_term t')
 
   | because t1 t2 => erase_term t1
-  | get_proof_in t1 t2 => notype_tlet uu (erase_term t2)
+  | get_refinement_witness t1 t2 => notype_tlet uu (erase_term t2)
 
   | ttrue => ttrue
   | tfalse => tfalse

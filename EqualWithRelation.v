@@ -81,7 +81,7 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
     forall t1 t1' t2 t2',
       equal_with_relation rel t1 t1' ->
       equal_with_relation rel t2 t2' ->
-      equal_with_relation rel (get_proof_in t1 t2) (get_proof_in t1' t2')
+      equal_with_relation rel (get_refinement_witness t1 t2) (get_refinement_witness t1' t2')
 
 | EWRTrue:
     equal_with_relation rel ttrue ttrue

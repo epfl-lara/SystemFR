@@ -54,7 +54,7 @@ Proof.
   repeat step || simp_red || t_deterministic_star; t_closer.
 Qed.
 
-Lemma open_reducible_get_proof_in:
+Lemma open_reducible_get_refinement_witness:
   forall tvars gamma t1 t2 A B T x,
     ~(x ∈ tvars) ->
     ~(x ∈ fv_context gamma) ->
