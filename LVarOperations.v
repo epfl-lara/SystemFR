@@ -42,6 +42,7 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (map_indices k t1 f) (map_indices k t2 f) (map_indices k t3 f)
+  | boolean_recognizer r t => boolean_recognizer r (map_indices k t f)
 
   | zero => t
   | succ t' => succ (map_indices k t' f)

@@ -2,6 +2,7 @@ Require Import SystemFR.Syntax.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.PrimitiveSize.
 Require Import SystemFR.StarRelation.
+Require Import SystemFR.PrimitiveRecognizers.
 
 Inductive is_value: tree -> Prop :=
 | IVUnit: is_value uu
@@ -55,6 +56,36 @@ Lemma is_nat_value_build_nat:
 Proof.
   induction n; steps; eauto with b_inv.
 Qed.
+
+Lemma is_value_build_nat:
+  forall n, is_value (build_nat n).
+Proof.
+  induction n; steps; eauto with values.
+Qed.
+
+Lemma is_value_is_pair:
+  forall v, is_value (is_pair v).
+Proof.
+  destruct v; steps.
+Qed.
+
+Lemma is_value_is_succ:
+  forall v, is_value (is_succ v).
+Proof.
+  destruct v; steps.
+Qed.
+
+Lemma is_value_is_lambda:
+  forall v, is_value (is_lambda v).
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_nat_value_build_nat: values.
+Hint Immediate is_value_build_nat: values.
+Hint Immediate is_value_is_pair: values.
+Hint Immediate is_value_is_succ: values.
+Hint Immediate is_value_is_lambda: values.
 
 Inductive small_step: tree -> tree -> Prop :=
 (* beta reduction *)
@@ -133,6 +164,22 @@ Inductive small_step: tree -> tree -> Prop :=
       pfv v term_var = nil ->
       small_step (tsize v) (build_nat (tsize_semantics v))
 
+| SPBetaIsPair:
+    forall v,
+      is_value v ->
+      pfv v term_var = nil ->
+      small_step (boolean_recognizer 0 v) (is_pair v)
+| SPBetaIsSucc:
+    forall v,
+      is_value v ->
+      pfv v term_var = nil ->
+      small_step (boolean_recognizer 1 v) (is_succ v)
+| SPBetaIsLambda:
+    forall v,
+      is_value v ->
+      pfv v term_var = nil ->
+      small_step (boolean_recognizer 2 v) (is_lambda v)
+
 (* reduction inside terms *)
 | SPTypeInst: forall t1 t2,
     small_step t1 t2 ->
@@ -198,6 +245,10 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPTSize: forall t1 t2,
     small_step t1 t2 ->
     small_step (tsize t1) (tsize t2)
+
+| SPRecognizer: forall r t1 t2,
+    small_step t1 t2 ->
+    small_step (boolean_recognizer r t1) (boolean_recognizer r t2)
 .
 
 Hint Constructors small_step: smallstep.
@@ -205,6 +256,7 @@ Hint Constructors small_step: smallstep.
 Ltac t_invert_step :=
   match goal with
   | _ => step_inversion small_step
+  | H: small_step (boolean_recognizer _ _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
   | H: small_step (notype_inst _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold _) _ |- _ => inversion H; clear H

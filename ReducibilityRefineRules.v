@@ -94,7 +94,7 @@ Lemma reducible_refine_subtype:
     reducible_values theta t (T_refine (substitute A l) (substitute p l)) ->
     reducible_values theta t (T_refine (substitute B l) (substitute q l)).
 Proof.
-  repeat step || simp_red; eauto with bwf; eauto with berased.
+  repeat step || simp_red; unshelve eauto with bwf; eauto with berased.
 
   unshelve epose proof (H8 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.
@@ -118,7 +118,7 @@ Lemma reducible_refine_subtype2:
       reducible_values theta t (substitute T l) ->
       reducible_values theta t (T_refine (substitute A l) (substitute p l)).
 Proof.
-  repeat step || simp_red; t_closer.
+  repeat step || simp_red || unshelve t_closer.
 
   unshelve epose proof (H5 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.

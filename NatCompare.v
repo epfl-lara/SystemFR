@@ -116,15 +116,16 @@ Proof.
   apply_any; steps; eauto with values.
   unfold tlt in *;
     repeat step || t_invert_star ||
-           (rewrite open_none in * by (repeat step; eauto with bwf b_inv)) ||
+           (rewrite open_none in * by (repeat step || unshelve eauto with bwf b_inv)) ||
            t_star_smallstep_app_onestep;
-    eauto with values.
+      eauto with values.
 
   eapply star_many_steps in H24; eauto with smallstep bsteplemmas;
     repeat step || unfold irred || t_invert_step.
   apply star_smallstep_app_l; steps.
-  eapply Trans; eauto using SPBetaApp with values;
-    repeat step || (rewrite open_none in * by (repeat step; eauto with bwf b_inv)).
+  eapply Trans; eauto using SPBetaApp with values; steps.
+
+  repeat rewrite (open_none v'1) in * by (repeat step || unshelve eauto with bwf b_inv); steps.
 Qed.
 
 Ltac t_tlt_sound :=

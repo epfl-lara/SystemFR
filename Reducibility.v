@@ -67,6 +67,7 @@ Require Import SystemFR.ReducibilityTypeRefineRules.
 Require Import SystemFR.ReducibilityRecGenRules.
 Require Import SystemFR.ReducibilityIteTypeRules.
 Require Import SystemFR.ReducibilityRecPos.
+Require Import SystemFR.ReducibilityRecognizers.
 
 Require Import SystemFR.StrictPositivity.
 Require Import SystemFR.StrictPositivityLemmas.
@@ -237,6 +238,9 @@ Proof.
   - apply open_reducible_tfalse.
   - apply open_reducible_ite with x; side_conditions.
   - apply open_reducible_T_ite with (erase_type T1) (erase_type T2) x; side_conditions; eauto 2 using ite_type_erase.
+  - apply open_reducible_is_pair; side_conditions.
+  - apply open_reducible_is_succ; side_conditions.
+  - apply open_reducible_is_lambda; side_conditions.
   - unfold_open; repeat step || t_instantiate_sat3;  auto 3 using not_equivalent with falsity.
   - apply open_reducible_zero.
   - apply open_reducible_succ; auto.

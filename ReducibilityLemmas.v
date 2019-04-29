@@ -13,8 +13,6 @@ Require Import SystemFR.SmallStepIrredLemmas.
 Require Import SystemFR.TermList.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.WFLemmasEval.
-Require Import SystemFR.FVLemmasEval.
 Require Import SystemFR.SmallStepSubstitutions.
 Require Import SystemFR.StarLemmas.
 Require Import SystemFR.StarInversions.
@@ -23,8 +21,11 @@ Require Import SystemFR.Trees.
 Require Import SystemFR.Sets.
 Require Import SystemFR.StarRelation.
 
+Require Import SystemFR.FVLemmas.
+Require Import SystemFR.FVLemmasEval.
 
 Require Import SystemFR.WFLemmas.
+Require Import SystemFR.WFLemmasEval.
 Require Import SystemFR.TWFLemmas.
 
 Require Import SystemFR.ReducibilityCandidate.

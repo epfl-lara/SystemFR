@@ -45,10 +45,10 @@ Lemma small_step_subst:
     small_step (substitute t l) (substitute t' l).
 Proof.
   induction 1; steps; eauto using is_value_subst with values smallstep;
-    repeat rewrite substitute_open; steps; eauto using is_value_subst with smallstep bwf.
-  - rewrite substitute_nothing5; steps.
-    rewrite substitute_nothing5; eauto with smallstep; repeat step;
-      eauto using is_nat_value_build_nat with bfv.
+    repeat
+      step || rewrite substitute_open ||
+      rewrite substitute_nothing5 by (steps; eauto with bfv);
+    eauto using is_value_subst with smallstep bwf.
 Qed.
 
 Ltac t_smallstep_subst :=

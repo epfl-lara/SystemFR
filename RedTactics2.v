@@ -9,7 +9,6 @@ Require Import SystemFR.SubstitutionLemmas.
 Require Import SystemFR.TermList.
 Require Import SystemFR.TermListLemmas.
 Require Import SystemFR.AssocList.
-Require Import SystemFR.TypeErasure.
 Require Import SystemFR.FVLemmasLists.
 Require Import SystemFR.EquivalenceLemmas.
 Require Import SystemFR.SubstitutionErase.

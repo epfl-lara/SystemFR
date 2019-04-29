@@ -61,7 +61,7 @@ Ltac t_substitutions :=
   (rewrite substitute_open in * by t_rewrite) ||
   (rewrite substitute_topen in * by t_rewrite).
 
-Ltac tac0 :=
+Ltac tac0_aux :=
   repeat step || t_listutils || finisher || apply SatCons ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
            t_substitutions ||
@@ -71,6 +71,8 @@ Ltac tac0 :=
            eauto with btwf;
            eauto with berased;
            eauto 3 using NoDup_append with sets.
+
+Ltac tac0 := unshelve tac0_aux.
 
 Ltac tac1 := repeat tac0 || simp_red.
 
@@ -377,7 +379,7 @@ Lemma equivalent_cons2:
             (notype_lambda (notype_rec v (psubstitute t0 l term_var) (psubstitute ts l term_var))))
       (psubstitute t l term_var).
 Proof.
-  tac0.
+  tac0; steps.
 Qed.
 
 Hint Resolve equivalent_cons: b_equiv_subst.

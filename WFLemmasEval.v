@@ -6,7 +6,7 @@ Require Import SystemFR.TermProperties.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.SizeLemmas.
 Require Import SystemFR.StarRelation.
-
+Require Import SystemFR.PrimitiveRecognizers.
 
 Lemma wf_nat_value:
   forall v, is_nat_value v -> wf v 0.
@@ -14,7 +14,7 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve wf_nat_value: bwf.
+Hint Immediate wf_nat_value: bwf.
 
 Lemma twf_nat_value:
   forall v, is_nat_value v -> twf v 0.
@@ -22,7 +22,31 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve twf_nat_value: btwf.
+Hint Immediate twf_nat_value: btwf.
+
+Lemma wf_is_pair:
+  forall v, wf (is_pair v) 0.
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate wf_is_pair: bwf.
+
+Lemma wf_is_succ:
+  forall v, wf (is_succ v) 0.
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate wf_is_succ: bwf.
+
+Lemma wf_is_lambda:
+  forall v, wf (is_lambda v) 0.
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate wf_is_lambda: bwf.
 
 Lemma wf_smallstep:
   forall t1 t2,

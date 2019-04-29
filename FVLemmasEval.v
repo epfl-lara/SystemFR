@@ -9,6 +9,7 @@ Require Import SystemFR.SizeLemmas.
 Require Import SystemFR.StarRelation.
 Require Import SystemFR.SetLemmas.
 Require Import SystemFR.PrimitiveSize.
+Require Import SystemFR.PrimitiveRecognizers.
 
 Require Import Coq.Strings.String.
 
@@ -27,6 +28,45 @@ Qed.
 
 Hint Immediate nat_value_fv: bfv.
 
+Lemma pfv_build_nat:
+  forall n tag,
+    pfv (build_nat n) tag = nil.
+Proof.
+  induction n; steps.
+Qed.
+
+Hint Immediate pfv_build_nat: bfv.
+
+Lemma is_pair_fv:
+  forall v tag,
+    pfv (is_pair v) tag = nil.
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_pair_fv: bfv.
+Hint Rewrite is_pair_fv: rfv.
+
+Lemma is_succ_fv:
+  forall v tag,
+    pfv (is_succ v) tag = nil.
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_succ_fv: bfv.
+Hint Rewrite is_succ_fv: rfv.
+
+Lemma is_lambda_fv:
+  forall v tag,
+    pfv (is_lambda v) tag = nil.
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_lambda_fv: bfv.
+Hint Rewrite is_lambda_fv: rfv.
+
 Lemma fv_smallstep:
   forall t t',
     small_step t t' ->
@@ -36,7 +76,8 @@ Lemma fv_smallstep:
 Proof.
   induction 1;
     repeat step || t_listutils || t_fv_open || unfold subset in * ||
-           (rewrite nat_value_fv in * by eauto using is_nat_value_build_nat);
+           (rewrite nat_value_fv in * by eauto using is_nat_value_build_nat) ||
+           (autorewrite with rfv in *);
     eauto with bfv blistutils.
 Qed.
 

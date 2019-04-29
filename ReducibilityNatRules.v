@@ -310,7 +310,7 @@ Proof.
   unfold open_reducible in *; steps.
 
   apply reducible_rec; repeat step;
-    eauto with bwf;
+    unshelve eauto with bwf;
     eauto with bfv;
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].

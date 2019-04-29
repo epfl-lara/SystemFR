@@ -256,7 +256,8 @@ Ltac simp_red :=
   rewrite reducible_values_equation_56 in * ||
   rewrite reducible_values_equation_57 in * ||
   rewrite reducible_values_equation_58 in * ||
-  rewrite reducible_values_equation_59 in *.
+  rewrite reducible_values_equation_59 in * ||
+  rewrite reducible_values_equation_60 in *.
 
 Ltac top_level_unfold :=
   match goal with

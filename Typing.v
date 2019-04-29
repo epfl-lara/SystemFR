@@ -162,6 +162,21 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       T_ite b T1 T2 T ->
       has_type tvars gamma (ite b t1 t2) T
 
+| HTIsPair:
+    forall tvars gamma t,
+      has_type tvars gamma t T_top ->
+      has_type tvars gamma (boolean_recognizer 0 t) T_bool
+
+| HTIsSucc:
+    forall tvars gamma t,
+      has_type tvars gamma t T_top ->
+      has_type tvars gamma (boolean_recognizer 1 t) T_bool
+
+| HTIsLambda:
+    forall tvars gamma t,
+      has_type tvars gamma t T_top ->
+      has_type tvars gamma (boolean_recognizer 2 t) T_bool
+
 | HTErr:
     forall tvars gamma T,
       is_type tvars gamma T ->

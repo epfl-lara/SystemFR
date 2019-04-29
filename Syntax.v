@@ -50,6 +50,7 @@ Fixpoint pfv t tag: set nat :=
   | ttrue => nil
   | tfalse => nil
   | ite t1 t2 t3 => pfv t1 tag ++ pfv t2 tag ++ pfv t3 tag
+  | boolean_recognizer _ t => pfv t tag
 
   | zero => nil
   | succ t' => pfv t' tag
@@ -184,6 +185,7 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (psubstitute t1 l tag) (psubstitute t2 l tag) (psubstitute t3 l tag)
+  | boolean_recognizer r t => boolean_recognizer r (psubstitute t l tag)
 
   | zero => t
   | succ t' => succ (psubstitute t' l tag)
@@ -281,6 +283,7 @@ Fixpoint wf t k :=
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => wf t1 k /\ wf t2 k /\ wf t3 k
+  | boolean_recognizer _ t => wf t k
 
   | zero => True
   | succ t' => wf t' k
@@ -371,6 +374,7 @@ Fixpoint twf t k :=
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => twf t1 k /\ twf t2 k /\ twf t3 k
+  | boolean_recognizer _ t => twf t k
 
   | zero => True
   | succ t' => twf t' k
@@ -472,6 +476,7 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (open k t1 rep) (open k t2 rep) (open k t3 rep)
+  | boolean_recognizer r t => boolean_recognizer r (open k t rep)
 
   | zero => t
   | succ t' => succ (open k t' rep)
@@ -563,6 +568,7 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (close k t1 x) (close k t2 x) (close k t3 x)
+  | boolean_recognizer r t => boolean_recognizer r (close k t x)
 
   | zero => t
   | succ t' => succ (close k t' x)
@@ -655,6 +661,7 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (topen k t1 rep) (topen k t2 rep) (topen k t3 rep)
+  | boolean_recognizer r t => boolean_recognizer r (topen k t rep)
 
   | zero => t
   | succ t' => succ (topen k t' rep)
@@ -748,6 +755,7 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (tclose k t1 x) (tclose k t2 x) (tclose k t3 x)
+  | boolean_recognizer r t => boolean_recognizer r (tclose k t x)
 
   | zero => t
   | succ t' => succ (tclose k t' x)

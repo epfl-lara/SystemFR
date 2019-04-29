@@ -47,6 +47,7 @@ Fixpoint swap_type_holes t i j :=
   | ttrue => t
   | tfalse => t
   | ite t1 t2 t3 => ite (swap_type_holes t1 i j) (swap_type_holes t2 i j) (swap_type_holes t3 i j)
+  | boolean_recognizer r t => boolean_recognizer r (swap_type_holes t i j)
 
   | zero => t
   | succ t' => succ (swap_type_holes t' i j)

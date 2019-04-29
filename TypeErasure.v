@@ -33,6 +33,7 @@ Fixpoint erase_term (t: tree): tree :=
   | ttrue => ttrue
   | tfalse => tfalse
   | ite t1 t2 t3 => ite (erase_term t1) (erase_term t2) (erase_term t3)
+  | boolean_recognizer r t => boolean_recognizer r (erase_term t)
 
   | zero => zero
   | succ t' => succ (erase_term t')

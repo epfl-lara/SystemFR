@@ -93,6 +93,11 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel t2 t2' ->
       equal_with_relation rel t3 t3' ->
       equal_with_relation rel (ite t1 t2 t3) (ite t1' t2' t3')
+| EWRRecognizer:
+    forall r t t',
+      equal_with_relation rel t t' ->
+      equal_with_relation rel (boolean_recognizer r t) (boolean_recognizer r t')
+
 | EWRZero:
     equal_with_relation rel zero zero
 | EWRSucc:

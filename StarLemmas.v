@@ -287,3 +287,13 @@ Proof.
 Qed.
 
 Hint Resolve star_smallstep_tsize: bsteplemmas.
+
+Lemma star_smallstep_recognizer:
+  forall t1 t1' r,
+    star small_step t1 t1' ->
+    star small_step (boolean_recognizer r t1) (boolean_recognizer r t1').
+Proof.
+  induction 1; steps; eauto with smallstep.
+Qed.
+
+Hint Resolve star_smallstep_recognizer: bsteplemmas.

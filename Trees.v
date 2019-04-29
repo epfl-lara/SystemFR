@@ -58,6 +58,7 @@ Inductive tree: Set :=
   | ttrue: tree
   | tfalse: tree
   | ite: tree -> tree -> tree -> tree
+  | boolean_recognizer: nat -> tree -> tree
 
   | zero: tree
   | succ: tree -> tree
@@ -127,6 +128,7 @@ Fixpoint is_annotated_term t :=
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => is_annotated_term t1 /\ is_annotated_term t2 /\ is_annotated_term t3
+  | boolean_recognizer _ t => is_annotated_term t
 
   | zero => True
   | succ t' => is_annotated_term t'
@@ -203,6 +205,7 @@ Fixpoint is_erased_term t :=
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => is_erased_term t1 /\ is_erased_term t2 /\ is_erased_term t3
+  | boolean_recognizer _ t => is_erased_term t
 
   | zero => True
   | succ t' => is_erased_term t'
@@ -281,6 +284,7 @@ Fixpoint tree_size t :=
   | ttrue => 0
   | tfalse => 0
   | ite t1 t2 t3 => 1 + tree_size t1 + tree_size t2 + tree_size t3
+  | boolean_recognizer _ t => 1 + tree_size t
 
   | zero => 0
   | succ t' =>  1 + tree_size t'

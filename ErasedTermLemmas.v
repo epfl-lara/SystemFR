@@ -8,6 +8,7 @@ Require Import SystemFR.StarRelation.
 Require Import SystemFR.SubstitutionLemmas.
 Require Import SystemFR.PrimitiveSize.
 Require Import SystemFR.SmallStep.
+Require Import SystemFR.PrimitiveRecognizers.
 
 Lemma is_erased_term_twf:
   forall t k,
@@ -118,7 +119,31 @@ Proof.
   eauto using is_nat_value_erased, is_nat_value_build_nat.
 Qed.
 
-Hint Resolve is_erased_term_tsize: berased.
+Hint Immediate is_erased_term_tsize: berased.
+
+Lemma is_erased_is_pair:
+  forall v, is_erased_term (is_pair v).
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_erased_is_pair: berased.
+
+Lemma is_erased_is_succ:
+  forall v, is_erased_term (is_succ v).
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_erased_is_succ: berased.
+
+Lemma is_erased_is_lambda:
+  forall v, is_erased_term (is_lambda v).
+Proof.
+  destruct v; steps.
+Qed.
+
+Hint Immediate is_erased_is_lambda: berased.
 
 Lemma erase_smallstep:
   forall t1 t2,

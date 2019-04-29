@@ -220,7 +220,7 @@ Proof.
   unfold open_reducible in *; steps.
 
   apply reducible_fix_strong_induction_forall; repeat step;
-    eauto with bwf;
+    unshelve eauto with bwf;
     eauto with bfv;
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
@@ -241,8 +241,8 @@ Proof.
 
   unshelve epose proof (H21 a _ _);
     repeat step || simp reducible_values || rewrite open_tlt in * ||
-           (progress rewrite open_shift in * by (steps; eauto with bwf)) ||
-           (progress rewrite open_none in * by (steps; eauto with bwf));
+           (progress rewrite open_shift in * by (repeat step || unshelve eauto with bwf)) ||
+           (progress rewrite open_none in * by (repeat step || unshelve eauto with bwf));
     eauto using reducible_value_expr.
 Qed.
 
@@ -352,7 +352,7 @@ Proof.
   unfold open_reducible in *; steps.
 
   apply reducible_fix_induction_forall; repeat step;
-    eauto with bwf;
+    unshelve eauto with bwf;
     eauto with bfv;
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
