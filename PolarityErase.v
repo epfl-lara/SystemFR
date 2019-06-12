@@ -1,5 +1,4 @@
 Require Import Equations.Equations.
-Require Import Equations.Subterm.
 
 Require Import Omega.
 

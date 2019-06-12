@@ -5,7 +5,9 @@ Require Import SystemFR.StarRelation.
 Require Import SystemFR.StarInversions.
 
 Require Import Equations.Equations.
-Require Import Equations.Subterm.
+Require Import Equations.Prop.Subterm.
+
+Require Import Coq.Program.Program.
 
 (* Lexicographic order used for the termination argument of reducibility *)
 (* Follows a lexicographic order defined in Equations *)

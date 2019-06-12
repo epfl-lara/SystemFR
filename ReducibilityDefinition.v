@@ -19,7 +19,7 @@ Require Import SystemFR.ReducibilityMeasure.
 Require Import SystemFR.ReducibilityCandidate.
 
 Require Import Equations.Equations.
-Require Import Equations.Subterm.
+Require Import Equations.Prop.Subterm.
 
 Require Import Omega.
 
