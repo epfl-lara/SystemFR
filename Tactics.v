@@ -27,20 +27,14 @@ Ltac basic_rewrites :=
 
 Ltac light2 := basic_rewrites || firstorder.
 
-Ltac is_construct t :=
-  let x := fresh in
-  (let eq := constr:(ltac:(eexists ?[x]; only [x]: econstructor; reflexivity)
-    : exists x, x = t) in
-  idtac) + fail.
-
 Ltac t_equality :=
   match goal with
-  | |- ?F _ = ?G _ => unify F G; is_construct F; f_equal
-  | |- ?F _ _ = ?G _ _ => unify F G; is_construct F; f_equal
-  | |- ?F _ _ _ = ?G _ _ _ => unify F G; is_construct F; f_equal
-  | |- ?F _ _ _ _ = ?G _ _ _ _ => unify F G; is_construct F; f_equal
-  | |- ?F _ _ _ _ _ = ?G _ _ _ _ _ => unify F G; is_construct F; f_equal
-  | |- ?F _ _ _ _ _ _ = ?G _ _ _ _ _ _ => unify F G; is_construct F; f_equal
+  | |- ?F _ = ?F _ => is_constructor F; f_equal
+  | |- ?F _ _ = ?F _ _ => is_constructor F; f_equal
+  | |- ?F _ _ _ = ?F _ _ _ => is_constructor F; f_equal
+  | |- ?F _ _ _ _ = ?F _ _ _ _ => is_constructor F; f_equal
+  | |- ?F _ _ _ _ _ = ?F _ _ _ _ _ => is_constructor F; f_equal
+  | |- ?F _ _ _ _ _ _ = ?F _ _ _ _ _ _ => is_constructor F; f_equal
   end.
 
 (** Taken from Cpdt **)
@@ -105,9 +99,7 @@ Ltac step_gen := match goal with
   | [ p: ?A*?B |- _ ] => destruct p
   | [ H: (_,_) = (_,_) |- _ ] => inversion H; clear H
   | [ H: context[Nat.eq_dec ?U ?V] |- _ ] => destruct (Nat.eq_dec U V)
-  | [ H: ?F _ = ?F _ |- _ ] => is_construct F; inversion H; clear H
-  | [ H: ?F _ _ = ?F _ _ |- _ ] => is_construct F; inversion H; clear H
-  | [ H: ?F _ _ _ = ?F _ _ _ |- _ ] => is_construct F; inversion H; clear H
+  | H: _ |- _ => injection H; clear H
   | |- NoDup _ => constructor
   | H: forall a, _ -> _ |- _ => pose proof (H _ eq_refl); clear H
   | H: forall a b, _ -> _ |- _ => pose proof (H _ _ eq_refl); clear H
