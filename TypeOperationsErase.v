@@ -17,8 +17,8 @@ Require Import SystemFR.ListUtils.
 Require Import SystemFR.TypeErasure.
 
 Lemma ite_type_erase:
-  forall b T1 T2 T, T_ite b T1 T2 T ->
-    T_ite (erase_term b) (erase_type T1) (erase_type T2) (erase_type T).
+  forall b T1 T2 T, T_ite_push b T1 T2 T ->
+    T_ite_push (erase_term b) (erase_type T1) (erase_type T2) (erase_type T).
 Proof.
   induction 1; repeat step || constructor;
     eauto with bfv.

@@ -140,65 +140,65 @@ Ltac find_exists_open :=
 
 Ltac t_apply_ih :=
   match goal with
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T1
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T1
     |- reducible_values ?theta ?v ?T =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size T1, index T1) _ b T1 T2 T); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T
+     unshelve eapply (IH (typeNodes T1, index T1) _ b T1 T2 T); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T
     |- reducible_values ?theta ?v ?T1 =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size T1, index T1) _ b T1 T2 T); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T1 ?a)
+     unshelve eapply (IH (typeNodes T1, index T1) _ b T1 T2 T); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T1 ?a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T ?a)
+     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T ?a)
     |- reducible_values ?theta ?v (open 0 ?T1 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T1 a)
+     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T1 a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T a)
+     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T a)
     |- reducible_values ?theta ?v (open 0 ?T1 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   end.
 
 Ltac t_apply_ih_topen :=
   lazymatch goal with
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T1 ?X)
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T1 ?X)
     |- reducible_values ?theta ?v (topen 0 ?T ?X) =>
-     unshelve eapply (IH (size (topen 0 T1 X), index (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T ?X)
+     unshelve eapply (IH (typeNodes (topen 0 T1 X), index (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T ?X)
     |- reducible_values ?theta ?v (topen 0 ?T1 ?X) =>
-     unshelve eapply (IH (size (topen 0 T1 X), index (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+     unshelve eapply (IH (typeNodes (topen 0 T1 X), index (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
   end.
 
 Ltac t_apply_ih_rec :=
   lazymatch goal with
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T0' ?T0'' ?T0, H2: T_ite ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts)
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts)
     |- reducible_values ?theta ?v (T_rec ?n ?T0' ?Ts') =>
-     unshelve eapply (IH (size (T_rec n T0' Ts'), index (T_rec n T0' Ts')) _ b
+     unshelve eapply (IH (typeNodes (T_rec n T0' Ts'), index (T_rec n T0' Ts')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T0' ?T0'' ?T0, H2: T_ite ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0' ?Ts')
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0' ?Ts')
     |- reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts) =>
      apply reducible_values_rec_equivalent with (ite b n n); eauto with b_equiv; steps; eauto with berased;
-     unshelve eapply (IH (size (T_rec n T0' Ts'), index (T_rec n T0' Ts')) _ b
+     unshelve eapply (IH (typeNodes (T_rec n T0' Ts'), index (T_rec n T0' Ts')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
   end.
 
 Lemma reducible_values_T_ite_true_aux:
   forall measure b T1 T2 T theta v,
-    (size T1, index T1) = measure ->
-    T_ite b T1 T2 T ->
+    (typeNodes T1, index T1) = measure ->
+    T_ite_push b T1 T2 T ->
     wf b 0 ->
     wf T1 0 ->
     wf T2 0 ->
@@ -219,10 +219,10 @@ Proof.
            | |- reduces_to _ _ => apply_any
            | H: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?B a)
                |- reducible_values ?theta ?v (open 0 ?B ?a) => apply H
-           | H1: T_ite _ ?A1 _ ?A, H2: reducible_values _ ?v ?A |- reducible_values _ ?v ?A1 \/ _ => left
-           | H1: T_ite _ ?A1 _ ?A, H2: reducible_values _ ?v ?A1 |- reducible_values _ ?v ?A \/ _ => left
-           | H1: T_ite _ ?A1 _ ?A, H2: reducible_values _ ?v ?A |- _ \/ reducible_values _ ?v ?A1 => right
-           | H1: T_ite _ ?A1 _ ?A, H2: reducible_values _ ?v ?A1 |- _ \/ reducible_values _ ?v ?a => right
+           | H1: T_ite_push _ ?A1 _ ?A, H2: reducible_values _ ?v ?A |- reducible_values _ ?v ?A1 \/ _ => left
+           | H1: T_ite_push _ ?A1 _ ?A, H2: reducible_values _ ?v ?A1 |- reducible_values _ ?v ?A \/ _ => left
+           | H1: T_ite_push _ ?A1 _ ?A, H2: reducible_values _ ?v ?A |- _ \/ reducible_values _ ?v ?A1 => right
+           | H1: T_ite_push _ ?A1 _ ?A, H2: reducible_values _ ?v ?A1 |- _ \/ reducible_values _ ?v ?a => right
            | _ => step || t_apply_ih || t_dangerous_rec_choice || find_exists_open ||
                  simp_red || apply wf_open || apply fv_nils_open ||
                  t_invert_ite ||
@@ -336,7 +336,7 @@ Qed.
 
 Lemma reducible_values_T_ite_true:
   forall b T1 T2 T theta v,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     wf b 0 ->
     wf T1 0 ->
     wf T2 0 ->
@@ -355,65 +355,65 @@ Qed.
 
 Ltac t_apply_ih_false :=
   match goal with
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T2
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T2
     |- reducible_values ?theta ?v ?T =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size T2, index T2) _ b T1 T2 T); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T
+     unshelve eapply (IH (typeNodes T2, index T2) _ b T1 T2 T); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T
     |- reducible_values ?theta ?v ?T2 =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size T2, index T2) _ b T1 T2 T); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T2 ?a)
+     unshelve eapply (IH (typeNodes T2, index T2) _ b T1 T2 T); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T2 ?a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T ?a)
+     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T ?a)
     |- reducible_values ?theta ?v (open 0 ?T2 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T2 a)
+     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T2 a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T a)
+     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T a)
     |- reducible_values ?theta ?v (open 0 ?T2 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (size (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   end.
 
 Ltac t_apply_ih_topen_false :=
   lazymatch goal with
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T2 ?X)
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T2 ?X)
     |- reducible_values ?theta ?v (topen 0 ?T ?X) =>
-     unshelve eapply (IH (size (topen 0 T2 X), index (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T ?X)
+     unshelve eapply (IH (typeNodes (topen 0 T2 X), index (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T ?X)
     |- reducible_values ?theta ?v (topen 0 ?T2 ?X) =>
-     unshelve eapply (IH (size (topen 0 T2 X), index (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+     unshelve eapply (IH (typeNodes (topen 0 T2 X), index (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
   end.
 
 Ltac t_apply_ih_rec_false :=
   lazymatch goal with
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T0' ?T0'' ?T0, H2: T_ite ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts)
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts)
     |- reducible_values ?theta ?v (T_rec ?n ?T0'' ?Ts'') =>
-     unshelve eapply (IH (size (T_rec n T0'' Ts''), index (T_rec n T0'' Ts'')) _ b
+     unshelve eapply (IH (typeNodes (T_rec n T0'' Ts''), index (T_rec n T0'' Ts'')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
-  | IH: forall _ _ _ _ _ _, _, H1: T_ite ?b ?T0' ?T0'' ?T0, H2: T_ite ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0'' ?Ts'')
+  | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0'' ?Ts'')
     |- reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts) =>
      apply reducible_values_rec_equivalent with (ite b n n); eauto with b_equiv; steps; eauto with berased;
-     unshelve eapply (IH (size (T_rec n T0'' Ts''), index (T_rec n T0'' Ts'')) _ b
+     unshelve eapply (IH (typeNodes (T_rec n T0'' Ts''), index (T_rec n T0'' Ts'')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
   end.
 
 Lemma reducible_values_T_ite_false_aux:
   forall measure b T1 T2 T theta v,
-    (size T2, index T2) = measure ->
-    T_ite b T1 T2 T ->
+    (typeNodes T2, index T2) = measure ->
+    T_ite_push b T1 T2 T ->
     wf b 0 ->
     wf T1 0 ->
     wf T2 0 ->
@@ -434,10 +434,10 @@ Proof.
            | |- reduces_to _ _ => apply_any
            | H: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?B a)
                |- reducible_values ?theta ?v (open 0 ?B ?a) => apply H
-           | H1: T_ite _ _ ?A2 ?A, H2: reducible_values _ ?v ?A |- reducible_values _ ?v ?A2 \/ _ => left
-           | H1: T_ite _ _ ?A2 ?A, H2: reducible_values _ ?v ?A2 |- reducible_values _ ?v ?A \/ _ => left
-           | H1: T_ite _ _ ?A2 ?A, H2: reducible_values _ ?v ?A |- _ \/ reducible_values _ ?v ?A2 => right
-           | H1: T_ite _ _ ?A2 ?A, H2: reducible_values _ ?v ?A2 |- _ \/ reducible_values _ ?v ?a => right
+           | H1: T_ite_push _ _ ?A2 ?A, H2: reducible_values _ ?v ?A |- reducible_values _ ?v ?A2 \/ _ => left
+           | H1: T_ite_push _ _ ?A2 ?A, H2: reducible_values _ ?v ?A2 |- reducible_values _ ?v ?A \/ _ => left
+           | H1: T_ite_push _ _ ?A2 ?A, H2: reducible_values _ ?v ?A |- _ \/ reducible_values _ ?v ?A2 => right
+           | H1: T_ite_push _ _ ?A2 ?A, H2: reducible_values _ ?v ?A2 |- _ \/ reducible_values _ ?v ?a => right
            | _ => step || t_apply_ih_false || t_dangerous_rec_choice || find_exists_open ||
                  simp_red || apply wf_open || apply fv_nils_open ||
                  t_invert_ite ||
@@ -551,7 +551,7 @@ Qed.
 
 Lemma reducible_values_T_ite_false:
   forall b T1 T2 T theta v,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     wf b 0 ->
     wf T1 0 ->
     wf T2 0 ->
@@ -568,7 +568,7 @@ Proof.
   eauto using reducible_values_T_ite_false_aux.
 Qed.
 
-Lemma reducible_T_ite:
+Lemma reducible_T_ite_push:
   forall theta T1 T2 T b t1 t2,
     wf t1 0 ->
     wf t2 0 ->
@@ -584,7 +584,7 @@ Lemma reducible_T_ite:
     is_erased_type T2 ->
     valid_interpretation theta ->
     reducible theta b T_bool ->
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     (equivalent b ttrue -> reducible theta t1 T1) ->
     (equivalent b tfalse -> reducible theta t2 T2) ->
     reducible theta (ite b t1 t2) T.
@@ -615,7 +615,7 @@ Proof.
     eapply reducible_values_T_ite_false; eauto; steps.
 Qed.
 
-Lemma open_reducible_T_ite:
+Lemma open_reducible_T_ite_push:
   forall tvars gamma T T1 T2 b t1 t2 x,
     wf t1 0 ->
     wf t2 0 ->
@@ -639,16 +639,15 @@ Lemma open_reducible_T_ite:
     is_erased_term b ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     open_reducible tvars gamma b T_bool ->
     open_reducible tvars ((x, T_equal b ttrue) :: gamma) t1 T1 ->
     open_reducible tvars ((x, T_equal b tfalse) :: gamma) t2 T2 ->
     open_reducible tvars gamma (ite b t1 t2) T.
 Proof.
-  intros; unfold open_reducible; steps.
+  unfold open_reducible; steps.
 
-  unfold open_reducible in *.
-  apply reducible_T_ite with (substitute T1 lterms) (substitute T2 lterms);
+  apply reducible_T_ite_push with (substitute T1 lterms) (substitute T2 lterms);
     repeat step || t_termlist || apply ite_type_subst;
     eauto with bwf;
     eauto using subset_same with bfv;

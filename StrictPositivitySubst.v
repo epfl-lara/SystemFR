@@ -23,7 +23,7 @@ Opaque strictly_positive.
 
 Lemma strictly_positive_subst_aux:
   forall n T lterms vars,
-    size T < n ->
+    typeNodes T < n ->
     pclosed_mapping lterms type_var ->
     twfs lterms 0 ->
     is_erased_type T ->

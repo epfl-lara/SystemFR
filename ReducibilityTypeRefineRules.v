@@ -2,6 +2,7 @@ Require Import Equations.Equations.
 
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
+Require Import Coq.Strings.String.
 
 Require Import SystemFR.Syntax.
 Require Import SystemFR.Tactics.
@@ -39,19 +40,28 @@ Require Import SystemFR.RedTactics.
 Opaque reducible_values.
 Opaque makeFresh.
 
+Lemma reducible_type_refine:
+  forall theta t1 t2 A B,
+    valid_interpretation theta ->
+    reducible theta t1 A ->
+    reducible theta t2 (T_let t1 B) ->
+    reducible theta t1 (T_type_refine A B).
+Proof.
+  unfold reducible, reduces_to in *; repeat step;
+    eauto with bwf; eauto with bfv.
+
+  eexists; steps; eauto.
+  repeat step || simp_red || t_deterministic_star; t_closer.
+Qed.
+
 Lemma open_reducible_type_refine:
   forall tvars gamma t1 t2 A B,
     open_reducible tvars gamma t1 A ->
     open_reducible tvars gamma t2 (T_let t1 B) ->
     open_reducible tvars gamma t1 (T_type_refine A B).
 Proof.
-  unfold open_reducible; repeat step || t_instantiate_sat3.
-
-  unfold reducible, reduces_to in *; repeat step;
-    eauto with bwf; eauto with bfv.
-
-  eexists; steps; eauto.
-  repeat step || simp_red || t_deterministic_star; t_closer.
+  unfold open_reducible; repeat step || t_instantiate_sat3;
+    eauto using reducible_type_refine.
 Qed.
 
 Lemma open_reducible_get_refinement_witness:

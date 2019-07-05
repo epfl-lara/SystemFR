@@ -17,6 +17,7 @@ Require Import SystemFR.StarLemmas.
 Require Import SystemFR.StarInversions.
 Require Import SystemFR.SmallStepSubstitutions.
 Require Import SystemFR.SetLemmas.
+Require Import SystemFR.StarRelation.
 
 Require Import SystemFR.Equivalence.
 Require Import SystemFR.EquivalenceLemmas.
@@ -39,6 +40,27 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_refine:
+  forall theta t A b,
+    reducible theta t A ->
+    wf b 1 ->
+    wf t 0 ->
+    valid_interpretation theta ->
+    is_erased_term b ->
+    (forall v,
+        reducible_values theta v A ->
+        equivalent t v ->
+        equivalent (open 0 b v) ttrue) ->
+    reducible theta t (T_refine A b).
+Proof.
+  unfold reducible, reduces_to in *; repeat step;
+    eauto with bwf; eauto with bfv.
+
+  eexists; steps; eauto.
+  repeat step || simp_red; t_closer;
+    eauto using equivalent_true with b_equiv.
+Qed.
+
+Lemma open_reducible_refine:
   forall tvars gamma t A b x p,
     open_reducible tvars gamma t A ->
     wf b 1 ->
@@ -62,13 +84,9 @@ Lemma reducible_refine:
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
 
-  unfold reducible, reduces_to in *; repeat step;
-    eauto with bwf; eauto with bfv.
+  apply reducible_refine; steps; t_closer.
 
-  eexists; steps; eauto.
-  repeat step || simp_red; t_closer.
-
-  unshelve epose proof (H12 theta ((p, uu) :: (x,t') :: lterms) _ _ _); tac1;
+  unshelve epose proof (H12 theta ((p, uu) :: (x,v) :: lterms) _ _ _); tac1;
     eauto 3 using equivalent_sym with b_equiv;
     eauto using equivalent_true.
 Qed.

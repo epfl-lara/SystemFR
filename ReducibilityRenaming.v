@@ -50,7 +50,7 @@ Ltac t_bewr_constructor :=
 (* The property that we wnat to prove for a type T and a measure m *)
 Definition renamable_prop m T: Prop :=
   forall (T' t : tree) (theta theta' : interpretation) (rel : map nat nat),
-    (size T, index T) = m ->
+    (typeNodes T, index T) = m ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
@@ -67,7 +67,7 @@ Lemma reducible_rename_induct:
     reducible_values theta v A ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
-    size A < n1 ->
+    typeNodes A < n1 ->
     reducible_values theta' v A'.
 Proof.
   unfold renamable_prop_IH; intros.
@@ -76,7 +76,7 @@ Proof.
     H1: reducible_values ?theta ?t ?T,
     H2: equal_with_relation ?rel ?T ?T' |-
       reducible_values ?theta' ?t ?T' =>
-        unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
   end.
   repeat step || apply left_lex.
 Qed.
@@ -89,7 +89,7 @@ Lemma reducible_rename_induct_back:
     reducible_values theta' v A' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
-    size A < n1 ->
+    typeNodes A < n1 ->
     reducible_values theta v A.
 Proof.
   unfold renamable_prop_IH; intros.
@@ -98,7 +98,7 @@ Proof.
     H1: reducible_values ?theta' ?t ?T',
     H2: equal_with_relation ?rel ?T ?T' |-
       reducible_values ?theta ?t ?T =>
-        unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
   end.
   repeat step || apply left_lex.
 Qed.
@@ -109,12 +109,12 @@ Ltac t_apply_ih :=
     H1: reducible_values ?theta' ?t ?T',
     H2: equivalent_with_relation ?rel ?theta ?theta' _ |-
       reducible_values ?theta ?t ?T =>
-        unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
   | IH: forall m, _ << _ -> _ ,
     H1: reducible_values ?theta ?t ?T,
     H2: equivalent_with_relation ?rel ?theta ?theta' _ |-
       reducible_values ?theta' ?t ?T' =>
-        unshelve eapply (IH (size T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
   end.
 
 Lemma reducible_rename_induct_open:
@@ -126,7 +126,7 @@ Lemma reducible_rename_induct_open:
     valid_interpretation theta ->
     valid_interpretation theta' ->
     is_erased_term a ->
-    size (open 0 B a) < n1 ->
+    typeNodes (open 0 B a) < n1 ->
     reducible_values theta' v (open 0 B' a).
 Proof.
   unfold renamable_prop_IH; intros.
@@ -142,7 +142,7 @@ Lemma reducible_rename_induct_open_back:
     valid_interpretation theta ->
     valid_interpretation theta' ->
     is_erased_term a ->
-    size (open 0 B a) < n1 ->
+    typeNodes (open 0 B a) < n1 ->
     reducible_values theta v (open 0 B a).
 Proof.
   unfold renamable_prop_IH; intros.
@@ -172,7 +172,7 @@ Ltac t_prove_reduces_to :=
 Lemma reducible_rename_reduces_to:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (S (size T1 + size T2), notype_err) ->
+    renamable_prop_IH (S (typeNodes T1 + typeNodes T2), notype_err) ->
     reducible_values theta' a A' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
@@ -191,7 +191,7 @@ Qed.
 Lemma reducible_rename_reduces_to_back:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (S (size T1 + size T2), notype_err) ->
+    renamable_prop_IH (S (typeNodes T1 + typeNodes T2), notype_err) ->
     reducible_values theta a T1 ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
@@ -347,7 +347,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (size T, index T) _ T T' t
+            (IH (typeNodes T, index T) _ T T' t
                  ((X,RC) :: theta)
                  ((M,RC) :: theta')
                  ((X,M) :: rel)
@@ -371,7 +371,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (size T, index T) _ T T' t
+            (IH (typeNodes T, index T) _ T T' t
                  ((X,RC) :: theta)
                  ((M,RC) :: theta')
                  ((X,M) :: (swap rel))
@@ -416,7 +416,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC2) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (size T, index T) _ T T' t
+            (IH (typeNodes T, index T) _ T T' t
                  ((X,RC1) :: theta)
                  ((M,RC2) :: theta')
                  ((X,M) :: rel)
@@ -446,7 +446,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC2) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (size T, index T) _ T T' t
+            (IH (typeNodes T, index T) _ T T' t
                  ((X,RC1) :: theta)
                  ((M,RC2) :: theta')
                  ((X,M) :: (swap rel))

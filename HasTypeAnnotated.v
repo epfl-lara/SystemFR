@@ -41,9 +41,9 @@ Lemma annotations:
 .
 Proof.
   apply mut_HT_IT_IC_IS_AE;
-    repeat step || t_annotated_open || rewrite annotated_types_append in * ||
+    try solve [ repeat step || t_annotated_open || rewrite annotated_types_append in * ||
       unshelve eauto with bannot ||
-      unshelve eauto 3 with bannot step_tactic.
+      unshelve eauto 3 with bannot step_tactic ].
 Qed.
 
 Ltac t_annotations :=

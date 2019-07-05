@@ -26,7 +26,7 @@ Require Import SystemFR.TypeErasureLemmas.
 Require Import SystemFR.SubstitutionErase.
 Require Import SystemFR.TreeLists.
 Require Import SystemFR.TermListReducible.
-Require Import SystemFR.NatUtils.
+Require Import SystemFR.SomeTerms.
 
 Require Import SystemFR.Sets.
 Require Import SystemFR.SetLemmas.
@@ -68,6 +68,7 @@ Require Import SystemFR.ReducibilityRecGenRules.
 Require Import SystemFR.ReducibilityIteTypeRules.
 Require Import SystemFR.ReducibilityRecPos.
 Require Import SystemFR.ReducibilityRecognizers.
+Require Import SystemFR.ReducibilitySugar.
 
 Require Import SystemFR.StrictPositivity.
 Require Import SystemFR.StrictPositivityLemmas.
@@ -143,7 +144,7 @@ Ltac choose_variables :=
   match goal with
   | H: NoDup (?n :: ?y :: ?p :: nil) |- _ => apply open_reducible_rec with n y p
   | H: ?n = ?p -> False |- _ => apply open_reducible_match with n p
-  | H: ?x = ?p -> False |- _ => apply reducible_refine with x p
+  | H: ?x = ?p -> False |- _ => apply open_reducible_refine with x p
   | H2: has_type _ _ ?t ?A, H: ?x = ?p -> False |- _ =>
       is_var t;
       apply open_reducible_let with (erase_type A) x p
@@ -237,7 +238,8 @@ Proof.
   - apply open_reducible_ttrue.
   - apply open_reducible_tfalse.
   - apply open_reducible_ite with x; side_conditions.
-  - apply open_reducible_T_ite with (erase_type T1) (erase_type T2) x; side_conditions; eauto 2 using ite_type_erase.
+  - apply open_reducible_T_ite_push with (erase_type T1) (erase_type T2) x; side_conditions; eauto 2 using ite_type_erase.
+  - apply open_reducible_T_ite with x; side_conditions; eauto 2 using ite_type_erase.
   - apply open_reducible_is_pair; side_conditions.
   - apply open_reducible_is_succ; side_conditions.
   - apply open_reducible_is_lambda; side_conditions.

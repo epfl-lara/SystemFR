@@ -82,7 +82,7 @@ Qed.
 
 Lemma strictly_positive_open_aux:
   forall n T vars rep k,
-    size T < n ->
+    typeNodes T < n ->
     is_erased_type T ->
     is_erased_term rep ->
     strictly_positive T vars ->
@@ -164,7 +164,7 @@ Hint Extern 50 => solve [ t_red_is_val ]: b_red_is_val.
 
 Lemma strictly_positive_rename_aux:
   forall n T T' vars vars' rel,
-    size T < n ->
+    typeNodes T < n ->
     strictly_positive T vars ->
     equal_with_relation rel T T' ->
     similar_sets rel vars vars' ->
@@ -217,7 +217,7 @@ Qed.
 
 Lemma strictly_positive_swap_aux:
   forall n T vars i j,
-    size T < n ->
+    typeNodes T < n ->
     strictly_positive T vars ->
     strictly_positive (swap_type_holes T i j) vars.
 Proof.
@@ -239,7 +239,7 @@ Qed.
 
 Lemma strictly_positive_topen_aux:
   forall n T vars k X,
-    size T < n ->
+    typeNodes T < n ->
     strictly_positive T vars ->
     ~(X ∈ vars) ->
     strictly_positive (topen k T (fvar X type_var)) vars.
@@ -353,7 +353,7 @@ Ltac t_forall_implies_equiv :=
 
 Lemma strictly_positive_append_aux:
   forall n T vars1 vars2,
-    size T < n ->
+    typeNodes T < n ->
     strictly_positive T vars1 ->
     strictly_positive T vars2 ->
     strictly_positive T (vars1 ++ vars2).

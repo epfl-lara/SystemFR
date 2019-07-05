@@ -67,17 +67,17 @@ Ltac t_apply_ih_sub :=
      H1: reducible_values ?theta ?t (T_rec ?n (psubstitute ?T0 _ type_var) (psubstitute ?Ts _ type_var)) |-
      reducible_values ?theta ?t (T_rec ?n ?T0 ?Ts)  =>
        poseNew (Mark 0 "IHOncee");
-       unshelve eapply (IHn (size (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P); eauto
+       unshelve eapply (IHn (typeNodes (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P); eauto
   | IHn: forall m, _ -> forall theta U V X v P, _,
      H1: reducible_values ?theta ?t (T_rec ?n ?T0 ?Ts) |-
      reducible_values ?theta ?t (T_rec ?n (psubstitute ?T0 _ type_var) (psubstitute ?Ts _ type_var))  =>
        poseNew (Mark 0 "IHOnce");
-       unshelve eapply (IHn (size (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P) in H1; eauto
+       unshelve eapply (IHn (typeNodes (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P) in H1; eauto
   end.
 
 Lemma reducibility_subst_aux:
   forall measure (theta: interpretation) U V X v P,
-    (size U, index U) = measure ->
+    (typeNodes U, index U) = measure ->
     twf V 0 ->
     wf V 0 ->
     is_erased_type U ->
@@ -122,11 +122,11 @@ Proof.
            | IHn: forall m, _ -> forall theta U V X v P, _,
              H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
                reducible_values ?theta ?t ?T =>
-                 unshelve eapply (IHn (size T, index T) _ theta T V X t P); eauto
+                 unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P); eauto
            | IHn: forall m, _ -> forall theta U V X v P, _,
              H1: reducible_values ?theta ?t ?T |-
                reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
-                 unshelve eapply (IHn (size T, index T) _ theta T V X t P); eauto
+                 unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P); eauto
            | |- exists c d _, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
            | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
 (*           | H: is_erased_term ?a |- _ => unshelve exists a (* !!! *) *)
@@ -149,7 +149,7 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t ?T |-
           reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
-            unshelve eapply (IHn (size T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
@@ -179,7 +179,7 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
           reducible_values ?theta ?t ?T =>
-            unshelve eapply (IHn (size T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
@@ -220,7 +220,7 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t ?T |-
           reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
-            unshelve eapply (IHn (size T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
@@ -269,7 +269,7 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
           reducible_values ?theta ?t ?T =>
-            unshelve eapply (IHn (size T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||

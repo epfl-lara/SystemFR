@@ -11,12 +11,13 @@ Require Import SystemFR.TypeErasure.
 Require Import SystemFR.StrictPositivity.
 
 Require Import SystemFR.Polarity.
-Require Import SystemFR.NatUtils.
+Require Import SystemFR.SomeTerms.
 Require Import SystemFR.NatCompare.
 Require Import SystemFR.LVarOperations.
 Require Import SystemFR.NatCompareErase.
 Require Import SystemFR.BaseType.
 Require Import SystemFR.TypeOperations.
+Require Import SystemFR.TypeSugar.
 
 Open Scope list_scope.
 
@@ -147,7 +148,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars ((x, T_equal b tfalse) :: gamma) t2 T ->
       has_type tvars gamma (ite b t1 t2) T
 
-| HTIte2:
+| HTIte1:
     forall tvars gamma b t1 t2 T1 T2 T x,
       ~(x ∈ fv_context gamma) ->
       ~(x ∈ fv b) ->
@@ -159,8 +160,22 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma b T_bool ->
       has_type tvars ((x, T_equal b ttrue) :: gamma) t1 T1 ->
       has_type tvars ((x, T_equal b tfalse) :: gamma) t2 T2 ->
-      T_ite b T1 T2 T ->
+      T_ite_push b T1 T2 T ->
       has_type tvars gamma (ite b t1 t2) T
+
+| HTIte2:
+    forall tvars gamma b t1 t2 T1 T2 x,
+      ~(x ∈ fv_context gamma) ->
+      ~(x ∈ fv b) ->
+      ~(x ∈ fv t1) ->
+      ~(x ∈ fv t2) ->
+      ~(x ∈ fv T1) ->
+      ~(x ∈ fv T2) ->
+      ~(x ∈ tvars) ->
+      has_type tvars gamma b T_bool ->
+      has_type tvars ((x, T_equal b ttrue) :: gamma) t1 T1 ->
+      has_type tvars ((x, T_equal b tfalse) :: gamma) t2 T2 ->
+      has_type tvars gamma (ite b t1 t2) (T_ite b T1 T2)
 
 | HTIsPair:
     forall tvars gamma t,
@@ -836,6 +851,7 @@ with is_subtype: tvar_list -> context -> tree -> tree -> Prop :=
       is_subtype tvars gamma T1 T2 ->
       is_subtype tvars gamma T2 T3 ->
       is_subtype tvars gamma T1 T3
+
 | ISArrow:
     forall tvars gamma A1 A2 B1 B2 x,
       ~(x ∈ support gamma) ->

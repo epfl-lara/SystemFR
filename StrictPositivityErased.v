@@ -23,7 +23,7 @@ Opaque strictly_positive.
 
 Lemma strictly_positive_erased_aux:
   forall n T vars,
-    size T < n ->
+    typeNodes T < n ->
     is_annotated_type T ->
     strictly_positive T vars ->
     strictly_positive (erase_type T) vars.

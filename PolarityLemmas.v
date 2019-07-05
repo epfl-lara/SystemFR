@@ -54,7 +54,7 @@ Opaque reducible_values.
 
 Lemma polarity_open_aux:
   forall m T pols k rep,
-    size T < m ->
+    typeNodes T < m ->
     has_polarities T pols ->
     is_erased_term rep ->
     has_polarities (open k T rep) pols.
@@ -113,7 +113,7 @@ Definition hp_rename_prop T :=
     equal_with_relation rel T T' ->
     has_polarities T' pols'.
 
-Definition hp_rename_prop_aux n T := size T = n -> hp_rename_prop T.
+Definition hp_rename_prop_aux n T := typeNodes T = n -> hp_rename_prop T.
 
 Definition hp_rename_until n :=
   forall n', n' < n -> forall T, hp_rename_prop_aux n' T.
@@ -148,7 +148,7 @@ Lemma hp_rename_induct_invert:
     equivalent_pairs_with_relation rel pols pols' eq ->
     has_polarities T1 (invert_polarities pols) ->
     equal_with_relation rel T1 T2 ->
-    size T1 < n ->
+    typeNodes T1 < n ->
     has_polarities T2 (invert_polarities pols').
 Proof.
   repeat autounfold with u_hprename; intros.
@@ -162,7 +162,7 @@ Lemma hp_rename_induct:
     equivalent_pairs_with_relation rel pols pols' eq ->
     has_polarities T1 pols ->
     equal_with_relation rel T1 T2 ->
-    size T1 < n ->
+    typeNodes T1 < n ->
     has_polarities T2 pols'.
 Proof.
   repeat autounfold with u_hprename; intros.
@@ -262,7 +262,7 @@ Qed.
 
 Lemma has_polarities_swap_aux:
   forall n T pols i j,
-    size T < n ->
+    typeNodes T < n ->
     has_polarities T pols ->
     has_polarities (swap_type_holes T i j) pols.
 Proof.
@@ -284,7 +284,7 @@ Qed.
 
 Lemma has_polarities_topen_aux:
   forall n T pols X k,
-    size T < n ->
+    typeNodes T < n ->
     has_polarities T pols ->
     ~(X ∈ support pols) ->
     has_polarities (topen k T (fvar X type_var)) pols.

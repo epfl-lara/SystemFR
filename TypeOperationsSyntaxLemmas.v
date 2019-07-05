@@ -16,7 +16,7 @@ Require Import SystemFR.ListUtils.
 
 Lemma is_annotated_type_ite:
   forall b T1 T2 T,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     is_annotated_term b ->
     is_annotated_type T1 ->
     is_annotated_type T2 ->
@@ -27,14 +27,14 @@ Qed.
 
 Ltac t_is_annotated_type_ite :=
   match goal with
-  | H: T_ite ?b ?T1 ?T2 ?T |- is_annotated_type ?T => apply is_annotated_type_ite with b T1 T2
+  | H: T_ite_push ?b ?T1 ?T2 ?T |- is_annotated_type ?T => apply is_annotated_type_ite with b T1 T2
   end.
 
 Hint Extern 50 => t_is_annotated_type_ite: bannot.
 
 Lemma wf_ite:
   forall b T1 T2 T,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     forall k,
       wf b k ->
       wf T1 k ->
@@ -46,14 +46,14 @@ Qed.
 
 Ltac t_wf_ite :=
   match goal with
-  | H: T_ite ?b ?T1 ?T2 ?T |- wf ?T _ => apply wf_ite with b T1 T2
+  | H: T_ite_push ?b ?T1 ?T2 ?T |- wf ?T _ => apply wf_ite with b T1 T2
   end.
 
 Hint Extern 50 => t_wf_ite: bwf.
 
 Lemma twf_ite:
   forall b T1 T2 T,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     forall k,
       twf b k ->
       twf T1 k ->
@@ -65,14 +65,14 @@ Qed.
 
 Ltac t_twf_ite :=
   match goal with
-  | H: T_ite ?b ?T1 ?T2 ?T |- twf ?T _ => apply twf_ite with b T1 T2
+  | H: T_ite_push ?b ?T1 ?T2 ?T |- twf ?T _ => apply twf_ite with b T1 T2
   end.
 
 Hint Extern 50 => t_twf_ite: btwf.
 
 Lemma pfv_ite:
   forall b T1 T2 T,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     forall x tag,
       x ∈ pfv T tag ->
       (x ∈ pfv b tag \/ x ∈ pfv T1 tag \/ x ∈ pfv T2 tag).
@@ -86,7 +86,7 @@ Qed.
 
 Ltac t_pfv_ite :=
   match goal with
-  | H1: T_ite ?b ?T1 ?T2 ?T, H2: ?x ∈ pfv ?T ?tag |- _ =>
+  | H1: T_ite_push ?b ?T1 ?T2 ?T, H2: ?x ∈ pfv ?T ?tag |- _ =>
     poseNew (Mark H2 "pfv_ite");
     pose proof (pfv_ite _ _ _ _ H1 _ _ H2)
   end.
@@ -95,7 +95,7 @@ Hint Extern 50 => t_pfv_ite: bfv.
 
 Lemma pfv_ite2:
   forall b T1 T2 T S tag,
-    T_ite b T1 T2 T ->
+    T_ite_push b T1 T2 T ->
     subset (pfv b tag) S ->
     subset (pfv T1 tag) S ->
     subset (pfv T2 tag) S ->
@@ -106,7 +106,7 @@ Qed.
 
 Ltac t_pfv_ite2 :=
   match goal with
-  | H: T_ite ?b ?T1 ?T2 ?T |- subset (pfv ?T _) _ => apply pfv_ite2 with b T1 T2
+  | H: T_ite_push ?b ?T1 ?T2 ?T |- subset (pfv ?T _) _ => apply pfv_ite2 with b T1 T2
   end.
 
 Hint Extern 50 => t_pfv_ite2: bfv.

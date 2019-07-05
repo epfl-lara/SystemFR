@@ -37,7 +37,7 @@ Qed.
 
 Lemma base_type_approx_aux:
   forall n X Ts T theta l v RC,
-    size T < n ->
+    typeNodes T < n ->
     wfs l 0 ->
     pclosed_mapping l type_var ->
     base_type X Ts T ->

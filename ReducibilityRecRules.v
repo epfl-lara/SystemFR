@@ -23,7 +23,7 @@ Require Import SystemFR.StarInversions.
 Require Import SystemFR.EquivalentWithRelation.
 Require Import SystemFR.TermProperties.
 Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.NatUtils.
+Require Import SystemFR.SomeTerms.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.TermListLemmas.
 

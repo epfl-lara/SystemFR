@@ -66,7 +66,7 @@ Qed.
 
 Lemma has_polarities_erase_aux:
   forall n T pols,
-    size T < n ->
+    typeNodes T < n ->
     is_annotated_type T ->
     has_polarities T pols ->
     has_polarities (erase_type T) pols.
@@ -90,7 +90,7 @@ Qed.
 
 Lemma has_polarities_subst_aux:
   forall n T pols l,
-    size T < n ->
+    typeNodes T < n ->
     has_polarities T pols ->
     pclosed_mapping l type_var ->
     twfs l 0 ->

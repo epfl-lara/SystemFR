@@ -378,7 +378,7 @@ Qed.
 Lemma equal_with_relation_size:
   forall t1 t2 rel,
     equal_with_relation rel t1 t2 ->
-    size t1 = size t2.
+    typeNodes t1 = typeNodes t2.
 Proof.
   induction 1; steps.
 Qed.

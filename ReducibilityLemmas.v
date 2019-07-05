@@ -201,7 +201,7 @@ Ltac t_values_info2 :=
 
 Lemma smallstep_reducible_aux:
   forall n theta t T,
-    size T < n ->
+    typeNodes T < n ->
     valid_interpretation theta ->
     reducible theta t T ->
     forall t',
@@ -250,7 +250,7 @@ Qed.
 
 Lemma backstep_reducible_aux:
   forall n theta t' T,
-    size T < n ->
+    typeNodes T < n ->
     valid_interpretation theta ->
     reducible theta t' T ->
     forall t,

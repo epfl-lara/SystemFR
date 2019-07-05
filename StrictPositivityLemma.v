@@ -84,7 +84,7 @@ Ltac apply_induction H :=
   match goal with
     H2: forall_implies (fun _ => reducible_values _ _ ?A) ?ptheta ?theta' |-
       reducible_values (?theta' ++ _) _ ?T =>
-      apply H with (size T, index T) ptheta A
+      apply H with (typeNodes T, index T) ptheta A
   end.
 
 Ltac find_exists3 :=
@@ -113,7 +113,7 @@ Definition sp_push_forall_prop T: Prop :=
     forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
     reducible_values (theta' ++ theta) v T.
 
-Definition sp_push_forall_prop_aux m T: Prop := (size T, index T) = m -> sp_push_forall_prop T.
+Definition sp_push_forall_prop_aux m T: Prop := (typeNodes T, index T) = m -> sp_push_forall_prop T.
 
 Definition sp_push_forall_until m: Prop := forall m', m' << m -> forall T', sp_push_forall_prop_aux m' T'.
 
@@ -412,7 +412,7 @@ Proof.
       | H1: non_empty ?theta ?A,
         H2: forall_implies _ ?ptheta ?theta' |-
           reducible_values (((?X, fun t => reducible_values (?theta' ++ ?theta) t ?R) :: ?theta') ++ ?theta) _ ?T =>
-          apply H with (size T, index T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
+          apply H with (typeNodes T, index T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
       end;
         repeat
           step || apply left_lex || autorewrite with bsize in * || t_deterministic_star ||

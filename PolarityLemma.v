@@ -114,7 +114,7 @@ Definition polarity_variance_prop T: Prop :=
     reducible_values theta1 v T ->
     reducible_values theta2 v T.
 
-Definition polarity_variance_prop_aux m T: Prop := (size T, index T) = m -> polarity_variance_prop T.
+Definition polarity_variance_prop_aux m T: Prop := (typeNodes T, index T) = m -> polarity_variance_prop T.
 
 Definition polarity_variance_until m: Prop := forall m', m' << m -> forall T', polarity_variance_prop_aux m' T'.
 
@@ -159,7 +159,7 @@ Lemma polarity_variance_induction:
     polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T pols ->
-    size T < n ->
+    typeNodes T < n ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
     reducible_values theta1 v T ->
@@ -174,7 +174,7 @@ Lemma polarity_variance_induction_invert:
     polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T (invert_polarities pols) ->
-    size T < n ->
+    typeNodes T < n ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
     reducible_values theta2 v T ->
@@ -190,7 +190,7 @@ Lemma polarity_variance_induction_open:
     polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T pols ->
-    size T < n ->
+    typeNodes T < n ->
     is_erased_term a ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->

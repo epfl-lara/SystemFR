@@ -9,7 +9,7 @@ Require Import SystemFR.NoTypeFVar.
 Require Import SystemFR.Tactics.
 
 Equations strictly_positive (T: tree) (vars: list nat): Prop
-    by wf (size T) lt :=
+    by wf (typeNodes T) lt :=
   strictly_positive (fvar _ type_var) _ := True;
   strictly_positive (lvar _ _) _ := True;
 

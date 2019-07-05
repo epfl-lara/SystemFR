@@ -39,7 +39,7 @@ Proof.
 Qed.
 
 Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
-    by wf (size T, index T) (lexprod _ _ lt lt_index) :=
+    by wf (typeNodes T, index T) (lexprod _ _ lt lt_index) :=
   reducible_values theta v (fvar X type_var) :=
     match lookup Nat.eq_dec theta X with
     | None => False
