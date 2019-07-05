@@ -100,8 +100,7 @@ Fixpoint pfv t tag: set nat :=
 Definition fv t := pfv t term_var.
 Definition tfv t := pfv t type_var.
 
-Hint Unfold fv.
-Hint Unfold tfv.
+Hint Unfold fv tfv: core.
 
 Definition tvar_list := list nat.
 
@@ -115,7 +114,7 @@ Fixpoint pfv_context gamma tag :=
 
 Definition fv_context gamma := pfv_context gamma term_var.
 
-Hint Unfold fv_context.
+Hint Unfold fv_context: core.
 
 Lemma fv_context_append:
   forall gamma1 gamma2 tag,
@@ -134,7 +133,7 @@ Fixpoint pfv_range (m: list (nat * tree)) tag :=
 
 Definition fv_range (m: list (nat * tree)) := pfv_range m term_var.
 
-Hint Unfold fv_range.
+Hint Unfold fv_range: core.
 
 Fixpoint pclosed_mapping (m: list (nat * tree)) tag: Prop :=
   match m with
@@ -144,7 +143,7 @@ Fixpoint pclosed_mapping (m: list (nat * tree)) tag: Prop :=
 
 Definition closed_mapping (m: list (nat * tree)): Prop := pclosed_mapping m term_var.
 
-Hint Unfold closed_mapping.
+Hint Unfold closed_mapping: core.
 
 Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   match t with
@@ -238,8 +237,8 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
 Definition substitute t l := psubstitute t l term_var.
 Definition substitute_type_vars t l := psubstitute t l type_var.
 
-Hint Unfold substitute.
-Hint Unfold substitute_type_vars.
+Hint Unfold substitute: core.
+Hint Unfold substitute_type_vars: core.
 
 Fixpoint psubstitute_context (gamma: context) (l: list (nat * tree)) tag: context :=
   match gamma with

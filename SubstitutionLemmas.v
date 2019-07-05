@@ -27,7 +27,7 @@ Proof.
                    apply_any
                   )
            | x: nat, H: _ |- _ => apply H with x
-           end; eauto with falsity.
+           end; eauto with falsity blookup.
 Qed.
 
 Lemma substitute_nothing2:

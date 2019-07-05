@@ -51,7 +51,7 @@ Proof.
     exists ((x0,y0) :: m'); steps.
 Qed.
 
-Hint Immediate lookupRestSuffix.
+Hint Immediate lookupRestSuffix: blookup.
 
 Lemma lookupRestLookup:
   forall X Y eq_dec (m: map X Y) x y suffix,
@@ -61,7 +61,7 @@ Proof.
   induction m; repeat step; eauto.
 Qed.
 
-Hint Immediate lookupRestLookup.
+Hint Immediate lookupRestLookup: blookup.
 
 Lemma lookupLookupRest:
   forall X Y eq_dec (m: map X Y) x y,
@@ -75,7 +75,7 @@ Qed.
 
 (* fresh s gamma holds if variable x does not appear in the context gamma *)
 Definition fresh { X Y } (m: map X Y) x := ~(x ∈ support m).
-Hint Unfold fresh.
+Hint Unfold fresh: core.
 
 Lemma lookupSupport:
   forall X Y eq_dec (m: map X Y) (x: X) (y: Y),
@@ -106,7 +106,7 @@ Proof.
   induction m; repeat step.
 Qed.
 
-Hint Immediate lookupNoneSupport.
+Hint Immediate lookupNoneSupport: blookup.
 
 Lemma lookupNoneSupport2:
   forall X Y eq_dec (m: map X Y) x,
@@ -117,7 +117,7 @@ Proof.
   induction m; repeat step; eauto.
 Qed.
 
-Hint Immediate lookupNoneSupport2.
+Hint Immediate lookupNoneSupport2: blookup.
 
 Lemma lookupSomeSupport:
   forall X Y eq_dec (m: map X Y) x A,
@@ -127,7 +127,7 @@ Proof.
   induction m; repeat step || unfold fv_context in * || set_solver; eauto.
 Qed.
 
-Hint Immediate lookupSomeSupport.
+Hint Immediate lookupSomeSupport: blookup.
 
 Lemma lookupRange:
   forall X Y eq_dec (m: map X Y) x y,

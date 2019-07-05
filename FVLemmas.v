@@ -212,7 +212,7 @@ Proof.
   induction t;
     repeat step || apply fv_subst2_lemma;
     eauto 2 with sets;
-    try solve [ unfold subset; repeat step || t_listutils; eauto with bfv ].
+    try solve [ unfold subset; repeat step || t_listutils; eauto with bfv blookup ].
 Qed.
 
 Hint Resolve fv_subst2: bfv.

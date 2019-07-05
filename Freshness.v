@@ -40,8 +40,7 @@ Proof.
   repeat step || t_list_smaller; omega.
 Qed.
 
-Hint Immediate freshMakeFresh freshMakeFresh2.
-
+Hint Immediate freshMakeFresh freshMakeFresh2: core.
 
 Fixpoint makeFresh (ll: list (list nat)): nat :=
   match ll with

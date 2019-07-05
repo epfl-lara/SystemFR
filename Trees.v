@@ -97,8 +97,8 @@ Definition typeability t T := T_intersection (T_singleton t) T.
 Definition term_fvar s := fvar s term_var.
 Definition type_fvar s := fvar s type_var.
 
-Hint Unfold term_fvar.
-Hint Unfold type_fvar.
+Hint Unfold term_fvar: core.
+Hint Unfold type_fvar: core.
 
 Fixpoint is_annotated_term t :=
   match t with
