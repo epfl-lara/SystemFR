@@ -39,7 +39,7 @@ Proof.
 Qed.
 
 Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
-    by wf (typeNodes T, index T) (lexprod _ _ lt lt_index) :=
+    by wf (get_measure T) lt_measure :=
   reducible_values theta v (fvar X type_var) :=
     match lookup Nat.eq_dec theta X with
     | None => False
@@ -63,12 +63,14 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
                    (notype_inst v);
 
   reducible_values theta v (T_arrow A B) :=
+    exists (_: is_erased_type B),
     closed_value v /\
     forall a (p: is_erased_term a),
       reducible_values theta a A ->
       reduces_to (fun t => reducible_values theta t (open 0 B a)) (app v a);
 
   reducible_values theta v (T_prod A B) :=
+    exists (_: is_erased_type B),
     closed_value v /\
     exists a b (_: is_erased_term a),
       v = pp a b /\
@@ -89,11 +91,13 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     star small_step (open 0 p v) ttrue;
 
   reducible_values theta v (T_type_refine T1 T2) :=
+    exists (_: is_erased_type T2),
     exists (_: closed_value v),
       reducible_values theta v T1 /\
       exists p, reducible_values theta p (open 0 T2 v);
 
   reducible_values theta v (T_let a B) :=
+    exists (_: is_erased_type B),
     closed_value v /\
     exists a' (_: is_erased_term a'),
       is_erased_term a /\
@@ -130,12 +134,14 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     equivalent t1 t2;
 
   reducible_values theta v (T_forall A B) :=
+    exists (_: is_erased_type B),
     closed_value v /\
     forall a (p: is_erased_term a),
       reducible_values theta a A ->
       reducible_values theta v (open 0 B a);
 
   reducible_values theta v (T_exists A B) :=
+    exists (_: is_erased_type B),
     closed_value v /\
     exists a (_: is_erased_term a),
       reducible_values theta a A /\
@@ -156,15 +162,26 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
       )
     );
 
+  reducible_values theta v (T_interpret T) :=
+    closed_value v /\
+    exists T' (_: count_interpret T' < 1 + count_interpret T),
+      star small_step T T' /\
+      irred T' /\
+      reducible_values theta v T';
+
   reducible_values theta v T := False
 .
 
+Hint Transparent lt_measure: core.
+
 Ltac t_reducibility_definition :=
-  repeat step || autorewrite with bsize || unfold closed_value, closed_term in *;
-    eauto using left_lex with omega;
-    eauto using right_lex, lt_index_step.
+  repeat step || autorewrite with bsize || unfold "<<", get_measure, closed_value, closed_term in *;
+    try solve [ apply right_lex, right_lex, lt_index_step; steps ];
+    try solve [ apply leq_lt_measure; omega ];
+    try solve [ apply left_lex; omega ].
 
 Solve Obligations with t_reducibility_definition.
+
 Fail Next Obligation.
 
 Definition reducible (theta: interpretation) t T: Prop :=
@@ -257,9 +274,9 @@ Ltac simp_red :=
   rewrite reducible_values_equation_57 in * ||
   rewrite reducible_values_equation_58 in * ||
   rewrite reducible_values_equation_59 in * ||
-  rewrite reducible_values_equation_59 in * ||
   rewrite reducible_values_equation_60 in * ||
-  rewrite reducible_values_equation_61 in *.
+  rewrite reducible_values_equation_61 in * ||
+  rewrite reducible_values_equation_62 in *.
 
 Ltac top_level_unfold :=
   match goal with

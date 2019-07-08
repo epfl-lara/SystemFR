@@ -70,6 +70,7 @@ Lemma strictly_positive_pull_forall:
     wf B 1 ->
     wf T 0 ->
     is_erased_type A ->
+    is_erased_type B ->
     is_erased_type T ->
     valid_interpretation theta ->
     strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
@@ -90,7 +91,8 @@ Proof.
     repeat step || t_listutils || apply twf_open || apply wf_open;
     try finisher;
       eauto with btwf;
-      eauto with bwf.
+      eauto with bwf;
+      eauto with berased.
 
   rewrite cons_app.
   lazymatch goal with

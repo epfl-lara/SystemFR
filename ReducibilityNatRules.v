@@ -22,6 +22,7 @@ Require Import SystemFR.StarRelation.
 Require Import SystemFR.StarInversions.
 Require Import SystemFR.SetLemmas.
 Require Import SystemFR.SubstitutionErase.
+Require Import SystemFR.TermListLemmas.
 
 Require Import SystemFR.Equivalence.
 Require Import SystemFR.EquivalenceLemmas.
@@ -202,6 +203,7 @@ Lemma reducible_rec_induction:
        is_erased_term ts ->
        valid_interpretation theta ->
        reducible theta t0 (open 0 T zero) ->
+       is_erased_type T ->
         (forall n tx,
            reducible_values theta n T_nat ->
            reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
@@ -226,7 +228,7 @@ Proof.
       eauto 2 with bwf;
       eauto with berased.
 
-    apply H7;
+    apply H8;
       repeat step || unfold normalizing in * || t_listutils;
       eauto 2 with bfv;
       eauto 4 with bwf;
@@ -253,13 +255,14 @@ Lemma reducible_rec:
     valid_interpretation theta ->
     reducible theta tn T_nat ->
     reducible theta t0 (open 0 T zero) ->
-     (forall tx n,
-        reducible_values theta n T_nat ->
-        reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
-        equivalent tx (notype_lambda (notype_rec n t0 ts)) ->
-        reducible theta
-          (open 0 (open 1 ts n) tx)
-          (open 0 T (succ n))) ->
+    is_erased_type T ->
+    (forall tx n,
+      reducible_values theta n T_nat ->
+      reducible_values theta tx (T_arrow T_unit (open 0 T n)) ->
+      equivalent tx (notype_lambda (notype_rec n t0 ts)) ->
+      reducible theta
+        (open 0 (open 1 ts n) tx)
+        (open 0 T (succ n))) ->
     reducible theta (notype_rec tn t0 ts) (T_let tn T).
 Proof.
   repeat step.
@@ -296,6 +299,7 @@ Lemma open_reducible_rec:
     ~(n ∈ fv_context gamma) ->
     is_erased_term ts ->
     NoDup (n :: y :: p :: nil) ->
+    is_erased_type T ->
     open_reducible tvars gamma tn T_nat ->
     open_reducible tvars gamma t0 (open 0 T zero) ->
     open_reducible tvars (
@@ -315,6 +319,6 @@ Proof.
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  unshelve epose proof (H21 theta ((p, uu) :: (y, tx) :: (n, n0) :: lterms) _ _ _);
+  unshelve epose proof (H22 theta ((p, uu) :: (y, tx) :: (n, n0) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 Qed.

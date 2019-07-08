@@ -40,6 +40,7 @@ Opaque makeFresh.
 Lemma reducible_val_let:
   forall theta A B a b,
     valid_interpretation theta ->
+    is_erased_type B ->
     reducible_values theta a A ->
     reducible_values theta b (open 0 B a) ->
     reducible_values theta b (T_let a B).
@@ -51,6 +52,7 @@ Qed.
 Lemma reducible_let:
   forall theta A B a b,
     valid_interpretation theta ->
+    is_erased_type B ->
     reducible_values theta a A ->
     reducible theta b (open 0 B a) ->
     reducible theta b (T_let a B).
@@ -194,6 +196,7 @@ Lemma reducible_subtype_let_open2:
   forall tvars theta (gamma : context) v A B,
     is_value v ->
     open_reducible tvars gamma v A ->
+    is_erased_type B ->
     valid_interpretation theta ->
     support theta = tvars ->
     forall t l,
@@ -205,5 +208,5 @@ Proof.
   unfold open_reducible in *; rewrite substitute_open in *; steps; eauto with bwf.
   eapply reducible_val_let;
     eauto using is_value_subst, reducible_values_list, reducible_expr_value;
-    eauto 2 with btf.
+    eauto with berased.
 Qed.

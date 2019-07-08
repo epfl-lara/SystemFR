@@ -8,6 +8,10 @@ Require Import SystemFR.SizeLemmas.
 Require Import SystemFR.Sets.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.SubstitutionErase.
+Require Import SystemFR.TreeLists.
+Require Import SystemFR.TermListLemmas.
+Require Import SystemFR.TermListReducible.
 
 Require Import SystemFR.ReducibilityDefinition.
 Require Import SystemFR.ReducibilityCandidate.
@@ -32,8 +36,19 @@ Lemma base_type_open:
     base_type X (open k T a) (open k T0 a).
 Proof.
   induction 1; repeat step || constructor || t_fv_open || t_listutils || rewrite is_erased_term_tfv in * by assumption;
-    eauto with bfv.
+    eauto with bfv;
+    eauto with berased.
 Qed.
+
+Lemma base_type_erased:
+  forall X T T0,
+    base_type X T T0 ->
+    is_erased_type T0.
+Proof.
+  induction 1; steps.
+Qed.
+
+Hint Resolve base_type_erased: berased.
 
 Lemma base_type_approx_aux:
   forall n X Ts T theta l v RC,
@@ -41,6 +56,7 @@ Lemma base_type_approx_aux:
     wfs l 0 ->
     pclosed_mapping l type_var ->
     base_type X Ts T ->
+    erased_terms l ->
     valid_interpretation theta ->
     reducibility_candidate RC ->
     (* RC can be instantiated by the denotation of T_rec zero T0 Ts *)
@@ -55,7 +71,8 @@ Proof.
     end;
     try omega;
     try solve [ eapply_any; steps; eauto with omega ];
-    try solve [ eapply_any; repeat step || autorewrite with bsize in *; eauto 1; try omega; eauto 2 using base_type_open ];
+    try solve [ eapply_any; repeat step || autorewrite with bsize in *;
+                eauto 1; try omega; eauto 2 using base_type_open; eauto 2 with berased ];
     t_closer;
     eauto 2 using reducible_values_closed with step_tactic;
     try solve [ eapply reducible_unused3; eauto 1; repeat step || rewrite fv_subst_different_tag in * by steps ].
@@ -68,6 +85,7 @@ Lemma base_type_approx:
     wfs l 0 ->
     pclosed_mapping l type_var ->
     base_type X Ts T ->
+    erased_terms l ->
     valid_interpretation theta ->
     reducibility_candidate RC ->
     reducible_values theta v (psubstitute T l term_var).

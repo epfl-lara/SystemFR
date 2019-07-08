@@ -18,6 +18,9 @@ Equations strictly_positive (T: tree) (vars: list nat): Prop
   strictly_positive T_nat _ := True;
   strictly_positive T_top _ := True;
   strictly_positive T_bot _ := True;
+
+  strictly_positive (ite b T1 T2) vars := strictly_positive T1 vars /\ strictly_positive T2 vars;
+
   strictly_positive (T_equal _ _) _ := True;
 
   strictly_positive (T_prod T1 T2) vars := strictly_positive T1 vars /\ strictly_positive T2 vars;
@@ -49,6 +52,7 @@ Equations strictly_positive (T: tree) (vars: list nat): Prop
 
 
 Solve All Obligations with (repeat step || autorewrite with bsize in *; try omega; eauto with omega).
+
 Fail Next Obligation.
 
 Ltac simp_spos :=
@@ -111,4 +115,5 @@ Ltac simp_spos :=
   rewrite strictly_positive_equation_57 in * ||
   rewrite strictly_positive_equation_58 in * ||
   rewrite strictly_positive_equation_59 in * ||
-  rewrite strictly_positive_equation_60.
+  rewrite strictly_positive_equation_60 in * ||
+  rewrite strictly_positive_equation_61.

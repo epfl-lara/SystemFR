@@ -118,6 +118,7 @@ Lemma reducible_value_let2:
     pfv t term_var = nil ->
     is_erased_term t ->
     valid_interpretation theta ->
+    is_erased_type B ->
     reducible_values theta v A ->
     reducible theta (open 0 t v) (open 0 B v) ->
     reducible theta (notype_tlet v t) (T_let v B).
@@ -138,6 +139,7 @@ Lemma reducible_let2_rule:
     valid_interpretation theta ->
     reducible theta t1 A ->
     is_erased_term t2 ->
+    is_erased_type B ->
     (forall v,
         is_value v ->
         star small_step t1 v ->
@@ -172,6 +174,7 @@ Lemma open_reducible_let2:
     is_erased_term t2 ->
     subset (fv A) (support gamma) ->
     subset (fv t2) (support gamma) ->
+    is_erased_type B ->
     open_reducible tvars gamma t1 A ->
     open_reducible tvars ((p, T_equal (fvar x term_var) t1) :: (x,A) :: gamma)
                    (open 0 t2 (fvar x term_var)) (open 0 B (fvar x term_var)) ->
@@ -183,7 +186,8 @@ Proof.
    repeat step || top_level_unfold || t_values_info2 || t_deterministic_star || t_termlist || t_instantiate_sat4;
       unshelve eauto with bwf; eauto using subset_same with bfv;
         eauto with berased.
-  - unshelve epose proof (H15 theta ((p, uu) :: (x,t') :: lterms) _ _); tac1;
-      eauto 3 using equivalent_sym with b_equiv;
-      eauto with berased.
+
+  unshelve epose proof (H16 theta ((p, uu) :: (x,t') :: lterms) _ _); tac1;
+    eauto 3 using equivalent_sym with b_equiv;
+    eauto with berased.
 Qed.

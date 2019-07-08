@@ -3,6 +3,7 @@ Require Import SystemFR.Syntax.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.AssocList.
 Require Import SystemFR.TreeLists.
+Require Import SystemFR.ErasedTermLemmas.
 
 Require Import PeanoNat.
 
@@ -31,3 +32,15 @@ Proof.
 Qed.
 
 Hint Resolve subst_erased_type: berased.
+
+Lemma subst_erased_type2:
+  forall T X V,
+    is_erased_type T ->
+    is_erased_type V ->
+    is_erased_type (psubstitute T ((X,V) :: nil) type_var).
+Proof.
+  induction T; repeat step || rewrite is_erased_subst;
+    eauto using subst_erased.
+Qed.
+
+Hint Resolve subst_erased_type2: berased.

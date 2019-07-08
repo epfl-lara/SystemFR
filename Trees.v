@@ -33,6 +33,7 @@ Inductive tree: Set :=
   | T_exists: tree -> tree -> tree
   | T_abs: tree -> tree
   | T_rec: tree -> tree -> tree -> tree
+  | T_interpret: tree -> tree
 
   (* terms *)
   | err: tree -> tree
@@ -236,6 +237,9 @@ Fixpoint is_erased_type T :=
   match T with
   | fvar y type_var => True
   | lvar y type_var => True
+
+  | ite b T1 T2 => is_erased_term b /\ is_erased_type T1 /\ is_erased_type T2
+
   | T_unit => True
   | T_bool => True
   | T_nat => True
@@ -340,6 +344,7 @@ Fixpoint tree_size t :=
   | T_exists A B => 1 + tree_size A + tree_size B
   | T_abs T => 1 + tree_size T
   | T_rec n T0 Ts => 1 + tree_size n + tree_size T0 + tree_size Ts
+  | T_interpret t => 1 + tree_size t
   end.
 
 Fixpoint build_nat (n: nat): tree :=

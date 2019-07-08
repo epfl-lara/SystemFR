@@ -96,6 +96,7 @@ Fixpoint pfv t tag: set nat :=
   | T_exists A B => pfv A tag ++ pfv B tag
   | T_abs T => pfv T tag
   | T_rec n T0 Ts => pfv n tag ++ pfv T0 tag ++ pfv Ts tag
+  | T_interpret t => pfv t tag
   end.
 
 Definition fv t := pfv t term_var.
@@ -234,6 +235,7 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | T_exists T1 T2 => T_exists (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_abs T => T_abs (psubstitute T l tag)
   | T_rec n T0 Ts => T_rec (psubstitute n l tag) (psubstitute T0 l tag) (psubstitute Ts l tag)
+  | T_interpret t => T_interpret (psubstitute t l tag)
   end.
 
 Definition substitute t l := psubstitute t l term_var.
@@ -341,6 +343,7 @@ Fixpoint wf t k :=
   | T_exists T1 T2 => wf T1 k /\ wf T2 (S k)
   | T_abs T => wf T k
   | T_rec n T0 Ts => wf n k /\ wf T0 k /\ wf Ts k
+  | T_interpret t => wf t k
   end.
 
 Fixpoint twf t k :=
@@ -433,6 +436,7 @@ Fixpoint twf t k :=
   | T_exists T1 T2 => twf T1 k /\ twf T2 k
   | T_abs T => twf T (S k)
   | T_rec n T0 Ts => twf n k /\ twf T0 k /\ twf Ts (S k)
+  | T_interpret T => twf T k
   end.
 
 Fixpoint wfs (gamma: list (nat * tree)) k :=
@@ -538,6 +542,7 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | T_exists T1 T2 => T_exists (open k T1 rep) (open (S k) T2 rep)
   | T_abs T => T_abs (open k T rep)
   | T_rec n T0 Ts => T_rec (open k n rep) (open k T0 rep) (open k Ts rep)
+  | T_interpret T => T_interpret (open k T rep)
   end.
 
 Fixpoint close (k: nat) (t: tree) (x: nat) :=
@@ -631,6 +636,7 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | T_exists T1 T2 => T_exists (close k T1 x) (close (S k) T2 x)
   | T_abs T => T_abs (close k T x)
   | T_rec n T0 Ts => T_rec (close k n x) (close k T0 x) (close k Ts x)
+  | T_interpret T => T_interpret (close k T x)
   end.
 
 Fixpoint topen (k: nat) (t rep: tree) :=
@@ -726,6 +732,7 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | T_exists T1 T2 => T_exists (topen k T1 rep) (topen k T2 rep)
   | T_abs T => T_abs (topen (S k) T rep)
   | T_rec n T0 Ts => T_rec (topen k n rep) (topen k T0 rep) (topen (S k) Ts rep)
+  | T_interpret T => T_interpret (topen k T rep)
   end.
 
 Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
@@ -820,4 +827,6 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | T_exists T1 T2 => T_exists (tclose k T1 x) (tclose k T2 x)
   | T_abs T => T_abs (tclose (S k) T x)
   | T_rec n T0 Ts => T_rec (tclose k n x) (tclose k T0 x) (tclose (S k) Ts x)
+  | T_interpret T => T_interpret (tclose k T x)
   end.
+

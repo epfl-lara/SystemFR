@@ -106,6 +106,7 @@ Lemma open_reducible_sum_match:
     is_erased_term t ->
     is_erased_term tl ->
     is_erased_term tr ->
+    is_erased_type T ->
     open_reducible tvars gamma t (T_sum T1 T2) ->
     open_reducible tvars
                    ((p, T_equal t (tleft (fvar y term_var))) :: (y, T1) :: gamma)
@@ -120,9 +121,10 @@ Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold || simp_red.
 
   - eapply reducible_let_backstep_expr; eauto; t_closer.
-    apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var)); repeat step || simp_red; eauto.
+    apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var));
+      repeat step || simp_red; eauto with berased.
 
-    unshelve epose proof (H24 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
+    unshelve epose proof (H25 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star.
 
     eapply star_backstep_reducible; eauto with bsteplemmas;
@@ -131,9 +133,10 @@ Proof.
       repeat step || t_listutils; t_closer.
 
   - eapply reducible_let_backstep_expr; eauto; t_closer.
-    apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var)); repeat step || simp_red; eauto.
+    apply reducible_let with (T_sum (psubstitute T1 lterms term_var) (psubstitute T2 lterms term_var));
+      repeat step || simp_red; eauto with berased.
 
-    unshelve epose proof (H25 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
+    unshelve epose proof (H26 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star.
 
     eapply star_backstep_reducible; eauto with bsteplemmas;

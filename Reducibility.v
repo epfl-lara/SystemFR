@@ -318,7 +318,7 @@ Proof.
   - apply reducible_subtype_let_left with (support theta) (erase_context gamma) (erase_term t) (erase_type A) (erase_type B) x p; side_conditions.
   - simp_red; unfold_reduce; repeat step || t_termlist || find_smallstep_value2; eauto using equivalence_def with berased.
   - many_tactics; eauto with bwf.
-  - eapply reducible_subtype_let_open2; eauto; many_tactics.
+  - eapply reducible_subtype_let_open2; eauto; many_tactics; eauto with berased.
   - simp_red; steps.
   - simp_red; steps; t_closer.
   - simp_red; steps.

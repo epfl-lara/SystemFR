@@ -45,13 +45,13 @@ Opaque reducible_values.
 Opaque makeFresh.
 Opaque tlt.
 
-
 Lemma reducible_fix_zero:
   forall (theta : interpretation) (T ts : tree),
     wf ts 1 ->
     pfv ts term_var = nil ->
     valid_interpretation theta ->
     is_erased_term ts ->
+    is_erased_type T ->
     (forall tx n : tree,
         reducible_values theta n T_nat ->
         reducible_values theta tx
@@ -97,6 +97,7 @@ Lemma reducible_fix_strong_induction_aux:
     wf ts 1 ->
     is_nat_value v ->
     is_erased_term ts ->
+    is_erased_type T ->
     valid_interpretation theta ->
     (forall tx n,
        reducible_values theta n T_nat ->
@@ -144,6 +145,7 @@ Lemma reducible_fix_strong_induction:
     wf ts 1 ->
     is_nat_value v ->
     is_erased_term ts ->
+    is_erased_type T ->
     valid_interpretation theta ->
     (forall tx n,
        reducible_values theta n T_nat ->
@@ -168,6 +170,7 @@ Lemma reducible_fix_strong_induction_forall:
     wf ts 1 ->
     is_erased_term ts ->
     valid_interpretation theta ->
+    is_erased_type T ->
     (forall tx n,
        reducible_values theta n T_nat ->
        reducible_values theta tx
@@ -204,6 +207,7 @@ Lemma open_reducible_fix_strong_induction:
     ~(n ∈ fv T) ->
     ~(n ∈ fv_context gamma) ->
     is_erased_term ts ->
+    is_erased_type T ->
     NoDup (n :: y :: p :: nil) ->
     open_reducible tvars (
         (p, T_equal (fvar y term_var) (notype_lambda (notype_tfix ts))) ::
@@ -225,7 +229,7 @@ Proof.
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  unshelve epose proof (H13 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _) as HH;
+  unshelve epose proof (H14 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _) as HH;
     repeat
       tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any ||
       rewrite pfv_tlt in * || rewrite pfv_map_indices in * ||
@@ -239,7 +243,7 @@ Proof.
     eauto with bwf;
     eauto using reducible_unit.
 
-  unshelve epose proof (H21 a _ _);
+  unshelve epose proof (H27 a _ _);
     repeat step || simp reducible_values || rewrite open_tlt in * ||
            (progress rewrite open_shift in * by (repeat step || unshelve eauto with bwf)) ||
            (progress rewrite open_none in * by (repeat step || unshelve eauto with bwf));
@@ -253,6 +257,7 @@ Lemma reducible_fix_induction:
     wf T 1 ->
     wf ts 1 ->
     is_erased_term ts ->
+    is_erased_type T ->
     valid_interpretation theta ->
     (forall tx, reducible_values theta tx T_top -> reducible theta (open 0 ts tx) (open 0 T zero)) ->
     (forall tx n,
@@ -293,6 +298,7 @@ Lemma reducible_fix_induction_forall:
     wf T 1 ->
     wf ts 1 ->
     is_erased_term ts ->
+    is_erased_type T ->
     valid_interpretation theta ->
     (forall tx,
         reducible_values theta tx T_top ->
@@ -335,6 +341,7 @@ Lemma open_reducible_fix:
     ~(n ∈ fv T) ->
     ~(n ∈ fv_context gamma) ->
     is_erased_term ts ->
+    is_erased_type T ->
     NoDup (n :: y :: p :: nil) ->
     open_reducible tvars
                    ((y, T_top) :: gamma)
@@ -357,9 +364,9 @@ Proof.
     eauto with berased;
     try solve [ rewrite substitute_open2; eauto with bwf ].
 
-  - unshelve epose proof (H13 theta ((y, tx) :: lterms) _ _ _);
+  - unshelve epose proof (H14 theta ((y, tx) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 
-  - unshelve epose proof (H14 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
+  - unshelve epose proof (H15 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
       repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
 Qed.
