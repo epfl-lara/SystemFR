@@ -64,6 +64,7 @@ Lemma strictly_positive_push_forall2:
     wf B 1 ->
     wf T 0 ->
     is_erased_type A ->
+    is_erased_type B ->
     is_erased_type T ->
     valid_interpretation theta ->
     strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->

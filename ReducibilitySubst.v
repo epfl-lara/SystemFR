@@ -43,6 +43,8 @@ Opaque lt.
 
 Require Import Omega.
 
+(* TODO: rewrite proof following ReducibilityRenaming's model *)
+
 Lemma fv_red:
   forall t x tag theta T,
     valid_interpretation theta ->
@@ -67,22 +69,23 @@ Ltac t_apply_ih_sub :=
      H1: reducible_values ?theta ?t (T_rec ?n (psubstitute ?T0 _ type_var) (psubstitute ?Ts _ type_var)) |-
      reducible_values ?theta ?t (T_rec ?n ?T0 ?Ts)  =>
        poseNew (Mark 0 "IHOncee");
-       unshelve eapply (IHn (typeNodes (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P); eauto
+       unshelve eapply (IHn (get_measure (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P); eauto
   | IHn: forall m, _ -> forall theta U V X v P, _,
      H1: reducible_values ?theta ?t (T_rec ?n ?T0 ?Ts) |-
      reducible_values ?theta ?t (T_rec ?n (psubstitute ?T0 _ type_var) (psubstitute ?Ts _ type_var))  =>
        poseNew (Mark 0 "IHOnce");
-       unshelve eapply (IHn (typeNodes (T_rec n T0 Ts), index (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P) in H1; eauto
+       unshelve eapply (IHn (get_measure (T_rec n T0 Ts)) _ theta (T_rec n T0 Ts) V X t P) in H1; eauto
   end.
 
 Lemma reducibility_subst_aux:
-  forall measure (theta: interpretation) U V X v P,
-    (typeNodes U, index U) = measure ->
+  forall (measure: measure_domain) (theta: interpretation) U V X v P,
+    get_measure U = measure ->
     twf V 0 ->
     wf V 0 ->
     is_erased_type U ->
     valid_interpretation theta ->
     lookup Nat.eq_dec theta X = Some P ->
+    is_erased_type V ->
     (forall (t: tree), P t <-> reducible_values theta t V) ->
     reducible_values theta v U <-> reducible_values theta v (psubstitute U ((X,V) :: nil) type_var).
 Proof.
@@ -90,7 +93,7 @@ Proof.
     repeat match goal with
            | _ => progress (step || simp_red)
            | _ => find_smallstep_value || find_exists
-           | _ => apply left_lex
+           | _ => apply leq_lt_measure
            | _ => rewrite substitute_nothing5 in * by (steps; eauto with bfv)
            | _ => rewrite substitute_open2 in *  by repeat step || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased)
            | _ => progress ( autorewrite with bsize in * )
@@ -122,11 +125,11 @@ Proof.
            | IHn: forall m, _ -> forall theta U V X v P, _,
              H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
                reducible_values ?theta ?t ?T =>
-                 unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P); eauto
+                 unshelve eapply (IHn (get_measure T) _ theta T V X t P); eauto
            | IHn: forall m, _ -> forall theta U V X v P, _,
              H1: reducible_values ?theta ?t ?T |-
                reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
-                 unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P); eauto
+                 unshelve eapply (IHn (get_measure T) _ theta T V X t P); eauto
            | |- exists c d _, pp ?a ?b = pp _ _ /\ _ => unshelve exists a, b
            | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
 (*           | H: is_erased_term ?a |- _ => unshelve exists a (* !!! *) *)
@@ -149,11 +152,11 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t ?T |-
           reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
-            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (get_measure T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               apply left_lex ||
+               apply leq_lt_measure ||
                finisher || apply is_erased_type_topen;
           try omega;
           eauto with bapply_any.
@@ -179,11 +182,11 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
           reducible_values ?theta ?t ?T =>
-            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (get_measure T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               finisher || apply is_erased_type_topen || apply left_lex;
+               finisher || apply is_erased_type_topen || apply leq_lt_measure;
           try omega;
           eauto with bapply_any.
 
@@ -191,7 +194,8 @@ Proof.
        | H: _ |- _ => apply reducible_unused3 in H
        end; repeat step || finisher || apply_any.
 
-    - right.
+    - (* recursive type n+1 *)
+      right.
       unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var
                                                      :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
                                                      :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
@@ -212,19 +216,19 @@ Proof.
                   end ||
                   unfold EquivalentWithRelation.equivalent_rc;
         eauto using reducibility_is_candidate;
-        try solve [ apply left_lex; autorewrite with bsize in *; omega ];
-        try solve [ apply right_lex; apply lt_index_step; auto ];
+        try solve [ apply leq_lt_measure; autorewrite with bsize in *; omega ];
+        try solve [ apply right_lex, right_lex, lt_index_step; auto ];
         eauto with berased.
 
       lazymatch goal with
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t ?T |-
           reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) =>
-            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (get_measure T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               apply left_lex ||
+               apply leq_lt_measure ||
                finisher || apply is_erased_type_topen;
           try omega;
           eauto with bapply_any;
@@ -235,7 +239,8 @@ Proof.
        end; repeat step || finisher || apply_any;
          eauto using reducibility_is_candidate.
 
-    - right.
+    - (* recursive type n+1 bis *)
+      right.
       unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var
                                                      :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
                                                      :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
@@ -256,8 +261,8 @@ Proof.
                   end ||
                   unfold EquivalentWithRelation.equivalent_rc;
         eauto using reducibility_is_candidate;
-        try solve [ apply left_lex; autorewrite with bsize in *; omega ];
-        try solve [ apply right_lex; apply lt_index_step; auto ];
+        try solve [ apply leq_lt_measure; autorewrite with bsize in *; omega ];
+        try solve [ apply right_lex, right_lex, lt_index_step; auto ];
         eauto with berased.
 
       lazymatch goal with
@@ -269,11 +274,11 @@ Proof.
       | IHn: forall m, _ -> forall theta U V X v P, _,
         H1: reducible_values ?theta ?t (psubstitute ?T ((?X,?V) :: nil) type_var) |-
           reducible_values ?theta ?t ?T =>
-            unshelve eapply (IHn (typeNodes T, index T) _ theta T V X t P)
+            unshelve eapply (IHn (get_measure T) _ theta T V X t P)
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               apply left_lex ||
+               apply leq_lt_measure ||
                finisher || apply is_erased_type_topen;
           try omega;
           eauto with bapply_any;
@@ -291,6 +296,7 @@ Lemma reducibility_subst:
     twf V 0 ->
     wf V 0 ->
     is_erased_type U ->
+    is_erased_type V ->
     lookup Nat.eq_dec theta X = Some P ->
     (forall (t: tree), P t <-> reducible_values theta t V) ->
     reducible_values theta v U <-> reducible_values theta v (psubstitute U ((X,V) :: nil) type_var).
@@ -308,6 +314,7 @@ Lemma reducibility_subst_head:
     twf V 0 ->
     wf V 0 ->
     is_erased_type U ->
+    is_erased_type V ->
     reducible_values theta v (topen 0 U V).
 Proof.
   intros.
@@ -320,7 +327,7 @@ Proof.
     unshelve epose proof (proj1 (
       reducibility_subst ((X,RC) :: theta) U V X v
                          (fun v => reducible_values theta v V)
-                         _ _ _ _ _ _) H)
+                         _ _ _ _ _ _ _) H)
   end;
     repeat tac1 || rewrite substitute_nothing3 in *;
       eauto using reducibility_is_candidate;
@@ -337,12 +344,13 @@ Lemma reducibility_subst_head2:
     twf V 0 ->
     wf V 0 ->
     is_erased_type U ->
+    is_erased_type V ->
     reducible_values theta v (topen 0 U V) ->
     reducible_values ((X, fun v => reducible_values theta v V) :: theta) v
                      (topen 0 U (fvar X type_var)).
 Proof.
   intros.
-  apply (reducible_unused2 _ _ X _ (fun v => reducible_values theta v V)) in H5;
+  apply (reducible_unused2 _ _ X _ (fun v => reducible_values theta v V)) in H6;
     repeat step || t_fv_open  || t_listutils;
     eauto using reducibility_is_candidate.
 
@@ -351,7 +359,7 @@ Proof.
     unshelve epose proof (
       reducibility_subst ((X,RC) :: theta) U V X v
                          (fun v => reducible_values theta v V)
-                         _ _ _ _ _ _)
+                         _ _ _ _ _ _ _)
   end;
     repeat tac1 || rewrite substitute_nothing3 in *;
       eauto using reducibility_is_candidate;

@@ -43,6 +43,7 @@ Lemma reducible_lambda:
     pfv t term_var = nil ->
     pfv t type_var = nil ->
     valid_interpretation theta ->
+    is_erased_type V ->
     (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (T_let u V)) ->
     reducible_values theta (notype_lambda t) (T_arrow U V).
 Proof.
@@ -68,6 +69,7 @@ Lemma open_reducible_lambda:
     ~(x ∈ fv t) ->
     ~(x ∈ fv V) ->
     is_erased_term t ->
+    is_erased_type V ->
     open_reducible tvars ((x, U) :: gamma) (open 0 t (term_fvar x)) (open 0 V (term_fvar x)) ->
     open_reducible tvars gamma (notype_lambda t) (T_arrow U V).
 Proof.
@@ -79,8 +81,8 @@ Proof.
     eauto with bfv;
     eauto with berased.
 
-  - unshelve epose proof (H8 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
-      eauto using reducible_let.
+  - unshelve epose proof (H9 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
+      eauto using reducible_let with berased.
 Qed.
 
 Lemma reducible_app:

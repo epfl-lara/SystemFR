@@ -111,6 +111,7 @@ Lemma reducible_inst:
     pfv V term_var = nil ->
     valid_interpretation theta ->
     is_erased_type U ->
+    is_erased_type V ->
     reducible theta t (T_abs U) ->
     reducible theta (notype_inst t) (topen 0 U V).
 Proof.
@@ -122,7 +123,7 @@ Proof.
         eauto using reducibility_is_candidate
   end.
   exists t'0; steps; eauto using star_smallstep_trans with bsteplemmas.
-  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H13;
+  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H14;
     repeat step || finisher; eauto using reducibility_is_candidate.
   eapply reducibility_subst_head; eauto; repeat step || t_listutils || finisher.
 Qed.
@@ -132,6 +133,7 @@ Lemma open_reducible_inst:
     wf V 0 ->
     twf V 0 ->
     is_erased_type U ->
+    is_erased_type V ->
     subset (fv V) (support gamma) ->
     open_reducible tvars gamma t (T_abs U) ->
     open_reducible tvars gamma (notype_inst t) (topen 0 U V).

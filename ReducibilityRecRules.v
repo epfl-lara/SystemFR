@@ -591,7 +591,8 @@ Proof.
       eauto using reducibility_is_candidate.
     + apply reducibility_subst_head in H24;
         repeat step || t_listutils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased);
-      eauto with bwf btwf bfv.
+      eauto with bwf btwf bfv;
+      eauto with berased.
 
       apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
         eauto using red_is_val with smallstep;

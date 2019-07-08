@@ -70,6 +70,7 @@ Lemma subtype_arrow2:
     ~(f ∈ fv B) ->
     ~(f ∈ fv T) ->
     ~(x = f) ->
+    is_erased_type B ->
     open_reducible tvars ((x, A) :: (f, T) :: gamma)
                    (app (term_fvar f) (term_fvar x))
                    (open 0 B (term_fvar x)) ->
@@ -81,10 +82,10 @@ Lemma subtype_arrow2:
 Proof.
   repeat step || simp_red || rewrite reducibility_rewrite ;
     eauto using red_is_val, values_normalizing with bwf bfv;
-    eauto 2 with berased;
+    eauto 3 with berased;
     eauto using reducible_values_closed.
   unfold open_reducible in *.
-  unshelve epose proof (H8 theta ((x,a) :: (f,v) :: l) _ _ _); tac1.
+  unshelve epose proof (H9 theta ((x,a) :: (f,v) :: l) _ _ _); tac1.
 Qed.
 
 Lemma reducible_ext_pair:
@@ -127,6 +128,7 @@ Lemma subtype_prod2:
     open_reducible tvars ((x, T) :: gamma) (pi1 (term_fvar x)) A ->
     open_reducible tvars ((x, T) :: gamma) (pi2 (term_fvar x)) (T_let (pi1 (term_fvar x)) B) ->
     satisfies (reducible_values theta) gamma l ->
+    is_erased_type B ->
     reducible_values theta v (substitute T l) ->
     reducible_values theta v (T_prod (substitute A l) (substitute B l)).
 Proof.
@@ -163,6 +165,7 @@ Lemma reducible_values_arrow_subtype:
         reducible_values theta t (open 0 B2 a)
     ) ->
    (forall t, reducible_values theta t B1 -> reducible_values theta t A1) ->
+   is_erased_type B2 ->
    reducible_values theta t (T_arrow A1 A2) ->
    reducible_values theta t (T_arrow B1 B2).
 Proof.
@@ -187,6 +190,7 @@ Lemma reducible_arrow_subtype_subst:
        reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
        reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
     (forall t, reducible_values theta t (substitute B1 l) -> reducible_values theta t (substitute A1 l)) ->
+    is_erased_type B2 ->
     reducible_values theta t (T_arrow (substitute A1 l) (substitute A2 l)) ->
     reducible_values theta t (T_arrow (substitute B1 l) (substitute B2 l)).
 Proof.
@@ -204,6 +208,7 @@ Lemma reducible_values_prod_subtype:
         reducible_values theta t (open 0 B2 a)
     ) ->
    (forall t, reducible_values theta t A1 -> reducible_values theta t B1) ->
+   is_erased_type B2 ->
    reducible_values theta t (T_prod A1 A2) ->
    reducible_values theta t (T_prod B1 B2).
 Proof.
@@ -226,6 +231,7 @@ Lemma reducible_prod_subtype_subst:
        reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
        reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
     (forall t, reducible_values theta t (substitute A1 l) -> reducible_values theta t (substitute B1 l)) ->
+    is_erased_type B2 ->
     reducible_values theta t (T_prod (substitute A1 l) (substitute A2 l)) ->
     reducible_values theta t (T_prod (substitute B1 l) (substitute B2 l)).
 Proof.

@@ -101,6 +101,7 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | T_exists T1 T2 => T_exists (map_indices k T1 f) (map_indices (S k) T2 f)
   | T_abs T => T_abs (map_indices k T f)
   | T_rec n T0 Ts => T_rec (map_indices k n f) (map_indices k T0 f) (map_indices k Ts f)
+  | T_interpret T => T_interpret (map_indices k T f)
   end.
 
 Definition shift t := map_indices 0 t S.

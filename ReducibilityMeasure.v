@@ -3,14 +3,16 @@ Require Import SystemFR.SmallStep.
 Require Import SystemFR.Tactics.
 Require Import SystemFR.StarRelation.
 Require Import SystemFR.StarInversions.
+Require Import SystemFR.SizeLemmas.
 
 Require Import Equations.Equations.
-Require Import Equations.Prop.Subterm.
+Require Import Equations.Prop.Subterm. (* lexicographic ordering *)
 
 Require Import Coq.Program.Program.
 
 (* Lexicographic order used for the termination argument of reducibility *)
-(* Follows a lexicographic order defined in Equations *)
+(* Follows the lexicographic order definition given in Equations *)
+(* The measure used is: (number of T_interpret, size, recursive index) *)
 
 Require Import Omega.
 
@@ -43,6 +45,8 @@ Ltac t_nat_value_to_nat :=
 Solve Obligations with t_nat_value_to_nat.
 
 Fail Next Obligation.
+
+Unset Program Mode.
 
 Lemma nat_value_to_nat_fun:
   forall v p1 p2, nat_value_to_nat v p1 = nat_value_to_nat v p2.
@@ -94,19 +98,24 @@ Qed.
 Instance wellfounded_lt_index :
   WellFounded lt_index := wf_lt_index.
 
-Notation "p1 '<<' p2" := (lexprod nat tree lt lt_index p1 p2) (at level 80).
-
-Definition wf_measure := wellfounded_lexprod nat tree lt lt_index lt_wf wf_lt_index.
+Definition lt_partial := (lexprod nat tree lt lt_index).
+Definition wf_measure_partial := wellfounded_lexprod nat tree lt lt_index lt_wf wf_lt_index.
+Definition wf_measure :=
+  wellfounded_lexprod nat (nat * tree) lt lt_partial lt_wf wf_measure_partial.
 
 Opaque lt.
+
+Definition measure_domain: Type := (nat * (nat * tree)).
+Definition lt_measure: measure_domain -> measure_domain -> Prop := lexprod nat (nat * tree) lt lt_partial.
+Notation "p1 '<<' p2" := (lt_measure p1 p2) (at level 80).
 
 Lemma measure_induction:
   forall P,
     (forall m, (forall m', m' << m -> P m') -> P m) ->
     (forall m, P m).
 Proof.
-  repeat step.
-  pose proof (wf_measure (a,b)).
+  repeat step || unfold measure_domain in *.
+  pose proof (wf_measure (a, (a0,b0))) as H.
   induction H; steps.
 Qed.
 
@@ -131,4 +140,33 @@ Proof.
   unshelve eexists v, (succ v), _, _; steps;
     eauto with b_inv;
     eauto using nat_value_to_nat_succ.
+Qed.
+
+Definition get_measure (T: tree) := (count_interpret T, (typeNodes T, index T)).
+
+Lemma leq_lt_measure:
+  forall a1 b1 c1 a2 b2 c2,
+    a1 <= a2 ->
+    b1 < b2 ->
+    lexprod nat (nat * tree) lt lt_partial (a1, (b1, c1)) (a2, (b2, c2)).
+Proof.
+  intros.
+  destruct (Nat.eq_dec a1 a2); steps.
+  - apply right_lex, left_lex; omega.
+  - apply left_lex; omega.
+Qed.
+
+Lemma leq_leq_lt_measure:
+  forall a1 b1 c1 a2 b2 c2,
+    a1 <= a2 ->
+    b1 <= b2 ->
+    lt_index c1  c2 ->
+    lexprod nat (nat * tree) lt lt_partial (a1, (b1, c1)) (a2, (b2, c2)).
+Proof.
+  intros.
+  destruct (Nat.eq_dec a1 a2);
+  destruct (Nat.eq_dec b1 b2); steps;
+    eauto using right_lex, left_lex with omega.
+  - apply right_lex, right_lex; steps.
+  - apply right_lex, left_lex; omega.
 Qed.

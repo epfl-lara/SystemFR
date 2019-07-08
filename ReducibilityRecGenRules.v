@@ -139,10 +139,10 @@ Proof.
       try solve [ t_closing ];
       eauto 3 using smallstep_succ_zero with falsity.
 
-  apply reducibility_subst_head in H19;
+  apply reducibility_subst_head in H22;
     repeat step || t_invert_star || t_listutils ||
-           (rewrite is_erased_term_tfv in H15 by (eauto with berased));
-      eauto with btwf bwf.
+           (rewrite is_erased_term_tfv in H14 by (eauto with berased));
+      eauto with btwf bwf berased.
 
   lazymatch goal with
   | H: star small_step ?v1 ?v2 |- _ =>
@@ -353,17 +353,17 @@ Proof.
   unfold intersect in *; repeat step.
   simp reducible_values; repeat step || (rewrite open_none in * by steps); try solve [ t_closing ].
 
-  unshelve epose proof (strictly_positive_pull_forall _ _ _ _ _ X _ _ _ _ _ _ _ _ _ _ _ H9);
+  unshelve epose proof (strictly_positive_pull_forall _ _ _ _ _ X _ _ _ _ _ _ _ _ _ _ _ _ H9) as HH;
     repeat step; eauto using non_empty_nat;
       eauto with bwf.
 
-  simp reducible_values in H10.
+  simp reducible_values in H12.
   t_invert_nat_value; repeat step || simp_red;
     try solve [ t_closing ];
     eauto with smallstep.
   - (* case a = 0, we use the decreasing property *)
     left; exists v; repeat step || apply_any.
-    unshelve epose proof (H11 zero _);
+    unshelve epose proof (HH zero _);
       repeat step || simp_red || rewrite open_none in * by steps.
   - (* case a = n+1 *)
     right; exists v0, v, (makeFresh (
@@ -381,7 +381,7 @@ Proof.
       try finisher;
       eauto with bwf btwf.
 
-    unshelve epose proof (H11 v0 _); repeat step || simp_red || rewrite open_none in * by steps.
+    unshelve epose proof (HH v0 _); repeat step || simp_red || rewrite open_none in * by steps.
 Qed.
 
 Lemma reducible_fold_gen:
@@ -464,8 +464,11 @@ Lemma open_reducible_fold_gen2:
 Proof.
   intros; apply open_reducible_fold_gen with X; steps.
   apply base_type_approx with X (topen 0 Ts (fvar X type_var))
-    (fun v => reducible_values theta v (T_rec zero (psubstitute T0 l term_var) (psubstitute Ts l term_var))); eauto with bwf bfv;
-    eauto using reducibility_is_candidate.
+    (fun v => reducible_values theta v (T_rec zero (psubstitute T0 l term_var) (psubstitute Ts l term_var)));
+    eauto with bwf bfv;
+    eauto using reducibility_is_candidate;
+    eauto with berased.
+
   rewrite <- substitute_topen2; steps; eauto with btwf.
   apply reducibility_subst_head2;
     repeat step || t_listutils || apply reducibility_is_candidate ||
@@ -473,4 +476,3 @@ Proof.
     eauto with bfv bwf btwf berased;
     eauto using reducibility_is_candidate.
 Qed.
-

@@ -15,5 +15,7 @@ Lemma base_type_erase:
     base_type X A B ->
     base_type X (erase_type A) (erase_type B).
 Proof.
-  induction 1; repeat step || constructor; eauto with bfv.
+  induction 1; repeat step || constructor;
+    eauto with bfv;
+    eauto with berased.
 Qed.

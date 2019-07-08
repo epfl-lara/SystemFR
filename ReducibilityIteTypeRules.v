@@ -144,60 +144,60 @@ Ltac t_apply_ih :=
     |- reducible_values ?theta ?v ?T =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes T1, index T1) _ b T1 T2 T); eauto
+     unshelve eapply (IH (get_measure T1) _ b T1 T2 T); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T
     |- reducible_values ?theta ?v ?T1 =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes T1, index T1) _ b T1 T2 T); eauto
+     unshelve eapply (IH (get_measure T1) _ b T1 T2 T); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T1 ?a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T ?a)
     |- reducible_values ?theta ?v (open 0 ?T1 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T1 a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T a)
     |- reducible_values ?theta ?v (open 0 ?T1 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T1 a), index (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T1 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   end.
 
 Ltac t_apply_ih_topen :=
   lazymatch goal with
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T1 ?X)
     |- reducible_values ?theta ?v (topen 0 ?T ?X) =>
-     unshelve eapply (IH (typeNodes (topen 0 T1 X), index (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+     unshelve eapply (IH (get_measure (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T ?X)
     |- reducible_values ?theta ?v (topen 0 ?T1 ?X) =>
-     unshelve eapply (IH (typeNodes (topen 0 T1 X), index (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+     unshelve eapply (IH (get_measure (topen 0 T1 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
   end.
 
 Ltac t_apply_ih_rec :=
   lazymatch goal with
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts)
     |- reducible_values ?theta ?v (T_rec ?n ?T0' ?Ts') =>
-     unshelve eapply (IH (typeNodes (T_rec n T0' Ts'), index (T_rec n T0' Ts')) _ b
+     unshelve eapply (IH (get_measure (T_rec n T0' Ts')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0' ?Ts')
     |- reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts) =>
      apply reducible_values_rec_equivalent with (ite b n n); eauto with b_equiv; steps; eauto with berased;
-     unshelve eapply (IH (typeNodes (T_rec n T0' Ts'), index (T_rec n T0' Ts')) _ b
+     unshelve eapply (IH (get_measure (T_rec n T0' Ts')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
   end.
 
 Lemma reducible_values_T_ite_true_aux:
-  forall measure b T1 T2 T theta v,
-    (typeNodes T1, index T1) = measure ->
+  forall (measure: measure_domain) b T1 T2 T theta v,
+    get_measure T1 = measure ->
     T_ite_push b T1 T2 T ->
     wf b 0 ->
     wf T1 0 ->
@@ -208,12 +208,13 @@ Lemma reducible_values_T_ite_true_aux:
     is_erased_term b ->
     is_erased_type T1 ->
     is_erased_type T2 ->
+    is_erased_type T ->
     star small_step b ttrue ->
     valid_interpretation theta ->
     (reducible_values theta v T <-> reducible_values theta v T1).
 Proof.
   induction measure using measure_induction; intros; try omega.
-  inversion H1;
+  unfold get_measure; inversion H1;
     repeat match goal with
            | |- reduces_to _ _ => t_reduces_to_open
            | |- reduces_to _ _ => apply_any
@@ -238,7 +239,7 @@ Proof.
     try omega;
     eauto using ite_type_open;
     eauto with bwf bfv berased;
-    try solve [ apply left_lex; autorewrite with bsize in *; omega ].
+    try solve [ apply leq_lt_measure; steps; autorewrite with bsize in *; eauto with berased; omega ].
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T0 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
@@ -252,7 +253,7 @@ Proof.
     t_apply_ih_topen;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply left_lex || apply wf_topen || apply fv_nils_topen ||
+             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -270,7 +271,7 @@ Proof.
     t_apply_ih_topen;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply left_lex || apply wf_topen || apply fv_nils_topen ||
+             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -293,18 +294,20 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply left_lex; autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex; apply lt_index_step; auto ];
+      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; try omega ];
+      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
       eauto with bwf;
       eauto with btwf;
       eauto with bfv.
-    + apply right_lex; apply lt_index_step; eauto with values.
+    + apply right_lex, right_lex, lt_index_step; repeat step || autorewrite with bsize in *;
+        eauto with omega;
+        eauto with values.
       eapply star_smallstep_ite_inv_true; try eassumption; steps; eauto with values.
     + eapply reducible_values_rec_equivalent; eauto; steps; eauto with b_equiv; eauto with berased.
-    + apply right_lex; apply lt_index_step; eauto with values.
+    + apply leq_leq_lt_measure, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_true; try eassumption; steps; eauto with values.
 
   - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T01 type_var
@@ -323,8 +326,8 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply left_lex; autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex; apply lt_index_step; auto ];
+      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ];
+      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
@@ -346,6 +349,7 @@ Lemma reducible_values_T_ite_true:
     is_erased_term b ->
     is_erased_type T1 ->
     is_erased_type T2 ->
+    is_erased_type T ->
     star small_step b ttrue ->
     valid_interpretation theta ->
     (reducible_values theta v T <-> reducible_values theta v T1).
@@ -359,60 +363,60 @@ Ltac t_apply_ih_false :=
     |- reducible_values ?theta ?v ?T =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes T2, index T2) _ b T1 T2 T); eauto
+     unshelve eapply (IH (get_measure T2) _ b T1 T2 T); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v ?T
     |- reducible_values ?theta ?v ?T2 =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes T2, index T2) _ b T1 T2 T); eauto
+     unshelve eapply (IH (get_measure T2) _ b T1 T2 T); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T2 ?a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (open 0 ?T ?a)
     |- reducible_values ?theta ?v (open 0 ?T2 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T2 a)
     |- reducible_values ?theta ?v (open 0 ?T ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: forall a, _ -> _ -> reducible_values ?theta ?v (open 0 ?T a)
     |- reducible_values ?theta ?v (open 0 ?T2 ?a) =>
      is_var T;
      poseNew (Mark T "applying IH");
-     unshelve eapply (IH (typeNodes (open 0 T2 a), index (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
+     unshelve eapply (IH (get_measure (open 0 T2 a)) _ b (open 0 T1 a) (open 0 T2 a) (open 0 T a)); eauto
   end.
 
 Ltac t_apply_ih_topen_false :=
   lazymatch goal with
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T2 ?X)
     |- reducible_values ?theta ?v (topen 0 ?T ?X) =>
-     unshelve eapply (IH (typeNodes (topen 0 T2 X), index (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+     unshelve eapply (IH (get_measure (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T1 ?T2 ?T, H2: reducible_values ?theta ?v (topen 0 ?T ?X)
     |- reducible_values ?theta ?v (topen 0 ?T2 ?X) =>
-     unshelve eapply (IH (typeNodes (topen 0 T2 X), index (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
+     unshelve eapply (IH (get_measure (topen 0 T2 X)) _ b (topen 0 T1 X) (topen 0 T2 X) (topen 0 T X)); eauto
   end.
 
 Ltac t_apply_ih_rec_false :=
   lazymatch goal with
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts)
     |- reducible_values ?theta ?v (T_rec ?n ?T0'' ?Ts'') =>
-     unshelve eapply (IH (typeNodes (T_rec n T0'' Ts''), index (T_rec n T0'' Ts'')) _ b
+     unshelve eapply (IH (get_measure (T_rec n T0'' Ts'')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
   | IH: forall _ _ _ _ _ _, _, H1: T_ite_push ?b ?T0' ?T0'' ?T0, H2: T_ite_push ?b ?Ts' ?Ts'' ?Ts, H3: reducible_values ?theta ?v (T_rec ?n ?T0'' ?Ts'')
     |- reducible_values ?theta ?v (T_rec ?n ?T0 ?Ts) =>
      apply reducible_values_rec_equivalent with (ite b n n); eauto with b_equiv; steps; eauto with berased;
-     unshelve eapply (IH (typeNodes (T_rec n T0'' Ts''), index (T_rec n T0'' Ts'')) _ b
+     unshelve eapply (IH (get_measure (T_rec n T0'' Ts'')) _ b
                          (T_rec n T0' Ts') (T_rec n T0'' Ts'') (T_rec (ite b n n) T0 Ts)); eauto
   end.
 
 Lemma reducible_values_T_ite_false_aux:
-  forall measure b T1 T2 T theta v,
-    (typeNodes T2, index T2) = measure ->
+  forall (measure: measure_domain) b T1 T2 T theta v,
+    get_measure T2 = measure ->
     T_ite_push b T1 T2 T ->
     wf b 0 ->
     wf T1 0 ->
@@ -423,6 +427,7 @@ Lemma reducible_values_T_ite_false_aux:
     is_erased_term b ->
     is_erased_type T1 ->
     is_erased_type T2 ->
+    is_erased_type T ->
     star small_step b tfalse ->
     valid_interpretation theta ->
     (reducible_values theta v T <-> reducible_values theta v T2).
@@ -453,7 +458,7 @@ Proof.
     try omega;
     eauto using ite_type_open;
     eauto with bwf bfv berased;
-    try solve [ apply left_lex; autorewrite with bsize in *; omega ].
+    try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ].
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T3 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
@@ -467,7 +472,7 @@ Proof.
     t_apply_ih_topen_false;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply left_lex || apply wf_topen || apply fv_nils_topen ||
+             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -485,7 +490,7 @@ Proof.
     t_apply_ih_topen_false;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply left_lex || apply wf_topen || apply fv_nils_topen ||
+             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -504,22 +509,23 @@ Proof.
       apply (reducible_rename_one_rc _ RC _ _ _ _ M) in H
     end;
       repeat step || finisher || apply is_erased_type_topen || apply ite_type_topen || t_listutils ||
-                rewrite substitute_topen2 || t_apply_ih || t_apply_ih_topen_false || t_apply_ih_rec_false ||
+                rewrite substitute_topen2 || t_apply_ih ||
+                t_apply_ih_topen_false || t_apply_ih_rec_false ||
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply left_lex; autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex; apply lt_index_step; auto ];
+      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ];
+      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
       eauto with bwf;
       eauto with btwf;
       eauto with bfv.
-    + apply right_lex; apply lt_index_step; eauto with values.
+    + apply right_lex, right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_false; try eassumption; steps; eauto with values.
     + eapply reducible_values_rec_equivalent; eauto; steps; eauto with b_equiv; eauto with berased.
-    + apply right_lex; apply lt_index_step; eauto with values.
+    + apply right_lex, right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_false; try eassumption; steps; eauto with values.
 
   - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T02 type_var
@@ -538,8 +544,8 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply left_lex; autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex; apply lt_index_step; auto ];
+      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ];
+      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
@@ -561,6 +567,7 @@ Lemma reducible_values_T_ite_false:
     is_erased_term b ->
     is_erased_type T1 ->
     is_erased_type T2 ->
+    is_erased_type T ->
     star small_step b tfalse ->
     valid_interpretation theta ->
     (reducible_values theta v T <-> reducible_values theta v T2).
@@ -582,6 +589,7 @@ Lemma reducible_T_ite_push:
     is_erased_term t2 ->
     is_erased_type T1 ->
     is_erased_type T2 ->
+    is_erased_type T ->
     valid_interpretation theta ->
     reducible theta b T_bool ->
     T_ite_push b T1 T2 T ->
@@ -625,6 +633,7 @@ Lemma open_reducible_T_ite_push:
     is_erased_term t2 ->
     is_erased_type T1 ->
     is_erased_type T2 ->
+    is_erased_type T ->
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
     subset (fv T1) (support gamma) ->
@@ -652,6 +661,6 @@ Proof.
     eauto with bwf;
     eauto using subset_same with bfv;
     eauto with berased.
-  - unshelve epose proof (H23 _ ((x, uu) :: lterms) _ _ _); tac1.
   - unshelve epose proof (H24 _ ((x, uu) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H25 _ ((x, uu) :: lterms) _ _ _); tac1.
 Qed.

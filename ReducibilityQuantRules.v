@@ -43,6 +43,7 @@ Lemma reducible_forall:
     reducible theta t A ->
     wf U 0 ->
     fv U = nil ->
+    is_erased_type V ->
     (forall u, reducible_values theta u U -> reducible theta t (open 0 V u)) ->
     reducible theta t (T_forall U V).
 Proof.
@@ -67,13 +68,14 @@ Lemma open_reducible_forall:
     wf U 0 ->
     subset (fv U) (support gamma) ->
     subset (fv t) (support gamma) ->
+    is_erased_type V ->
     open_reducible tvars ((x, U) :: gamma) t (open 0 V (term_fvar x)) ->
     open_reducible tvars gamma t (T_forall U V).
 Proof.
   unfold open_reducible in *; repeat step || t_instantiate_sat3.
 
   eapply reducible_forall; steps; t_closer.
-  unshelve epose proof (H7 theta ((x,u) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H8 theta ((x,u) :: lterms) _ _ _); tac1.
 Qed.
 
 Lemma open_reducible_exists_elim:

@@ -23,6 +23,7 @@ Inductive base_type: nat -> tree -> tree -> Prop :=
 | BTId:
     forall X A,
       ~(X ∈ pfv A type_var) ->
+      is_erased_type A ->
       base_type X A A
 | BTApprox:
     forall X A,

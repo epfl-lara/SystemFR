@@ -9,6 +9,7 @@ Require Import SystemFR.SubstitutionLemmas.
 Require Import SystemFR.PrimitiveSize.
 Require Import SystemFR.SmallStep.
 Require Import SystemFR.PrimitiveRecognizers.
+Require Import SystemFR.LVarOperations.
 
 Lemma is_erased_term_twf:
   forall t k,
@@ -175,3 +176,33 @@ Lemma is_erased_subst:
 Proof.
   intros; rewrite substitute_nothing5; eauto with bfv.
 Qed.
+
+Lemma is_erased_term_map_indices:
+  forall t k f,
+    is_erased_term t ->
+    is_erased_term (map_indices k t f).
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Resolve is_erased_term_map_indices: berased.
+
+Lemma is_erased_type_map_indices:
+  forall T k f,
+    is_erased_type T ->
+    is_erased_type (map_indices k T f).
+Proof.
+  induction T; steps; eauto using is_erased_term_map_indices.
+Qed.
+
+Hint Resolve is_erased_type_map_indices: berased.
+
+Lemma is_erased_type_shift:
+  forall T,
+    is_erased_type T ->
+    is_erased_type (shift T).
+Proof.
+  intros; apply is_erased_type_map_indices; assumption.
+Qed.
+
+Hint Resolve is_erased_type_shift: berased.

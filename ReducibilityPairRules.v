@@ -45,6 +45,7 @@ Lemma reducible_values_pp:
     valid_interpretation theta ->
     reducible_values theta v1 T1 ->
     reducible_values theta v2 (open 0 T2 v1) ->
+    is_erased_type T2 ->
     reducible_values theta (pp v1 v2) (T_prod T1 T2).
 Proof.
   repeat step || simp reducible_values || t_closer ||

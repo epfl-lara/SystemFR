@@ -317,6 +317,14 @@ Proof.
   - inversion H1; repeat step || t_deterministic_step; eauto with falsity.
 Qed.
 
+Ltac t_deterministic_star_irred :=
+    match goal with
+    | H1: star small_step ?t ?v1,
+      H2: star small_step ?t ?v2 |- _ =>
+      poseNew (Mark (v1,v2) "equality");
+      unshelve epose proof (star_smallstep_irred _ _ H1 _ H2 _ _)
+    end; eauto with values.
+
 Lemma star_smallstep_irred2:
   forall t t1,
     star small_step t t1 ->

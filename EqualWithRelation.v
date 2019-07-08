@@ -7,6 +7,12 @@ Require Import SystemFR.Trees.
 Require Import SystemFR.Syntax.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.SizeLemmas.
+Require Import SystemFR.SmallStep.
+Require Import SystemFR.StarRelation.
+Require Import SystemFR.StarLemmas.
+Require Import SystemFR.PrimitiveRecognizers.
+Require Import SystemFR.PrimitiveSize.
+Require Import SystemFR.TermProperties.
 
 Require Import SystemFR.ReducibilityCandidate.
 
@@ -22,7 +28,7 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel (fvar X type_var) (fvar X' type_var)
 | EWRFVar:
     forall X,
-      equal_with_relation rel(fvar X term_var) (fvar X term_var)
+      equal_with_relation rel (fvar X term_var) (fvar X term_var)
 | EWRLVar:
     forall i tag,
       equal_with_relation rel (lvar i tag) (lvar i tag)
@@ -296,7 +302,13 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel n n' ->
       equal_with_relation rel T0 T0' ->
       equal_with_relation rel Ts Ts' ->
-      equal_with_relation rel (T_rec n T0 Ts) (T_rec n' T0' Ts').
+      equal_with_relation rel (T_rec n T0 Ts) (T_rec n' T0' Ts')
+
+| EWRTInterpret:
+    forall T T',
+      equal_with_relation rel T T' ->
+      equal_with_relation rel (T_interpret T) (T_interpret T')
+.
 
 Hint Constructors equal_with_relation: bewr.
 
@@ -381,10 +393,28 @@ Proof.
     eauto using equal_with_relation_refl.
 Qed.
 
+Lemma equal_with_relation_open2:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    forall k v1 v2,
+      equal_with_relation rel v1 v2 ->
+      equal_with_relation rel (open k t1 v1) (open k t2 v2).
+Proof.
+  induction 1; repeat step; eauto 6 with bewr.
+Qed.
+
 Lemma equal_with_relation_size:
   forall t1 t2 rel,
     equal_with_relation rel t1 t2 ->
     typeNodes t1 = typeNodes t2.
+Proof.
+  induction 1; steps.
+Qed.
+
+Lemma equal_with_relation_count_interpret:
+  forall t1 t2 rel,
+    equal_with_relation rel t1 t2 ->
+    count_interpret t1 = count_interpret t2.
 Proof.
   induction 1; steps.
 Qed.
@@ -438,3 +468,257 @@ Ltac t_equal_with_relation_pfv2 :=
     pose proof (equal_with_relation_pfv2 _ _ _ _ H1 H2)
   | _ => t_equal_with_relation_pfv
   end.
+
+Lemma equal_with_relation_pfv_nil:
+  forall T T' rel tag,
+    equal_with_relation rel T T' ->
+    pfv T tag = nil ->
+    pfv T' tag = nil.
+Proof.
+  induction 1; repeat step || t_listutils || unfold singleton, add in *.
+Qed.
+
+Lemma equal_with_relation_pfv_nil2:
+  forall T T' rel tag,
+    equal_with_relation rel T T' ->
+    pfv T' tag = nil ->
+    pfv T tag = nil.
+Proof.
+  induction 1; repeat step || t_listutils || unfold singleton, add in *.
+Qed.
+
+Ltac t_ewr_nil :=
+  match goal with
+  | H1: equal_with_relation ?rel ?T ?T',
+    H2: pfv ?T _ = nil |- _ =>
+    poseNew (Mark T' "ewr_nil");
+    pose proof (equal_with_relation_pfv_nil _ _ _ _ H1 H2)
+  | H1: equal_with_relation ?rel ?T ?T',
+    H2: pfv ?T' _ = nil |- _ =>
+    poseNew (Mark T "ewr_nil2");
+    pose proof (equal_with_relation_pfv_nil2 _ _ _ _ H1 H2)
+  end.
+
+Lemma equal_with_relation_value:
+  forall rel v1 v2,
+    equal_with_relation rel v1 v2 ->
+    is_value v1 ->
+    is_value v2.
+Proof.
+  induction 1; repeat step || step_inversion is_value;
+    eauto with values.
+Qed.
+
+Lemma equal_with_relation_value2:
+  forall rel v1 v2,
+    equal_with_relation rel v1 v2 ->
+    is_value v2 ->
+    is_value v1.
+Proof.
+  induction 1; repeat step || step_inversion is_value;
+    eauto with values.
+Qed.
+
+Ltac t_ewr_value :=
+  match goal with
+  | H1: equal_with_relation _ ?v ?v2, H2: is_value ?v |- _ =>
+    poseNew (Mark v2 "ewr_value");
+    pose proof (equal_with_relation_value _ _ _ H1 H2)
+  | H1: equal_with_relation _ ?v1 ?v, H2: is_value ?v |- _ =>
+    poseNew (Mark v1 "ewr_value");
+    pose proof (equal_with_relation_value2 _ _ _ H1 H2)
+  end.
+
+Lemma equal_with_relation_tsize:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    tsize_semantics t1 = tsize_semantics t2.
+Proof.
+  induction 1; steps.
+Qed.
+
+Lemma equal_with_relation_pair:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    is_pair t1 = is_pair t2.
+Proof.
+  induction 1; steps.
+Qed.
+
+Lemma equal_with_relation_lambda:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    is_lambda t1 = is_lambda t2.
+Proof.
+  induction 1; steps.
+Qed.
+
+Lemma equal_with_relation_succ:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    is_succ t1 = is_succ t2.
+Proof.
+  induction 1; steps.
+Qed.
+
+Lemma equal_with_relation_nat:
+  forall rel n,
+    equal_with_relation rel (build_nat n) (build_nat n).
+Proof.
+  induction n; repeat step || constructor.
+Qed.
+
+Lemma equal_with_relation_pair_refl:
+  forall rel t,
+    equal_with_relation rel (is_pair t) (is_pair t).
+Proof.
+  destruct t; repeat step.
+Qed.
+
+Lemma equal_with_relation_succ_refl:
+  forall rel t,
+    equal_with_relation rel (is_succ t) (is_succ t).
+Proof.
+  destruct t; repeat step.
+Qed.
+
+Lemma equal_with_relation_lambda_refl:
+  forall rel t,
+    equal_with_relation rel (is_lambda t) (is_lambda t).
+Proof.
+  destruct t; repeat step.
+Qed.
+
+Lemma equal_with_relation_small_step:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    forall t1',
+      small_step t1 t1' ->
+      exists t2',
+        small_step t2 t2' /\
+        equal_with_relation rel t1' t2'.
+Proof.
+  induction 1; inversion 1;
+    repeat step || t_ewr_nil || t_ewr_value || instantiate_any ||
+      step_inversion equal_with_relation ||
+      apply equal_with_relation_open2 ||
+      (erewrite equal_with_relation_tsize by eauto) ||
+      (erewrite equal_with_relation_lambda by eauto) ||
+      (erewrite equal_with_relation_succ by eauto) ||
+      (erewrite equal_with_relation_pair by eauto) ||
+      (eexists; split; [ solve [ eauto with smallstep ] | idtac ]);
+      try solve [ apply equal_with_relation_nat ];
+      try solve [ apply equal_with_relation_pair_refl ];
+      try solve [ apply equal_with_relation_lambda_refl ];
+      try solve [ apply equal_with_relation_succ_refl ];
+      eauto with bewr.
+Qed.
+
+Ltac t_ewr_small_step :=
+  match goal with
+  | H1: equal_with_relation ?rel ?t1 ?t2, H2: small_step ?t1 ?t1' |- _ =>
+    poseNew (Mark (H1,H2) "ewr_small_step");
+    pose proof (equal_with_relation_small_step _ _ _ H1 _ H2)
+  end.
+
+Lemma equal_with_relation_star:
+  forall t1 t1',
+    star small_step t1 t1' ->
+    forall rel t2,
+      equal_with_relation rel t1 t2 ->
+      exists t2',
+        star small_step t2 t2' /\
+        equal_with_relation rel t1' t2'.
+Proof.
+  induction 1;
+    repeat match goal with
+           | _ => step || t_ewr_small_step
+           | H1: forall x y, equal_with_relation _ _ _ -> _,
+             H2: equal_with_relation _ _ _ |- _ => apply H1 in H2
+           end; eauto with smallstep.
+Qed.
+
+Lemma equal_with_relation_star2:
+  forall rel t1 t2 t2',
+    star small_step t2 t2' ->
+    equal_with_relation rel t1 t2 ->
+    exists t1',
+      star small_step t1 t1' /\
+      equal_with_relation rel t1' t2'.
+Proof.
+  intros.
+  apply equal_with_relation_swap in H0.
+  eapply equal_with_relation_star in H0; try eassumption; steps.
+  eexists; split; eauto.
+  apply equal_with_relation_swap in H2;
+    repeat step || rewrite swap_twice in *.
+Qed.
+
+Ltac t_ewr_star :=
+  match goal with
+  | H1: equal_with_relation ?rel ?t1 ?t2, H2: star small_step ?t1 ?t1' |- _ =>
+    poseNew (Mark 0 "ewr_star");
+    pose proof (equal_with_relation_star _ _ H2 _ _ H1)
+  | H1: equal_with_relation ?rel ?t1 ?t2, H2: star small_step ?t2 ?t2' |- _ =>
+    poseNew (Mark 0 "ewr_star");
+    pose proof (equal_with_relation_star2 _ _ _ _ H2 H1)
+  end.
+
+Ltac t_ewr_small_step_back :=
+  match goal with
+  | H1: equal_with_relation ?rel ?t1 ?t2, H2: small_step ?t2 ?t2' |- _ =>
+    poseNew (Mark (H1,H2) "ewr_small_step");
+    unshelve epose proof (equal_with_relation_small_step (swap rel) t2 t1 _ _ H2);
+    eauto using equal_with_relation_swap
+  end.
+
+Lemma equal_with_relation_irred:
+  forall rel T1 T2,
+    equal_with_relation rel T1 T2 ->
+    irred T1 ->
+    irred T2.
+Proof.
+  unfold irred; repeat step || t_ewr_small_step_back;
+    eauto.
+Qed.
+
+Lemma equal_with_relation_irred_back:
+  forall rel T1 T2,
+    equal_with_relation rel T1 T2 ->
+    irred T2 ->
+    irred T1.
+Proof.
+  intros; eauto using equal_with_relation_irred, equal_with_relation_swap.
+Qed.
+
+
+Lemma equal_with_relation_erased_term:
+  forall rel t1 t2,
+    equal_with_relation rel t1 t2 ->
+    is_erased_term t1 ->
+    is_erased_term t2.
+Proof.
+  induction 1; steps.
+Qed.
+
+Lemma equal_with_relation_erased_type:
+  forall rel T1 T2,
+    equal_with_relation rel T1 T2 ->
+    is_erased_type T1 ->
+    is_erased_type T2.
+Proof.
+  induction 1; steps; eauto using equal_with_relation_erased_term.
+Qed.
+
+Lemma equal_with_relation_erased_type_back:
+  forall rel T1 T2,
+    equal_with_relation rel T1 T2 ->
+    is_erased_type T2 ->
+    is_erased_type T1.
+Proof.
+  eauto using equal_with_relation_swap, equal_with_relation_erased_type.
+Qed.
+
+Hint Immediate equal_with_relation_erased_term: berased.
+Hint Immediate equal_with_relation_erased_type: berased.
+Hint Immediate equal_with_relation_erased_type_back: berased.

@@ -21,6 +21,7 @@ Require Import SystemFR.SetLemmas.
 Require Import SystemFR.EqualWithRelation.
 Require Import SystemFR.EquivalentWithRelation.
 Require Import SystemFR.ErasedTermLemmas.
+Require Import SystemFR.TermProperties.
 
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasLists.
@@ -48,9 +49,9 @@ Ltac t_bewr_constructor :=
   end.
 
 (* The property that we wnat to prove for a type T and a measure m *)
-Definition renamable_prop m T: Prop :=
+Definition renamable_prop (m: measure_domain) T: Prop :=
   forall (T' t : tree) (theta theta' : interpretation) (rel : map nat nat),
-    (typeNodes T, index T) = m ->
+    get_measure T = m ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
@@ -60,13 +61,14 @@ Definition renamable_prop m T: Prop :=
 Definition renamable_prop_IH m: Prop := forall m', m' << m -> forall T', renamable_prop m' T'.
 
 Lemma reducible_rename_induct:
-  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n1 n2,
-    renamable_prop_IH (n1, n2) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n0 n1 n2,
+    renamable_prop_IH (n0, (n1, n2)) ->
     equal_with_relation rel A A' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta v A ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
+    count_interpret A <= n0 ->
     typeNodes A < n1 ->
     reducible_values theta' v A'.
 Proof.
@@ -76,20 +78,22 @@ Proof.
     H1: reducible_values ?theta ?t ?T,
     H2: equal_with_relation ?rel ?T ?T' |-
       reducible_values ?theta' ?t ?T' =>
-        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (get_measure T) _ T T' t theta theta' rel); eauto
   end.
-  repeat step || apply left_lex.
+  repeat step || unfold get_measure;
+    try solve [ apply leq_lt_measure; steps ].
 Qed.
 
 Lemma reducible_rename_induct_back:
-  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n1 n2,
-    renamable_prop_IH (n1, n2) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n0 n1 n2,
+    renamable_prop_IH (n0, (n1, n2)) ->
     equal_with_relation rel A A' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta' v A' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
     typeNodes A < n1 ->
+    count_interpret A <= n0 ->
     reducible_values theta v A.
 Proof.
   unfold renamable_prop_IH; intros.
@@ -98,9 +102,10 @@ Proof.
     H1: reducible_values ?theta' ?t ?T',
     H2: equal_with_relation ?rel ?T ?T' |-
       reducible_values ?theta ?t ?T =>
-        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (get_measure T) _ T T' t theta theta' rel); eauto
   end.
-  repeat step || apply left_lex.
+  repeat step || unfold get_measure;
+    try solve [ apply leq_lt_measure; steps ].
 Qed.
 
 Ltac t_apply_ih :=
@@ -109,17 +114,17 @@ Ltac t_apply_ih :=
     H1: reducible_values ?theta' ?t ?T',
     H2: equivalent_with_relation ?rel ?theta ?theta' _ |-
       reducible_values ?theta ?t ?T =>
-        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (get_measure T) _ T T' t theta theta' rel); eauto
   | IH: forall m, _ << _ -> _ ,
     H1: reducible_values ?theta ?t ?T,
     H2: equivalent_with_relation ?rel ?theta ?theta' _ |-
       reducible_values ?theta' ?t ?T' =>
-        unshelve eapply (IH (typeNodes T, index T) _ T T' t theta theta' rel); eauto
+        unshelve eapply (IH (get_measure T) _ T T' t theta theta' rel); eauto
   end.
 
 Lemma reducible_rename_induct_open:
-  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n1 n2,
-    renamable_prop_IH (n1, n2) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n0 n1 n2,
+    renamable_prop_IH (n0, (n1, n2)) ->
     equal_with_relation rel B B' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta v (open 0 B a) ->
@@ -127,15 +132,17 @@ Lemma reducible_rename_induct_open:
     valid_interpretation theta' ->
     is_erased_term a ->
     typeNodes (open 0 B a) < n1 ->
+    count_interpret (open 0 B a) <= n0 ->
     reducible_values theta' v (open 0 B' a).
 Proof.
   unfold renamable_prop_IH; intros.
-  t_apply_ih; repeat step || apply left_lex || apply equal_with_relation_open; eauto with bfv.
+  t_apply_ih;
+    repeat step || apply leq_lt_measure || apply equal_with_relation_open; eauto with bfv.
 Qed.
 
 Lemma reducible_rename_induct_open_back:
-  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n1 n2,
-    renamable_prop_IH (n1, n2) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n0 n1 n2,
+    renamable_prop_IH (n0, (n1, n2)) ->
     equal_with_relation rel B B' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta' v (open 0 B' a) ->
@@ -143,10 +150,11 @@ Lemma reducible_rename_induct_open_back:
     valid_interpretation theta' ->
     is_erased_term a ->
     typeNodes (open 0 B a) < n1 ->
+    count_interpret (open 0 B a) <= n0 ->
     reducible_values theta v (open 0 B a).
 Proof.
   unfold renamable_prop_IH; intros.
-  t_apply_ih; repeat step || apply left_lex || apply equal_with_relation_open; eauto with bfv.
+  t_apply_ih; repeat step || apply leq_lt_measure || apply equal_with_relation_open; eauto with bfv.
 Qed.
 
 Ltac t_induct :=
@@ -172,8 +180,10 @@ Ltac t_prove_reduces_to :=
 Lemma reducible_rename_reduces_to:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (S (typeNodes T1 + typeNodes T2), notype_err) ->
+    renamable_prop_IH (count_interpret T1 + count_interpret T2, (S (typeNodes T1 + typeNodes T2), notype_err)) ->
     reducible_values theta' a A' ->
+    is_erased_type T2 ->
+    is_erased_type B' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
     (forall a : tree,
@@ -184,15 +194,16 @@ Lemma reducible_rename_reduces_to:
     equal_with_relation rel T2 B' ->
     reduces_to (fun t0 : tree => reducible_values theta' t0 (open 0 B' a)) (app t a).
 Proof.
-  intros.
   repeat step || t_reduces_to || t_reduces_to2 || t_prove_reduces_to || t_induct_all.
 Qed.
 
 Lemma reducible_rename_reduces_to_back:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (S (typeNodes T1 + typeNodes T2), notype_err) ->
+    renamable_prop_IH (count_interpret T1 + count_interpret T2, (S (typeNodes T1 + typeNodes T2), notype_err)) ->
     reducible_values theta a T1 ->
+    is_erased_type T2 ->
+    is_erased_type B' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
     (forall a : tree,
@@ -203,7 +214,6 @@ Lemma reducible_rename_reduces_to_back:
     equal_with_relation rel T2 B' ->
     reduces_to (fun t0 : tree => reducible_values theta t0 (open 0 T2 a)) (app t a).
 Proof.
-  intros.
   repeat step || t_reduces_to || t_reduces_to2 || t_prove_reduces_to || t_induct_all.
 Qed.
 
@@ -219,18 +229,20 @@ Hint Immediate reducible_rename_fvar: b_rename.
 
 Lemma reducible_rename_arrow: forall m T1 T2, renamable_prop_IH m -> renamable_prop m (T_arrow T1 T2).
 Proof.
-  unfold renamable_prop;
+  unfold renamable_prop, get_measure;
   repeat step || simp_red || step_inversion equal_with_relation;
     eauto 2 using reducible_rename_reduces_to;
-    eauto 2 using reducible_rename_reduces_to_back.
+    eauto 2 using reducible_rename_reduces_to_back;
+    eauto 2 with berased.
 Qed.
 
 Hint Immediate reducible_rename_arrow: b_rename.
 
 Lemma reducible_rename_prod: forall m T1 T2, renamable_prop_IH m -> renamable_prop m (T_prod T1 T2).
 Proof.
-  unfold renamable_prop;
-  repeat step || simp_red || step_inversion equal_with_relation || find_exists || t_induct_all.
+  unfold renamable_prop, get_measure;
+  repeat step || simp_red || step_inversion equal_with_relation || find_exists || t_induct_all;
+  eauto 2 with berased.
 Qed.
 
 Hint Immediate reducible_rename_prod: b_rename.
@@ -254,7 +266,8 @@ Hint Immediate reducible_rename_refine: b_rename.
 Lemma reducible_rename_type_refine: forall m T1 T2, renamable_prop_IH m -> renamable_prop m (T_type_refine T1 T2).
 Proof.
   unfold renamable_prop;
-  repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || find_exists_open.
+  repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || find_exists_open;
+  eauto 2 with berased.
 Qed.
 
 Hint Immediate reducible_rename_type_refine: b_rename.
@@ -262,7 +275,8 @@ Hint Immediate reducible_rename_type_refine: b_rename.
 Lemma reducible_rename_let: forall m t T, renamable_prop_IH m -> renamable_prop m (T_let t T).
 Proof.
   unfold renamable_prop;
-  repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || find_smallstep_value2 || t_equal_with_erased.
+  repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || find_smallstep_value2 || t_equal_with_erased;
+  eauto 2 with berased.
 Qed.
 
 Hint Immediate reducible_rename_let: b_rename.
@@ -312,7 +326,8 @@ Hint Immediate reducible_rename_equal: b_rename.
 Lemma reducible_rename_forall: forall m T1 T2, renamable_prop_IH m -> renamable_prop m (T_forall T1 T2).
 Proof.
   unfold renamable_prop;
-  repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || t_instantiate_reducible_erased.
+  repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || t_instantiate_reducible_erased;
+  eauto 2 with berased.
 Qed.
 
 Hint Immediate reducible_rename_forall: b_rename.
@@ -326,7 +341,8 @@ Proof.
          | H1: equal_with_relation _ ?T' ?T,
            H: reducible_values _ ?t ?T |- exists _ _, reducible_values _ _ ?T' /\ _ => exists t
          | _ => step || simp_red || step_inversion equal_with_relation || t_induct_all
-         end.
+         end;
+  eauto 2 with berased.
 Qed.
 
 Hint Immediate reducible_rename_exists: b_rename.
@@ -347,7 +363,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (typeNodes T, index T) _ T T' t
+            (IH (get_measure T) _ T T' t
                  ((X,RC) :: theta)
                  ((M,RC) :: theta')
                  ((X,M) :: rel)
@@ -356,9 +372,10 @@ Proof.
     end;
       repeat
         steps || (progress autorewrite with bsize in * ) || t_fv_open || t_listutils ||
+        unfold get_measure ||
         apply equivalent_with_relation_add || finisher ||
         apply equal_with_relation_topen ||
-        apply left_lex ||
+        apply right_lex, left_lex ||
         (rewrite substitute_topen3 in * by steps);
       try omega;
       eauto using in_remove_support;
@@ -371,7 +388,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (typeNodes T, index T) _ T T' t
+            (IH (get_measure T) _ T T' t
                  ((X,RC) :: theta)
                  ((M,RC) :: theta')
                  ((X,M) :: (swap rel))
@@ -380,14 +397,16 @@ Proof.
     end;
       repeat
         steps || (progress autorewrite with bsize in * ) || t_fv_open || t_listutils ||
+        unfold get_measure ||
         apply equivalent_with_relation_add || finisher ||
         apply equal_with_relation_topen ||
         apply equivalent_with_relation_swap ||
         apply equal_with_relation_swap ||
-        apply left_lex ||
+        apply leq_lt_measure ||
         match goal with
         | H: equal_with_relation _ _ _ |- _ =>
-          rewrite (equal_with_relation_size _ _ _ H) in * by steps
+          try (rewrite (equal_with_relation_count_interpret _ _ _ H) in * by steps);
+          try (rewrite (equal_with_relation_size _ _ _ H) in * by steps)
         end ||
         (rewrite substitute_topen3 in * by steps);
       try omega;
@@ -416,7 +435,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC2) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (typeNodes T, index T) _ T T' t
+            (IH (get_measure T) _ T T' t
                  ((X,RC1) :: theta)
                  ((M,RC2) :: theta')
                  ((X,M) :: rel)
@@ -424,6 +443,7 @@ Proof.
             )
     end;
       repeat
+        unfold get_measure ||
         steps || (progress autorewrite with bsize in * ) || t_fv_open || t_listutils ||
         apply equivalent_with_relation_add || finisher ||
         apply equal_with_relation_topen ||
@@ -431,8 +451,8 @@ Proof.
         apply equal_with_relation_refl ||
         (rewrite substitute_topen3 in * by steps) ||
         t_apply_ih || t_bewr_constructor;
-      try solve [ apply left_lex; omega ];
-      try solve [ apply right_lex; apply lt_index_step; auto ];
+      try solve [ apply leq_lt_measure; omega ];
+      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
       eauto using in_remove_support;
       eauto using reducibility_is_candidate;
       eauto with bfv.
@@ -446,7 +466,7 @@ Proof.
       H2: equal_with_relation ?rel _ _ |-
         reducible_values ((?M,?RC2) :: ?theta') ?t ?T' =>
           unshelve epose proof
-            (IH (typeNodes T, index T) _ T T' t
+            (IH (get_measure T) _ T T' t
                  ((X,RC1) :: theta)
                  ((M,RC2) :: theta')
                  ((X,M) :: (swap rel))
@@ -454,6 +474,7 @@ Proof.
             )
     end;
       repeat
+        unfold get_measure ||
         steps || (progress autorewrite with bsize in * ) || t_fv_open || t_listutils ||
         apply equivalent_with_relation_add || finisher ||
         apply equal_with_relation_topen ||
@@ -463,12 +484,13 @@ Proof.
         apply equal_with_relation_refl ||
         match goal with
         | H: equal_with_relation _ _ _ |- _ =>
-          rewrite (equal_with_relation_size _ _ _ H) in * by steps
+          rewrite (equal_with_relation_size _ _ _ H) in * by steps;
+          rewrite (equal_with_relation_count_interpret _ _ _ H) in * by steps
         end ||
         (rewrite substitute_topen3 in * by steps) ||
         t_apply_ih || t_bewr_constructor;
-      try solve [ apply left_lex; omega ];
-      try solve [ apply right_lex; apply lt_index_step; auto ];
+      try solve [ apply leq_lt_measure; omega ];
+      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
       eauto using in_remove_support;
       eauto using reducibility_is_candidate;
       eauto with bfv;
@@ -476,6 +498,28 @@ Proof.
 Qed.
 
 Hint Immediate reducible_rename_rec: b_rename.
+
+Lemma reducible_rename_interpret: forall m T, renamable_prop_IH m -> renamable_prop m (T_interpret T).
+Proof.
+  unfold renamable_prop;
+  repeat step || simp_red || step_inversion equal_with_relation || t_ewr_star.
+  - exists t2'; unfold renamable_prop_IH in *;
+      repeat step || t_apply_ih || apply left_lex ||
+        match goal with
+        | H: equal_with_relation _ _ _ |- _ =>
+          rewrite <- (equal_with_relation_count_interpret _ _ _ H) in * by steps
+        end; try omega;
+        eauto 2 using equal_with_relation_irred.
+  - exists t1'; unfold renamable_prop_IH in *;
+      repeat step || t_apply_ih || apply left_lex ||
+        match goal with
+        | H: equal_with_relation _ _ _ |- _ =>
+          rewrite <- (equal_with_relation_count_interpret _ _ _ H) in * by steps
+        end; try omega;
+        eauto 2 using equal_with_relation_irred_back.
+Qed.
+
+Hint Immediate reducible_rename_interpret: b_rename.
 
 Lemma reducible_rename_aux: forall m T, renamable_prop m T.
 Proof.
