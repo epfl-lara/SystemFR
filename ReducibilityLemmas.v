@@ -9,7 +9,6 @@ Require Import SystemFR.SmallStep.
 Require Import SystemFR.TermProperties.
 Require Import SystemFR.SizeLemmas.
 Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.SmallStepIrredLemmas.
 Require Import SystemFR.TermList.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.SizeLemmas.
@@ -189,15 +188,6 @@ Ltac t_reduction :=
       try omega;
       eauto 2 with bwf;
       eauto 2 with bfv.
-
-Ltac t_red_irred :=
-  match goal with
-  | H1: star small_step ?t ?t1,
-    H2: star small_step ?t ?t2,
-    H3: irred ?t1 |- _ =>
-    poseNew (Mark (t1,t2) "equality");
-    unshelve epose proof (star_smallstep_irred2 _ _ H1 _ H2 H3 _)
-  end.
 
 Ltac t_values_info2 :=
   match goal with
