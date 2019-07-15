@@ -13,20 +13,20 @@ Fixpoint size T: nat :=
   | T_nat => 0
   | T_refine A p => 1 + size A
   | T_type_refine A B => 1 + size A + size B
-  | T_arrow A B => 3 + size A + size B
-  | T_prod A B => 3 + size A + size B
+  | T_arrow A B => 1 + size A + size B
+  | T_prod A B => 1 + size A + size B
   | T_sum A B => 1 + size A + size B
-  | T_let t B => 2 + size B
+  | T_let t B => 1 + size B
   | T_singleton t => 0
   | T_intersection A B => 1 + size A + size B
   | T_union A B => 1 + size A + size B
   | T_top => 0
   | T_bot => 0
   | T_equal _ _ => 0
-  | T_forall A B => 3 + size A + size B
-  | T_exists A B => 3 + size A + size B
-  | T_abs T => 3 + size T
-  | T_rec _ T0 Ts => 2 + size T0 + size Ts
+  | T_forall A B => 1 + size A + size B
+  | T_exists A B => 1 + size A + size B
+  | T_abs T => 1 + size T
+  | T_rec _ T0 Ts => 1 + size T0 + size Ts
 
   | _ => 0
   end.

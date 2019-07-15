@@ -172,7 +172,7 @@ Ltac t_prove_reduces_to :=
 Lemma reducible_rename_reduces_to:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (S (S (S (size T1 + size T2))), None) ->
+    renamable_prop_IH (S (size T1 + size T2), notype_err) ->
     reducible_values theta' a A' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
@@ -191,7 +191,7 @@ Qed.
 Lemma reducible_rename_reduces_to_back:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (S (S (S (size T1 + size T2))), None) ->
+    renamable_prop_IH (S (size T1 + size T2), notype_err) ->
     reducible_values theta a T1 ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
