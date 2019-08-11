@@ -561,11 +561,9 @@ Lemma reducible_unfold_in:
         equivalent t1 (notype_tfold v) ->
         equivalent n zero ->
         reducible theta (open 0 t2 v) T) ->
-    (forall v pn,
-        is_nat_value pn ->
-        reducible_values theta v (topen 0 Ts (T_rec pn T0 Ts)) ->
+    (forall v,
+        reducible_values theta v (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ->
         equivalent t1 (notype_tfold v) ->
-        equivalent n (succ pn) ->
         reducible theta (open 0 t2 v) T) ->
     reducible theta (tunfold_in t1 t2) T.
 Proof.
@@ -582,21 +580,34 @@ Proof.
       eauto with berased.
 
     apply H14; steps; eauto with b_equiv.
-  - apply reducibility_subst_head in H24;
-      repeat step || t_listutils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased);
+  - apply (
+        reducible_rename_one_rc
+          _
+          (fun t => reducible_values theta t (T_rec (notype_tpred n) T0 Ts))
+          _ _ _ X X
+     ) in H24;
+      eauto with values;
+      eauto using reducibility_is_candidate.
+    + apply reducibility_subst_head in H24;
+        repeat step || t_listutils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased);
       eauto with bwf btwf bfv.
 
-    apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
-      eauto using red_is_val with smallstep;
-      eauto with bwf;
-      eauto with bfv;
-      eauto with berased.
+      apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
+        eauto using red_is_val with smallstep;
+        eauto with bwf;
+        eauto with bfv;
+        eauto with berased.
 
-    apply H15 with n'; steps; eauto with b_equiv.
+      apply H15; steps; eauto with b_equiv.
+
+    + apply equivalent_rc_sym.
+      apply equivalent_rc_rec_step; unfold notype_tpred; steps.
+      eapply star_smallstep_trans; eauto with bsteplemmas.
+      eapply Trans; eauto with smallstep values.
 Qed.
 
 Lemma open_reducible_unfold_in:
-  forall tvars gamma t1 t2 T n T0 Ts p1 p2 pn y,
+  forall tvars gamma t1 t2 T n T0 Ts p1 p2 y,
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -629,15 +640,6 @@ Lemma open_reducible_unfold_in:
     ~(p2 ∈ fv T0) ->
     ~(p2 ∈ fv Ts) ->
     ~(p2 ∈ fv T) ->
-    ~(pn ∈ tvars) ->
-    ~(pn ∈ pfv_context gamma term_var) ->
-    ~(pn ∈ support gamma) ->
-    ~(pn ∈ fv t1) ->
-    ~(pn ∈ fv t2) ->
-    ~(pn ∈ fv n) ->
-    ~(pn ∈ fv T0) ->
-    ~(pn ∈ fv Ts) ->
-    ~(pn ∈ fv T) ->
     ~(y ∈ tvars) ->
     ~(y ∈ pfv_context gamma term_var) ->
     ~(y ∈ support gamma) ->
@@ -647,16 +649,15 @@ Lemma open_reducible_unfold_in:
     ~(y ∈ fv T0) ->
     ~(y ∈ fv Ts) ->
     ~(y ∈ fv T) ->
-    NoDup (p1 :: p2 :: pn :: y :: nil) ->
+    NoDup (p1 :: p2 :: y :: nil) ->
     open_reducible tvars gamma t1 (T_rec n T0 Ts) ->
     open_reducible tvars
              ((p2, T_equal n zero) :: (p1, T_equal t1 (notype_tfold (fvar y term_var))) :: (y, T0) :: gamma)
              (open 0 t2 (fvar y term_var)) T ->
     open_reducible tvars
-             ((p2, T_equal n (succ (fvar pn term_var))) ::
-              (p1, T_equal t1 (notype_tfold (fvar y term_var))) ::
-              (y, topen 0 Ts (T_rec (fvar pn term_var) T0 Ts)) ::
-              (pn, T_nat) :: gamma)
+             ((p1, T_equal t1 (notype_tfold (fvar y term_var))) ::
+              (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::
+              gamma)
              (open 0 t2 (fvar y term_var)) T ->
     open_reducible tvars gamma (tunfold_in t1 t2) T.
 Proof.
@@ -670,9 +671,9 @@ Proof.
     eauto with bfv;
     eauto with berased.
 
-  - unshelve epose proof (H51 theta ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
+  - unshelve epose proof (H42 theta ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat step_inversion NoDup || tac1.
-  - unshelve epose proof (H52 theta ((p2, uu) :: (p1, uu) :: (y, v) :: (pn, pn0) :: lterms) _ _ _);
+  - unshelve epose proof (H43 theta ((p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat match goal with
              | |- reducible_values _ _ T_nat => simp reducible_values
              | |- reducible_values _ _ (T_equal _ _) => simp reducible_values

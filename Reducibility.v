@@ -270,7 +270,7 @@ Proof.
   - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
   - apply open_reducible_unfold_zero2 with (erase_type Ts) (erase_term n); side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold2; unfold spositive; side_conditions.
-  - apply open_reducible_unfold_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 p2 pn y;
+  - apply open_reducible_unfold_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 p2 y;
       side_conditions.
   - apply open_reducible_fold2 with p pn; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations.

@@ -473,7 +473,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       has_type tvars gamma (tunfold t) (topen 0 Ts (T_rec (tpred n) T0 Ts))
 
 | HTUnfoldIn:
-    forall tvars gamma t1 t2 n T0 Ts pn p1 p2 y T,
+    forall tvars gamma t1 t2 n T0 Ts p1 p2 y T,
       ~(p1 ∈ tvars) ->
       ~(p1 ∈ support gamma) ->
       ~(p1 ∈ fv t1) ->
@@ -490,14 +490,6 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       ~(p2 ∈ fv T0) ->
       ~(p2 ∈ fv Ts) ->
       ~(p2 ∈ fv T) ->
-      ~(pn ∈ tvars) ->
-      ~(pn ∈ support gamma) ->
-      ~(pn ∈ fv t1) ->
-      ~(pn ∈ fv t2) ->
-      ~(pn ∈ fv n) ->
-      ~(pn ∈ fv T0) ->
-      ~(pn ∈ fv Ts) ->
-      ~(pn ∈ fv T) ->
       ~(y ∈ tvars) ->
       ~(y ∈ support gamma) ->
       ~(y ∈ fv t1) ->
@@ -506,7 +498,7 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       ~(y ∈ fv T0) ->
       ~(y ∈ fv Ts) ->
       ~(y ∈ fv T) ->
-      NoDup (p1 :: p2 :: pn :: y :: nil) ->
+      NoDup (p1 :: p2 :: y :: nil) ->
       is_annotated_term n ->
       is_annotated_type T0 ->
       is_annotated_type Ts ->
@@ -518,13 +510,14 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
       wf t2 0 ->
       has_type tvars gamma t1 (T_rec n T0 Ts) ->
       has_type tvars
-               ((p2, T_equal n zero) :: (p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) :: (y, T0) :: gamma)
+               ((p2, T_equal n zero) ::
+                (p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) ::
+                (y, T0) :: gamma)
                (open 0 t2 (fvar y term_var)) T ->
       has_type tvars
-               ((p2, T_equal n (succ (fvar pn term_var))) ::
-                (p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) ::
-                (y, topen 0 Ts (T_rec (fvar pn term_var) T0 Ts)) ::
-                (pn, T_nat) :: gamma)
+               ((p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) ::
+                (y, topen 0 Ts (T_rec (tpred n) T0 Ts)) ::
+                gamma)
                (open 0 t2 (fvar y term_var)) T ->
       has_type tvars gamma (tunfold_in t1 t2) T
 
