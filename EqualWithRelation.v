@@ -164,6 +164,7 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
     forall t t',
       equal_with_relation rel t t' ->
       equal_with_relation rel (notype_tfix t) (notype_tfix t')
+
 | EWRNoTypeFold:
     forall t t',
       equal_with_relation rel t t' ->
@@ -182,6 +183,11 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel t1 t1' ->
       equal_with_relation rel t2 t2' ->
       equal_with_relation rel (tunfold_in t1 t2) (tunfold_in t1' t2')
+| EWRUnfoldPosIn:
+    forall t1 t1' t2 t2',
+      equal_with_relation rel t1 t1' ->
+      equal_with_relation rel t2 t2' ->
+      equal_with_relation rel (tunfold_pos_in t1 t2) (tunfold_pos_in t1' t2')
 
 | EWRLeft:
     forall t t',

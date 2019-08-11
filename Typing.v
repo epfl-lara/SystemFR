@@ -521,6 +521,43 @@ Inductive has_type: list nat -> context -> tree -> tree -> Prop :=
                (open 0 t2 (fvar y term_var)) T ->
       has_type tvars gamma (tunfold_in t1 t2) T
 
+| HTUnfoldPosIn:
+    forall tvars gamma t1 t2 n T0 Ts p1 y T,
+      ~(p1 ∈ tvars) ->
+      ~(p1 ∈ support gamma) ->
+      ~(p1 ∈ fv t1) ->
+      ~(p1 ∈ fv t2) ->
+      ~(p1 ∈ fv n) ->
+      ~(p1 ∈ fv T0) ->
+      ~(p1 ∈ fv Ts) ->
+      ~(p1 ∈ fv T) ->
+      ~(y ∈ tvars) ->
+      ~(y ∈ support gamma) ->
+      ~(y ∈ fv t1) ->
+      ~(y ∈ fv t2) ->
+      ~(y ∈ fv n) ->
+      ~(y ∈ fv T0) ->
+      ~(y ∈ fv Ts) ->
+      ~(y ∈ fv T) ->
+      NoDup (p1 :: y :: nil) ->
+      is_annotated_term n ->
+      is_annotated_type T0 ->
+      is_annotated_type Ts ->
+      wf n 0 ->
+      wf T0 0 ->
+      wf Ts 0 ->
+      twf T0 0 ->
+      twf Ts 1 ->
+      wf t2 0 ->
+      has_type tvars gamma t1 (T_rec n T0 Ts) ->
+      are_equal tvars gamma (annotated_tlt zero n) ttrue ->
+      has_type tvars
+               ((p1, T_equal t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) ::
+                (y, topen 0 Ts (T_rec (tpred n) T0 Ts)) ::
+                gamma)
+               (open 0 t2 (fvar y term_var)) T ->
+      has_type tvars gamma (tunfold_pos_in t1 t2) T
+
 | HTFold:
     forall tvars gamma t n pn T0 Ts p,
       ~(p ∈ tvars) ->
@@ -1419,8 +1456,3 @@ Scheme mut_has_type        := Induction for has_type    Sort Prop
 
 Combined Scheme mut_HT_IT_IC_IS_AE from
          mut_has_type, mut_is_type, mut_is_context, mut_is_subtype, mut_are_equal.
-
-Ltac t_invert_context :=
-  match goal with
-  | H: is_context (_ :: _) |- _ => inversion H; clear H
-  end.

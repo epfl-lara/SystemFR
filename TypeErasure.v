@@ -51,6 +51,7 @@ Fixpoint erase_term (t: tree): tree :=
   | tfold T t' => notype_tfold (erase_term t')
   | tunfold t' => tunfold (erase_term t')
   | tunfold_in t1 t2 => tunfold_in (erase_term t1) (erase_term t2)
+  | tunfold_pos_in t1 t2 => tunfold_in (erase_term t1) (erase_term t2)
 
   | tleft t' => tleft (erase_term t')
   | tright t' => tright (erase_term t')

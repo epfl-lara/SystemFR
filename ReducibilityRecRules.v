@@ -26,6 +26,7 @@ Require Import SystemFR.ErasedTermLemmas.
 Require Import SystemFR.SomeTerms.
 Require Import SystemFR.FVLemmas.
 Require Import SystemFR.TermListLemmas.
+Require Import SystemFR.NatCompare.
 
 Require Import SystemFR.Equivalence.
 Require Import SystemFR.EquivalenceLemmas.
@@ -674,6 +675,143 @@ Proof.
   - unshelve epose proof (H42 theta ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat step_inversion NoDup || tac1.
   - unshelve epose proof (H43 theta ((p1, uu) :: (y, v) :: lterms) _ _ _);
+      repeat match goal with
+             | |- reducible_values _ _ T_nat => simp reducible_values
+             | |- reducible_values _ _ (T_equal _ _) => simp reducible_values
+             | _ => step_inversion NoDup || tac0
+             end.
+Qed.
+
+Lemma equivalent_zero_contradiction:
+  forall n,
+    equivalent (tlt zero n) ttrue ->
+    star small_step n zero ->
+    False.
+Proof.
+  intros.
+  apply (equivalent_tlt_steps _ _ zero zero) in H;
+    steps.
+  apply equivalent_true in H.
+  apply tlt_sound in H; steps; eauto with omega.
+Qed.
+
+Lemma reducible_unfold_pos_in:
+  forall (t1 t2 T n T0 Ts : tree) (theta : interpretation),
+    reducible theta t1 (T_rec n T0 Ts) ->
+    wf T0 0 ->
+    twf T0 0 ->
+    wf Ts 0 ->
+    twf Ts 1 ->
+    wf t1 0 ->
+    wf t2 1 ->
+    wf n 0 ->
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    valid_interpretation theta ->
+    pfv t1 term_var = nil ->
+    pfv t2 term_var = nil ->
+    equivalent (tlt zero n) ttrue ->
+    (forall v,
+        reducible_values theta v (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ->
+        equivalent t1 (notype_tfold v) ->
+        reducible theta (open 0 t2 v) T) ->
+    reducible theta (tunfold_in t1 t2) T.
+Proof.
+  intros.
+  unfold reducible, reduces_to in H; steps.
+  eapply star_backstep_reducible; eauto with bsteplemmas; repeat step || t_listutils;
+    eauto with bwf.
+
+  simp_red; steps; eauto using equivalent_zero_contradiction with falsity.
+
+  - apply (
+        reducible_rename_one_rc
+          _
+          (fun t => reducible_values theta t (T_rec (notype_tpred n) T0 Ts))
+          _ _ _ X X
+     ) in H24;
+      eauto with values;
+      eauto using reducibility_is_candidate.
+    + apply reducibility_subst_head in H24;
+        repeat step || t_listutils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased);
+      eauto with bwf btwf bfv.
+
+      apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
+        eauto using red_is_val with smallstep;
+        eauto with bwf;
+        eauto with bfv;
+        eauto with berased.
+
+      apply H15; steps; eauto with b_equiv.
+
+    + apply equivalent_rc_sym.
+      apply equivalent_rc_rec_step; unfold notype_tpred; steps.
+      eapply star_smallstep_trans; eauto with bsteplemmas.
+      eapply Trans; eauto with smallstep values.
+Qed.
+
+Lemma open_reducible_unfold_pos_in:
+  forall tvars gamma t1 t2 T n T0 Ts p1 y,
+    wf T0 0 ->
+    twf T0 0 ->
+    wf Ts 0 ->
+    twf Ts 1 ->
+    wf t1 0 ->
+    wf t2 1 ->
+    wf n 0 ->
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    is_erased_term n ->
+    is_erased_type T0 ->
+    is_erased_type Ts ->
+    subset (pfv t1 term_var) (support gamma) ->
+    subset (pfv t2 term_var) (support gamma) ->
+    ~(p1 ∈ tvars) ->
+    ~(p1 ∈ pfv_context gamma term_var) ->
+    ~(p1 ∈ support gamma) ->
+    ~(p1 ∈ fv t1) ->
+    ~(p1 ∈ fv t2) ->
+    ~(p1 ∈ fv n) ->
+    ~(p1 ∈ fv T0) ->
+    ~(p1 ∈ fv Ts) ->
+    ~(p1 ∈ fv T) ->
+    ~(y ∈ tvars) ->
+    ~(y ∈ pfv_context gamma term_var) ->
+    ~(y ∈ support gamma) ->
+    ~(y ∈ fv t1) ->
+    ~(y ∈ fv t2) ->
+    ~(y ∈ fv n) ->
+    ~(y ∈ fv T0) ->
+    ~(y ∈ fv Ts) ->
+    ~(y ∈ fv T) ->
+    NoDup (p1 :: y :: nil) ->
+    open_reducible tvars gamma t1 (T_rec n T0 Ts) ->
+    (forall theta l,
+      valid_interpretation theta ->
+      satisfies (reducible_values theta) gamma l ->
+      support theta = tvars ->
+      equivalent (substitute (tlt zero n) l) ttrue) ->
+    open_reducible
+      tvars
+      ((p1, T_equal t1 (notype_tfold (fvar y term_var))) ::
+       (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::
+       gamma)
+      (open 0 t2 (fvar y term_var)) T ->
+    open_reducible tvars gamma (tunfold_in t1 t2) T.
+Proof.
+  unfold open_reducible;
+    repeat step || t_instantiate_sat3 || t_reducible_trec.
+
+  eapply reducible_unfold_pos_in; try eassumption;
+    steps;
+    eauto with bwf;
+    eauto with btwf;
+    eauto with bfv;
+    eauto with berased.
+
+  - unshelve epose proof (H34 theta ((p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat match goal with
              | |- reducible_values _ _ T_nat => simp reducible_values
              | |- reducible_values _ _ (T_equal _ _) => simp reducible_values

@@ -268,9 +268,12 @@ Proof.
   - apply open_reducible_refl; side_conditions.
   - apply open_reducible_forall with x (erase_type A); steps; side_conditions.
   - apply open_reducible_exists_elim with (erase_type U) (erase_type V) x y; slow_side_conditions.
+
   - apply open_reducible_unfold_zero2 with (erase_type Ts) (erase_term n); side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations. apply open_reducible_unfold2; unfold spositive; side_conditions.
   - apply open_reducible_unfold_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 p2 y;
+      side_conditions.
+  - apply open_reducible_unfold_pos_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 y;
       side_conditions.
   - apply open_reducible_fold2 with p pn; side_conditions.
   - rewrite erase_type_topen; repeat step || t_annotations.
@@ -294,6 +297,7 @@ Proof.
     + change (fvar X type_var) with (erase_type (fvar X type_var)).
       rewrite <- erase_type_topen; repeat step || apply base_type_erase.
     + rewrite erase_type_topen in *; (steps; eauto 3 with bannot step_tactic).
+
   - apply open_reducible_left; side_conditions.
   - apply open_reducible_right; side_conditions.
   - apply open_reducible_sum_match with (erase_type A) (erase_type B) y p; side_conditions.
