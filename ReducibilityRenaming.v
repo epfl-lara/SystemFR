@@ -356,7 +356,7 @@ Proof.
          | _ => step || simp_red || step_inversion equal_with_relation
          end; try finisher.
 
-  - instantiate_any. eapply reduces_to_equiv; eauto 1; steps.
+  - instantiate_any.
     lazymatch goal with
     | IH: forall m, _ << _ ->  _ ,
       H1: reducible_values ((?X,?RC) :: ?theta) ?t ?T,
@@ -381,7 +381,7 @@ Proof.
       eauto using in_remove_support;
       eauto using equivalent_rc_refl.
 
-  - instantiate_any. eapply reduces_to_equiv; eauto 1; steps.
+  - instantiate_any.
     lazymatch goal with
     | IH: forall m, _ << _ ->  _ ,
       H1: reducible_values ((?X,?RC) :: ?theta) ?t ?T,

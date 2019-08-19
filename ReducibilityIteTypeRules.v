@@ -243,7 +243,7 @@ Proof.
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T0 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -261,7 +261,7 @@ Proof.
 
   - (* polymorphic type (2) *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T0 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -462,7 +462,7 @@ Proof.
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T3 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -480,7 +480,7 @@ Proof.
 
   - (* polymorphic type (2) *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T3 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H

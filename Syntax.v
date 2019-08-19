@@ -38,7 +38,6 @@ Fixpoint pfv t tag: set nat :=
 
   | type_abs t => pfv t tag
   | type_inst t T => pfv t tag ++ pfv T tag
-  | notype_inst t => pfv t tag
 
   | pp t1 t2 => pfv t1 tag ++ pfv t2 tag
   | pi1 t' => pfv t' tag
@@ -173,7 +172,6 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
 
   | type_abs t' => type_abs (psubstitute t' l tag)
   | type_inst t' T => type_inst (psubstitute t' l tag) (psubstitute T l tag)
-  | notype_inst t'=> notype_inst (psubstitute t' l tag)
 
   | pp t1 t2 => pp (psubstitute t1 l tag) (psubstitute t2 l tag)
   | pi1 t' => pi1 (psubstitute t' l tag)
@@ -272,7 +270,6 @@ Fixpoint wf t k :=
 
   | type_abs t => wf t k
   | type_inst t T => wf t k /\ wf T k
-  | notype_inst t => wf t k
 
   | pp t1 t2 => wf t1 k /\ wf t2 k
   | pi1 t => wf t k
@@ -364,7 +361,6 @@ Fixpoint twf t k :=
 
   | type_abs t => twf t (S k)
   | type_inst t T => twf t k /\ twf T k
-  | notype_inst t => twf t k
 
   | pp t1 t2 => twf t1 k /\ twf t2 k
   | pi1 t => twf t k
@@ -463,7 +459,6 @@ Fixpoint open (k: nat) (t rep: tree) :=
 
   | type_abs t => type_abs (open k t rep)
   | type_inst t T => type_inst (open k t rep) (open k T rep)
-  | notype_inst t => notype_inst (open k t rep)
 
   | uu => t
 
@@ -556,7 +551,6 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
 
   | type_abs t => type_abs (close k t x)
   | type_inst t T => type_inst (close k t x) (close k T x)
-  | notype_inst t => notype_inst (close k t x)
 
   | uu => t
 
@@ -650,7 +644,6 @@ Fixpoint topen (k: nat) (t rep: tree) :=
 
   | type_abs t => type_abs (topen (S k) t rep)
   | type_inst t T => type_inst (topen k t rep) (topen k T rep)
-  | notype_inst t => notype_inst (topen k t rep)
 
   | uu => t
 
@@ -745,7 +738,6 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
 
   | type_abs t => type_abs (tclose (S k) t x)
   | type_inst t T => type_inst (tclose k t x) (tclose k T x)
-  | notype_inst t => notype_inst (tclose k t x)
 
   | uu => t
 

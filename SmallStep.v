@@ -12,7 +12,6 @@ Inductive is_value: tree -> Prop :=
 | IVTrue: is_value ttrue
 | IVPair: forall v1 v2, is_value v1 -> is_value v2 -> is_value (pp v1 v2)
 | IVLambda: forall t, is_value (notype_lambda t)
-| IVTypeAbs: forall t, is_value (type_abs t)
 | IVVar: forall x, is_value (fvar x term_var)
 | IVLeft: forall v, is_value v -> is_value (tleft v)
 | IVRight: forall v, is_value v -> is_value (tright v)
@@ -102,9 +101,6 @@ Inductive small_step: tree -> tree -> Prop :=
       (app (notype_lambda t) v)
       (open 0 t v)
 
-| SPBetaTypeInst: forall t,
-    small_step (notype_inst (type_abs t)) t
-
 | SPBetaIte1: forall t1 t2,
     small_step (ite ttrue t1 t2) t1
 | SPBetaIte2: forall t1 t2,
@@ -165,9 +161,6 @@ Inductive small_step: tree -> tree -> Prop :=
       small_step (boolean_recognizer 2 v) (is_lambda v)
 
 (* reduction inside terms *)
-| SPTypeInst: forall t1 t2,
-    small_step t1 t2 ->
-    small_step (notype_inst t1) (notype_inst t2)
 | SPAppLeft: forall t1 t2 t,
     small_step t1 t2 ->
     small_step (app t1 t) (app t2 t)
@@ -229,7 +222,6 @@ Ltac t_invert_step :=
   | _ => step_inversion small_step
   | H: small_step (boolean_recognizer _ _) _ |- _ => inversion H; clear H
   | H: small_step (app _ _) _ |- _ => inversion H; clear H
-  | H: small_step (notype_inst _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold _) _ |- _ => inversion H; clear H
   | H: small_step (tunfold_in _ _) _ |- _ => inversion H; clear H
   | H: small_step (ite _ _ _) _ |- _ => inversion H; clear H

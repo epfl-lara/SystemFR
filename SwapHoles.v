@@ -31,7 +31,6 @@ Fixpoint swap_type_holes t i j :=
 
   | type_abs t => type_abs (swap_type_holes t (S i) (S j))
   | type_inst t T => type_inst (swap_type_holes t i j) (swap_type_holes T i j)
-  | notype_inst t => notype_inst (swap_type_holes t i j)
 
   | uu => t
 

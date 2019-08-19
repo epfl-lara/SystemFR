@@ -26,7 +26,6 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
 
   | type_abs t => type_abs (map_indices k t f)
   | type_inst t T => type_inst (map_indices k t f) (map_indices k T f)
-  | notype_inst t => notype_inst (map_indices k t f)
 
   | uu => t
 

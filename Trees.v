@@ -75,7 +75,6 @@ Inductive tree: Set :=
 
   | type_abs: tree -> tree
   | type_inst: tree -> tree -> tree
-  | notype_inst: tree -> tree
 
   | tfold: tree -> tree -> tree
   | tunfold: tree -> tree
@@ -202,9 +201,6 @@ Fixpoint is_erased_term t :=
   | pi1 t' => is_erased_term t'
   | pi2 t' => is_erased_term t'
 
-  | because t1 t2 => is_erased_term t1 /\ is_erased_term t2
-  | get_refinement_witness t1 t2 => is_erased_term t1 /\ is_erased_term t2
-
   | ttrue => True
   | tfalse => True
   | ite t1 t2 t3 => is_erased_term t1 /\ is_erased_term t2 /\ is_erased_term t3
@@ -216,9 +212,6 @@ Fixpoint is_erased_term t :=
   | tmatch t' t0 ts => is_erased_term t' /\ is_erased_term t0 /\ is_erased_term ts
 
   | notype_tfix t' => is_erased_term t'
-
-  | type_abs t => is_erased_term t
-  | notype_inst t => is_erased_term t
 
   | tleft t => is_erased_term t
   | tright t => is_erased_term t
@@ -305,7 +298,6 @@ Fixpoint tree_size t :=
 
   | type_abs t => 1 + tree_size t
   | type_inst t T => 1 + tree_size t + tree_size T
-  | notype_inst t => 1 + tree_size t
 
   | tfold T t => 1 + tree_size T + tree_size t
   | tunfold t => 1 + tree_size t

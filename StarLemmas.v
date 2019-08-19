@@ -198,16 +198,6 @@ Qed.
 
 Hint Resolve star_smallstep_succ: bsteplemmas.
 
-Lemma star_smallstep_type_inst:
-  forall t1 t1',
-    star small_step t1 t1' ->
-    star small_step (notype_inst t1) (notype_inst t1').
-Proof.
-  induction 1; steps; eauto with smallstep.
-Qed.
-
-Hint Resolve star_smallstep_type_inst: bsteplemmas.
-
 Lemma star_smallstep_tleft:
   forall t1 t1',
     star small_step t1 t1' ->

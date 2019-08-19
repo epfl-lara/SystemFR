@@ -59,8 +59,7 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
       ~(X ∈ pfv T type_var) /\
       forall RC,
         reducibility_candidate RC ->
-        reduces_to (fun t => reducible_values ((X,RC) :: theta) t (topen 0 T (type_fvar X)))
-                   (notype_inst v);
+        reducible_values ((X,RC) :: theta) v (topen 0 T (type_fvar X));
 
   reducible_values theta v (T_arrow A B) :=
     exists (_: is_erased_type B),
@@ -273,8 +272,7 @@ Ltac simp_red :=
   rewrite reducible_values_equation_57 in * ||
   rewrite reducible_values_equation_58 in * ||
   rewrite reducible_values_equation_59 in * ||
-  rewrite reducible_values_equation_60 in * ||
-  rewrite reducible_values_equation_61 in *.
+  rewrite reducible_values_equation_60 in *.
 
 Ltac top_level_unfold :=
   match goal with
