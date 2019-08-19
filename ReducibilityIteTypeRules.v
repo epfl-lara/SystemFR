@@ -277,7 +277,7 @@ Proof.
         eauto with bapply_any;
         eauto with btwf.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T01 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T01 type_var
                                                    :: pfv Ts1 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var
@@ -310,7 +310,7 @@ Proof.
     + apply leq_leq_lt_measure, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_true; try eassumption; steps; eauto with values.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T01 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T01 type_var
                                                    :: pfv Ts1 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var
@@ -496,7 +496,7 @@ Proof.
         eauto with bapply_any;
         eauto with btwf.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T02 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T02 type_var
                                                    :: pfv Ts2 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var
@@ -528,7 +528,7 @@ Proof.
     + apply right_lex, right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_false; try eassumption; steps; eauto with values.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T02 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T02 type_var
                                                    :: pfv Ts2 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var

@@ -28,7 +28,7 @@ Fixpoint erase_term (t: tree): tree :=
   | pi2 t' => pi2 (erase_term t')
 
   | because t1 t2 => erase_term t1
-  | get_refinement_witness t1 t2 => notype_tlet uu (erase_term t2)
+  | get_refinement_witness t1 t2 => app (notype_lambda (erase_term t2)) uu
 
   | ttrue => ttrue
   | tfalse => tfalse
@@ -40,7 +40,8 @@ Fixpoint erase_term (t: tree): tree :=
   | rec T t' t0 ts => notype_rec (erase_term t') (erase_term t0) (erase_term ts)
   | tmatch t' t0 ts => tmatch (erase_term t') (erase_term t0) (erase_term ts)
 
-  | tlet t1 A t2 => notype_tlet (erase_term t1) (erase_term t2)
+  | notype_tlet t1 t2 => app (notype_lambda (erase_term t2)) (erase_term t1)
+  | tlet t1 A t2 => app (notype_lambda (erase_term t2)) (erase_term t1)
   | trefl t1 t2 => uu
 
   | type_abs t => type_abs (erase_term t)
@@ -48,10 +49,10 @@ Fixpoint erase_term (t: tree): tree :=
 
   | tfix T t => notype_tfix (erase_term t)
 
-  | tfold T t' => notype_tfold (erase_term t')
-  | tunfold t' => tunfold (erase_term t')
-  | tunfold_in t1 t2 => tunfold_in (erase_term t1) (erase_term t2)
-  | tunfold_pos_in t1 t2 => tunfold_in (erase_term t1) (erase_term t2)
+  | tfold T t' => erase_term t'
+  | tunfold t' => erase_term t'
+  | tunfold_in t1 t2 => app (notype_lambda (erase_term t2)) (erase_term t1)
+  | tunfold_pos_in t1 t2 => app (notype_lambda (erase_term t2)) (erase_term t1)
 
   | tleft t' => tleft (erase_term t')
   | tright t' => tright (erase_term t')

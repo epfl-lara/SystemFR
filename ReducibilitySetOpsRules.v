@@ -115,7 +115,7 @@ Lemma open_reducible_union_elim:
     open_reducible tvars gamma t (T_union T1 T2) ->
     open_reducible tvars ((z, T1) :: gamma) (open 0 t' (term_fvar z)) T ->
     open_reducible tvars ((z, T2) :: gamma) (open 0 t' (term_fvar z)) T ->
-    open_reducible tvars gamma (notype_tlet t t') T.
+    open_reducible tvars gamma (app (notype_lambda t') t) T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold || simp_red.
 

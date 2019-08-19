@@ -352,7 +352,7 @@ Proof.
 
   (** Recursive type at n+1: case where the variables do not appear in the recursive type **)
   - right.
-      exists n'0, v'0, (makeFresh (
+      exists n'0, (makeFresh (
                        support theta ::
                        support pre_theta ::
                        support theta' ::
@@ -391,7 +391,7 @@ Proof.
 
   (** Recursive type at n+1: case where the recursive type is itself strictly positive **)
   - right.
-      exists n'0, v'0, (makeFresh (
+      exists n'0, (makeFresh (
                        support theta ::
                        support pre_theta ::
                        support theta' ::

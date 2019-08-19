@@ -65,7 +65,6 @@ Fixpoint pfv t tag: set nat :=
   | tlet t1 A t2 => pfv t1 tag ++ pfv A tag ++  pfv t2 tag
   | trefl t1 t2 => pfv t1 tag ++ pfv t2 tag
 
-  | notype_tfold t' => pfv t' tag
   | tfold T t' => pfv T tag ++ pfv t' tag
   | tunfold t' => pfv t' tag
   | tunfold_in t1 t2 => pfv t1 tag ++ pfv t2 tag
@@ -204,7 +203,6 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | tlet t1 T t2 => tlet (psubstitute t1 l tag) (psubstitute T l tag) (psubstitute t2 l tag)
   | trefl t1 t2 => trefl (psubstitute t1 l tag) (psubstitute t2 l tag)
 
-  | notype_tfold t' => notype_tfold (psubstitute t' l tag)
   | tfold T t' => tfold (psubstitute T l tag) (psubstitute t' l tag)
   | tunfold t' => tunfold (psubstitute t' l tag)
   | tunfold_in t1 t2 => tunfold_in (psubstitute t1 l tag) (psubstitute t2 l tag)
@@ -313,7 +311,6 @@ Fixpoint wf t k :=
   | trefl t1 t2 => wf t1 k /\ wf t2 k
 
   | tfold T t' => wf T k /\ wf t' k
-  | notype_tfold t' => wf t' k
   | tunfold t' => wf t' k
   | tunfold_in t1 t2 => wf t1 k /\ wf t2 (S k)
   | tunfold_pos_in t1 t2 => wf t1 k /\ wf t2 (S k)
@@ -405,7 +402,6 @@ Fixpoint twf t k :=
 
   | trefl t1 t2 => twf t1 k /\ twf t2 k
 
-  | notype_tfold t => twf t k
   | tfold T t => twf T k /\ twf t k
   | tunfold t => twf t k
   | tunfold_in t1 t2 => twf t1 k /\ twf t2 k
@@ -511,7 +507,6 @@ Fixpoint open (k: nat) (t rep: tree) :=
       tlet (open k t1 rep) (open k T rep) (open (S k) t2 rep)
   | trefl t1 t2 => trefl (open k t1 rep) (open k t2 rep)
 
-  | notype_tfold t' => notype_tfold (open k t' rep)
   | tfold T t' => tfold (open k T rep) (open k t' rep)
   | tunfold t' => tunfold (open k t' rep)
   | tunfold_in t1 t2 => tunfold_in (open k t1 rep) (open (S k) t2 rep)
@@ -605,7 +600,6 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
       tlet (close k t1 x) (close k T x) (close (S k) t2 x)
   | trefl t1 t2 => trefl (close k t1 x) (close k t2 x)
 
-  | notype_tfold t' => notype_tfold (close k t' x)
   | tfold T t' => tfold (close k T x) (close k t' x)
   | tunfold t' => tunfold (close k t' x)
   | tunfold_in t1 t2 => tunfold_in (close k t1 x) (close (S k) t2 x)
@@ -701,7 +695,6 @@ Fixpoint topen (k: nat) (t rep: tree) :=
 
   | trefl t1 t2 => trefl (topen k t1 rep) (topen k t2 rep)
 
-  | notype_tfold t => notype_tfold (topen k t rep)
   | tfold T t => tfold (topen k T rep) (topen k t rep)
   | tunfold t => tunfold (topen k t rep)
   | tunfold_in t1 t2 => tunfold_in (topen k t1 rep) (topen k t2 rep)
@@ -796,7 +789,6 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
       tlet (tclose k t1 x) (tclose k T x) (tclose k t2 x)
   | trefl t1 t2 => trefl (tclose k t1 x) (tclose k t2 x)
 
-  | notype_tfold t => notype_tfold (tclose k t x)
   | tfold T t => tfold (tclose k T x) (tclose k t x)
   | tunfold t => tunfold (tclose k t x)
   | tunfold_in t1 t2 => tunfold_in (tclose k t1 x) (tclose k t2 x)
@@ -829,4 +821,3 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | T_rec n T0 Ts => T_rec (tclose k n x) (tclose k T0 x) (tclose (S k) Ts x)
   | T_interpret T => T_interpret (tclose k T x)
   end.
-

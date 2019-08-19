@@ -196,7 +196,7 @@ Proof.
 
     - (* recursive type n+1 *)
       right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var
+      unshelve eexists n', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var
                                                      :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
                                                      :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
                                                      :: support theta :: nil)), _, _; eauto;
@@ -241,7 +241,7 @@ Proof.
 
     - (* recursive type n+1 bis *)
       right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var
+      unshelve eexists n', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var
                                                      :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
                                                      :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
                                                      :: support theta :: nil)), _, _; eauto;

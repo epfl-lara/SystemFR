@@ -103,7 +103,6 @@ Ltac find_smallstep_value2 :=
 Ltac find_exists :=
   match goal with
   | |- exists a b _, pp ?c ?d = pp a b /\ _ => exists c, d
-  | |- exists x, notype_tfold ?v = notype_tfold x /\ _ => exists v
   | |- (exists x, tleft ?v = tleft x /\ _) \/ _  => left; exists v
   | |- _ \/ (exists x, tright ?v = tright x /\ _)  => right; exists v
   end.

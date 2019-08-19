@@ -80,10 +80,11 @@ Lemma open_reducible_get_refinement_witness:
     subset (fv t2) (support gamma) ->
     open_reducible tvars gamma t1 (T_type_refine A B) ->
     open_reducible tvars ((x, T_let t1 B) :: gamma) t2 T ->
-    open_reducible tvars gamma (notype_tlet uu t2) T.
+    open_reducible tvars gamma (app (notype_lambda t2) uu) T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
-  eapply backstep_reducible; eauto with smallstep values; steps; eauto with bfv bwf berased.
+  eapply backstep_reducible; eauto with smallstep values;
+    repeat step || t_listutils; eauto with bfv bwf berased.
   rewrite open_none; eauto with bwf.
   top_level_unfold; repeat step || simp_red.
 

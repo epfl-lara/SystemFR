@@ -70,7 +70,6 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
       tlet (map_indices k t1 f) (map_indices k T f) (map_indices (S k) t2 f)
   | trefl t1 t2 => trefl (map_indices k t1 f) (map_indices k t2 f)
 
-  | notype_tfold t' => notype_tfold (map_indices k t' f)
   | tfold T t' => tfold (map_indices k T f) (map_indices k t' f)
   | tunfold t' => tunfold (map_indices k t' f)
   | tunfold_in t1 t2 => tunfold_in (map_indices k t1 f) (map_indices (S k) t2 f)

@@ -427,7 +427,7 @@ Proof.
          end.
 
   - (* case recursive type at n + 1 *)
-    unshelve eexists n', v', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
+    unshelve eexists n', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ << _ -> _ ,
@@ -458,7 +458,7 @@ Proof.
       eauto with bfv.
 
   - (* case recursive type at n + 1 *)
-   unshelve eexists n'0, v', (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _; eauto;
+   unshelve eexists n'0, (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ << _ ->  _ ,

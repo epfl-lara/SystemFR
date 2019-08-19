@@ -150,14 +150,13 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
   reducible_values theta v (T_rec n T0 Ts) :=
     closed_value v /\
     is_erased_term n /\ (
-      (exists v', v = notype_tfold v' /\ star small_step n zero /\ reducible_values theta v' T0) \/
-      (exists n' v' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
-         v = notype_tfold v' /\
+      (star small_step n zero /\ reducible_values theta v T0) \/
+      (exists n' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
          ~(X ∈ pfv T0 type_var) /\
          ~(X ∈ pfv Ts type_var) /\
          ~(X ∈ support theta) /\
          reducible_values ((X, fun t => reducible_values theta t (T_rec n' T0 Ts)) :: theta)
-                          v'
+                          v
                           (topen 0 Ts (fvar X type_var))
       )
     );
@@ -275,8 +274,7 @@ Ltac simp_red :=
   rewrite reducible_values_equation_58 in * ||
   rewrite reducible_values_equation_59 in * ||
   rewrite reducible_values_equation_60 in * ||
-  rewrite reducible_values_equation_61 in * ||
-  rewrite reducible_values_equation_62 in *.
+  rewrite reducible_values_equation_61 in *.
 
 Ltac top_level_unfold :=
   match goal with

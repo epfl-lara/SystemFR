@@ -14,7 +14,6 @@ Inductive is_value: tree -> Prop :=
 | IVLambda: forall t, is_value (notype_lambda t)
 | IVTypeAbs: forall t, is_value (type_abs t)
 | IVVar: forall x, is_value (fvar x term_var)
-| IVFold: forall v, is_value v -> is_value (notype_tfold v)
 | IVLeft: forall v, is_value v -> is_value (tleft v)
 | IVRight: forall v, is_value v -> is_value (tright v)
 .
@@ -40,7 +39,6 @@ Ltac t_is_value t :=
         | pp ?v1 ?v2 => t_is_value v1; t_is_value v2
         | fvar _ term_var => idtac
         | notype_lambda _ => idtac
-        | notype_tfold ?v => t_is_value v
         | tleft ?v => t_is_value v
         | tright ?v => t_is_value v
         end
@@ -107,12 +105,6 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPBetaTypeInst: forall t,
     small_step (notype_inst (type_abs t)) t
 
-| SPBetaLet: forall t v,
-    is_value v ->
-    small_step
-      (notype_tlet v t)
-      (open 0 t v)
-
 | SPBetaIte1: forall t1 t2,
     small_step (ite ttrue t1 t2) t1
 | SPBetaIte2: forall t1 t2,
@@ -149,14 +141,6 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPBetaMatchRight: forall v tl tr,
     is_value v ->
     small_step (sum_match (tright v) tl tr) (open 0 tr v)
-
-| SPBetaFold:
-    forall v, is_value v ->
-         small_step (tunfold (notype_tfold v)) v
-| SPBetaFold2:
-    forall v t,
-      is_value v ->
-      small_step (tunfold_in (notype_tfold v) t) (open 0 t v)
 
 | SPBetaSize:
     forall v,
@@ -218,19 +202,6 @@ Inductive small_step: tree -> tree -> Prop :=
 | SPIte: forall t1 t1' t2 t3,
     small_step t1 t1' ->
     small_step (ite t1 t2 t3) (ite t1' t2 t3)
-| SPLet: forall t1 t1' t2,
-    small_step t1 t1' ->
-    small_step (notype_tlet t1 t2) (notype_tlet t1' t2)
-
-| SPFold: forall t1 t2,
-    small_step t1 t2 ->
-    small_step (notype_tfold t1) (notype_tfold t2)
-| SPUnfold: forall t1 t2,
-    small_step t1 t2 ->
-    small_step (tunfold t1) (tunfold t2)
-| SPUnfold2: forall t1 t2 t,
-    small_step t1 t2 ->
-    small_step (tunfold_in t1 t) (tunfold_in t2 t)
 
 | SPLeft: forall t1 t2,
     small_step t1 t2 ->
@@ -265,7 +236,6 @@ Ltac t_invert_step :=
   | H: small_step (notype_rec _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (tmatch _ _ _) _ |- _ => inversion H; clear H
   | H: small_step (pp _ _) _ |- _ => inversion H; clear H
-  | H: small_step (notype_tlet _ _) _ |- _ => inversion H; clear H
   | H: small_step (pi1 _) _ |- _ => inversion H; clear H
   | H: small_step (pi2 _) _ |- _ => inversion H; clear H
   | H: small_step (sum_match _ _ _) _ |- _ => inversion H; clear H
