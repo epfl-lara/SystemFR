@@ -93,7 +93,7 @@ Proof.
       repeat step || t_listutils || rewrite nat_value_fv in * by assumption;
       eauto 2 with btwf;
       eauto 2 with bwf.
-    apply (reducible_rename_one _ _ _ _ _ X) in H22; steps; eauto using reducibility_is_candidate.
+    apply (reducible_rename_one _ _ _ _ _ X) in H21; steps; eauto using reducibility_is_candidate.
     eapply positive_grow; eauto 1;
       repeat step || autounfold with u_short;
       eauto using reducibility_is_candidate.
@@ -104,8 +104,8 @@ Proof.
       eauto 2 with berased;
       eauto 3 using smallstep_succ_zero with falsity.
     right; repeat step.
-    apply (reducible_rename_one _ _ _ _ _ X) in H22; steps; eauto using reducibility_is_candidate.
-    exists v1', v', X; steps.
+    apply (reducible_rename_one _ _ _ _ _ X) in H21; steps; eauto using reducibility_is_candidate.
+    exists v1', X; steps.
     eapply positive_grow; eauto 1;
       repeat step || autounfold with u_short;
       eauto using reducibility_is_candidate.

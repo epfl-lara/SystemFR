@@ -14,7 +14,6 @@ Fixpoint tsize_semantics t: nat :=
   | zero => 0
   | succ t' =>  1 + tsize_semantics t'
   | type_abs t => 0
-  | notype_tfold t => 1 + tsize_semantics t
   | tright t => 1 + tsize_semantics t
   | tleft t => 1 + tsize_semantics t
   | T => 0

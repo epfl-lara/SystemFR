@@ -243,7 +243,7 @@ Proof.
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T0 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -261,7 +261,7 @@ Proof.
 
   - (* polymorphic type (2) *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T0 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -277,7 +277,7 @@ Proof.
         eauto with bapply_any;
         eauto with btwf.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T01 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T01 type_var
                                                    :: pfv Ts1 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var
@@ -310,7 +310,7 @@ Proof.
     + apply leq_leq_lt_measure, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_true; try eassumption; steps; eauto with values.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T01 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T01 type_var
                                                    :: pfv Ts1 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var
@@ -462,7 +462,7 @@ Proof.
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T3 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -480,7 +480,7 @@ Proof.
 
   - (* polymorphic type (2) *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T3 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
-    instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+    instantiate_any.
     lazymatch goal with
     | H: reducible_values ((?X,?RC) :: ?theta) ?v _ |- reducible_values ((?M,?RC) :: ?theta) _ _ =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -496,7 +496,7 @@ Proof.
         eauto with bapply_any;
         eauto with btwf.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T02 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T02 type_var
                                                    :: pfv Ts2 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var
@@ -528,7 +528,7 @@ Proof.
     + apply right_lex, right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_false; try eassumption; steps; eauto with values.
 
-  - unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv T02 type_var
+  - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T02 type_var
                                                    :: pfv Ts2 type_var
                                                    :: pfv T0 type_var
                                                    :: pfv Ts type_var

@@ -377,11 +377,11 @@ Proof.
     try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega berased ].
 
   define m (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support pols :: support theta1 :: support theta2 :: nil)).
-  exists n', v', m;
+  exists n', m;
     repeat step; try finisher.
 
   define m (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support pols :: support theta1 :: support theta2 :: nil)).
-  apply (reducible_rename_one _ _ _ _ _ m) in H11;
+  apply (reducible_rename_one _ _ _ _ _ m) in H10;
     repeat step;
       eauto using reducibility_is_candidate;
       try finisher.

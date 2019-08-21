@@ -156,10 +156,6 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel T T' ->
       equal_with_relation rel t t' ->
       equal_with_relation rel (type_inst t T) (type_inst t' T')
-| EWRNoTypeInst:
-    forall t t',
-      equal_with_relation rel t t' ->
-      equal_with_relation rel (notype_inst t) (notype_inst t')
 
 | EWRFix:
     forall t t' T T',
@@ -171,10 +167,6 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel t t' ->
       equal_with_relation rel (notype_tfix t) (notype_tfix t')
 
-| EWRNoTypeFold:
-    forall t t',
-      equal_with_relation rel t t' ->
-      equal_with_relation rel (notype_tfold t) (notype_tfold t')
 | EWRFold:
     forall t t' T T',
       equal_with_relation rel T T' ->

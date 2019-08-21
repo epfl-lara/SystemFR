@@ -102,7 +102,7 @@ Lemma open_reducible_exists_elim:
     open_reducible tvars
                    ((v, open 0 V (term_fvar u)) :: (u, U) :: gamma)
                    (open 0 t (term_fvar v)) T ->
-    open_reducible tvars gamma (notype_tlet p t) T.
+    open_reducible tvars gamma (app (notype_lambda t) p) T.
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
   pose proof H5 as Copy.
@@ -111,7 +111,7 @@ Proof.
          apply reducible_let_rule with
              (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var)); t_closer.
 
-  unshelve epose proof (H18 theta ((v,v0) :: (u,a) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H18 theta ((v, v0) :: (u,a) :: lterms) _ _ _); tac1.
 Qed.
 
 Set Program Mode.

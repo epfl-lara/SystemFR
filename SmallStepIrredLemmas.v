@@ -9,38 +9,6 @@ Require Import SystemFR.StarRelation.
 
 Require Import Coq.Strings.String.
 
-Lemma star_smallstep_let_inv_irred:
-  forall t v,
-    star small_step t v ->
-    irred v ->
-    forall t1 t2,
-      t = notype_tlet t1 t2 ->
-      exists v1,
-        irred v1 /\
-        star small_step t1 v1 /\
-        star small_step (notype_tlet v1 t2) v.
-Proof.
-  induction 1; unfold irred; repeat step.
-  - exists t1; steps; eauto with smallstep.
-  - inversion H; repeat step.
-    + exists t0; steps; repeat step || unshelve eauto with smallstep.
-    + exists v1; steps; repeat step; eauto with smallstep.
-Qed.
-
-Lemma star_smallstep_let_inv_irred2:
-  forall t v,
-    star small_step t v ->
-    irred v ->
-    forall w e,
-      t = notype_tlet w e ->
-      is_value w ->
-      star small_step (open 0 e w) v.
-Proof.
-  induction 1; unfold irred; repeat step || t_invert_star;
-    eauto 4 with falsity smallstep.
-Qed.
-
-
 Lemma star_smallstep_app_inv_irred:
   forall t v,
     star small_step t v ->
@@ -371,11 +339,6 @@ Ltac t_invert_irred :=
     (t_not_hyp_irred t1);
     poseNew (Mark H2 "inv app");
     pose proof (star_smallstep_app_inv_irred _ v H2 H1 t1 t2 eq_refl)
-
- | H1: irred ?v,
-    H2: star small_step (notype_tlet ?t1 ?t2) ?v |- _ =>
-    poseNew (Mark H2 "inv tlet");
-    pose proof (star_smallstep_let_inv_irred _ v H2 H1 t1 t2 eq_refl)
 
  | H1: irred ?v,
     H2: star small_step (notype_rec ?t1 ?t2 ?t3) ?v |- _ =>

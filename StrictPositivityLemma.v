@@ -329,8 +329,8 @@ Proof.
     try solve [ apply_any; assumption ].
 
   + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
-  + apply reducible_unused3 in H30; repeat step; try finisher; eauto with bapply_any.
-  + apply reducible_unused3 in H30;
+  + apply reducible_unused3 in H16; repeat step; try finisher; eauto with bapply_any.
+  + apply reducible_unused3 in H16;
       repeat step || t_instantiate_reducible || t_deterministic_star ||
              t_instantiate_rc || simp_red || unfold reduces_to in *;
       try finisher; eauto with bapply_any;
@@ -339,7 +339,7 @@ Proof.
       eauto with b_valid_interp;
       try finisher.
   + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
-  + apply reducible_unused3 in H30; steps; try finisher; eauto with bapply_any.
+  + apply reducible_unused3 in H16; steps; try finisher; eauto with bapply_any.
 Qed.
 
 Hint Immediate sp_push_forall_abs: b_push.
@@ -352,7 +352,7 @@ Proof.
 
   (** Recursive type at n+1: case where the variables do not appear in the recursive type **)
   - right.
-      exists n'0, v'0, (makeFresh (
+      exists n'0, (makeFresh (
                        support theta ::
                        support pre_theta ::
                        support theta' ::
@@ -391,7 +391,7 @@ Proof.
 
   (** Recursive type at n+1: case where the recursive type is itself strictly positive **)
   - right.
-      exists n'0, v'0, (makeFresh (
+      exists n'0, (makeFresh (
                        support theta ::
                        support pre_theta ::
                        support theta' ::

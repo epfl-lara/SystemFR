@@ -115,5 +115,4 @@ Ltac simp_spos :=
   rewrite strictly_positive_equation_57 in * ||
   rewrite strictly_positive_equation_58 in * ||
   rewrite strictly_positive_equation_59 in * ||
-  rewrite strictly_positive_equation_60 in * ||
-  rewrite strictly_positive_equation_61.
+  rewrite strictly_positive_equation_60.

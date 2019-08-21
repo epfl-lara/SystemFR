@@ -326,23 +326,6 @@ Proof.
     eauto 6 with smallstep.
 Qed.
 
-Lemma star_smallstep_unfold_in_inv:
-  forall t v,
-    star small_step t v ->
-    is_value v ->
-    forall t1 t2,
-      t = tunfold_in t1 t2 ->
-      (
-        exists v1,
-          is_value v1 /\
-          star small_step t1 (notype_tfold v1) /\
-          star small_step (open 0 t2 v1) v
-      ).
-Proof.
-  induction 1; repeat step || step_inversion is_value || t_invert_step;
-    eauto 6 with smallstep.
-Qed.
-
 Lemma star_smallstep_rec_zero2:
   forall t v,
     star small_step t v ->
@@ -384,33 +367,6 @@ Proof.
     eauto;
     eauto 5 using star_smallstep_trans with bsteplemmas smallstep;
     eauto using value_irred.
-Qed.
-
-Lemma star_smallstep_tunfold_inv:
-  forall t v,
-    star small_step t v ->
-    is_value v ->
-    forall t',
-      t = tunfold t' ->
-      star small_step t' (notype_tfold v).
-Proof.
-  induction 1; repeat step || step_inversion is_value || t_invert_step;
-    eauto with smallstep values bsteplemmas.
-Qed.
-
-Lemma star_smallstep_tfold_inv:
-  forall t v,
-    star small_step t v ->
-    is_value v ->
-    forall t',
-      t = notype_tfold t' ->
-      exists v',
-        v = notype_tfold v' /\
-        is_value v' /\
-        star small_step t' v'.
-Proof.
-  induction 1; repeat step || step_inversion is_value || t_invert_step;
-    eauto with smallstep values bsteplemmas.
 Qed.
 
 Lemma star_smallstep_tleft_inv:
@@ -572,17 +528,9 @@ Ltac t_invert_star :=
     poseNew (Mark H2 "inv succ");
     unshelve epose proof (star_smallstep_succ_inv _ v H2 H1 _ eq_refl)
   | H1: is_value ?v,
-    H2: star small_step (notype_tfold _) ?v |- _ =>
-    poseNew (Mark H2 "inv fold");
-    unshelve epose proof (star_smallstep_tfold_inv _ v H2 H1 _ eq_refl)
-  | H1: is_value ?v,
     H2: star small_step (tsize _) ?v |- _ =>
     poseNew (Mark H2 "inv tsize");
     unshelve epose proof (star_smallstep_tsize_inv _ v H2 H1 _ eq_refl)
-  | H1: is_value ?v,
-    H2: star small_step (tunfold _) ?v |- _ =>
-    poseNew (Mark H2 "inv unfold");
-    unshelve epose proof (star_smallstep_tunfold_inv _ v H2 H1 _ eq_refl)
   | H1: is_value ?v1,
     H2: is_value ?v2,
     H3: star small_step (notype_rec (succ ?v2) _ _) ?v1 |- _ =>
@@ -609,10 +557,6 @@ Ltac t_invert_star :=
     H2: star small_step (tmatch _ _ _) ?v |- _ =>
     poseNew (Mark H2 "inv match");
     unshelve epose proof (star_smallstep_match_inv _ v H2 H1 _ _ _ eq_refl)
-  | H1: is_value ?v,
-    H2: star small_step (tunfold_in _ _) ?v |- _ =>
-    poseNew (Mark H2 "inv unfold_in");
-    unshelve epose proof (star_smallstep_unfold_in_inv _ v H2 H1 _ _ eq_refl)
   | H: star small_step (notype_lambda _) _ |- _ => inversion H; clear H
   | H: star small_step notype_err _ |- _ => inversion H; clear H
   | H: star small_step uu _ |- _ => inversion H; clear H

@@ -16,6 +16,7 @@ Require Import SystemFR.TypeErasure.
 Require Import SystemFR.SubstitutionErase.
 Require Import SystemFR.TreeLists.
 Require Import SystemFR.TermListReducible.
+Require Import SystemFR.StarInversions.
 
 Require Import SystemFR.ReducibilityCandidate.
 Require Import SystemFR.ReducibilityDefinition.
@@ -34,25 +35,10 @@ Require Import SystemFR.WFLemmasLists.
 Opaque reducible_values.
 Opaque makeFresh.
 
-Lemma reducible_type_abs_value:
-  forall theta t T X,
-    fv t = nil ->
-    fv T = nil ->
-    wf t 0 ->
-    wf T 1 ->
-    is_erased_term t ->
-    valid_interpretation theta ->
-    (X ∈ pfv T type_var -> False) ->
-    (X ∈ support theta -> False) ->
-    (forall RC,
-      reducibility_candidate RC ->
-      reducible ((X,RC) :: theta) t (topen 0 T (fvar X type_var))) ->
-    reducible_values theta (type_abs t) (T_abs T).
+Lemma reducibility_candidate_empty:
+  reducibility_candidate (fun _ => False).
 Proof.
-  repeat step || simp_red; t_closer.
-  exists X; repeat step || rewrite reducibility_rewrite.
-  apply backstep_reducible with t; repeat step || t_listutils;
-    eauto 2 using reducible_value_expr with step_tactic.
+  unfold reducibility_candidate; steps.
 Qed.
 
 Lemma reducible_type_abs:
@@ -68,9 +54,17 @@ Lemma reducible_type_abs:
     (forall RC,
       reducibility_candidate RC ->
       reducible ((X,RC) :: theta) t (topen 0 T (fvar X type_var))) ->
-    reducible theta (type_abs t) (T_abs T).
+    reducible theta t (T_abs T).
 Proof.
-  intros; eauto using reducible_type_abs_value, reducible_value_expr.
+  intros.
+  unshelve epose proof (H7 (fun _ => False) _); steps; eauto using reducibility_candidate_empty; t_closing.
+
+  unfold reducible, reduces_to in *; repeat step || simp_red; t_closing.
+  exists t'; repeat step || simp_red; t_closing;
+    eauto 3 using red_is_val, reducibility_candidate_empty with step_tactic.
+  exists X; steps.
+  instantiate_any; repeat step || t_deterministic_star;
+    eauto 3 using red_is_val, reducibility_candidate_empty with step_tactic.
 Qed.
 
 Lemma open_reducible_type_abs:
@@ -87,7 +81,7 @@ Lemma open_reducible_type_abs:
     (X ∈ tvars -> False) ->
     is_erased_term t ->
     open_reducible (X :: tvars) gamma t (topen 0 T (fvar X type_var)) ->
-    open_reducible tvars gamma (type_abs t) (T_abs T).
+    open_reducible tvars gamma t (T_abs T).
 Proof.
   unfold open_reducible; repeat step || t_termlist.
 
@@ -113,7 +107,7 @@ Lemma reducible_inst:
     is_erased_type U ->
     is_erased_type V ->
     reducible theta t (T_abs U) ->
-    reducible theta (notype_inst t) (topen 0 U V).
+    reducible theta t (topen 0 U V).
 Proof.
   unfold reducible, reduces_to in *;
     repeat step || t_listutils || simp_red || unfold reduces_to in *.
@@ -122,8 +116,8 @@ Proof.
       unshelve epose proof (H (fun v => reducible_values theta v V) _); steps;
         eauto using reducibility_is_candidate
   end.
-  exists t'0; steps; eauto using star_smallstep_trans with bsteplemmas.
-  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H14;
+  exists t'; steps; eauto using star_smallstep_trans with bsteplemmas.
+  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H10;
     repeat step || finisher; eauto using reducibility_is_candidate.
   eapply reducibility_subst_head; eauto; repeat step || t_listutils || finisher.
 Qed.
@@ -136,7 +130,7 @@ Lemma open_reducible_inst:
     is_erased_type V ->
     subset (fv V) (support gamma) ->
     open_reducible tvars gamma t (T_abs U) ->
-    open_reducible tvars gamma (notype_inst t) (topen 0 U V).
+    open_reducible tvars gamma t (topen 0 U V).
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen || apply reducible_inst ||

@@ -141,7 +141,7 @@ Proof.
 
     - (* polymorphic type *)
       exists (makeFresh ((X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
-      instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+      instantiate_any.
       lazymatch goal with
       | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
         apply (reducible_rename_one _ _ _ _ _ M) in H
@@ -167,7 +167,7 @@ Proof.
 
     - (* polymorphic type (2) *)
       exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support theta :: pfv V type_var :: pfv U type_var :: pfv (psubstitute U ((X, V) :: nil) type_var) type_var :: nil)); repeat step || finisher.
-      instantiate_any; eapply reduces_to_equiv; eauto 1; steps.
+      instantiate_any.
 
       lazymatch goal with
       | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
@@ -196,7 +196,7 @@ Proof.
 
     - (* recursive type n+1 *)
       right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var
+      unshelve eexists n', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U2 type_var :: pfv U3 type_var
                                                      :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
                                                      :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
                                                      :: support theta :: nil)), _, _; eauto;
@@ -241,7 +241,7 @@ Proof.
 
     - (* recursive type n+1 bis *)
       right.
-      unshelve eexists n', v', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var
+      unshelve eexists n', (makeFresh ((X :: nil) :: pfv V type_var :: pfv U3 type_var :: pfv U2 type_var
                                                      :: pfv (psubstitute U3 ((X, V) :: nil) type_var) type_var
                                                      :: pfv (psubstitute U2 ((X, V) :: nil) type_var) type_var
                                                      :: support theta :: nil)), _, _; eauto;

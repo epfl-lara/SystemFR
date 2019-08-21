@@ -58,8 +58,8 @@ Lemma reducible_values_rec_step:
 Proof.
   repeat step || simp_red;
     eauto with berased.
-  - left; exists v'; steps; eapply star_many_steps; eauto; unfold irred; repeat step || t_invert_step.
-  - right. unshelve eexists n', v', X, _, _; steps;
+  - left; steps; eapply star_many_steps; eauto; unfold irred; repeat step || t_invert_step.
+  - right. unshelve eexists n', X, _, _; steps;
              eauto using is_nat_value_value, value_irred, star_many_steps with values.
 Qed.
 
@@ -73,7 +73,7 @@ Proof.
   repeat step || simp_red;
     eauto with berased.
   - left; steps; eauto using star_smallstep_trans.
-  - right. unshelve eexists n', v', X, _, _; steps; eauto using star_smallstep_trans.
+  - right. unshelve eexists n', X, _, _; steps; eauto using star_smallstep_trans.
 Qed.
 
 Lemma reducible_values_rec_equivalent:
@@ -87,7 +87,7 @@ Proof.
   repeat step || simp_red;
     eauto with berased.
   - left; eauto using equivalence_def with values.
-  - right. unshelve eexists n', v', X, _, _; steps;
+  - right. unshelve eexists n', X, _, _; steps;
              eauto using equivalence_def with values.
 Qed.
 
@@ -127,7 +127,7 @@ Lemma reducible_values_unfold:
     is_erased_type T0 ->
     is_erased_type Ts ->
     valid_interpretation theta ->
-    reducible_values theta (notype_tfold v) (T_rec (succ n) T0 Ts) ->
+    reducible_values theta v (T_rec (succ n) T0 Ts) ->
     reducible_values theta v (topen 0 Ts (T_rec n T0 Ts)).
 Proof.
   unfold reducible, reduces_to;
@@ -156,32 +156,6 @@ Ltac inst_one :=
       poseNew (Mark 0 "once"); unshelve epose proof (H (succ zero) (red_one theta))
   end.
 
-Lemma fold_in_rec:
-  forall theta v T0 Ts n,
-    valid_interpretation theta ->
-    reducible_values theta v (T_rec n T0 Ts) ->
-    exists v', closed_value v' /\ v = notype_tfold v'.
-Proof.
-  repeat match goal with
-         | _ => step || simp_red || inst_one
-         | H: reducible_values ?theta ?v ?T |- _ => apply reducible_values_closed with theta T
-         | H: reducible_values ?theta ?v ?T |- _ => exists v
-         | H: star small_step (succ ?n) zero |- _ =>
-             unshelve eapply (False_ind _ (smallstep_succ_zero (succ n) zero H n _ _))
-         end; eauto using reducibility_is_candidate.
-Qed.
-
-Lemma star_unfold_fold:
-  forall t v,
-    closed_value (notype_tfold v) ->
-    star small_step t (notype_tfold v) ->
-    star small_step (tunfold t) v.
-Proof.
-  unfold closed_value.
-  repeat step || step_inversion is_value.
-  eapply star_smallstep_trans; eauto with bsteplemmas; eauto with smallstep.
-Qed.
-
 Lemma reducible_unfold:
   forall theta t n T0 Ts,
     wf n 0 ->
@@ -195,16 +169,12 @@ Lemma reducible_unfold:
     is_erased_type Ts ->
     valid_interpretation theta ->
     reducible theta t (T_rec (succ n) T0 Ts) ->
-    reducible theta (tunfold t) (topen 0 Ts (T_rec n T0 Ts)).
+    reducible theta t (topen 0 Ts (T_rec n T0 Ts)).
 Proof.
   unfold reducible, reduces_to;
     repeat match goal with
-           | _ => apply star_unfold_fold
+           | _ => exists t'
            | _ => apply reducible_values_unfold
-           | H: star small_step ?t (notype_tfold ?v) |- exists t', star small_step (tunfold ?t) _ /\ _ => exists v
-           | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?v (T_rec _ _ _) |- _ =>
-               poseNew (Mark 0 "once");
-               is_var v; unshelve epose proof (fold_in_rec _ _ _ _ _ H1 H2)
            | _ => step || unfold closed_value in *
            end; eauto with values.
 Qed.
@@ -221,7 +191,7 @@ Lemma open_reducible_unfold:
     is_erased_type T0 ->
     is_erased_type Ts ->
     open_reducible tvars gamma t (T_rec (succ n) T0 Ts) ->
-    open_reducible tvars gamma (tunfold t) (topen 0 Ts (T_rec n T0 Ts)).
+    open_reducible tvars gamma t (topen 0 Ts (T_rec n T0 Ts)).
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
@@ -289,7 +259,7 @@ Lemma open_reducible_unfold2:
        support theta = tvars ->
        equivalent (spositive (psubstitute n l term_var)) ttrue) ->
     open_reducible tvars gamma t (T_rec n T0 Ts) ->
-    open_reducible tvars gamma (tunfold t) (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)).
+    open_reducible tvars gamma t (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)).
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen || t_instantiate_sat3 || t_reducible_trec;
@@ -313,7 +283,7 @@ Lemma reducible_fold:
     is_erased_type Ts ->
     reducible theta n T_nat ->
     reducible theta t (topen 0 Ts (T_rec n T0 Ts)) ->
-    reducible theta (notype_tfold t) (T_rec (succ n) T0 Ts).
+    reducible theta t (T_rec (succ n) T0 Ts).
 Proof.
   unfold reducible, reduces_to;
     repeat match goal with
@@ -324,7 +294,7 @@ Proof.
   repeat step || simp_red; t_closer.
 
   right.
-  unshelve eexists t'0, t', (makeFresh (pfv n type_var :: pfv t'0 type_var :: pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _;
+  unshelve eexists t'0, (makeFresh (pfv n type_var :: pfv t'0 type_var :: pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _;
     repeat step;
     try finisher;
     eauto with bsteplemmas.
@@ -352,7 +322,7 @@ Lemma open_reducible_fold:
     is_erased_type Ts ->
     open_reducible tvars gamma n T_nat ->
     open_reducible tvars gamma t (topen 0 Ts (T_rec n T0 Ts)) ->
-    open_reducible tvars gamma (notype_tfold t) (T_rec (succ n) T0 Ts).
+    open_reducible tvars gamma t (T_rec (succ n) T0 Ts).
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
@@ -376,16 +346,11 @@ Lemma reducible_unfold_zero:
     is_erased_type Ts ->
     valid_interpretation theta ->
     reducible theta t (T_rec zero T0 Ts) ->
-    reducible theta (tunfold t) T0.
+    reducible theta t T0.
 Proof.
   unfold reducible, reduces_to;
     repeat match goal with
-           | _ => apply star_unfold_fold
            | _ => apply reducible_values_unfold
-           | H: star small_step ?t (notype_tfold ?v) |- exists t', star small_step (tunfold ?t) _ /\ _ => exists v
-           | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?v (T_rec _ _ _) |- _ =>
-               poseNew (Mark 0 "once");
-               is_var v; unshelve epose proof (fold_in_rec _ _ _ _ _ H1 H2)
            | _ => step || unfold closed_value in * || simp_red || t_invert_star
            end; eauto with values.
 Qed.
@@ -399,7 +364,7 @@ Lemma open_reducible_unfold_zero:
     is_erased_type T0 ->
     is_erased_type Ts ->
     open_reducible tvars gamma t (T_rec zero T0 Ts) ->
-    open_reducible tvars gamma (tunfold t) T0.
+    open_reducible tvars gamma t T0.
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
@@ -424,7 +389,7 @@ Lemma open_reducible_unfold_zero2:
        support theta = tvars ->
        equivalent (substitute n l) zero) ->
     open_reducible tvars gamma t (T_rec n T0 Ts) ->
-    open_reducible tvars gamma (tunfold t) T0.
+    open_reducible tvars gamma t T0.
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen;
@@ -447,7 +412,7 @@ Lemma reducible_fold_zero:
     is_erased_type T0 ->
     is_erased_type Ts ->
     reducible theta t T0 ->
-    reducible theta (notype_tfold t) (T_rec zero T0 Ts).
+    reducible theta t (T_rec zero T0 Ts).
 Proof.
   unfold reducible, reduces_to;
     repeat match goal with
@@ -467,7 +432,7 @@ Lemma open_reducible_fold_zero:
     is_erased_type T0 ->
     is_erased_type Ts ->
     open_reducible tvars gamma t T0 ->
-    open_reducible tvars gamma (notype_tfold t) (T_rec zero T0 Ts).
+    open_reducible tvars gamma t (T_rec zero T0 Ts).
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
@@ -503,7 +468,7 @@ Lemma open_reducible_fold2:
                    ((p, T_equal n (succ (fvar pn term_var))) :: (pn, T_nat) :: gamma)
                    t
                    (topen 0 Ts (T_rec (fvar pn term_var) T0 Ts)) ->
-    open_reducible tvars gamma (notype_tfold t) (T_rec n T0 Ts).
+    open_reducible tvars gamma t (T_rec n T0 Ts).
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
@@ -559,48 +524,42 @@ Lemma reducible_unfold_in:
     pfv t2 term_var = nil ->
     (forall v,
         reducible_values theta v T0 ->
-        equivalent t1 (notype_tfold v) ->
+        equivalent t1 v ->
         equivalent n zero ->
         reducible theta (open 0 t2 v) T) ->
     (forall v,
         reducible_values theta v (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ->
-        equivalent t1 (notype_tfold v) ->
+        equivalent t1 v ->
         reducible theta (open 0 t2 v) T) ->
-    reducible theta (tunfold_in t1 t2) T.
+    reducible theta (app (notype_lambda t2) t1) T.
 Proof.
   intros.
   unfold reducible, reduces_to in H; steps.
-  eapply star_backstep_reducible; eauto with bsteplemmas; repeat step || t_listutils;
-    eauto with bwf.
 
-  simp_red; steps.
-  - apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
+  eapply star_backstep_reducible; eauto with bsteplemmas values;
+    repeat step || t_listutils.
+
+  apply backstep_reducible with (open 0 t2 t'); repeat step || t_listutils;
       eauto using red_is_val with smallstep;
       eauto with bwf;
       eauto with bfv;
       eauto with berased.
 
-    apply H14; steps; eauto with b_equiv.
+  simp_red; steps; eauto with b_equiv.
+
   - apply (
         reducible_rename_one_rc
           _
           (fun t => reducible_values theta t (T_rec (notype_tpred n) T0 Ts))
           _ _ _ X X
-     ) in H24;
+     ) in H23;
       eauto with values;
       eauto using reducibility_is_candidate.
-    + apply reducibility_subst_head in H24;
+    + apply reducibility_subst_head in H23;
         repeat step || t_listutils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased);
       eauto with bwf btwf bfv;
-      eauto with berased.
-
-      apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
-        eauto using red_is_val with smallstep;
-        eauto with bwf;
-        eauto with bfv;
-        eauto with berased.
-
-      apply H15; steps; eauto with b_equiv.
+      eauto with berased;
+      eauto with b_equiv.
 
     + apply equivalent_rc_sym.
       apply equivalent_rc_rec_step; unfold notype_tpred; steps.
@@ -654,14 +613,14 @@ Lemma open_reducible_unfold_in:
     NoDup (p1 :: p2 :: y :: nil) ->
     open_reducible tvars gamma t1 (T_rec n T0 Ts) ->
     open_reducible tvars
-             ((p2, T_equal n zero) :: (p1, T_equal t1 (notype_tfold (fvar y term_var))) :: (y, T0) :: gamma)
+             ((p2, T_equal n zero) :: (p1, T_equal t1 (fvar y term_var)) :: (y, T0) :: gamma)
              (open 0 t2 (fvar y term_var)) T ->
     open_reducible tvars
-             ((p1, T_equal t1 (notype_tfold (fvar y term_var))) ::
+             ((p1, T_equal t1 (fvar y term_var)) ::
               (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::
               gamma)
              (open 0 t2 (fvar y term_var)) T ->
-    open_reducible tvars gamma (tunfold_in t1 t2) T.
+    open_reducible tvars gamma (app (notype_lambda t2) t1) T.
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || t_reducible_trec.
@@ -716,14 +675,20 @@ Lemma reducible_unfold_pos_in:
     equivalent (tlt zero n) ttrue ->
     (forall v,
         reducible_values theta v (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ->
-        equivalent t1 (notype_tfold v) ->
+        equivalent t1 v ->
         reducible theta (open 0 t2 v) T) ->
-    reducible theta (tunfold_in t1 t2) T.
+    reducible theta (app (notype_lambda t2) t1) T.
 Proof.
   intros.
   unfold reducible, reduces_to in H; steps.
-  eapply star_backstep_reducible; eauto with bsteplemmas; repeat step || t_listutils;
+  eapply star_backstep_reducible; eauto with bsteplemmas values; repeat step || t_listutils;
     eauto with bwf.
+
+  apply backstep_reducible with (open 0 t2 t'); repeat step || t_listutils;
+    eauto using red_is_val with smallstep;
+    eauto with bwf;
+    eauto with bfv;
+    eauto with berased.
 
   simp_red; steps; eauto using equivalent_zero_contradiction with falsity.
 
@@ -732,18 +697,12 @@ Proof.
           _
           (fun t => reducible_values theta t (T_rec (notype_tpred n) T0 Ts))
           _ _ _ X X
-     ) in H24;
+     ) in H23;
       eauto with values;
       eauto using reducibility_is_candidate.
-    + apply reducibility_subst_head in H24;
+    + apply reducibility_subst_head in H23;
         repeat step || t_listutils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased);
       eauto with bwf btwf bfv.
-
-      apply backstep_reducible with (open 0 t2 v'); repeat step || t_listutils;
-        eauto using red_is_val with smallstep;
-        eauto with bwf;
-        eauto with bfv;
-        eauto with berased.
 
       apply H15; steps; eauto with b_equiv.
 
@@ -796,11 +755,11 @@ Lemma open_reducible_unfold_pos_in:
       equivalent (substitute (tlt zero n) l) ttrue) ->
     open_reducible
       tvars
-      ((p1, T_equal t1 (notype_tfold (fvar y term_var))) ::
+      ((p1, T_equal t1 (fvar y term_var)) ::
        (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::
        gamma)
       (open 0 t2 (fvar y term_var)) T ->
-    open_reducible tvars gamma (tunfold_in t1 t2) T.
+    open_reducible tvars gamma (app (notype_lambda t2) t1) T.
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || t_reducible_trec.

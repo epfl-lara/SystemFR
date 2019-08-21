@@ -198,56 +198,6 @@ Qed.
 
 Hint Resolve star_smallstep_succ: bsteplemmas.
 
-Lemma star_smallstep_let:
-  forall t1 t1' t2,
-    star small_step t1 t1' ->
-    star small_step (notype_tlet t1 t2) (notype_tlet t1' t2).
-Proof.
-  induction 1; steps; eauto with smallstep.
-Qed.
-
-Hint Resolve star_smallstep_let: bsteplemmas.
-
-Lemma star_smallstep_type_inst:
-  forall t1 t1',
-    star small_step t1 t1' ->
-    star small_step (notype_inst t1) (notype_inst t1').
-Proof.
-  induction 1; steps; eauto with smallstep.
-Qed.
-
-Hint Resolve star_smallstep_type_inst: bsteplemmas.
-
-Lemma star_smallstep_fold:
-  forall t1 t1',
-    star small_step t1 t1' ->
-    star small_step (notype_tfold t1) (notype_tfold t1').
-Proof.
-  induction 1; steps; eauto with smallstep.
-Qed.
-
-Hint Resolve star_smallstep_fold: bsteplemmas.
-
-Lemma star_smallstep_unfold:
-  forall t1 t1',
-    star small_step t1 t1' ->
-    star small_step (tunfold t1) (tunfold t1').
-Proof.
-  induction 1; steps; eauto with smallstep.
-Qed.
-
-Hint Resolve star_smallstep_unfold: bsteplemmas.
-
-Lemma star_smallstep_unfold_in:
-  forall t1 t1' t2,
-    star small_step t1 t1' ->
-    star small_step (tunfold_in t1 t2) (tunfold_in t1' t2).
-Proof.
-  induction 1; steps; eauto with smallstep.
-Qed.
-
-Hint Resolve star_smallstep_unfold_in: bsteplemmas.
-
 Lemma star_smallstep_tleft:
   forall t1 t1',
     star small_step t1 t1' ->

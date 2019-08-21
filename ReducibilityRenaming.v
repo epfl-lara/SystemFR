@@ -356,7 +356,7 @@ Proof.
          | _ => step || simp_red || step_inversion equal_with_relation
          end; try finisher.
 
-  - instantiate_any. eapply reduces_to_equiv; eauto 1; steps.
+  - instantiate_any.
     lazymatch goal with
     | IH: forall m, _ << _ ->  _ ,
       H1: reducible_values ((?X,?RC) :: ?theta) ?t ?T,
@@ -381,7 +381,7 @@ Proof.
       eauto using in_remove_support;
       eauto using equivalent_rc_refl.
 
-  - instantiate_any. eapply reduces_to_equiv; eauto 1; steps.
+  - instantiate_any.
     lazymatch goal with
     | IH: forall m, _ << _ ->  _ ,
       H1: reducible_values ((?X,?RC) :: ?theta) ?t ?T,
@@ -427,7 +427,7 @@ Proof.
          end.
 
   - (* case recursive type at n + 1 *)
-    unshelve eexists n', v', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
+    unshelve eexists n', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ << _ -> _ ,
@@ -458,7 +458,7 @@ Proof.
       eauto with bfv.
 
   - (* case recursive type at n + 1 *)
-   unshelve eexists n'0, v', (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _; eauto;
+   unshelve eexists n'0, (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _; eauto;
       repeat step || finisher.
     lazymatch goal with
     | IH: forall m, _ << _ ->  _ ,
