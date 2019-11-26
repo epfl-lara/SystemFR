@@ -3,6 +3,9 @@
 *.aux
 Makefile
 Makefile.conf
+.Makefile.d
 .coqdeps.d
 .#*
 \#*#
+*.vok
+*.vos
