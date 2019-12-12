@@ -246,6 +246,7 @@ Fixpoint is_erased_type T :=
   | T_exists A B => is_erased_type A /\ is_erased_type B
   | T_abs A => is_erased_type A
   | T_rec n T0 Ts => is_erased_term n /\ is_erased_type T0 /\ is_erased_type Ts
+  | T_interpret T => is_erased_type T
   | _ => False
   end.
 
