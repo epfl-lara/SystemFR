@@ -55,52 +55,6 @@ Require Import Omega.
 Opaque reducible_values.
 Opaque makeFresh.
 
-Lemma star_smallstep_ite_inv_true:
-  forall b t1 t2 v,
-    is_value v ->
-    star small_step (ite b t1 t2) v ->
-    star small_step b ttrue ->
-    star small_step t1 v.
-Proof.
-  repeat step || t_invert_star || t_deterministic_star.
-Qed.
-
-Lemma star_smallstep_ite_inv_false:
-  forall b t1 t2 v,
-    is_value v ->
-    star small_step (ite b t1 t2) v ->
-    star small_step b tfalse ->
-    star small_step t2 v.
-Proof.
-  repeat step || t_invert_star || t_deterministic_star.
-Qed.
-
-Ltac t_invert_ite :=
-  match goal with
-  | H1: star small_step (ite ?b ?t1 ?t2) ?v |- star small_step ?t1 ?v =>
-      apply star_smallstep_ite_inv_true with b t2
-  | H1: star small_step (ite ?b ?t1 ?t2) ?v |- star small_step ?t2 ?v =>
-      apply star_smallstep_ite_inv_false with b t1
-  end.
-
-Lemma star_smallstep_ite_true:
-  forall b t1 t2 v,
-    star small_step b ttrue ->
-    star small_step t1 v ->
-    star small_step (ite b t1 t2) v.
-Proof.
-  eauto using star_smallstep_trans with smallstep bsteplemmas.
-Qed.
-
-Lemma star_smallstep_ite_false:
-  forall b t1 t2 v,
-    star small_step b tfalse ->
-    star small_step t2 v ->
-    star small_step (ite b t1 t2) v.
-Proof.
-  eauto using star_smallstep_trans with smallstep bsteplemmas.
-Qed.
-
 Ltac t_reduces_to_open :=
   match goal with
   | _: is_erased_term ?b,
@@ -239,7 +193,7 @@ Proof.
     try omega;
     eauto using ite_type_open;
     eauto with bwf bfv berased;
-    try solve [ apply leq_lt_measure; steps; autorewrite with bsize in *; eauto with berased; omega ].
+    try solve [ apply left_lex; steps; autorewrite with bsize in *; eauto with berased; omega ].
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T0 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
@@ -253,7 +207,7 @@ Proof.
     t_apply_ih_topen;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
+             apply left_lex || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -271,7 +225,7 @@ Proof.
     t_apply_ih_topen;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
+             apply left_lex || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -294,20 +248,20 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; try omega ];
-      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+      try solve [ apply left_lex; repeat step || autorewrite with bsize in *; try omega ];
+      try solve [ apply right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
       eauto with bwf;
       eauto with btwf;
       eauto with bfv.
-    + apply right_lex, right_lex, lt_index_step; repeat step || autorewrite with bsize in *;
+    + apply right_lex, lt_index_step; repeat step || autorewrite with bsize in *;
         eauto with omega;
         eauto with values.
       eapply star_smallstep_ite_inv_true; try eassumption; steps; eauto with values.
     + eapply reducible_values_rec_equivalent; eauto; steps; eauto with b_equiv; eauto with berased.
-    + apply leq_leq_lt_measure, lt_index_step; eauto with values.
+    + apply right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_true; try eassumption; steps; eauto with values.
 
   - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T01 type_var
@@ -326,8 +280,8 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+      try solve [ apply left_lex; repeat step || autorewrite with bsize in *; omega ];
+      try solve [ apply right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
@@ -458,7 +412,7 @@ Proof.
     try omega;
     eauto using ite_type_open;
     eauto with bwf bfv berased;
-    try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ].
+    try solve [ apply left_lex; repeat step || autorewrite with bsize in *; omega ].
 
   - (* polymorphic type *)
     exists (makeFresh ((X :: nil) :: support theta :: pfv T3 type_var :: pfv T4 type_var :: nil)); repeat step || finisher.
@@ -472,7 +426,7 @@ Proof.
     t_apply_ih_topen_false;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
+             apply left_lex || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -490,7 +444,7 @@ Proof.
     t_apply_ih_topen_false;
       repeat step || autorewrite with bsize in * ||
              apply reducible_unused2 || t_fv_open || t_listutils || apply ite_type_topen ||
-             apply leq_lt_measure || apply wf_topen || apply fv_nils_topen ||
+             apply left_lex || apply wf_topen || apply fv_nils_topen ||
              finisher || apply is_erased_type_topen;
         try omega;
         eauto with bapply_any;
@@ -514,18 +468,18 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+      try solve [ apply left_lex; repeat step || autorewrite with bsize in *; omega ];
+      try solve [ apply right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;
       eauto with bwf;
       eauto with btwf;
       eauto with bfv.
-    + apply right_lex, right_lex, lt_index_step; eauto with values.
+    + apply right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_false; try eassumption; steps; eauto with values.
     + eapply reducible_values_rec_equivalent; eauto; steps; eauto with b_equiv; eauto with berased.
-    + apply right_lex, right_lex, lt_index_step; eauto with values.
+    + apply right_lex, lt_index_step; eauto with values.
       eapply star_smallstep_ite_inv_false; try eassumption; steps; eauto with values.
 
   - unshelve eexists n', (makeFresh ((X :: nil) :: pfv T02 type_var
@@ -544,8 +498,8 @@ Proof.
                 apply wf_topen || apply fv_nils_topen ||
                 unfold EquivalentWithRelation.equivalent_rc;
       eauto using reducibility_is_candidate;
-      try solve [ apply leq_lt_measure; repeat step || autorewrite with bsize in *; omega ];
-      try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+      try solve [ apply left_lex; repeat step || autorewrite with bsize in *; omega ];
+      try solve [ apply right_lex, lt_index_step; auto ];
       try solve [ constructor; steps ];
       eauto with berased;
       eauto using ite_type_topen;

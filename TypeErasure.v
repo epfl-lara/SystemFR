@@ -67,6 +67,7 @@ Fixpoint erase_type (T: tree): tree :=
   match T with
   | fvar _ type_var => T
   | lvar _ type_var => T
+
   | T_unit => T
   | T_bool => T
   | T_nat => T

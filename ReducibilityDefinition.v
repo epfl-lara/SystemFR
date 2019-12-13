@@ -160,13 +160,6 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
       )
     );
 
-  reducible_values theta v (T_interpret T) :=
-    closed_value v /\
-    exists T' (_: count_interpret T' < 1 + count_interpret T),
-      star small_step T T' /\
-      irred T' /\
-      reducible_values theta v T';
-
   reducible_values theta v T := False
 .
 
@@ -175,6 +168,7 @@ Hint Transparent lt_measure: core.
 Ltac t_reducibility_definition :=
   repeat step || autorewrite with bsize || unfold "<<", get_measure, closed_value, closed_term in *;
     try solve [ apply right_lex, right_lex, lt_index_step; steps ];
+    try solve [ apply right_lex, lt_index_step; steps ];
     try solve [ apply leq_lt_measure; omega ];
     try solve [ apply left_lex; omega ].
 
@@ -271,8 +265,7 @@ Ltac simp_red :=
   rewrite reducible_values_equation_56 in * ||
   rewrite reducible_values_equation_57 in * ||
   rewrite reducible_values_equation_58 in * ||
-  rewrite reducible_values_equation_59 in * ||
-  rewrite reducible_values_equation_60 in *.
+  rewrite reducible_values_equation_59 in *.
 
 Ltac top_level_unfold :=
   match goal with

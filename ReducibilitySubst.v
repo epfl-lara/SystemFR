@@ -93,7 +93,7 @@ Proof.
     repeat match goal with
            | _ => progress (step || simp_red)
            | _ => find_smallstep_value || find_exists
-           | _ => apply leq_lt_measure
+           | _ => apply left_lex
            | _ => rewrite substitute_nothing5 in * by (steps; eauto with bfv)
            | _ => rewrite substitute_open2 in *  by repeat step || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased)
            | _ => progress ( autorewrite with bsize in * )
@@ -156,7 +156,7 @@ Proof.
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               apply leq_lt_measure ||
+               apply left_lex ||
                finisher || apply is_erased_type_topen;
           try omega;
           eauto with bapply_any.
@@ -186,7 +186,7 @@ Proof.
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               finisher || apply is_erased_type_topen || apply leq_lt_measure;
+               finisher || apply is_erased_type_topen || apply left_lex;
           try omega;
           eauto with bapply_any.
 
@@ -218,6 +218,8 @@ Proof.
         eauto using reducibility_is_candidate;
         try solve [ apply leq_lt_measure; autorewrite with bsize in *; omega ];
         try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+        try solve [ apply left_lex; autorewrite with bsize in *; omega ];
+        try solve [ apply right_lex, lt_index_step; auto ];
         eauto with berased.
 
       lazymatch goal with
@@ -228,7 +230,7 @@ Proof.
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               apply leq_lt_measure ||
+               apply left_lex ||
                finisher || apply is_erased_type_topen;
           try omega;
           eauto with bapply_any;
@@ -263,6 +265,8 @@ Proof.
         eauto using reducibility_is_candidate;
         try solve [ apply leq_lt_measure; autorewrite with bsize in *; omega ];
         try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+        try solve [ apply left_lex; autorewrite with bsize in *; omega ];
+        try solve [ apply right_lex, lt_index_step; auto ];
         eauto with berased.
 
       lazymatch goal with
@@ -278,7 +282,7 @@ Proof.
       end;
         repeat step || autorewrite with bsize in * ||
                apply reducible_unused2 || t_fv_open || t_listutils ||
-               apply leq_lt_measure ||
+               apply left_lex ||
                finisher || apply is_erased_type_topen;
           try omega;
           eauto with bapply_any;

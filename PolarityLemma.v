@@ -155,45 +155,42 @@ Qed.
 Hint Immediate polarity_variance_fvar: b_polarity_variance.
 
 Lemma polarity_variance_induction:
-  forall T ci n o pols theta1 theta2 v,
-    polarity_variance_until (ci, (n, o)) ->
+  forall T n o pols theta1 theta2 v,
+    polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T pols ->
     typeNodes T < n ->
-    count_interpret T <= ci ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
     reducible_values theta1 v T ->
     reducible_values theta2 v T.
 Proof.
   repeat autounfold with u_polarity; intros.
-  eapply_any; eauto 1; repeat step || apply leq_lt_measure.
+  eapply_any; eauto 1; repeat step || apply left_lex.
 Qed.
 
 Lemma polarity_variance_induction_invert:
-  forall T ci n o pols theta1 theta2 v,
-    polarity_variance_until (ci, (n, o)) ->
+  forall T n o pols theta1 theta2 v,
+    polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T (invert_polarities pols) ->
     typeNodes T < n ->
-    count_interpret T <= ci ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
     reducible_values theta2 v T ->
     reducible_values theta1 v T.
 Proof.
   repeat autounfold with u_polarity; intros.
-  eapply H with _ (invert_polarities pols) theta2; eauto 1; repeat step || apply leq_lt_measure;
+  eapply H with _ (invert_polarities pols) theta2; eauto 1; repeat step || apply left_lex;
     eauto using respect_polarities_invert.
 Qed.
 
 Lemma polarity_variance_induction_open:
-  forall T a ci n o pols theta1 theta2 v,
-    polarity_variance_until (ci, (n, o)) ->
+  forall T a n o pols theta1 theta2 v,
+    polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T pols ->
     typeNodes T < n ->
-    count_interpret T <= ci ->
     is_erased_term a ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
@@ -203,7 +200,7 @@ Lemma polarity_variance_induction_open:
 Proof.
   repeat autounfold with u_polarity; intros.
   eapply_any; eauto 1;
-    repeat step || apply leq_lt_measure || autorewrite with bsize in * ||
+    repeat step || apply left_lex || autorewrite with bsize in * ||
            apply polarity_open.
 Qed.
 
@@ -346,9 +343,9 @@ Proof.
 
   lazymatch goal with
   | |- reducible_values ((?M,?RC) :: _) _ _ =>
-    eapply polarity_variance_induction with _ _ _ pols ((M,RC) :: theta1); eauto 1
+    eapply polarity_variance_induction with _ _ pols ((M,RC) :: theta1); eauto 1
   end;
-    repeat step || apply leq_lt_measure || autorewrite with bsize in * ||
+    repeat step || autorewrite with bsize in * ||
            apply has_polarities_topen; try finisher.
 Qed.
 
@@ -387,7 +384,7 @@ Proof.
       try finisher.
 
   define m (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support pols :: support theta1 :: support theta2 :: nil)).
-  eapply (polarity_variance_induction _ _ _ _ ((m, Positive) :: pols) ((m, fun t : tree => reducible_values theta1 t (T_rec n' T0 Ts)) :: theta1)); eauto 1;
+  eapply (polarity_variance_induction _ _ _ ((m, Positive) :: pols) ((m, fun t : tree => reducible_values theta1 t (T_rec n' T0 Ts)) :: theta1)); eauto 1;
     repeat step || apply respect_polarities_cons || unfold subset_rc ||
             autorewrite with bsize in *;
     try finisher;
@@ -395,7 +392,7 @@ Proof.
     eauto with omega;
     eauto using reducibility_is_candidate.
 
-  eapply H; eauto 1; repeat step || apply right_lex, right_lex || apply PolRec;
+  eapply H; eauto 1; repeat step || apply right_lex || apply PolRec;
     eauto using lt_index_step.
 Qed.
 

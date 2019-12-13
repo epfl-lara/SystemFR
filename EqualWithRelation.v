@@ -295,11 +295,6 @@ Inductive equal_with_relation rel: tree -> tree -> Prop :=
       equal_with_relation rel T0 T0' ->
       equal_with_relation rel Ts Ts' ->
       equal_with_relation rel (T_rec n T0 Ts) (T_rec n' T0' Ts')
-
-| EWRTInterpret:
-    forall T T',
-      equal_with_relation rel T T' ->
-      equal_with_relation rel (T_interpret T) (T_interpret T')
 .
 
 Hint Constructors equal_with_relation: bewr.
@@ -399,14 +394,6 @@ Lemma equal_with_relation_size:
   forall t1 t2 rel,
     equal_with_relation rel t1 t2 ->
     typeNodes t1 = typeNodes t2.
-Proof.
-  induction 1; steps.
-Qed.
-
-Lemma equal_with_relation_count_interpret:
-  forall t1 t2 rel,
-    equal_with_relation rel t1 t2 ->
-    count_interpret t1 = count_interpret t2.
 Proof.
   induction 1; steps.
 Qed.

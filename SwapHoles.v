@@ -105,7 +105,6 @@ Fixpoint swap_type_holes t i j :=
   | T_exists T1 T2 => T_exists (swap_type_holes T1 i j) (swap_type_holes T2 i j)
   | T_abs T => T_abs (swap_type_holes T (S i) (S j))
   | T_rec n T0 Ts => T_rec (swap_type_holes n i j) (swap_type_holes T0 i j) (swap_type_holes Ts (S i) (S j))
-  | T_interpret T => T_interpret (swap_type_holes T i j)
   end.
 
 Lemma open_swap:

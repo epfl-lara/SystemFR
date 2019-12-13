@@ -154,7 +154,7 @@ Ltac t_spos_proof HH :=
       ( progress unfold reduces_to in * ) ||
       find_smallstep_value ||
       apply strictly_positive_open ||
-      apply leq_lt_measure ||
+      apply left_lex ||
       find_exists ||
       find_exists3 ||
       find_exists2 || (* must be after find_exists3 *)
@@ -313,7 +313,7 @@ Proof.
   apply_induction H;
     repeat
       step || t_valid_interpretation_equiv || t_forall_implies_equiv ||
-      apply leq_lt_measure ||
+      apply left_lex ||
       (progress autorewrite with bsize in * ) ||
       apply strictly_positive_swap ||
       apply twf_topen ||
@@ -415,7 +415,7 @@ Proof.
           apply H with (get_measure T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
       end;
         repeat
-          step || apply leq_lt_measure || autorewrite with bsize in * || t_deterministic_star ||
+          step || apply left_lex || autorewrite with bsize in * || t_deterministic_star ||
           apply is_erased_type_topen || t_instantiate_reducible ||
           apply wf_topen || apply twf_topen || apply reducibility_is_candidate ||
           (poseNew (Mark 0 "strictly_positive_topen2"); apply strictly_positive_topen2);
@@ -433,19 +433,11 @@ Proof.
             try finisher.
       + (* We apply one last time the induction hypothesis for rec(n) *)
         apply_induction H;
-          repeat step || apply right_lex, right_lex || simp_spos; eauto using lt_index_step;
+          repeat step || apply right_lex || simp_spos; eauto using lt_index_step;
             eauto with bwf btwf berased.
 Qed.
 
 Hint Immediate sp_push_forall_rec: b_push.
-
-Lemma sp_push_forall_interpret:
-  forall m T, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_interpret T).
-Proof.
-  repeat autounfold with u_push; steps.
-Qed.
-
-Hint Immediate sp_push_forall_interpret: b_push.
 
 Lemma strictly_positive_push_forall_aux: forall (m: measure_domain) T, sp_push_forall_prop_aux m T.
 Proof.

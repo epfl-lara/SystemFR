@@ -153,6 +153,24 @@ Proof.
     eauto with smallstep bsteplemmas bwf.
 Qed.
 
+Lemma star_smallstep_ite_true:
+  forall b t1 t2 v,
+    star small_step b ttrue ->
+    star small_step t1 v ->
+    star small_step (ite b t1 t2) v.
+Proof.
+  eauto using star_smallstep_trans with smallstep bsteplemmas.
+Qed.
+
+Lemma star_smallstep_ite_false:
+  forall b t1 t2 v,
+    star small_step b tfalse ->
+    star small_step t2 v ->
+    star small_step (ite b t1 t2) v.
+Proof.
+  eauto using star_smallstep_trans with smallstep bsteplemmas.
+Qed.
+
 Lemma star_smallstep_succ_inv:
   forall t v,
     star small_step t v ->
@@ -568,3 +586,31 @@ Lemma false_step:
 Proof.
   inversion 1; repeat step || t_invert_step.
 Qed.
+
+Lemma star_smallstep_ite_inv_true:
+  forall b t1 t2 v,
+    is_value v ->
+    star small_step (ite b t1 t2) v ->
+    star small_step b ttrue ->
+    star small_step t1 v.
+Proof.
+  repeat step || t_invert_star || t_deterministic_star.
+Qed.
+
+Lemma star_smallstep_ite_inv_false:
+  forall b t1 t2 v,
+    is_value v ->
+    star small_step (ite b t1 t2) v ->
+    star small_step b tfalse ->
+    star small_step t2 v.
+Proof.
+  repeat step || t_invert_star || t_deterministic_star.
+Qed.
+
+Ltac t_invert_ite :=
+  match goal with
+  | H1: star small_step (ite ?b ?t1 ?t2) ?v |- star small_step ?t1 ?v =>
+      apply star_smallstep_ite_inv_true with b t2
+  | H1: star small_step (ite ?b ?t1 ?t2) ?v |- star small_step ?t2 ?v =>
+      apply star_smallstep_ite_inv_false with b t1
+  end.

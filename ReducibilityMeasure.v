@@ -12,7 +12,7 @@ Require Import Coq.Program.Program.
 
 (* Lexicographic order used for the termination argument of reducibility *)
 (* Follows the lexicographic order definition given in Equations *)
-(* The measure used is: (number of T_interpret, size, recursive index) *)
+(* The measure used is: (size, recursive index) *)
 
 Require Import Omega.
 
@@ -100,13 +100,11 @@ Instance wellfounded_lt_index :
 
 Definition lt_partial := (lexprod nat tree lt lt_index).
 Definition wf_measure_partial := wellfounded_lexprod nat tree lt lt_index lt_wf wf_lt_index.
-Definition wf_measure :=
-  wellfounded_lexprod nat (nat * tree) lt lt_partial lt_wf wf_measure_partial.
 
 Opaque lt.
 
-Definition measure_domain: Type := (nat * (nat * tree)).
-Definition lt_measure: measure_domain -> measure_domain -> Prop := lexprod nat (nat * tree) lt lt_partial.
+Definition measure_domain: Type := (nat * tree).
+Definition lt_measure: measure_domain -> measure_domain -> Prop := lt_partial.
 Notation "p1 '<<' p2" := (lt_measure p1 p2) (at level 80).
 
 Lemma measure_induction:
@@ -115,7 +113,7 @@ Lemma measure_induction:
     (forall m, P m).
 Proof.
   repeat step || unfold measure_domain in *.
-  pose proof (wf_measure (a, (a0,b0))) as H.
+  pose proof (wf_measure_partial (a, b)) as H.
   induction H; steps.
 Qed.
 
@@ -142,7 +140,7 @@ Proof.
     eauto using nat_value_to_nat_succ.
 Qed.
 
-Definition get_measure (T: tree) := (count_interpret T, (typeNodes T, index T)).
+Definition get_measure (T: tree) := (typeNodes T, index T).
 
 Lemma leq_lt_measure:
   forall a1 b1 c1 a2 b2 c2,

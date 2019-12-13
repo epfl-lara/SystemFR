@@ -61,14 +61,13 @@ Definition renamable_prop (m: measure_domain) T: Prop :=
 Definition renamable_prop_IH m: Prop := forall m', m' << m -> forall T', renamable_prop m' T'.
 
 Lemma reducible_rename_induct:
-  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n0 n1 n2,
-    renamable_prop_IH (n0, (n1, n2)) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n1 n2,
+    renamable_prop_IH (n1, n2) ->
     equal_with_relation rel A A' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta v A ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
-    count_interpret A <= n0 ->
     typeNodes A < n1 ->
     reducible_values theta' v A'.
 Proof.
@@ -81,19 +80,18 @@ Proof.
         unshelve eapply (IH (get_measure T) _ T T' t theta theta' rel); eauto
   end.
   repeat step || unfold get_measure;
-    try solve [ apply leq_lt_measure; steps ].
+    try solve [ apply left_lex; steps ].
 Qed.
 
 Lemma reducible_rename_induct_back:
-  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n0 n1 n2,
-    renamable_prop_IH (n0, (n1, n2)) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) A A' v n1 n2,
+    renamable_prop_IH (n1, n2) ->
     equal_with_relation rel A A' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta' v A' ->
     valid_interpretation theta ->
     valid_interpretation theta' ->
     typeNodes A < n1 ->
-    count_interpret A <= n0 ->
     reducible_values theta v A.
 Proof.
   unfold renamable_prop_IH; intros.
@@ -105,7 +103,7 @@ Proof.
         unshelve eapply (IH (get_measure T) _ T T' t theta theta' rel); eauto
   end.
   repeat step || unfold get_measure;
-    try solve [ apply leq_lt_measure; steps ].
+    try solve [ apply left_lex; steps ].
 Qed.
 
 Ltac t_apply_ih :=
@@ -123,8 +121,8 @@ Ltac t_apply_ih :=
   end.
 
 Lemma reducible_rename_induct_open:
-  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n0 n1 n2,
-    renamable_prop_IH (n0, (n1, n2)) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n1 n2,
+    renamable_prop_IH (n1, n2) ->
     equal_with_relation rel B B' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta v (open 0 B a) ->
@@ -132,17 +130,16 @@ Lemma reducible_rename_induct_open:
     valid_interpretation theta' ->
     is_erased_term a ->
     typeNodes (open 0 B a) < n1 ->
-    count_interpret (open 0 B a) <= n0 ->
     reducible_values theta' v (open 0 B' a).
 Proof.
   unfold renamable_prop_IH; intros.
   t_apply_ih;
-    repeat step || apply leq_lt_measure || apply equal_with_relation_open; eauto with bfv.
+    repeat step || apply left_lex || apply equal_with_relation_open; eauto with bfv.
 Qed.
 
 Lemma reducible_rename_induct_open_back:
-  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n0 n1 n2,
-    renamable_prop_IH (n0, (n1, n2)) ->
+  forall (theta theta' : interpretation) (rel : map nat nat) B B' v a n1 n2,
+    renamable_prop_IH (n1, n2) ->
     equal_with_relation rel B B' ->
     equivalent_with_relation rel theta theta' equivalent_rc ->
     reducible_values theta' v (open 0 B' a) ->
@@ -150,11 +147,10 @@ Lemma reducible_rename_induct_open_back:
     valid_interpretation theta' ->
     is_erased_term a ->
     typeNodes (open 0 B a) < n1 ->
-    count_interpret (open 0 B a) <= n0 ->
     reducible_values theta v (open 0 B a).
 Proof.
   unfold renamable_prop_IH; intros.
-  t_apply_ih; repeat step || apply leq_lt_measure || apply equal_with_relation_open; eauto with bfv.
+  t_apply_ih; repeat step || apply left_lex || apply equal_with_relation_open; eauto with bfv.
 Qed.
 
 Ltac t_induct :=
@@ -180,7 +176,7 @@ Ltac t_prove_reduces_to :=
 Lemma reducible_rename_reduces_to:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (count_interpret T1 + count_interpret T2, (S (typeNodes T1 + typeNodes T2), notype_err)) ->
+    renamable_prop_IH (S (typeNodes T1 + typeNodes T2), notype_err) ->
     reducible_values theta' a A' ->
     is_erased_type T2 ->
     is_erased_type B' ->
@@ -200,7 +196,7 @@ Qed.
 Lemma reducible_rename_reduces_to_back:
   forall (T1 T2 t : tree) (theta theta' : interpretation) (rel : map nat nat) A' B' a,
     equivalent_with_relation rel theta theta' equivalent_rc ->
-    renamable_prop_IH (count_interpret T1 + count_interpret T2, (S (typeNodes T1 + typeNodes T2), notype_err)) ->
+    renamable_prop_IH (S (typeNodes T1 + typeNodes T2), notype_err) ->
     reducible_values theta a T1 ->
     is_erased_type T2 ->
     is_erased_type B' ->
@@ -452,7 +448,9 @@ Proof.
         (rewrite substitute_topen3 in * by steps) ||
         t_apply_ih || t_bewr_constructor;
       try solve [ apply leq_lt_measure; omega ];
+      try solve [ apply left_lex; omega ];
       try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+      try solve [ apply right_lex, lt_index_step; auto ];
       eauto using in_remove_support;
       eauto using reducibility_is_candidate;
       eauto with bfv.
@@ -484,13 +482,14 @@ Proof.
         apply equal_with_relation_refl ||
         match goal with
         | H: equal_with_relation _ _ _ |- _ =>
-          rewrite (equal_with_relation_size _ _ _ H) in * by steps;
-          rewrite (equal_with_relation_count_interpret _ _ _ H) in * by steps
+          rewrite (equal_with_relation_size _ _ _ H) in * by steps
         end ||
         (rewrite substitute_topen3 in * by steps) ||
         t_apply_ih || t_bewr_constructor;
       try solve [ apply leq_lt_measure; omega ];
+      try solve [ apply left_lex; omega ];
       try solve [ apply right_lex, right_lex, lt_index_step; auto ];
+      try solve [ apply right_lex, lt_index_step; auto ];
       eauto using in_remove_support;
       eauto using reducibility_is_candidate;
       eauto with bfv;
@@ -498,28 +497,6 @@ Proof.
 Qed.
 
 Hint Immediate reducible_rename_rec: b_rename.
-
-Lemma reducible_rename_interpret: forall m T, renamable_prop_IH m -> renamable_prop m (T_interpret T).
-Proof.
-  unfold renamable_prop;
-  repeat step || simp_red || step_inversion equal_with_relation || t_ewr_star.
-  - exists t2'; unfold renamable_prop_IH in *;
-      repeat step || t_apply_ih || apply left_lex ||
-        match goal with
-        | H: equal_with_relation _ _ _ |- _ =>
-          rewrite <- (equal_with_relation_count_interpret _ _ _ H) in * by steps
-        end; try omega;
-        eauto 2 using equal_with_relation_irred.
-  - exists t1'; unfold renamable_prop_IH in *;
-      repeat step || t_apply_ih || apply left_lex ||
-        match goal with
-        | H: equal_with_relation _ _ _ |- _ =>
-          rewrite <- (equal_with_relation_count_interpret _ _ _ H) in * by steps
-        end; try omega;
-        eauto 2 using equal_with_relation_irred_back.
-Qed.
-
-Hint Immediate reducible_rename_interpret: b_rename.
 
 Lemma reducible_rename_aux: forall m T, renamable_prop m T.
 Proof.
