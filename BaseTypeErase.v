@@ -1,14 +1,14 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.BaseType.
-Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.TypeErasureLemmas.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.BaseType.
+Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.TypeErasure.
+Require Export SystemFR.TypeErasureLemmas.
 
 Lemma base_type_erase:
   forall X A B,
@@ -16,6 +16,6 @@ Lemma base_type_erase:
     base_type X (erase_type A) (erase_type B).
 Proof.
   induction 1; repeat step || constructor;
-    eauto with bfv;
-    eauto with berased.
+    eauto with fv;
+    eauto with erased.
 Qed.

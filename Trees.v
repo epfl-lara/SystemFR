@@ -1,4 +1,4 @@
-Require Import SystemFR.Tactics.
+Require Export SystemFR.Tactics.
 
 Inductive fv_tag: Set := term_var | type_var.
 
@@ -22,13 +22,11 @@ Inductive tree: Set :=
   | T_sum: tree -> tree -> tree
   | T_refine: tree -> tree -> tree
   | T_type_refine: tree -> tree -> tree
-  | T_let: tree -> tree -> tree
-  | T_singleton: tree -> tree
   | T_intersection: tree -> tree -> tree
   | T_union: tree -> tree -> tree
   | T_top: tree
   | T_bot: tree
-  | T_equal: tree -> tree -> tree
+  | T_equiv: tree -> tree -> tree
   | T_forall: tree -> tree -> tree
   | T_exists: tree -> tree -> tree
   | T_abs: tree -> tree
@@ -91,7 +89,6 @@ Inductive tree: Set :=
 
 (* types defined in terms out of the previous types *)
 Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
-Definition typeability t T := T_intersection (T_singleton t) T.
 
 Definition term_fvar s := fvar s term_var.
 Definition type_fvar s := fvar s type_var.
@@ -167,13 +164,11 @@ with is_annotated_type T :=
   | T_prod A B => is_annotated_type A /\ is_annotated_type B
   | T_arrow A B => is_annotated_type A /\ is_annotated_type B
   | T_sum A B => is_annotated_type A /\ is_annotated_type B
-  | T_let t B => is_annotated_term t /\ is_annotated_type B
-  | T_singleton t => is_annotated_term t
   | T_intersection A B => is_annotated_type A /\ is_annotated_type B
   | T_union A B => is_annotated_type A /\ is_annotated_type B
   | T_top => True
   | T_bot => True
-  | T_equal t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
+  | T_equiv t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
   | T_forall A B => is_annotated_type A /\ is_annotated_type B
   | T_exists A B => is_annotated_type A /\ is_annotated_type B
   | T_abs T => is_annotated_type T
@@ -232,13 +227,11 @@ Fixpoint is_erased_type T :=
   | T_prod A B => is_erased_type A /\ is_erased_type B
   | T_arrow A B => is_erased_type A /\ is_erased_type B
   | T_sum A B => is_erased_type A /\ is_erased_type B
-  | T_let t B => is_erased_term t /\ is_erased_type B
-  | T_singleton t => is_erased_term t
   | T_intersection A B => is_erased_type A /\ is_erased_type B
   | T_union A B => is_erased_type A /\ is_erased_type B
   | T_top => True
   | T_bot => True
-  | T_equal t1 t2 => is_erased_term t1 /\ is_erased_term t2
+  | T_equiv t1 t2 => is_erased_term t1 /\ is_erased_term t2
   | T_forall A B => is_erased_type A /\ is_erased_type B
   | T_exists A B => is_erased_type A /\ is_erased_type B
   | T_abs A => is_erased_type A
@@ -315,13 +308,11 @@ Fixpoint tree_size t :=
   | T_prod A B => 1 + tree_size A + tree_size B
   | T_arrow A B => 1 + tree_size A + tree_size B
   | T_sum A B => 1 + tree_size A + tree_size B
-  | T_let t B => 1 + tree_size t + tree_size B
-  | T_singleton t => 1 + tree_size t
   | T_intersection A B => 1 + tree_size A + tree_size B
   | T_union A B => 1 + tree_size A + tree_size B
   | T_top => 0
   | T_bot => 0
-  | T_equal t1 t2 => 1 + tree_size t1 + tree_size t2
+  | T_equiv t1 t2 => 1 + tree_size t1 + tree_size t2
   | T_forall A B => 1 + tree_size A + tree_size B
   | T_exists A B => 1 + tree_size A + tree_size B
   | T_abs T => 1 + tree_size T
@@ -333,3 +324,11 @@ Fixpoint build_nat (n: nat): tree :=
   | 0 => zero
   | S n => succ (build_nat n)
   end.
+
+Lemma build_nat_inj:
+  forall n1 n2,
+    build_nat n1 = build_nat n2 ->
+    n1 = n2.
+Proof.
+  induction n1; destruct n2; steps.
+Qed.

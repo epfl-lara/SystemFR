@@ -3,13 +3,13 @@ Require Import Coq.Lists.List.
 Require Import Coq.Init.Datatypes.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.SetLemmas.
-Require Import SystemFR.FVLemmas.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.AssocList.
+
+Require Export SystemFR.ListLemmas.
+Require Export SystemFR.FVLemmas.
 
 Lemma fv_close1:
   forall t k x,
@@ -30,7 +30,7 @@ Proof.
            | _ => step || t_listutils || instantiate_any
            end;
     eauto 3 using fv_close1;
-    eauto 5 with beapply_any.
+    eauto 5 with eapply_any.
 Qed.
 
 Lemma fv_close3:
@@ -42,7 +42,7 @@ Proof.
     repeat match goal with
            | _ => step || t_listutils || instantiate_any
            end;
-    eauto with beapply_any.
+    eauto with eapply_any.
 Qed.
 
 Lemma tfv_close1:
@@ -64,7 +64,7 @@ Proof.
            | _ => step || t_listutils || instantiate_any
            end;
     eauto 3 using tfv_close1;
-    eauto 5 with beapply_any.
+    eauto 5 with eapply_any.
 Qed.
 
 Lemma tfv_close3:
@@ -76,7 +76,7 @@ Proof.
     repeat match goal with
            | _ => step || t_listutils || instantiate_any
            end;
-    eauto with beapply_any.
+    eauto with eapply_any.
 Qed.
 
 Ltac t_fv_close :=

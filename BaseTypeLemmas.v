@@ -1,30 +1,30 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.SubstitutionErase.
-Require Import SystemFR.TreeLists.
-Require Import SystemFR.TermListLemmas.
-Require Import SystemFR.TermListReducible.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.SizeLemmas.
 
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.RedTactics.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.SubstitutionErase.
+Require Export SystemFR.TreeLists.
+Require Export SystemFR.TermListLemmas.
+Require Export SystemFR.TermListReducible.
 
-Require Import SystemFR.SubstitutionLemmas.
+Require Export SystemFR.ReducibilityDefinition.
+Require Export SystemFR.ReducibilityCandidate.
+Require Export SystemFR.ReducibilityUnused.
+Require Export SystemFR.ReducibilityLemmas.
+Require Export SystemFR.RedTactics.
 
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
+Require Export SystemFR.SubstitutionLemmas.
 
-Require Import SystemFR.BaseType.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.FVLemmasLists.
+
+Require Export SystemFR.BaseType.
 
 Require Import Omega.
 
@@ -36,8 +36,8 @@ Lemma base_type_open:
     base_type X (open k T a) (open k T0 a).
 Proof.
   induction 1; repeat step || constructor || t_fv_open || t_listutils || rewrite is_erased_term_tfv in * by assumption;
-    eauto with bfv;
-    eauto with berased.
+    eauto with fv;
+    eauto with erased.
 Qed.
 
 Lemma base_type_erased:
@@ -48,11 +48,11 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve base_type_erased: berased.
+Hint Resolve base_type_erased: erased.
 
 Lemma base_type_approx_aux:
   forall n X Ts T theta l v RC,
-    typeNodes T < n ->
+    type_nodes T < n ->
     wfs l 0 ->
     pclosed_mapping l type_var ->
     base_type X Ts T ->
@@ -67,12 +67,12 @@ Proof.
     repeat match goal with
     | _ =>
       step || simp_red || find_exists ||
-      (rewrite substitute_open2 in * by (t_closing; eauto with bfv))
+      (rewrite substitute_open2 in * by (t_closing; eauto with fv))
     end;
     try omega;
     try solve [ eapply_any; steps; eauto with omega ];
     try solve [ eapply_any; repeat step || autorewrite with bsize in *;
-                eauto 1; try omega; eauto 2 using base_type_open; eauto 2 with berased ];
+                eauto 1; try omega; eauto 2 using base_type_open; eauto 2 with erased ];
     t_closer;
     eauto 2 using reducible_values_closed with step_tactic;
     try solve [ eapply reducible_unused3; eauto 1; repeat step || rewrite fv_subst_different_tag in * by steps ].

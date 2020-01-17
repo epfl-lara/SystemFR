@@ -1,76 +1,72 @@
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.SwapHoles.
+Require Export SystemFR.SwapTypeHoles.
 
 Require Import Omega.
 
 (* measure for ensuring termination of reducible_values *)
 (* see file ReducibilityMeasure for the full measure *)
-Fixpoint typeNodes T: nat :=
+Fixpoint type_nodes T: nat :=
   match T with
   | T_unit => 0
   | T_bool => 0
   | T_nat => 0
-  | T_refine A p => 1 + typeNodes A
-  | T_type_refine A B => 1 + typeNodes A + typeNodes B
-  | T_arrow A B => 1 + typeNodes A + typeNodes B
-  | T_prod A B => 1 + typeNodes A + typeNodes B
-  | T_sum A B => 1 + typeNodes A + typeNodes B
-  | T_let t B => 1 + typeNodes B
-  | T_singleton t => 0
-  | T_intersection A B => 1 + typeNodes A + typeNodes B
-  | T_union A B => 1 + typeNodes A + typeNodes B
+  | T_refine A p => 1 + type_nodes A
+  | T_type_refine A B => 1 + type_nodes A + type_nodes B
+  | T_arrow A B => 1 + type_nodes A + type_nodes B
+  | T_prod A B => 1 + type_nodes A + type_nodes B
+  | T_sum A B => 1 + type_nodes A + type_nodes B
+  | T_intersection A B => 1 + type_nodes A + type_nodes B
+  | T_union A B => 1 + type_nodes A + type_nodes B
   | T_top => 0
   | T_bot => 0
-  | T_equal _ _ => 0
-  | T_forall A B => 1 + typeNodes A + typeNodes B
-  | T_exists A B => 1 + typeNodes A + typeNodes B
-  | T_abs T => 1 + typeNodes T
-  | T_rec _ T0 Ts => 1 + typeNodes T0 + typeNodes Ts
+  | T_equiv _ _ => 0
+  | T_forall A B => 1 + type_nodes A + type_nodes B
+  | T_exists A B => 1 + type_nodes A + type_nodes B
+  | T_abs T => 1 + type_nodes T
+  | T_rec _ T0 Ts => 1 + type_nodes T0 + type_nodes Ts
 
   | _ => 0
   end.
 
-(*
-Lemma typeNodes_term_form:
-  forall t, is_erased_term t -> typeNodes t = 0.
-Proof.
-  destruct t; steps.
-Qed.
-*)
-
-Lemma typeNodes_opening:
-  forall T k rep,
-    is_erased_type T ->
-    is_erased_term rep ->
-    typeNodes (open k T rep) = typeNodes T.
-Proof.
-  induction T; repeat step || rewrite_any || apply typeNodes_term_form;
-    try omega.
-Qed.
-
-Hint Rewrite typeNodes_opening: bsize.
-
-Lemma typeNodes_opening_var:
-  forall T k X, typeNodes (open k T (fvar X type_var)) = typeNodes T.
-Proof.
-  induction T; steps.
-Qed.
-
-Hint Rewrite typeNodes_opening_var: bsize.
-
-Lemma typeNodes_topening_var:
-  forall T k X, typeNodes (topen k T (fvar X type_var)) = typeNodes T.
-Proof.
-  induction T; steps.
-Qed.
-
-Hint Rewrite typeNodes_topening_var: bsize.
-
-Lemma typeNodes_swap:
-  forall t i j, typeNodes (swap_type_holes t i j) = typeNodes t.
+Lemma type_nodes_term:
+  forall t,
+    is_erased_term t ->
+    type_nodes t = 0.
 Proof.
   induction t; steps.
 Qed.
 
-Hint Rewrite typeNodes_swap: bsize.
+Lemma type_nodes_opening:
+  forall T k rep,
+    is_erased_type T ->
+    is_erased_term rep ->
+    type_nodes (open k T rep) = type_nodes T.
+Proof.
+  induction T; repeat step || rewrite_any || apply type_nodes_term_form;
+    try omega.
+Qed.
+
+Hint Rewrite type_nodes_opening: bsize.
+
+Lemma type_nodes_opening_var:
+  forall T k X, type_nodes (open k T (fvar X type_var)) = type_nodes T.
+Proof.
+  induction T; steps.
+Qed.
+
+Hint Rewrite type_nodes_opening_var: bsize.
+
+Lemma type_nodes_topening_var:
+  forall T k X, type_nodes (topen k T (fvar X type_var)) = type_nodes T.
+Proof.
+  induction T; steps.
+Qed.
+
+Hint Rewrite type_nodes_topening_var: bsize.
+
+Lemma type_nodes_swap:
+  forall t i j, type_nodes (swap_type_holes t i j) = type_nodes t.
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Rewrite type_nodes_swap: bsize.

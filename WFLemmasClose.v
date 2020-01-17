@@ -1,13 +1,13 @@
 Require Import Coq.Strings.String.
 Require Import Omega.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.AssocList.
 
-Require Import SystemFR.WFLemmas.
+Require Export SystemFR.ListUtils.
+
+Require Export SystemFR.WFLemmas.
 
 Open Scope string_scope.
 Open Scope list_scope.
@@ -44,7 +44,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve wf_close: bwf.
+Hint Resolve wf_close: wf.
 Hint Resolve twf_tclose: btwf.
-Hint Resolve wf_tclose: bwf.
+Hint Resolve wf_tclose: wf.
 Hint Resolve twf_close: btwf.

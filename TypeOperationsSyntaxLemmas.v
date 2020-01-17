@@ -1,18 +1,18 @@
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.Trees.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Syntax.
+Require Export SystemFR.Trees.
+
+Require Export SystemFR.Syntax.
 
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
 
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.AnnotatedTermLemmas.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.TypeOperations.
-Require Import SystemFR.ListUtils.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.AnnotatedTermLemmas.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.TypeOperations.
+Require Export SystemFR.ListUtils.
 
 Lemma is_annotated_type_ite:
   forall b T1 T2 T,
@@ -41,7 +41,7 @@ Lemma wf_ite:
       wf T2 k ->
       wf T k.
 Proof.
-  induction 1; steps; eauto with bwf.
+  induction 1; steps; eauto with wf.
 Qed.
 
 Ltac t_wf_ite :=
@@ -49,7 +49,7 @@ Ltac t_wf_ite :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- wf ?T _ => apply wf_ite with b T1 T2
   end.
 
-Hint Extern 50 => t_wf_ite: bwf.
+Hint Extern 50 => t_wf_ite: wf.
 
 Lemma twf_ite:
   forall b T1 T2 T,
@@ -91,7 +91,7 @@ Ltac t_pfv_ite :=
     pose proof (pfv_ite _ _ _ _ H1 _ _ H2)
   end.
 
-Hint Extern 50 => t_pfv_ite: bfv.
+Hint Extern 50 => t_pfv_ite: fv.
 
 Lemma pfv_ite2:
   forall b T1 T2 T S tag,
@@ -109,4 +109,4 @@ Ltac t_pfv_ite2 :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- subset (pfv ?T _) _ => apply pfv_ite2 with b T1 T2
   end.
 
-Hint Extern 50 => t_pfv_ite2: bfv.
+Hint Extern 50 => t_pfv_ite2: fv.

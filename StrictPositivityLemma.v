@@ -6,47 +6,28 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.OpenTOpen.
+Require Export SystemFR.Equivalence.
+Require Export SystemFR.OpenTOpen.
 
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.SizeLemmas.
 
+Require Export SystemFR.ErasedTermLemmas.
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.ReducibilitySubst.
+Require Export SystemFR.RedTactics2.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.RedTactics.
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilitySubst.
-Require Import SystemFR.ReducibilityRenaming.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.RedTactics2.
+Require Export SystemFR.IdRelation.
+Require Export SystemFR.EqualWithRelation.
 
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.EqualWithRelation.
+Require Export SystemFR.EquivalentWithRelation.
+Require Export SystemFR.AssocList.
 
-Require Import SystemFR.EquivalentWithRelation.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.SwapHoles.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TOpenTClose.
-Require Import SystemFR.StrictPositivity.
-Require Import SystemFR.StrictPositivityLemmas.
-Require Import SystemFR.NoTypeFVar.
+Require Export SystemFR.Freshness.
 
-Require Import SystemFR.FVLemmas.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.StrictPositivity.
+Require Export SystemFR.StrictPositivityLemmas.
+Require Export SystemFR.NoTypeFVar.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -72,11 +53,11 @@ Ltac t_rewrite_support :=
 Ltac t_rewriter :=
   repeat step || t_listutils || unfold no_type_fvar in * || t_forall_implies_support ||
          t_fv_open ||
-         (rewrite is_erased_term_tfv in * by (steps; eauto with berased)) ||
+         (rewrite is_erased_term_tfv in * by (steps; eauto with erased)) ||
          rewrite support_push_all in * || rewrite support_push_one in *;
-    eauto with bapply_any;
+    eauto with apply_any;
     eauto with b_valid_interp;
-    eauto 2 with beapply_any step_tactic;
+    eauto 2 with eapply_any step_tactic;
     try solve [ eapply_any; eauto; steps ];
     try finisher.
 
@@ -127,7 +108,7 @@ Proof.
   unfold push_all, push_one;
   intros; t_instantiate_non_empty;
     repeat match goal with
-           | _ => step || simp_red || t_instantiate_reducible || rewrite support_mapValues in * || t_listutils
+           | _ => step || simp_red || t_instantiate_reducible || rewrite support_map_values in * || t_listutils
            | _ => t_lookup_same || t_lookupor || t_lookup_rewrite || t_lookupMap2 || t_lookup
            | _ => t_forall_implies_apply || t_forall_implies_support
            end.
@@ -137,9 +118,9 @@ Hint Immediate sp_push_forall_fvar: b_push.
 
 Ltac t_spos_proof HH :=
       repeat match goal with
-    | |- closed_term _ => solve [ t_closing; eauto with bfv bwf b_valid_interp ]
+    | |- closed_term _ => solve [ t_closing; eauto with fv wf b_valid_interp ]
     | |- wf _ _ => solve [ t_closing; repeat step || apply wf_open ]
-    | H: star small_step _ zero |- _ \/ _ => left
+    | H: star scbv_step _ zero |- _ \/ _ => left
     | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
     | _ =>
       step ||
@@ -160,12 +141,12 @@ Ltac t_spos_proof HH :=
       find_exists2 || (* must be after find_exists3 *)
       ( progress autorewrite with bsize in * ) ||
       (rewrite reducible_unused_many in * by t_rewriter) ||
-      (rewrite open_topen in * by (steps; eauto with btwf; eauto with bwf)) ||
+      (rewrite open_topen in * by (steps; eauto with btwf; eauto with wf)) ||
       apply_induction HH
     end;
     try omega;
     eauto using reducible_values_closed;
-    eauto with berased bwf btwf;
+    eauto with erased wf btwf;
     try solve [ apply twf_open; eauto with btwf ];
     eauto with b_red_is_val;
     eauto using no_type_fvar_strictly_positive;
@@ -223,16 +204,6 @@ Proof.
 Qed.
 
 Hint Immediate sp_push_forall_type_refine: b_push.
-
-Lemma sp_push_forall_let:
-  forall m t T, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_let t T).
-Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
-    repeat step || simp_red || simp_spos.
-  t_spos_proof H.
-Qed.
-
-Hint Immediate sp_push_forall_let: b_push.
 
 Lemma sp_push_forall_intersection:
   forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_intersection T1 T2).
@@ -323,23 +294,23 @@ Proof.
       apply strictly_positive_topen ||
       apply wf_topen;
     try finisher;
-    eauto with bwf btwf omega berased;
+    eauto with wf btwf omega erased;
     eauto 2 using red_is_val with step_tactic;
     eauto with b_red_is_val;
     try solve [ apply_any; assumption ].
 
-  + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
-  + apply reducible_unused3 in H16; repeat step; try finisher; eauto with bapply_any.
+  + apply reducible_unused2; steps; try finisher; eauto with apply_any.
+  + apply reducible_unused3 in H16; repeat step; try finisher; eauto with apply_any.
   + apply reducible_unused3 in H16;
       repeat step || t_instantiate_reducible || t_deterministic_star ||
              t_instantiate_rc || simp_red || unfold reduces_to in *;
-      try finisher; eauto with bapply_any;
+      try finisher; eauto with apply_any;
         eauto with b_red_is_val.
     apply reducible_rename_permute with X1; repeat step || rewrite support_push_one in *;
       eauto with b_valid_interp;
       try finisher.
-  + apply reducible_unused2; steps; try finisher; eauto with bapply_any.
-  + apply reducible_unused3 in H16; steps; try finisher; eauto with bapply_any.
+  + apply reducible_unused2; steps; try finisher; eauto with apply_any.
+  + apply reducible_unused3 in H16; steps; try finisher; eauto with apply_any.
 Qed.
 
 Hint Immediate sp_push_forall_abs: b_push.
@@ -386,7 +357,7 @@ Proof.
                (rewrite reducible_unused_many in * by t_rewriter) ||
                apply reducibility_is_candidate ||
                unfold equivalent_rc;
-        eauto with b_valid_interp bapply_any;
+        eauto with b_valid_interp apply_any;
         try finisher.
 
   (** Recursive type at n+1: case where the recursive type is itself strictly positive **)
@@ -434,7 +405,7 @@ Proof.
       + (* We apply one last time the induction hypothesis for rec(n) *)
         apply_induction H;
           repeat step || apply right_lex || simp_spos; eauto using lt_index_step;
-            eauto with bwf btwf berased.
+            eauto with wf btwf erased.
 Qed.
 
 Hint Immediate sp_push_forall_rec: b_push.

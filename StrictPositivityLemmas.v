@@ -6,46 +6,16 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.OpenTOpen.
+Require Export SystemFR.OpenTOpen.
 
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.ReducibilitySubst.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.RedTactics.
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilitySubst.
-Require Import SystemFR.ReducibilityRenaming.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.RedTactics2.
-
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.EqualWithRelation.
-
-Require Import SystemFR.EquivalentWithRelation.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.SwapHoles.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TOpenTClose.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.StrictPositivity.
-Require Import SystemFR.NoTypeFVarLemmas.
-
-Require Import SystemFR.FVLemmas.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.StrictPositivity.
+Require Export SystemFR.NoTypeFVarLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -82,7 +52,7 @@ Qed.
 
 Lemma strictly_positive_open_aux:
   forall n T vars rep k,
-    typeNodes T < n ->
+    type_nodes T < n ->
     is_erased_type T ->
     is_erased_term rep ->
     strictly_positive T vars ->
@@ -96,7 +66,7 @@ Proof.
   right. exists X; repeat step || t_fv_open || t_listutils || rewrite is_erased_term_tfv in * by steps.
   rewrite <- open_topen;
     repeat step || apply IHn || autorewrite with bsize in * || apply is_erased_type_topen;
-    eauto with btwf bwf omega.
+    eauto with btwf wf omega.
 Qed.
 
 Lemma strictly_positive_open:
@@ -123,7 +93,7 @@ Lemma push_is_candidate:
     reducibility_candidate (fun v : tree => reducible_values theta a A -> RC v).
 Proof.
   repeat step || unfold non_empty in * || unfold reducibility_candidate in * || instantiate_any;
-    eauto with bfv bwf.
+    eauto with fv wf.
 Qed.
 
 Lemma push_all_is_candidate:
@@ -133,7 +103,7 @@ Lemma push_all_is_candidate:
     reducibility_candidate (fun v : tree => forall a, reducible_values theta a A -> RC v).
 Proof.
   repeat step || unfold non_empty in * || unfold reducibility_candidate in * || instantiate_any;
-    eauto with bfv bwf.
+    eauto with fv wf.
 Qed.
 
 Ltac find_exists2 :=
@@ -158,22 +128,22 @@ Ltac t_red_is_val :=
   eapply red_is_val; eauto;
     repeat step || apply valid_interpretation_append || eapply valid_interpretation_one ||
     eauto with b_valid_interp; steps;
-    eauto with bapply_any.
+    eauto with apply_any.
 
 Hint Extern 50 => solve [ t_red_is_val ]: b_red_is_val.
 
 Lemma strictly_positive_rename_aux:
   forall n T T' vars vars' rel,
-    typeNodes T < n ->
+    type_nodes T < n ->
     strictly_positive T vars ->
-    equal_with_relation rel T T' ->
+    equal_with_relation type_var rel T T' ->
     similar_sets rel vars vars' ->
     strictly_positive T' vars'.
 Proof.
-  induction n; destruct T;
+  induction n; destruct T; inversion 3;
     repeat (intuition auto) || simp_spos || destruct_tag || step_inversion equal_with_relation; try omega;
     repeat match goal with
-           | H1: equal_with_relation ?rel ?T ?T',
+           | H1: equal_with_relation _ ?rel ?T ?T',
              H2: strictly_positive ?T ?vars |-
                strictly_positive ?T' ?vars' =>
              apply IHn with T vars rel
@@ -187,7 +157,7 @@ Proof.
     repeat step; try finisher.
 
   match goal with
-  | H1: equal_with_relation ?rel _ _,
+  | H1: equal_with_relation _ ?rel _ _,
     H2: strictly_positive ?T (?X :: nil) |-
       strictly_positive (topen 0 ?T' (fvar ?M type_var)) ?vars' =>
     apply IHn with T (X :: nil) ((X,M) :: rel)
@@ -200,7 +170,7 @@ Qed.
 Lemma strictly_positive_rename:
   forall T T' vars vars' rel,
     strictly_positive T vars ->
-    equal_with_relation rel T T' ->
+    equal_with_relation type_var rel T T' ->
     similar_sets rel vars vars' ->
     strictly_positive T' vars'.
 Proof.
@@ -217,7 +187,7 @@ Qed.
 
 Lemma strictly_positive_swap_aux:
   forall n T vars i j,
-    typeNodes T < n ->
+    type_nodes T < n ->
     strictly_positive T vars ->
     strictly_positive (swap_type_holes T i j) vars.
 Proof.
@@ -239,7 +209,7 @@ Qed.
 
 Lemma strictly_positive_topen_aux:
   forall n T vars k X,
-    typeNodes T < n ->
+    type_nodes T < n ->
     strictly_positive T vars ->
     ~(X ∈ vars) ->
     strictly_positive (topen k T (fvar X type_var)) vars.
@@ -271,14 +241,14 @@ Lemma support_push_one:
   forall theta a,
     support (push_one a theta) = support theta.
 Proof.
-  unfold push_one; repeat step || rewrite support_mapValues.
+  unfold push_one; repeat step || rewrite support_map_values.
 Qed.
 
 Lemma support_push_all:
   forall theta P,
     support (push_all P theta) = support theta.
 Proof.
-  unfold push_one; repeat step || rewrite support_mapValues.
+  unfold push_one; repeat step || rewrite support_map_values.
 Qed.
 
 Lemma strictly_positive_topen:
@@ -342,7 +312,7 @@ Lemma forall_implies_equiv:
     (forall x, P1 x <-> P2 x) ->
     forall_implies P2 ptheta theta.
 Proof.
-  induction ptheta; destruct theta; steps; eauto with beapply_any.
+  induction ptheta; destruct theta; steps; eauto with eapply_any.
 Qed.
 
 Ltac t_forall_implies_equiv :=
@@ -353,7 +323,7 @@ Ltac t_forall_implies_equiv :=
 
 Lemma strictly_positive_append_aux:
   forall n T vars1 vars2,
-    typeNodes T < n ->
+    type_nodes T < n ->
     strictly_positive T vars1 ->
     strictly_positive T vars2 ->
     strictly_positive T (vars1 ++ vars2).

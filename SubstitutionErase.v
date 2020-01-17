@@ -1,9 +1,9 @@
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.TreeLists.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.TreeLists.
+Require Export SystemFR.ErasedTermLemmas.
 
 Require Import PeanoNat.
 
@@ -18,7 +18,7 @@ Proof.
   induction t; steps; eauto using erased_term_in_list.
 Qed.
 
-Hint Resolve subst_erased: berased.
+Hint Resolve subst_erased: erased.
 
 Lemma subst_erased_type:
   forall t l,
@@ -31,7 +31,7 @@ Proof.
     eauto using erased_term_in_list.
 Qed.
 
-Hint Resolve subst_erased_type: berased.
+Hint Resolve subst_erased_type: erased.
 
 Lemma subst_erased_type2:
   forall T X V,
@@ -43,4 +43,4 @@ Proof.
     eauto using subst_erased.
 Qed.
 
-Hint Resolve subst_erased_type2: berased.
+Hint Resolve subst_erased_type2: erased.

@@ -1,19 +1,7 @@
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.TermList.
-Require Import SystemFR.SubstitutionErase.
-Require Import SystemFR.TreeLists.
-Require Import SystemFR.Sets.
+Require Import Coq.Lists.List.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-
-Require Import PeanoNat.
-
-Open Scope list_scope.
+Require Export SystemFR.TreeLists.
+Require Export SystemFR.ReducibilityLemmas.
 
 Opaque reducible_values.
 
@@ -24,7 +12,26 @@ Lemma satisfies_erased_terms:
     erased_terms l.
 Proof.
   induction l; repeat step || step_inversion satisfies;
-    eauto with berased.
+    eauto with erased.
 Qed.
 
-Hint Resolve satisfies_erased_terms: berased.
+Hint Resolve satisfies_erased_terms: erased.
+
+Lemma satisfies_weaken:
+  forall theta gamma1 gamma2 x T T' l,
+    (forall t l,
+      satisfies (reducible_values theta) gamma2 l ->
+      reducible_values theta t (substitute T l) ->
+      reducible_values theta t (substitute T' l)) ->
+    subset (fv T) (support gamma2) ->
+    subset (fv T') (support gamma2) ->
+    NoDup (support (gamma1 ++ (x, T) :: gamma2)) ->
+    satisfies (reducible_values theta) (gamma1 ++ (x, T) :: gamma2) l ->
+    satisfies (reducible_values theta) (gamma1 ++ (x, T') :: gamma2) l.
+Proof.
+  induction gamma1;
+    repeat step || t_listutils || apply SatCons || step_inversion NoDup ||
+           step_inversion satisfies.
+
+  apply IHgamma1 with T; repeat step || t_listutils; eauto.
+Qed.

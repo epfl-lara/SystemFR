@@ -1,14 +1,8 @@
 Require Import Coq.Strings.String.
 Require Import Omega.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
 
 Open Scope string_scope.
 Open Scope list_scope.
@@ -22,6 +16,6 @@ Proof.
   induction t;
     repeat step || t_equality || apply_any ||
       (rewrite topen_none by (steps;eauto with btwf omega)) ||
-      (rewrite open_none by (steps;eauto with bwf omega));
-        eauto with bwf btwf omega.
+      (rewrite open_none by (steps;eauto with wf omega));
+        eauto with wf btwf omega.
 Qed.

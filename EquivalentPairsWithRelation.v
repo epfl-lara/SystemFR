@@ -1,11 +1,11 @@
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.ListUtils.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.ListUtils.
 
 Require Import PeanoNat.
 

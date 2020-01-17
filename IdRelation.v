@@ -1,11 +1,11 @@
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.SetLemmas.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.EqualWithRelation.
-Require Import SystemFR.EquivalentWithRelation.
+Require Export SystemFR.Syntax.
+
+Require Export SystemFR.Tactics.
+Require Export SystemFR.ListLemmas.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.EqualWithRelation.
+Require Export SystemFR.EquivalentWithRelation.
 
 Require Import PeanoNat.
 
@@ -34,7 +34,7 @@ Proof.
 Qed.
 
 Lemma equal_with_idrel:
-  forall t, equal_with_relation (idrel (pfv t type_var)) t t.
+  forall t, equal_with_relation type_var (idrel (pfv t type_var)) t t.
 Proof.
   intros; apply equal_with_relation_refl2; steps;
     eauto using idrel_lookup, idrel_lookup_swap.

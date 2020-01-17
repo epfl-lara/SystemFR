@@ -1,19 +1,4 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
-
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.TermProperties.
-Require Import SystemFR.Sets.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.TermList.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.SubstitutionLemmas.
-
-
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
-
+Require Export SystemFR.FVLemmasLists.
 
 Lemma satisfies_insert:
   forall (P: tree -> tree -> Prop) gamma1 gamma2 l1 l2 t T x,
@@ -33,9 +18,8 @@ Lemma satisfies_insert:
 Proof.
   induction gamma1; destruct l1;
     repeat step || step_inversion satisfies || apply SatCons || t_listutils ||
-           (rewrite substitute_skip by (steps; eauto with bfv b_cmap)); eauto.
+           (rewrite substitute_skip by (steps; eauto with fv b_cmap)); eauto.
 Qed.
-
 
 Lemma satisfies_drop:
   forall (P: tree -> tree -> Prop) gamma1 gamma2 l1 l2 t T x,
@@ -46,5 +30,5 @@ Lemma satisfies_drop:
 Proof.
   induction gamma1; destruct l1;
     repeat step || step_inversion satisfies || apply SatCons || t_listutils ||
-           (rewrite substitute_skip in * by (steps; eauto with bfv b_cmap)); eauto.
+           (rewrite substitute_skip in * by (steps; eauto with fv b_cmap)); eauto.
 Qed.

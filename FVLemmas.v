@@ -3,12 +3,7 @@ Require Import Coq.Lists.List.
 Require Import Coq.Init.Datatypes.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.SetLemmas.
+Require Export SystemFR.Syntax.
 
 Ltac slow_instantiations :=
   match goal with
@@ -36,7 +31,7 @@ Proof.
   induction gamma; repeat step || t_listutils.
 Qed.
 
-Hint Resolve fv_context_support: bfv.
+Hint Resolve fv_context_support: fv.
 
 Lemma fv_lookup:
   forall gamma x T tag,
@@ -73,10 +68,10 @@ Proof.
   induction l; repeat step || t_sets || unfold subset in * || t_listutils; eauto.
 Qed.
 
-Hint Resolve fv_lookup: bfv.
-Hint Resolve fv_lookup2: bfv.
-Hint Resolve fv_lookup3: bfv.
-Hint Resolve fv_lookup4: bfv.
+Hint Resolve fv_lookup: fv.
+Hint Resolve fv_lookup2: fv.
+Hint Resolve fv_lookup3: fv.
+Hint Resolve fv_lookup4: fv.
 
 Lemma fv_in_open:
   forall t x r k tag,
@@ -86,7 +81,7 @@ Proof.
   induction t; repeat light || t_fair_split.
 Qed.
 
-Hint Resolve fv_in_open: bfv.
+Hint Resolve fv_in_open: fv.
 
 Lemma fv_in_topen:
   forall t x r k tag,
@@ -96,7 +91,7 @@ Proof.
   induction t; repeat light || t_fair_split.
 Qed.
 
-Hint Resolve fv_in_topen: bfv.
+Hint Resolve fv_in_topen: fv.
 
 Lemma fv_open2:
   (forall t rep k y tag,
@@ -159,7 +154,7 @@ Proof.
     repeat step || t_listutils || t_fv_open; eauto.
 Qed.
 
-Hint Resolve fv_nils_open: bfv.
+Hint Resolve fv_nils_open: fv.
 
 Lemma fv_nils_topen:
   forall t rep k tag,
@@ -172,7 +167,7 @@ Proof.
     repeat step || t_listutils || t_fv_open; eauto.
 Qed.
 
-Hint Resolve fv_nils_topen: bfv.
+Hint Resolve fv_nils_topen: fv.
 
 Lemma fv_subst_lemma:
   forall s1 s1' s2 s2' s3 x,
@@ -193,7 +188,7 @@ Proof.
     eauto 2 with sets.
 Qed.
 
-Hint Resolve fv_subst: bfv.
+Hint Resolve fv_subst: fv.
 
 Lemma fv_subst2_lemma:
   forall s1 s1' s2 s2' s3 s,
@@ -212,10 +207,10 @@ Proof.
   induction t;
     repeat step || apply fv_subst2_lemma;
     eauto 2 with sets;
-    try solve [ unfold subset; repeat step || t_listutils; eauto with bfv blookup ].
+    try solve [ unfold subset; repeat step || t_listutils; eauto with fv blookup ].
 Qed.
 
-Hint Resolve fv_subst2: bfv.
+Hint Resolve fv_subst2: fv.
 
 Lemma fv_subst3:
   forall t x rep y tag,
@@ -232,7 +227,7 @@ Proof.
     end.
 Qed.
 
-Hint Resolve fv_subst3: bfv.
+Hint Resolve fv_subst3: fv.
 
 Lemma closed_mapping_lookup:
   forall l x t tag,
@@ -243,7 +238,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-Hint Resolve closed_mapping_lookup: bfv.
+Hint Resolve closed_mapping_lookup: fv.
 
 Lemma closed_mapping_range:
   forall l t tag,
@@ -254,7 +249,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-Hint Resolve closed_mapping_range: bfv.
+Hint Resolve closed_mapping_range: fv.
 
 Lemma fv_nils:
   forall t l tag,
@@ -267,10 +262,10 @@ Proof.
            | H: forall x, _ -> _ -> _, H1: _, H2: _ |- _ => pose proof (H _ H1 H2); clear H
            | H: _ = nil |- _ => rewrite H
            | _ => step || t_listutils
-           end; eauto with bfv.
+           end; eauto with fv.
 Qed.
 
-Hint Resolve fv_nils: bfv.
+Hint Resolve fv_nils: fv.
 
 Lemma closed_mapping_fv:
   forall l x tag,
@@ -301,11 +296,11 @@ Proof.
     repeat match goal with
            | _ => step || t_listutils
            end;
-      eauto 2 with bfv;
-      eauto 2 using closed_mapping_fv with falsity;
-      eauto 2 using closed_mapping_fv2 with falsity;
+      eauto 2 with fv;
+      eauto 2 using closed_mapping_fv with exfalso;
+      eauto 2 using closed_mapping_fv2 with exfalso;
       try solve [ rewrite (@singleton_subset nat) in *; repeat step || t_lookup ];
       try solve [ apply_any; eauto 2 with sets ].
 Qed.
 
-Hint Resolve fv_nils2: bfv.
+Hint Resolve fv_nils2: fv.

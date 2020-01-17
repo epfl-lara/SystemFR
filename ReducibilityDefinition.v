@@ -1,22 +1,14 @@
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TermProperties.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.TermList.
+Require Export SystemFR.WFLemmas.
 
-Require Import SystemFR.StarRelation.
+Require Export SystemFR.SizeLemmas.
+Require Export SystemFR.Equivalence.
+Require Export SystemFR.StarInversions.
+Require Export SystemFR.TermList.
 
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilityCandidate.
+Require Export SystemFR.ReducibilityMeasure.
+Require Export SystemFR.ReducibilityCandidate.
 
 Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm.
@@ -25,9 +17,7 @@ Require Import Omega.
 
 Definition reduces_to (P: tree -> Prop) (t: tree) :=
   closed_term t /\
-  exists t',
-    star small_step t t' /\
-    P t'.
+  exists v, P v /\ star scbv_step t v.
 
 Lemma reduces_to_equiv:
   forall (P P': tree -> Prop) t,
@@ -35,7 +25,7 @@ Lemma reduces_to_equiv:
     (forall v, P v -> P' v) ->
     reduces_to P' t.
 Proof.
-  unfold reduces_to; repeat step || eexists; eauto.
+  unfold reduces_to; repeat step; eauto.
 Qed.
 
 Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
@@ -87,27 +77,13 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     reducible_values theta v T /\
     is_erased_term p /\
     wf p 1 /\
-    star small_step (open 0 p v) ttrue;
+    star scbv_step (open 0 p v) ttrue;
 
   reducible_values theta v (T_type_refine T1 T2) :=
     exists (_: is_erased_type T2),
     exists (_: closed_value v),
       reducible_values theta v T1 /\
       exists p, reducible_values theta p (open 0 T2 v);
-
-  reducible_values theta v (T_let a B) :=
-    exists (_: is_erased_type B),
-    closed_value v /\
-    exists a' (_: is_erased_term a'),
-      is_erased_term a /\
-      is_value a' /\
-      star small_step a a' /\
-      reducible_values theta v (open 0 B a');
-
-  reducible_values theta v (T_singleton t) :=
-    closed_value v /\
-    is_erased_term t /\
-    star small_step t v;
 
   reducible_values theta v (T_intersection A B) :=
     closed_value v /\
@@ -125,12 +101,9 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
 
   reducible_values theta v T_bot := False;
 
-  reducible_values theta v (T_equal t1 t2) :=
-    closed_value v /\
-    is_erased_term t1 /\
-    is_erased_term t2 /\
+  reducible_values theta v (T_equiv t1 t2) :=
     v = uu /\
-    equivalent t1 t2;
+    equivalent_terms t1 t2;
 
   reducible_values theta v (T_forall A B) :=
     exists (_: is_erased_type B),
@@ -149,8 +122,8 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
   reducible_values theta v (T_rec n T0 Ts) :=
     closed_value v /\
     is_erased_term n /\ (
-      (star small_step n zero /\ reducible_values theta v T0) \/
-      (exists n' X (p1: is_nat_value n') (p2: star small_step n (succ n')),
+      (star scbv_step n zero /\ reducible_values theta v T0) \/
+      (exists n' X (p1: is_nat_value n') (p2: star scbv_step n (succ n')),
          ~(X ∈ pfv T0 type_var) /\
          ~(X ∈ pfv Ts type_var) /\
          ~(X ∈ support theta) /\
@@ -176,10 +149,10 @@ Solve Obligations with t_reducibility_definition.
 
 Fail Next Obligation.
 
-Definition reducible (theta: interpretation) t T: Prop :=
+Definition reducible (theta: interpretation) t T : Prop :=
   reduces_to (fun t => reducible_values theta t T) t.
 
-Definition open_reducible (tvars: tvar_list) (gamma: context) t T: Prop :=
+Definition open_reducible (tvars: tvar_list) (gamma: context) t T : Prop :=
   forall theta lterms,
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma lterms  ->
@@ -187,6 +160,31 @@ Definition open_reducible (tvars: tvar_list) (gamma: context) t T: Prop :=
     reducible theta
               (substitute t lterms)
               (substitute T lterms).
+
+Definition subtype (tvars: tvar_list) (gamma: context) T1 T2 : Prop :=
+  forall theta l,
+   valid_interpretation theta ->
+   satisfies (reducible_values theta) gamma l ->
+   support theta = tvars ->
+   forall v,
+     reducible_values theta v (substitute T1 l) ->
+     reducible_values theta v (substitute T2 l).
+
+Definition equivalent (tvars: tvar_list) (gamma: context) t1 t2 : Prop :=
+  forall theta l,
+    valid_interpretation theta ->
+    satisfies (reducible_values theta) gamma l ->
+    support theta = tvars ->
+    equivalent_terms (substitute t1 l) (substitute t2 l).
+
+Notation "'[' tvars ';' gamma '⊨' t ':' T ']'" := (open_reducible tvars gamma t T)
+  (at level 50, t at level 50).
+
+Notation "'[' tvars ';' gamma '⊨' T1 '<:' T2 ']'" := (subtype tvars gamma T1 T2)
+  (at level 50, T1 at level 50).
+
+Notation "'[' tvars ';' gamma '⊨' t1 '≡' t2 ']'" := (equivalent tvars gamma t1 t2)
+  (at level 50, t1 at level 50).
 
 Lemma reducibility_rewrite:
   forall theta t T,
@@ -199,11 +197,11 @@ Qed.
 Lemma obvious_reducible:
   forall theta t T,
     reducible theta t T ->
-    exists t',
-      star small_step t t' /\
-      reducible_values theta t' T.
+    exists v,
+      star scbv_step t v /\
+      reducible_values theta v T.
 Proof.
-  unfold reducible, reduces_to; steps.
+  unfold reducible, reduces_to; steps; eauto.
 Qed.
 
 Ltac simp_red :=
@@ -263,11 +261,9 @@ Ltac simp_red :=
   rewrite reducible_values_equation_54 in * ||
   rewrite reducible_values_equation_55 in * ||
   rewrite reducible_values_equation_56 in * ||
-  rewrite reducible_values_equation_57 in * ||
-  rewrite reducible_values_equation_58 in * ||
-  rewrite reducible_values_equation_59 in *.
+  rewrite reducible_values_equation_57 in *.
 
-Ltac top_level_unfold :=
+Ltac simp_red_nat :=
   match goal with
-  | H: reducible _ _ _ |- _ => unfold reducible, reduces_to in H
+  | H: reducible_values _ _ T_nat |- _ => simp reducible_values in H
   end.

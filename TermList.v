@@ -2,13 +2,13 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Sets.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.SubstitutionLemmas.
+Require Export SystemFR.Syntax.
+
+Require Export SystemFR.AssocList.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.SubstitutionLemmas.
 
 
 Open Scope list_scope.
@@ -35,7 +35,7 @@ Lemma satisfies_nodup:
     satisfies P gamma lterms ->
     NoDup (support gamma).
 Proof.
-  induction 1; repeat step; eauto with bfv.
+  induction 1; repeat step; eauto with fv.
 Qed.
 
 Hint Resolve satisfies_nodup: btermlist.
@@ -59,7 +59,7 @@ Proof.
   - rewrite substitute_nothing2; eauto.
   - rewrite substitute_cons; eauto.
     apply IHsatisfies with x0; eauto.
-    rewrite substitute_nothing; repeat step; eauto with bfv.
+    rewrite substitute_nothing; repeat step; eauto with fv.
 Qed.
 
 Lemma satisfies_lookup2:

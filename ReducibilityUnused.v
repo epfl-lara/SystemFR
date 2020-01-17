@@ -2,29 +2,8 @@ Require Import Equations.Equations.
 
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.TermList.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.EquivalentWithRelation.
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.EqualWithRelation.
-
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
-
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.ReducibilityRenaming.
+Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.ReducibilityRenaming.
 
 Require Import PeanoNat.
 
@@ -68,7 +47,7 @@ Proof.
   induction gamma as [ | [ x T ] gamma' IH ]; destruct lterms;
     repeat step || t_termlist || step_inversion satisfies || t_listutils ||
            apply SatCons || apply reducible_unused2 ||
-           (rewrite fv_subst_different_tag in * by (steps; eauto with bfv)).
+           (rewrite fv_subst_different_tag in * by (steps; eauto with fv)).
 Qed.
 
 Lemma reducible_unused_middle:
@@ -88,7 +67,7 @@ Proof.
              (progress rewrite swap_idrel in * by steps) ||
              t_idrel_lookup2 || t_lookupor || t_lookup_rewrite || t_lookup ||
              unfold no_type_fvar in * ||
-             unshelve eauto with falsity || exact True;
+             unshelve eauto with exfalso || exact True;
       eauto using equal_with_idrel;
       eauto using equivalent_rc_refl.
 
@@ -97,7 +76,7 @@ Proof.
       repeat step || apply valid_interpretation_append || (rewrite swap_idrel in * by steps) ||
              t_idrel_lookup2 || t_lookupor || t_lookup_rewrite || t_lookup ||
              unfold equivalent_with_relation, equivalent_at || unfold no_type_fvar in * ||
-             unshelve eauto with falsity || exact True;
+             unshelve eauto with exfalso || exact True;
       eauto using equal_with_idrel;
       eauto using equivalent_rc_refl.
 

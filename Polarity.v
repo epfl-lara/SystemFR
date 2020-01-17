@@ -2,12 +2,11 @@ Require Import Equations.Equations.
 
 Require Import Omega.
 
-Require Import SystemFR.Sets.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
+
+Require Export SystemFR.Syntax.
+Require Export SystemFR.SizeLemmas.
+Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.AssocList.
 
 Inductive polarity := Positive | Negative.
 
@@ -17,7 +16,7 @@ Definition invert_polarity (p: polarity) :=
   | Positive => Negative
   end.
 
-Definition invert_polarities (m: list (nat * polarity)) := mapValues invert_polarity m.
+Definition invert_polarities (m: list (nat * polarity)) := map_values invert_polarity m.
 
 Inductive has_polarities: tree -> list (nat * polarity) -> Prop :=
 | PolFVar:
@@ -66,16 +65,9 @@ Inductive has_polarities: tree -> list (nat * polarity) -> Prop :=
       has_polarities T1 pols ->
       has_polarities T2 pols ->
       has_polarities (T_type_refine T1 T2) pols
-| PolLet:
-    forall t T pols,
-      has_polarities T pols ->
-      has_polarities (T_let t T) pols
-| PolSingleton:
-    forall t pols,
-      has_polarities (T_singleton t) pols
 | PolEqual:
     forall t1 t2 pols,
-      has_polarities (T_equal t1 t2) pols
+      has_polarities (T_equiv t1 t2) pols
 | PolIntersection:
     forall A B pols,
       has_polarities A pols ->

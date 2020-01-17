@@ -1,13 +1,13 @@
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.TypeErasureLemmas.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.TreeLists.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.AssocList.
+Require Export SystemFR.TypeErasure.
+Require Export SystemFR.TypeErasureLemmas.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Trees.
+Require Export SystemFR.TreeLists.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.AssocList.
 
 Lemma annotated_term_type:
   forall t,
@@ -24,7 +24,7 @@ Lemma annotated_open:
     (is_annotated_type (open k t rep) -> is_annotated_term rep -> is_annotated_type t).
 Proof.
   induction t;
-    try solve [ repeat step || eapply_any; eauto using annotated_term_type with falsity ].
+    try solve [ repeat step || eapply_any; eauto using annotated_term_type with exfalso ].
 Qed.
 
 Lemma annotated_open_1:
@@ -45,8 +45,8 @@ Proof.
   apply annotated_open.
 Qed.
 
-Hint Resolve annotated_open_1: bannot.
-Hint Resolve annotated_open_2: bannot.
+Hint Immediate annotated_open_1: bannot.
+Hint Immediate annotated_open_2: bannot.
 
 Lemma annotated_topen:
   forall t k rep,
@@ -54,7 +54,7 @@ Lemma annotated_topen:
     (is_annotated_type (topen k t rep) -> is_annotated_type rep -> is_annotated_type t).
 Proof.
   induction t;
-    try solve [ repeat step || eapply_any; eauto using annotated_term_type with falsity ].
+    try solve [ repeat step || eapply_any; eauto using annotated_term_type with exfalso ].
 Qed.
 
 Lemma annotated_topen_1:
@@ -75,8 +75,8 @@ Proof.
   apply annotated_topen.
 Qed.
 
-Hint Resolve annotated_topen_1: bannot.
-Hint Resolve annotated_topen_2: bannot.
+Hint Immediate annotated_topen_1: bannot.
+Hint Immediate annotated_topen_2: bannot.
 
 Lemma annotated_open_build:
   forall t k rep,
@@ -86,7 +86,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
-Hint Extern 50 => apply annotated_open_build: bannot.
+Hint Extern 50 => apply annotated_open_build; steps: bannot.
 
 Lemma annotated_topen_build:
   forall t k V,
@@ -96,7 +96,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
-Hint Extern 50 => apply annotated_topen_build: bannot.
+Hint Extern 50 => apply annotated_topen_build; steps: bannot.
 
 Ltac t_annotated_open :=
   match goal with

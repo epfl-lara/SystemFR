@@ -6,47 +6,47 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.OpenTOpen.
+Require Export SystemFR.StarInversions.
+Require Export SystemFR.RelationClosures.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Equivalence.
+Require Export SystemFR.OpenTOpen.
 
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.SizeLemmas.
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.RedTactics.
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilitySubst.
-Require Import SystemFR.ReducibilityRenaming.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.RedTactics2.
+Require Export SystemFR.ReducibilityCandidate.
+Require Export SystemFR.ReducibilityDefinition.
+Require Export SystemFR.ReducibilityLemmas.
+Require Export SystemFR.RedTactics.
+Require Export SystemFR.ReducibilityMeasure.
+Require Export SystemFR.ReducibilitySubst.
+Require Export SystemFR.ReducibilityRenaming.
+Require Export SystemFR.ReducibilityUnused.
+Require Export SystemFR.RedTactics2.
 
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.EqualWithRelation.
+Require Export SystemFR.IdRelation.
+Require Export SystemFR.EqualWithRelation.
 
-Require Import SystemFR.EquivalentWithRelation.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.SwapHoles.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TOpenTClose.
-Require Import SystemFR.StrictPositivity.
-Require Import SystemFR.StrictPositivityLemmas.
-Require Import SystemFR.StrictPositivityLemma.
+Require Export SystemFR.EquivalentWithRelation.
+Require Export SystemFR.AssocList.
+
+Require Export SystemFR.Freshness.
+
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.StrictPositivity.
+Require Export SystemFR.StrictPositivityLemmas.
+Require Export SystemFR.StrictPositivityLemma.
 
 
-Require Import SystemFR.FVLemmas.
+Require Export SystemFR.FVLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -91,8 +91,8 @@ Proof.
     repeat step || t_listutils || apply twf_open || apply wf_open;
     try finisher;
       eauto with btwf;
-      eauto with bwf;
-      eauto with berased.
+      eauto with wf;
+      eauto with erased.
 
   rewrite cons_app.
   lazymatch goal with
@@ -107,5 +107,5 @@ Proof.
     eauto;
     try finisher;
     eauto using reducibility_is_candidate;
-    eauto with berased.
+    eauto with erased.
 Qed.

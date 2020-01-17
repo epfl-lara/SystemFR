@@ -1,11 +1,11 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.SetLemmas.
+Require Export SystemFR.ListLemmas.
 
 Require Import PeanoNat.
+
+Close Scope string_scope.
 
 Definition map X Y := list (X * Y).
 Definition decidable X := forall (x1 x2: X), { x1 = x2 } + { x1 <> x2 }.
@@ -84,19 +84,19 @@ Proof.
   induction m; steps; eauto.
 Qed.
 
-Lemma supportAppend:
+Lemma support_append:
   forall X Y (m1 m2: map X Y),
     support (m1 ++ m2) = support m1 ++ support m2.
 Proof.
   induction m1; steps.
 Qed.
 
-Hint Rewrite supportAppend: blistutils.
+Hint Rewrite support_append: blistutils.
 
-Fixpoint mapValues {X Y Z} (f: Y -> Z) (l: map X Y) :=
+Fixpoint map_values {X Y Z} (f: Y -> Z) (l: map X Y) :=
   match l with
   | nil => nil
-  | (x,T) :: l' => (x, f T) :: mapValues f l'
+  | (x,T) :: l' => (x, f T) :: map_values f l'
   end.
 
 Lemma lookupNoneSupport: forall X Y eq_dec (m: map X Y) x,
@@ -227,7 +227,7 @@ Lemma lookupMap:
   forall X Y Z
          (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
          (m: map X Y) (f: Y -> Z) x,
-    lookup eq_dec (mapValues f m) x = option_map f (lookup eq_dec m x).
+    lookup eq_dec (map_values f m) x = option_map f (lookup eq_dec m x).
 Proof.
   induction m; steps.
 Qed.
@@ -249,7 +249,7 @@ Ltac t_lookup :=
   | H: lookup ?e (?l1 ++ ?l2)%list ?x = None |- _ =>
     poseNew (Mark (l1,l2,x) "lookupNoneAppend2");
     poseNew (lookupNoneAppend2 _ _ e _ _ _ H)
-  | H: context[lookup (mapValues _ _) _] |- _ => rewrite lookupMap in H
+  | H: context[lookup (map_values _ _) _] |- _ => rewrite lookupMap in H
   end.
 
 Ltac t_lookupor :=
@@ -368,7 +368,7 @@ Lemma lookupMap2:
   forall X Y Z
          (eq_dec: forall x1 x2: X, { x1 = x2 } + { x1 <> x2 })
          (m: map X Y) (f: Y -> Z) x z,
-    lookup eq_dec (mapValues f m) x = Some z ->
+    lookup eq_dec (map_values f m) x = Some z ->
     exists y, lookup eq_dec m x = Some y /\ f y  = z.
 Proof.
   induction m; steps; eauto.
@@ -377,7 +377,7 @@ Qed.
 Ltac t_lookupMap2 :=
   match goal with
   | H: Some _ = lookup _ _ _ |- _ => apply eq_sym in H
-  | H: lookup _ (mapValues _ _) _ = Some _ |- _ =>
+  | H: lookup _ (map_values _ _) _ = Some _ |- _ =>
     poseNew (Mark H "lookupMap2");
     pose proof (lookupMap2 _ _ _ _ _ _ _ _ H)
   end.
@@ -387,8 +387,8 @@ Ltac t_lookup_rewrite :=
   | H: lookup _ (_ ++ _) _ = lookup _ _ _ |- _ => rewrite H in *
   end.
 
-Lemma support_mapValues:
-  forall X Y Z (f: Y -> Z) (l: map X Y), support (mapValues f l) = support l.
+Lemma support_map_values:
+  forall X Y Z (f: Y -> Z) (l: map X Y), support (map_values f l) = support l.
 Proof.
   induction l; steps.
 Qed.

@@ -1,9 +1,9 @@
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.LVarOperations.
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.TypeErasureLemmas.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.LVarOperations.
+Require Export SystemFR.TypeErasure.
+Require Export SystemFR.TypeErasureLemmas.
 
 Require Import PeanoNat.
 

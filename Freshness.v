@@ -1,14 +1,14 @@
 Require Import Coq.Lists.List.
 Require Import Omega.
 
-Require Import SystemFR.Tactics.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.Sets.
-Require Import SystemFR.AssocList.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.ListUtils.
+
+Require Export SystemFR.AssocList.
 
 Open Scope list_scope.
 
-Fixpoint max (l: set nat): nat :=
+Fixpoint max (l: list nat): nat :=
   match l with
   | nil => 0
   | x :: xs => x + max xs
@@ -40,7 +40,7 @@ Proof.
   repeat step || t_list_smaller; omega.
 Qed.
 
-Hint Immediate freshMakeFresh freshMakeFresh2: core.
+Hint Immediate freshMakeFresh freshMakeFresh2: fresh.
 
 Fixpoint makeFresh (ll: list (list nat)): nat :=
   match ll with
@@ -87,8 +87,6 @@ Ltac finisher :=
   | H: makeFresh ?LL = ?S |- _ => solve [ apply False_ind;
                                          apply (eq_makeFresh LL S); cbn; intuition auto ]
   end.
-
-
 
 Lemma instantiate1:
   forall F P L,

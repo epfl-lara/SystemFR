@@ -1,18 +1,16 @@
 Require Import Coq.Program.Tactics.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.TypeErasure.
 
-
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.RelationClosures.
+Require Export SystemFR.ErasedTermLemmas.
 
 Open Scope list_scope.
 
@@ -30,16 +28,12 @@ Proof.
   induction l; steps.
 Qed.
 
-Hint Rewrite erased_context_support: berased.
-
 Lemma erase_context_append:
   forall l1 l2,
     erase_context (l1 ++ l2) = erase_context l1 ++ erase_context l2.
 Proof.
   induction l1; steps.
 Qed.
-
-Hint Rewrite erase_context_append: berased.
 
 Lemma erase_term_term_var:
   forall t x,
@@ -49,7 +43,7 @@ Proof.
   induction t; repeat step || t_listutils.
 Qed.
 
-Hint Immediate erase_term_term_var: bfv.
+Hint Immediate erase_term_term_var: fv.
 
 Lemma erase_term_type_var:
   forall t x,
@@ -59,17 +53,17 @@ Proof.
   induction t; repeat step || t_listutils; eauto.
 Qed.
 
-Hint Immediate erase_term_type_var: bfv.
+Hint Immediate erase_term_type_var: fv.
 
 Lemma erase_term_var:
   forall t x tag,
     x ∈ pfv (erase_term t) tag ->
     x ∈ pfv t tag.
 Proof.
-  destruct tag; intros; eauto with bfv falsity.
+  destruct tag; intros; eauto with fv exfalso.
 Qed.
 
-Hint Immediate erase_term_var: bfv.
+Hint Immediate erase_term_var: fv.
 
 Lemma erase_type_var:
   forall t x tag,
@@ -77,20 +71,20 @@ Lemma erase_type_var:
     x ∈ pfv t tag.
 Proof.
   induction t; destruct tag; repeat step || t_listutils;
-    eauto using erase_term_term_var, erase_term_type_var with falsity.
+    eauto using erase_term_term_var, erase_term_type_var with exfalso.
 Qed.
 
-Hint Immediate erase_type_var: bfv.
+Hint Immediate erase_type_var: fv.
 
 Lemma erase_context_var:
   forall gamma x tag,
     x ∈ pfv_context (erase_context gamma) tag ->
     x ∈ pfv_context gamma tag.
 Proof.
-  induction gamma; repeat step || t_listutils; eauto with bfv.
+  induction gamma; repeat step || t_listutils; eauto with fv.
 Qed.
 
-Hint Immediate erase_context_var: bfv.
+Hint Immediate erase_context_var: fv.
 
 Ltac t_fv_erase :=
   match goal with
@@ -107,7 +101,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve erase_term_wf: bwf.
+Hint Resolve erase_term_wf: wf.
 
 Lemma erase_type_wf:
   forall T k,
@@ -117,7 +111,7 @@ Proof.
   induction T; steps; eauto using erase_term_wf.
 Qed.
 
-Hint Resolve erase_type_wf: bwf.
+Hint Resolve erase_type_wf: wf.
 
 Lemma erase_term_twf:
   forall t k,
@@ -143,7 +137,7 @@ Lemma pfv_erase_context_subst:
     subset (pfv_context gamma tag) S ->
     subset (pfv_context (erase_context gamma) tag) S.
 Proof.
-  unfold subset; steps; eauto with bfv.
+  unfold subset; steps; eauto with fv.
 Qed.
 
 Lemma pfv_erase_term_subst:
@@ -151,7 +145,7 @@ Lemma pfv_erase_term_subst:
     subset (pfv t tag) S ->
     subset (pfv (erase_term t) tag) S.
 Proof.
-  unfold subset; destruct tag; steps; eauto with bfv falsity.
+  unfold subset; destruct tag; steps; eauto with fv exfalso.
 Qed.
 
 Lemma pfv_erase_type_subst:
@@ -159,7 +153,7 @@ Lemma pfv_erase_type_subst:
     subset (pfv T tag) S ->
     subset (pfv (erase_type T) tag) S.
 Proof.
-  unfold subset; steps; eauto with bfv.
+  unfold subset; steps; eauto with fv.
 Qed.
 
 Ltac t_subset_erase :=
