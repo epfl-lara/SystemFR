@@ -1,7 +1,7 @@
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Trees.
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.NatCompare.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Trees.
+Require Export SystemFR.TypeErasure.
+Require Export SystemFR.NatCompare.
 
 Definition annotated_tlt (a: tree) (b: tree) :=
   app

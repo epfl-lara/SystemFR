@@ -1,4 +1,4 @@
-Require Import SystemFR.Trees.
+Require Export SystemFR.Trees.
 
 Inductive T_ite_push (b: tree): tree -> tree -> tree -> Prop :=
 | IteUnit:
@@ -26,13 +26,7 @@ Inductive T_ite_push (b: tree): tree -> tree -> tree -> Prop :=
       T_ite_push b A1 A2 A ->
       T_ite_push b B1 B2 B ->
       T_ite_push b (T_sum A1 B1) (T_sum A2 B2) (T_sum A B)
-| IteTLet:
-    forall B1 B2 B t1 t2,
-      T_ite_push b B1 B2 B ->
-      T_ite_push b (T_let t1 B1) (T_let t2 B2) (T_let (ite b t1 t2) B)
-| IteSingleton:
-    forall t t',
-      T_ite_push b (T_singleton t) (T_singleton t') (T_singleton (ite b t t'))
+
 | IteIntersection:
     forall A1 A2 A B1 B2 B,
       T_ite_push b A1 A2 A ->
@@ -51,7 +45,7 @@ Inductive T_ite_push (b: tree): tree -> tree -> tree -> Prop :=
 
 | IteEqual:
     forall u1 v1 u2 v2,
-      T_ite_push b (T_equal u1 v1) (T_equal u2 v2) (T_equal (ite b u1 u2) (ite b v1 v2))
+      T_ite_push b (T_equiv u1 v1) (T_equiv u2 v2) (T_equiv (ite b u1 u2) (ite b v1 v2))
 
 | IteForall:
     forall A1 A2 A B1 B2 B,

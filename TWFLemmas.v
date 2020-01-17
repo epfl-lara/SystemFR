@@ -1,12 +1,12 @@
 Require Import Coq.Strings.String.
 Require Import Omega.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.SmallStep.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.AssocList.
+
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.SmallStep.
 
 Open Scope string_scope.
 Open Scope list_scope.

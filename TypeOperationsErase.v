@@ -1,25 +1,25 @@
 Require Import Coq.Strings.String.
 
-Require Import SystemFR.Trees.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Syntax.
+Require Export SystemFR.Trees.
+
+Require Export SystemFR.Syntax.
 
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
 
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.AnnotatedTermLemmas.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.TypeOperations.
-Require Import SystemFR.ListUtils.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.AnnotatedTermLemmas.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.TypeOperations.
+Require Export SystemFR.ListUtils.
 
-Require Import SystemFR.TypeErasure.
+Require Export SystemFR.TypeErasure.
 
 Lemma ite_type_erase:
   forall b T1 T2 T, T_ite_push b T1 T2 T ->
     T_ite_push (erase_term b) (erase_type T1) (erase_type T2) (erase_type T).
 Proof.
   induction 1; repeat step || constructor;
-    eauto with bfv.
+    eauto with fv.
 Qed.

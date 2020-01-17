@@ -5,51 +5,51 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.OpenTOpen.
+Require Export SystemFR.StarInversions.
+Require Export SystemFR.RelationClosures.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Equivalence.
+Require Export SystemFR.OpenTOpen.
 
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.SizeLemmas.
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.EqualWithRelation.
+Require Export SystemFR.IdRelation.
+Require Export SystemFR.EqualWithRelation.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
+Require Export SystemFR.ReducibilityCandidate.
+Require Export SystemFR.ReducibilityDefinition.
 
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.EquivalentWithRelation.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.SwapHoles.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TOpenTClose.
-Require Import SystemFR.NoTypeFVar.
+Require Export SystemFR.SubstitutionLemmas.
+Require Export SystemFR.EquivalentWithRelation.
+Require Export SystemFR.AssocList.
 
-Require Import SystemFR.Polarity.
-Require Import SystemFR.PolarityLemmas.
+Require Export SystemFR.Freshness.
 
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.NoTypeFVar.
 
-Require Import SystemFR.NoTypeFVarLemmas.
+Require Export SystemFR.Polarity.
+Require Export SystemFR.PolarityLemmas.
 
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.TypeErasureLemmas.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.FVLemmasLists.
 
-Require Import SystemFR.AnnotatedTermLemmas.
+Require Export SystemFR.NoTypeFVarLemmas.
 
-Require Import SystemFR.TermList.
+Require Export SystemFR.TypeErasure.
+Require Export SystemFR.TypeErasureLemmas.
+
+Require Export SystemFR.AnnotatedTermLemmas.
+
+Require Export SystemFR.TermList.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -66,7 +66,7 @@ Qed.
 
 Lemma has_polarities_erase_aux:
   forall n T pols,
-    typeNodes T < n ->
+    type_nodes T < n ->
     is_annotated_type T ->
     has_polarities T pols ->
     has_polarities (erase_type T) pols.
@@ -90,7 +90,7 @@ Qed.
 
 Lemma has_polarities_subst_aux:
   forall n T pols l,
-    typeNodes T < n ->
+    type_nodes T < n ->
     has_polarities T pols ->
     pclosed_mapping l type_var ->
     twfs l 0 ->
@@ -124,5 +124,5 @@ Proof.
   apply has_polarities_erase in H0;
     repeat step || rewrite erase_type_topen in * by steps; eauto 2 with bannot step_tactic.
   rewrite substitute_topen2; steps; eauto with btwf.
-  apply has_polarities_subst; steps; eauto with bfv btwf.
+  apply has_polarities_subst; steps; eauto with fv btwf.
 Qed.

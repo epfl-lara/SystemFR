@@ -1,15 +1,15 @@
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.PrimitiveSize.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.PrimitiveRecognizers.
-Require Import SystemFR.LVarOperations.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.RelationClosures.
+Require Export SystemFR.SubstitutionLemmas.
+Require Export SystemFR.PrimitiveSize.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.PrimitiveRecognizers.
+Require Export SystemFR.LVarOperations.
 
 Lemma is_erased_term_twf:
   forall t k,
@@ -41,7 +41,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve is_erased_open: berased.
+Hint Resolve is_erased_open: erased.
 
 Lemma is_erased_type_open:
   forall t k rep,
@@ -49,10 +49,10 @@ Lemma is_erased_type_open:
     is_erased_term rep ->
     is_erased_type (open k t rep).
 Proof.
-  induction t; steps; eauto with berased.
+  induction t; steps; eauto with erased.
 Qed.
 
-Hint Resolve is_erased_type_open: berased.
+Hint Resolve is_erased_type_open: erased.
 
 Lemma is_erased_type_open2:
   forall T i v,
@@ -63,7 +63,7 @@ Proof.
   unfold closed_value, closed_term; intros; apply is_erased_type_open; steps.
 Qed.
 
-Hint Resolve is_erased_type_open2: berased.
+Hint Resolve is_erased_type_open2: erased.
 
 Lemma is_erased_type_topen:
   forall t k rep,
@@ -74,7 +74,7 @@ Proof.
   induction t; repeat step || rewrite topen_none by eauto with btwf.
 Qed.
 
-Hint Resolve is_erased_type_topen: berased.
+Hint Resolve is_erased_type_topen: erased.
 
 Lemma is_erased_open2:
   forall t k rep,
@@ -92,7 +92,7 @@ Proof.
   induction t; repeat step || t_listutils.
 Qed.
 
-Hint Resolve is_erased_term_tfv: bfv.
+Hint Resolve is_erased_term_tfv: fv.
 
 Lemma is_erased_topen:
   forall t k rep,
@@ -103,7 +103,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve is_erased_topen: berased.
+Hint Resolve is_erased_topen: erased.
 
 Lemma is_erased_topen2:
   forall t k rep,
@@ -120,7 +120,7 @@ Proof.
   eauto using is_nat_value_erased, is_nat_value_build_nat.
 Qed.
 
-Hint Immediate is_erased_term_tsize: berased.
+Hint Immediate is_erased_term_tsize: erased.
 
 Lemma is_erased_is_pair:
   forall v, is_erased_term (is_pair v).
@@ -128,7 +128,7 @@ Proof.
   destruct v; steps.
 Qed.
 
-Hint Immediate is_erased_is_pair: berased.
+Hint Immediate is_erased_is_pair: erased.
 
 Lemma is_erased_is_succ:
   forall v, is_erased_term (is_succ v).
@@ -136,7 +136,7 @@ Proof.
   destruct v; steps.
 Qed.
 
-Hint Immediate is_erased_is_succ: berased.
+Hint Immediate is_erased_is_succ: erased.
 
 Lemma is_erased_is_lambda:
   forall v, is_erased_term (is_lambda v).
@@ -144,37 +144,64 @@ Proof.
   destruct v; steps.
 Qed.
 
-Hint Immediate is_erased_is_lambda: berased.
+Hint Immediate is_erased_is_lambda: erased.
 
-Lemma erase_smallstep:
+Lemma erase_scbv_step:
   forall t1 t2,
-    small_step t1 t2 ->
+    scbv_step t1 t2 ->
     is_erased_term t1 ->
     is_erased_term t2.
 Proof.
   induction 1; steps; eauto 3 using is_erased_open with step_tactic;
-    eauto with berased.
+    eauto with erased.
 Qed.
 
-Hint Immediate erase_smallstep: berased.
+Hint Immediate erase_scbv_step: erased.
 
-Lemma erase_star_smallstep:
+(*
+Lemma erase_cbv_step:
   forall t1 t2,
-    star small_step t1 t2 ->
+    cbv_step t1 t2 ->
     is_erased_term t1 ->
     is_erased_term t2.
 Proof.
-  induction 1; steps; eauto using erase_smallstep.
+  induction 1; steps; eauto 3 using is_erased_open with step_tactic;
+    eauto with erased.
 Qed.
 
-Hint Immediate erase_star_smallstep: berased.
+Hint Immediate erase_cbv_step: erased.
+*)
+
+Lemma erase_star_scbv_step:
+  forall t1 t2,
+    star scbv_step t1 t2 ->
+    is_erased_term t1 ->
+    is_erased_term t2.
+Proof.
+  induction 1; steps; eauto using erase_scbv_step.
+Qed.
+
+Hint Immediate erase_star_scbv_step: erased.
+
+(*
+Lemma erase_star_cbv_step:
+  forall t1 t2,
+    star cbv_step t1 t2 ->
+    is_erased_term t1 ->
+    is_erased_term t2.
+Proof.
+  induction 1; steps; eauto using erase_cbv_step.
+Qed.
+
+Hint Immediate erase_star_cbv_step: erased.
+*)
 
 Lemma is_erased_subst:
   forall t l,
     is_erased_term t ->
     psubstitute t l type_var = t.
 Proof.
-  intros; rewrite substitute_nothing5; eauto with bfv.
+  intros; rewrite substitute_nothing5; eauto with fv.
 Qed.
 
 Lemma is_erased_term_map_indices:
@@ -185,7 +212,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve is_erased_term_map_indices: berased.
+Hint Resolve is_erased_term_map_indices: erased.
 
 Lemma is_erased_type_map_indices:
   forall T k f,
@@ -195,7 +222,7 @@ Proof.
   induction T; steps; eauto using is_erased_term_map_indices.
 Qed.
 
-Hint Resolve is_erased_type_map_indices: berased.
+Hint Resolve is_erased_type_map_indices: erased.
 
 Lemma is_erased_type_shift:
   forall T,
@@ -205,4 +232,13 @@ Proof.
   intros; apply is_erased_type_map_indices; assumption.
 Qed.
 
-Hint Resolve is_erased_type_shift: berased.
+Hint Resolve is_erased_type_shift: erased.
+
+Lemma is_erased_term_type:
+  forall t,
+    is_erased_term t ->
+    is_erased_type t ->
+    False.
+Proof.
+  destruct t; steps.
+Qed.

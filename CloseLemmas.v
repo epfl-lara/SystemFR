@@ -1,11 +1,11 @@
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.AssocList.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.Syntax.
+Require Export SystemFR.SubstitutionLemmas.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.FVLemmasLists.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.AssocList.
 
 Lemma close_nothing:
   forall x t k,
@@ -31,7 +31,7 @@ Lemma substitute_close:
     psubstitute (close k t x) l tag = close k (psubstitute t l tag) x.
 Proof.
   induction t;
-    repeat step || t_equality || t_lookup || rewrite close_nothing2 by (steps; eauto with bfv).
+    repeat step || t_equality || t_lookup || rewrite close_nothing2 by (steps; eauto with fv).
 Qed.
 
 Lemma tclose_nothing:
@@ -58,5 +58,5 @@ Lemma substitute_tclose:
     psubstitute (tclose k t x) l tag = tclose k (psubstitute t l tag) x.
 Proof.
   induction t;
-    repeat step || t_equality || t_lookup || rewrite tclose_nothing2 by (steps; eauto with bfv).
+    repeat step || t_equality || t_lookup || rewrite tclose_nothing2 by (steps; eauto with fv).
 Qed.

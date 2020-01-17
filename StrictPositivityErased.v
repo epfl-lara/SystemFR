@@ -1,19 +1,19 @@
-Require Import SystemFR.StrictPositivity.
-Require Import SystemFR.StrictPositivityLemmas.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.Sets.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.TypeErasure.
-Require Import SystemFR.TypeErasureLemmas.
-Require Import SystemFR.AnnotatedTermLemmas.
-Require Import SystemFR.NoTypeFVarErased.
+Require Export SystemFR.StrictPositivity.
+Require Export SystemFR.StrictPositivityLemmas.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.SizeLemmas.
+Require Export SystemFR.NoTypeFVar.
 
-Require Import SystemFR.AssocList.
+Require Export SystemFR.SubstitutionLemmas.
+Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.TypeErasure.
+Require Export SystemFR.TypeErasureLemmas.
+Require Export SystemFR.AnnotatedTermLemmas.
+Require Export SystemFR.NoTypeFVarErased.
+
+Require Export SystemFR.AssocList.
 
 Require Import Coq.Lists.List.
 
@@ -23,7 +23,7 @@ Opaque strictly_positive.
 
 Lemma strictly_positive_erased_aux:
   forall n T vars,
-    typeNodes T < n ->
+    type_nodes T < n ->
     is_annotated_type T ->
     strictly_positive T vars ->
     strictly_positive (erase_type T) vars.
@@ -31,7 +31,7 @@ Proof.
   induction n; destruct T; repeat step || destruct_tag || simp_spos; try omega;
     eauto using no_type_fvar_erased;
     eauto with omega.
-  right; exists X; steps; eauto with bfv.
+  right; exists X; steps; eauto with fv.
   change (fvar X type_var) with (erase_type (fvar X type_var)).
   rewrite <- erase_type_topen; steps.
   apply_any;

@@ -6,53 +6,46 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.OpenTOpen.
+Require Export SystemFR.StarInversions.
+Require Export SystemFR.RelationClosures.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Equivalence.
+Require Export SystemFR.OpenTOpen.
 
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.SizeLemmas.
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.RedTactics.
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilitySubst.
-Require Import SystemFR.ReducibilityRenaming.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.RedTactics2.
+Require Export SystemFR.RedTactics.
+Require Export SystemFR.ReducibilitySubst.
+Require Export SystemFR.RedTactics2.
 
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.EqualWithRelation.
+Require Export SystemFR.IdRelation.
+Require Export SystemFR.EqualWithRelation.
 
-Require Import SystemFR.EquivalentWithRelation.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.SwapHoles.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TOpenTClose.
-Require Import SystemFR.NoTypeFVar.
+Require Export SystemFR.EquivalentWithRelation.
+Require Export SystemFR.AssocList.
 
-Require Import SystemFR.Polarity.
-Require Import SystemFR.PolarityLemmas.
+Require Export SystemFR.Freshness.
 
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.NoTypeFVarLemmas.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.NoTypeFVar.
+
+Require Export SystemFR.Polarity.
+Require Export SystemFR.PolarityLemmas.
+
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.NoTypeFVarLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
 Opaque reducible_values.
-
 
 Definition subset_rc (rc1 rc2: tree -> Prop) := forall v, rc1 v -> rc2 v.
 
@@ -131,7 +124,7 @@ Lemma use_respect_polarities:
     P1 v ->
     P2 v.
 Proof.
-  induction theta1; steps; eauto with beapply_any.
+  induction theta1; steps; eauto with eapply_any.
 Qed.
 
 Lemma respect_polarities_some_none:
@@ -159,7 +152,7 @@ Lemma polarity_variance_induction:
     polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T pols ->
-    typeNodes T < n ->
+    type_nodes T < n ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
     reducible_values theta1 v T ->
@@ -174,7 +167,7 @@ Lemma polarity_variance_induction_invert:
     polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T (invert_polarities pols) ->
-    typeNodes T < n ->
+    type_nodes T < n ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
     reducible_values theta2 v T ->
@@ -190,7 +183,7 @@ Lemma polarity_variance_induction_open:
     polarity_variance_until (n, o) ->
     respect_polarities pols theta1 theta2 ->
     has_polarities T pols ->
-    typeNodes T < n ->
+    type_nodes T < n ->
     is_erased_term a ->
     valid_interpretation theta1 ->
     valid_interpretation theta2 ->
@@ -252,27 +245,17 @@ Proof.
   unfold polarity_variance_prop_aux, polarity_variance_prop;
     repeat step || simp_red || step_inversion has_polarities || exists p;
     try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega ];
-    try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with omega berased ].
+    try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with omega erased ].
 Qed.
 
 Hint Immediate polarity_variance_type_refine: b_polarity_variance.
-
-Lemma polarity_variance_let:
-  forall m t T, polarity_variance_until m -> polarity_variance_prop_aux m (T_let t T).
-Proof.
-  unfold polarity_variance_prop_aux, polarity_variance_prop;
-    repeat step || simp_red || step_inversion has_polarities || find_smallstep_value;
-    try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with omega berased ].
-Qed.
-
-Hint Immediate polarity_variance_let: b_polarity_variance.
 
 Lemma polarity_variance_intersection:
   forall m T1 T2, polarity_variance_until m -> polarity_variance_prop_aux m (T_intersection T1 T2).
 Proof.
   unfold polarity_variance_prop_aux, polarity_variance_prop;
     repeat step || simp_red || step_inversion has_polarities;
-    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega berased ].
+    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega erased ].
 Qed.
 
 Hint Immediate polarity_variance_intersection: b_polarity_variance.
@@ -288,7 +271,7 @@ Lemma polarity_variance_union:
 Proof.
   unfold polarity_variance_prop_aux, polarity_variance_prop;
     repeat step || simp_red || step_inversion has_polarities || reducibility_choice2;
-    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega berased ].
+    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega erased ].
 Qed.
 
 Hint Immediate polarity_variance_union: b_polarity_variance.
@@ -300,7 +283,7 @@ Proof.
     repeat step || simp_red || step_inversion has_polarities.
   eapply polarity_variance_induction_open; eauto 1; repeat step || apply leq_lt_measure || apply_any;
     try omega;
-    try solve [ eapply polarity_variance_induction_invert; try eassumption; steps; eauto with omega berased ].
+    try solve [ eapply polarity_variance_induction_invert; try eassumption; steps; eauto with omega erased ].
 Qed.
 
 Hint Immediate polarity_variance_forall: b_polarity_variance.
@@ -310,8 +293,8 @@ Lemma polarity_variance_exists:
 Proof.
   unfold polarity_variance_prop_aux, polarity_variance_prop;
     repeat step || simp_red || step_inversion has_polarities || exists a;
-    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega berased ];
-    try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with omega berased ].
+    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega erased ];
+    try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with omega erased ].
 Qed.
 
 Hint Immediate polarity_variance_exists: b_polarity_variance.
@@ -353,8 +336,8 @@ Hint Immediate polarity_variance_abs: b_polarity_variance.
 
 Ltac t_dangerous_rec_choice :=
   match goal with
-  | H: star small_step _ zero |- _ \/ _ => left
-  | H: star small_step _ (succ _) |- _ => right
+  | H: star scbv_step _ zero |- _ \/ _ => left
+  | H: star scbv_step _ (succ _) |- _ => right
   end.
 
 
@@ -371,7 +354,7 @@ Lemma polarity_variance_rec:
 Proof.
   unfold polarity_variance_prop_aux, polarity_variance_prop;
     repeat step || simp_red || step_inversion has_polarities || t_dangerous_rec_choice || find_exists;
-    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega berased ].
+    try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with omega erased ].
 
   define m (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support pols :: support theta1 :: support theta2 :: nil)).
   exists n', m;

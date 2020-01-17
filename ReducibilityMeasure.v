@@ -1,9 +1,9 @@
-Require Import SystemFR.Syntax.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.RelationClosures.
+Require Export SystemFR.StarInversions.
+Require Export SystemFR.SizeLemmas.
 
 Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm. (* lexicographic ordering *)
@@ -56,8 +56,8 @@ Qed.
 
 Definition lt_index (t1 t2: tree) :=
   exists v1 v2 (p1: is_nat_value v1) (p2: is_nat_value v2),
-     star small_step t1 v1 /\
-     star small_step t2 v2 /\
+     star scbv_step t1 v1 /\
+     star scbv_step t2 v2 /\
      nat_value_to_nat v1 p1 < nat_value_to_nat v2 p2
 .
 
@@ -69,7 +69,7 @@ Ltac tlu :=
 Lemma acc_ind_aux:
   forall m t v (p: is_nat_value v),
     nat_value_to_nat v p < m ->
-    star small_step t v ->
+    star scbv_step t v ->
     Acc lt_index t.
 Proof.
   induction m; destruct p; steps; try omega.
@@ -107,6 +107,16 @@ Definition measure_domain: Type := (nat * tree).
 Definition lt_measure: measure_domain -> measure_domain -> Prop := lt_partial.
 Notation "p1 '<<' p2" := (lt_measure p1 p2) (at level 80).
 
+Lemma leq_lt_measure:
+  forall a1 b1 a2 b2,
+    a1 <= a2 ->
+    lt_index b1 b2 ->
+    (a1, b1) << (a2, b2).
+Proof.
+  unfold "<<", lt_partial; intros;
+  destruct (Nat.eq_dec a1 a2); steps; eauto using right_lex; eauto using left_lex with lia.
+Qed.
+
 Lemma measure_induction:
   forall P,
     (forall m, (forall m', m' << m -> P m') -> P m) ->
@@ -130,19 +140,19 @@ Qed.
 
 Lemma lt_index_step:
   forall t v,
-    star small_step t (succ v) ->
+    star scbv_step t (succ v) ->
     is_nat_value v ->
     lt_index v t.
 Proof.
   unfold lt_index; intros.
   unshelve eexists v, (succ v), _, _; steps;
-    eauto with b_inv;
+    eauto with is_nat_value;
     eauto using nat_value_to_nat_succ.
 Qed.
 
-Definition get_measure (T: tree) := (typeNodes T, index T).
+Definition get_measure (T: tree) := (type_nodes T, index T).
 
-Lemma leq_lt_measure:
+Lemma leq_lt_measure':
   forall a1 b1 c1 a2 b2 c2,
     a1 <= a2 ->
     b1 < b2 ->

@@ -1,14 +1,14 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
 
 
 Lemma substitute_nothing:
@@ -27,7 +27,7 @@ Proof.
                    apply_any
                   )
            | x: nat, H: _ |- _ => apply H with x
-           end; eauto with falsity blookup.
+           end; eauto with exfalso blookup.
 Qed.
 
 Lemma substitute_nothing2:
@@ -143,7 +143,7 @@ Proof.
     repeat match goal with
            | |- ?t = open ?k ?t ?rep => symmetry; apply open_none
            | _ => step || t_equality
-           end; eauto with bwf.
+           end; eauto with wf.
 Qed.
 
 Hint Resolve substitute_open: bsubst.
@@ -395,6 +395,6 @@ Lemma equivalent_append:
 Proof.
   unfold equivalent_subst;
     repeat step || t_lookup || t_lookupor || t_listutils;
-    auto using lookupWeaken with bcongruence bapply_any;
-    auto 6 using lookupRight2, lookupNoneSupport with bapply_any step_tactic.
+    auto using lookupWeaken with bcongruence apply_any;
+    auto 6 using lookupRight2, lookupNoneSupport with apply_any step_tactic.
 Qed.

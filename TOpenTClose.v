@@ -1,14 +1,14 @@
 Require Import Coq.Strings.String.
 Require Import Omega.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.FVLemmas.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.AssocList.
+
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.SubstitutionLemmas.
+Require Export SystemFR.FVLemmas.
 
 
 Open Scope string_scope.

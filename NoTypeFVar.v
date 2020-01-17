@@ -1,10 +1,10 @@
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.Syntax.
+Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.ListUtils.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.FVLemmasLists.
 
 Definition no_type_fvar T vars :=
   forall X, X ∈ pfv T type_var -> X ∈ vars -> False.

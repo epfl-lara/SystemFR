@@ -1,12 +1,12 @@
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.BaseType.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.AnnotatedTermLemmas.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Sets.
-Require Import SystemFR.ListUtils.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.BaseType.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.AnnotatedTermLemmas.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+
+Require Export SystemFR.ListUtils.
 
 Lemma wf_base_type:
   forall X A B,
@@ -18,14 +18,14 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Immediate wf_base_type: bwf.
+Hint Immediate wf_base_type: wf.
 
 Ltac t_wf_base_type :=
   match goal with
   | H: base_type ?X ?A ?B |- wf ?B ?k => apply wf_base_type with X A
   end.
 
-Hint Extern 50 => t_wf_base_type: bwf.
+Hint Extern 50 => t_wf_base_type: wf.
 
 Lemma twf_base_type:
   forall X A B,
@@ -37,7 +37,7 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Immediate twf_base_type: tbwf.
+Hint Immediate twf_base_type: twf.
 
 Ltac t_twf_base_type :=
   match goal with
@@ -77,7 +77,7 @@ Ltac t_pfv_base_type :=
   | H1: base_type ?X ?A ?B, H2: ?Y ∈ pfv ?B ?tag |- _ => apply (pfv_base_type _ _ _ H1) in H2
   end.
 
-Hint Extern 50 => t_pfv_base_type: bfv.
+Hint Extern 50 => t_pfv_base_type: fv.
 
 Lemma pfv_base_type_subset:
   forall X A B,
@@ -104,4 +104,4 @@ Proof.
   induction 1; repeat step || t_listutils.
 Qed.
 
-Hint Extern 1000 => apply False_ind; eapply pfv_base_type2; eassumption: bfv.
+Hint Extern 1000 => apply False_ind; eapply pfv_base_type2; eassumption: fv.

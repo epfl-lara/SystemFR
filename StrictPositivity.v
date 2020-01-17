@@ -2,14 +2,13 @@ Require Import Equations.Equations.
 
 Require Import Omega.
 
-Require Import SystemFR.Sets.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.Tactics.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.SizeLemmas.
+Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.Tactics.
 
 Equations strictly_positive (T: tree) (vars: list nat): Prop
-    by wf (typeNodes T) lt :=
+    by wf (type_nodes T) lt :=
   strictly_positive (fvar _ type_var) _ := True;
   strictly_positive (lvar _ _) _ := True;
 
@@ -19,7 +18,7 @@ Equations strictly_positive (T: tree) (vars: list nat): Prop
   strictly_positive T_top _ := True;
   strictly_positive T_bot _ := True;
 
-  strictly_positive (T_equal _ _) _ := True;
+  strictly_positive (T_equiv _ _) _ := True;
 
   strictly_positive (T_prod T1 T2) vars := strictly_positive T1 vars /\ strictly_positive T2 vars;
   strictly_positive (T_arrow T1 T2) vars := no_type_fvar T1 vars /\ strictly_positive T2 vars;
@@ -27,8 +26,6 @@ Equations strictly_positive (T: tree) (vars: list nat): Prop
   strictly_positive (T_sum T1 T2) vars := strictly_positive T1 vars /\ strictly_positive T2 vars;
   strictly_positive (T_refine T p) vars := strictly_positive T vars;
   strictly_positive (T_type_refine T1 T2) vars := no_type_fvar T1 vars /\ no_type_fvar T2 vars;
-  strictly_positive (T_let t T2) vars := strictly_positive T2 vars;
-  strictly_positive (T_singleton _) _ := True;
   strictly_positive (T_intersection T1 T2) _ :=
     strictly_positive T1 vars /\ strictly_positive T2 vars;
 
@@ -110,6 +107,4 @@ Ltac simp_spos :=
   rewrite strictly_positive_equation_54 in * ||
   rewrite strictly_positive_equation_55 in * ||
   rewrite strictly_positive_equation_56 in * ||
-  rewrite strictly_positive_equation_57 in * ||
-  rewrite strictly_positive_equation_58 in * ||
-  rewrite strictly_positive_equation_59 in *.
+  rewrite strictly_positive_equation_57 in *.

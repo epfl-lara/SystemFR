@@ -4,34 +4,7 @@ Require Import Equations.Prop.Subterm.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.TermList.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.ErasedTermLemmas.
-
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
-
-
-Require Import SystemFR.WFLemmas.
-
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilityRenaming.
-Require Import SystemFR.RedTactics.
-
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.Freshness.
+Require Export SystemFR.ReducibilityUnused.
 
 Require Import PeanoNat.
 
@@ -94,8 +67,8 @@ Proof.
            | _ => progress (step || simp_red)
            | _ => find_smallstep_value || find_exists
            | _ => apply left_lex
-           | _ => rewrite substitute_nothing5 in * by (steps; eauto with bfv)
-           | _ => rewrite substitute_open2 in *  by repeat step || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with berased)
+           | _ => rewrite substitute_nothing5 in * by (steps; eauto with fv)
+           | _ => rewrite substitute_open2 in *  by repeat step || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with erased)
            | _ => progress ( autorewrite with bsize in * )
            | H: is_erased_term ?t |- _ => rewrite (is_erased_subst t) in *
            | _ => apply erased_is_erased
@@ -106,12 +79,12 @@ Proof.
                    apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T b))
            | H: forall a, _ -> reduces_to _ _ |- _ => apply H
            | H: forall a, _ -> reducible_values _ _ _ |- _ => apply H
-(*           | H: star small_step _ ?a |- _ => unshelve exists a *)
+(*           | H: star scbv_step _ ?a |- _ => unshelve exists a *)
            | H: reducible_values _ ?t ?T |- reducible_values _ ?t (psubstitute ?T _ _) \/ _ => left
            | H: reducible_values _ ?t (psubstitute ?T _ _) |- reducible_values _ ?t ?T \/ _ => left
            | H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t (psubstitute ?T _ _) => right
            | H: reducible_values _ ?t (psubstitute ?T _ _) |- _ \/ reducible_values _ ?t ?T => right
-           | H: star small_step _ zero |- _ \/ _ => left
+           | H: star scbv_step _ zero |- _ \/ _ => left
            | |- (exists v, tleft ?v' = tleft v /\ _) \/ _ => left; exists v'
            | |- _ \/ (exists v, tright ?v' = tright v /\ _) => right; exists v'
            | H: reducible_values ?theta ?a ?U |- exists x _, reducible_values ?theta x (psubstitute ?U _ _) /\ _ => exists a
@@ -134,8 +107,8 @@ Proof.
            | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
 (*           | H: is_erased_term ?a |- _ => unshelve exists a (* !!! *) *)
            end;
-      eauto with bwf;
-      eauto with berased;
+      eauto with wf;
+      eauto with erased;
       try omega;
       try solve [ apply_any; auto ].
 
@@ -159,7 +132,7 @@ Proof.
                apply left_lex ||
                finisher || apply is_erased_type_topen;
           try omega;
-          eauto with bapply_any.
+          eauto with apply_any.
 
        match goal with
        | H: _ |- _ => apply reducible_unused3 in H
@@ -188,7 +161,7 @@ Proof.
                apply reducible_unused2 || t_fv_open || t_listutils ||
                finisher || apply is_erased_type_topen || apply left_lex;
           try omega;
-          eauto with bapply_any.
+          eauto with apply_any.
 
        match goal with
        | H: _ |- _ => apply reducible_unused3 in H
@@ -210,9 +183,9 @@ Proof.
                   rewrite substitute_topen2 || t_apply_ih_sub ||
                   match goal with
                   | H: is_nat_value ?v, H2: context[psubstitute ?v _ _] |- _ =>
-                    rewrite (substitute_nothing5 v) in H2 by eauto with bfv
+                    rewrite (substitute_nothing5 v) in H2 by eauto with fv
                   | H: is_nat_value ?v |- context[psubstitute ?v _ _] =>
-                    rewrite (substitute_nothing5 v) by eauto with bfv
+                    rewrite (substitute_nothing5 v) by eauto with fv
                   end ||
                   unfold EquivalentWithRelation.equivalent_rc;
         eauto using reducibility_is_candidate;
@@ -220,7 +193,7 @@ Proof.
         try solve [ apply right_lex, right_lex, lt_index_step; auto ];
         try solve [ apply left_lex; autorewrite with bsize in *; omega ];
         try solve [ apply right_lex, lt_index_step; auto ];
-        eauto with berased.
+        eauto with erased.
 
       lazymatch goal with
       | IHn: forall m, _ -> forall theta U V X v P, _,
@@ -233,7 +206,7 @@ Proof.
                apply left_lex ||
                finisher || apply is_erased_type_topen;
           try omega;
-          eauto with bapply_any;
+          eauto with apply_any;
           eauto using reducibility_is_candidate.
 
        match goal with
@@ -257,9 +230,9 @@ Proof.
                   t_apply_ih_sub ||
                   match goal with
                   | H: is_nat_value ?v, H2: context[psubstitute ?v _ _] |- _ =>
-                    rewrite (substitute_nothing5 v) in H2 by eauto with bfv
+                    rewrite (substitute_nothing5 v) in H2 by eauto with fv
                   | H: is_nat_value ?v |- context[psubstitute ?v _ _] =>
-                    rewrite (substitute_nothing5 v) by eauto with bfv
+                    rewrite (substitute_nothing5 v) by eauto with fv
                   end ||
                   unfold EquivalentWithRelation.equivalent_rc;
         eauto using reducibility_is_candidate;
@@ -267,7 +240,7 @@ Proof.
         try solve [ apply right_lex, right_lex, lt_index_step; auto ];
         try solve [ apply left_lex; autorewrite with bsize in *; omega ];
         try solve [ apply right_lex, lt_index_step; auto ];
-        eauto with berased.
+        eauto with erased.
 
       lazymatch goal with
       | H: reducible_values _ _ _ |- _ =>
@@ -285,7 +258,7 @@ Proof.
                apply left_lex ||
                finisher || apply is_erased_type_topen;
           try omega;
-          eauto with bapply_any;
+          eauto with apply_any;
           eauto using reducibility_is_candidate.
 
        match goal with
@@ -337,7 +310,7 @@ Proof.
       eauto using reducibility_is_candidate;
       try solve [ eapply reducible_unused2; steps; eauto using reducibility_is_candidate ];
       try solve [ eapply reducible_unused3 with X _; steps; eauto using reducibility_is_candidate ];
-      eauto 2 with berased step_tactic.
+      eauto 2 with erased step_tactic.
 Qed.
 
 Lemma reducibility_subst_head2:
@@ -369,5 +342,5 @@ Proof.
       eauto using reducibility_is_candidate;
       try solve [ eapply reducible_unused2; steps; eauto using reducibility_is_candidate ];
       try solve [ eapply reducible_unused3 with X _; steps; eauto using reducibility_is_candidate ];
-      eauto 2 with berased step_tactic.
+      eauto 2 with erased step_tactic.
 Qed.

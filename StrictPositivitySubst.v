@@ -1,19 +1,19 @@
-Require Import SystemFR.StrictPositivity.
-Require Import SystemFR.StrictPositivityLemmas.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.SizeLemmas.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.Sets.
-Require Import SystemFR.SubstitutionLemmas.
-Require Import SystemFR.ErasedTermLemmas.
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.FVLemmasLists.
+Require Export SystemFR.StrictPositivity.
+Require Export SystemFR.StrictPositivityLemmas.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.SizeLemmas.
+Require Export SystemFR.NoTypeFVar.
+
+Require Export SystemFR.SubstitutionLemmas.
+Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.FVLemmasLists.
 
 
 
-Require Import SystemFR.AssocList.
+Require Export SystemFR.AssocList.
 
 Require Import Coq.Lists.List.
 
@@ -23,7 +23,7 @@ Opaque strictly_positive.
 
 Lemma strictly_positive_subst_aux:
   forall n T lterms vars,
-    typeNodes T < n ->
+    type_nodes T < n ->
     pclosed_mapping lterms type_var ->
     twfs lterms 0 ->
     is_erased_type T ->

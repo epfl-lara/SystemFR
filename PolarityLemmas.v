@@ -6,47 +6,27 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.StarInversions.
-Require Import SystemFR.StarRelation.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Equivalence.
-Require Import SystemFR.OpenTOpen.
+Require Export SystemFR.OpenTOpen.
 
-Require Import SystemFR.SizeLemmas.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.TWFLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.TWFLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.ReducibilitySubst.
+Require Export SystemFR.RedTactics2.
 
-Require Import SystemFR.ReducibilityCandidate.
-Require Import SystemFR.ReducibilityDefinition.
-Require Import SystemFR.ReducibilityLemmas.
-Require Import SystemFR.RedTactics.
-Require Import SystemFR.ReducibilityMeasure.
-Require Import SystemFR.ReducibilitySubst.
-Require Import SystemFR.ReducibilityRenaming.
-Require Import SystemFR.ReducibilityUnused.
-Require Import SystemFR.RedTactics2.
+Require Export SystemFR.IdRelation.
+Require Export SystemFR.EqualWithRelation.
+Require Export SystemFR.EquivalentPairsWithRelation.
 
-Require Import SystemFR.IdRelation.
-Require Import SystemFR.EqualWithRelation.
-Require Import SystemFR.EquivalentPairsWithRelation.
+Require Export SystemFR.AssocList.
 
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Freshness.
-Require Import SystemFR.SwapHoles.
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.TOpenTClose.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.Polarity.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.Polarity.
 
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.NoTypeFVarLemmas.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.NoTypeFVarLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -54,7 +34,7 @@ Opaque reducible_values.
 
 Lemma polarity_open_aux:
   forall m T pols k rep,
-    typeNodes T < m ->
+    type_nodes T < m ->
     has_polarities T pols ->
     is_erased_term rep ->
     has_polarities (open k T rep) pols.
@@ -110,10 +90,10 @@ Definition hp_rename_prop T :=
   forall pols T' pols' rel,
     has_polarities T pols ->
     equivalent_pairs_with_relation rel pols pols' eq ->
-    equal_with_relation rel T T' ->
+    equal_with_relation type_var rel T T' ->
     has_polarities T' pols'.
 
-Definition hp_rename_prop_aux n T := typeNodes T = n -> hp_rename_prop T.
+Definition hp_rename_prop_aux n T := type_nodes T = n -> hp_rename_prop T.
 
 Definition hp_rename_until n :=
   forall n', n' < n -> forall T, hp_rename_prop_aux n' T.
@@ -126,10 +106,10 @@ Lemma has_polarities_rename_fvar:
   forall n x f, hp_rename_prop_aux n (fvar x f).
 Proof.
   repeat autounfold with u_hprename.
-  repeat
-    step || step_inversion has_polarities || step_inversion equal_with_relation ||
-    constructor; eauto with omega;
-    eauto using equivalent_pairs_same.
+  repeat step || step_inversion has_polarities.
+  force_invert equal_with_relation;
+    repeat step;
+    try solve [ constructor; eauto with omega; eauto using equivalent_pairs_same ].
 Qed.
 
 Hint Immediate has_polarities_rename_fvar: b_hp_rename.
@@ -147,8 +127,8 @@ Lemma hp_rename_induct_invert:
     hp_rename_until n ->
     equivalent_pairs_with_relation rel pols pols' eq ->
     has_polarities T1 (invert_polarities pols) ->
-    equal_with_relation rel T1 T2 ->
-    typeNodes T1 < n ->
+    equal_with_relation type_var rel T1 T2 ->
+    type_nodes T1 < n ->
     has_polarities T2 (invert_polarities pols').
 Proof.
   repeat autounfold with u_hprename; intros.
@@ -161,8 +141,8 @@ Lemma hp_rename_induct:
     hp_rename_until n ->
     equivalent_pairs_with_relation rel pols pols' eq ->
     has_polarities T1 pols ->
-    equal_with_relation rel T1 T2 ->
-    typeNodes T1 < n ->
+    equal_with_relation type_var rel T1 T2 ->
+    type_nodes T1 < n ->
     has_polarities T2 pols'.
 Proof.
   repeat autounfold with u_hprename; intros.
@@ -262,7 +242,7 @@ Qed.
 
 Lemma has_polarities_swap_aux:
   forall n T pols i j,
-    typeNodes T < n ->
+    type_nodes T < n ->
     has_polarities T pols ->
     has_polarities (swap_type_holes T i j) pols.
 Proof.
@@ -284,7 +264,7 @@ Qed.
 
 Lemma has_polarities_topen_aux:
   forall n T pols X k,
-    typeNodes T < n ->
+    type_nodes T < n ->
     has_polarities T pols ->
     ~(X ∈ support pols) ->
     has_polarities (topen k T (fvar X type_var)) pols.

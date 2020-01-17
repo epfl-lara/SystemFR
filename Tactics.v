@@ -1,10 +1,12 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Omega.
+Require Import Psatz.
 
 Open Scope string.
 
 Hint Extern 50 => omega: omega.
+Hint Extern 50 => lia: lia.
 Hint Extern 50 => cbn: cbn.
 Hint Extern 50 => cbn; intuition auto: cbn_intuition.
 
@@ -185,7 +187,8 @@ Ltac define3 m t :=
   pose t as m;
   assert (m = t) as M; auto.
 
-Hint Extern 50 => apply False_ind: falsity.
+Hint Extern 50 => apply False_ind: exfalso.
+(** Useful shorthands that work on any hypothesis in the the context *)
 
 Ltac apply_any :=
   match goal with
@@ -195,6 +198,11 @@ Ltac apply_any :=
 Ltac rewrite_any :=
   match goal with
   | H: _ |- _ => rewrite H in *
+  end.
+
+Ltac erewrite_any :=
+  match goal with
+  | H: _ |- _ => erewrite H in *
   end.
 
 Ltac rewrite_back_any :=
@@ -207,14 +215,74 @@ Ltac eapply_any :=
   | H: _ |- _ => eapply H
   end.
 
+Ltac apply_anywhere f :=
+  match goal with
+  | H: _ |- _ => apply f in H
+  end.
+
+Ltac eapply_anywhere f :=
+  match goal with
+  | H: _ |- _ => eapply f in H
+  end.
+
+Ltac rewrite_anywhere f :=
+  match goal with
+  | H: _ |- _ => rewrite f in H
+  end.
+
+Ltac erewrite_anywhere f :=
+  match goal with
+  | H: _ |- _ => erewrite f in H
+  end.
+
 Ltac instantiate_any :=
   match goal with
   | H1: forall x, _ -> _, H2: _ |- _ =>
-    poseNew (Mark (H1,H2) "instantiation");
+    poseNew (Mark (H1, H2) "instantiation");
     pose proof (H1 _ H2)
+  | H1: forall x y, _ -> _, H2: _ |- _ =>
+    poseNew (Mark (H1, H2) "instantiation");
+    pose proof (H1 _ _ H2)
+  | H1: forall x y z, _ -> _, H2: _ |- _ =>
+    poseNew (Mark (H1, H2) "instantiation");
+    pose proof (H1 _ _ _ H2)
   end.
 
-Hint Extern 50 => apply_any: bapply_any.
-Hint Extern 50 => eapply_any: beapply_any.
+Hint Extern 50 => apply_any: apply_any.
+Hint Extern 50 => eapply_any: eapply_any.
 Hint Extern 50 => congruence: bcongruence.
 Hint Extern 50 => steps: step_tactic.
+
+Ltac top_level_unfold F :=
+  match goal with
+  | H: ?f |- _ => unify f F; unfold F in H
+  | H: ?f _ |- _ => unify f F; unfold F in H
+  | H: ?f _ _ |- _ => unify f F; unfold F in H
+  | H: ?f _ _ _ |- _ => unify f F; unfold F in H
+  | H: ?f _ _ _ _ |- _ => unify f F; unfold F in H
+  | H: ?f _ _ _ _ _ |- _ => unify f F; unfold F in H
+  end.
+
+Ltac inversion_solve :=
+  match goal with
+  | H: _ |- _ => solve [ inversion H; steps ]
+  end.
+
+Lemma rewrite_truth:
+  forall (P: Prop), P -> (P <-> True).
+Proof.
+  steps.
+Qed.
+
+Ltac rewrite_truth l :=
+  rewrite (rewrite_truth _ l) in * by (eauto using l).
+
+Ltac force_invert P :=
+  match goal with
+  | H: ?F _ |- _ => unify F P; inversion H; clear H
+  | H: ?F _ _ |- _ => unify F P; inversion H; clear H
+  | H: ?F _ _ _ |- _ => unify F P; inversion H; clear H
+  | H: ?F _ _ _ _ |- _ => unify F P; inversion H; clear H
+  | H: ?F _ _ _ _ _ |- _ => unify F P; inversion H; clear H
+  | H: ?F _ _ _ _ _ _ |- _ => unify F P; inversion H; clear H
+  end.

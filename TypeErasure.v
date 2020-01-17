@@ -1,8 +1,5 @@
-Require Import Coq.Program.Tactics.
-
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.AssocList.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.Syntax.
 
 Require Import Coq.Strings.String.
 
@@ -76,13 +73,11 @@ Fixpoint erase_type (T: tree): tree :=
   | T_prod A B => T_prod (erase_type A) (erase_type B)
   | T_arrow A B => T_arrow (erase_type A) (erase_type B)
   | T_sum A B => T_sum (erase_type A) (erase_type B)
-  | T_let t B => T_let (erase_term t) (erase_type B)
-  | T_singleton t => T_singleton (erase_term t)
   | T_intersection A B => T_intersection (erase_type A) (erase_type B)
   | T_union A B => T_union (erase_type A) (erase_type B)
   | T_top => T
   | T_bot => T
-  | T_equal t1 t2 => T_equal (erase_term t1) (erase_term t2)
+  | T_equiv t1 t2 => T_equiv (erase_term t1) (erase_term t2)
   | T_forall A B => T_forall (erase_type A) (erase_type B)
   | T_exists A B => T_exists (erase_type A) (erase_type B)
   | T_abs T => T_abs (erase_type T)
@@ -102,11 +97,11 @@ Proof.
   induction T; steps; eauto using erase_term_erased.
 Qed.
 
-Program Fixpoint erase_context (l: list (nat * tree)): list (nat * tree) :=
+Fixpoint erase_context (l: list (nat * tree)): list (nat * tree) :=
   match l with
   | nil => nil
   | (x, T) :: l' => (x, erase_type T) :: erase_context l'
   end.
 
-Hint Resolve erase_term_erased: berased.
-Hint Resolve erase_type_erased: berased.
+Hint Resolve erase_term_erased: erased.
+Hint Resolve erase_type_erased: erased.

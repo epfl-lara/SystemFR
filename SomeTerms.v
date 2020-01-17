@@ -1,5 +1,5 @@
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Syntax.
 
 Definition spositive (a: tree): tree :=
   tmatch a tfalse ttrue.

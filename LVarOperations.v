@@ -1,8 +1,8 @@
-Require Import SystemFR.Trees.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.WFLemmas.
-Require Import SystemFR.WFLemmasLists.
+Require Export SystemFR.Trees.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.WFLemmas.
+Require Export SystemFR.WFLemmasLists.
 
 Require Import PeanoNat.
 
@@ -88,13 +88,11 @@ Fixpoint map_indices (k: nat) (t: tree) (f: nat -> nat) :=
   | T_sum T1 T2 => T_sum (map_indices k T1 f) (map_indices k T2 f)
   | T_refine T p => T_refine (map_indices k T f) (map_indices (S k) p f)
   | T_type_refine T1 T2 => T_type_refine (map_indices k T1 f) (map_indices (S k) T2 f)
-  | T_let t B => T_let (map_indices k t f) (map_indices (S k) B f)
-  | T_singleton t => T_singleton (map_indices k t f)
   | T_intersection T1 T2 => T_intersection (map_indices k T1 f) (map_indices k T2 f)
   | T_union T1 T2 => T_union (map_indices k T1 f) (map_indices k T2 f)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (map_indices k t1 f) (map_indices k t2 f)
+  | T_equiv t1 t2 => T_equiv (map_indices k t1 f) (map_indices k t2 f)
   | T_forall T1 T2 => T_forall (map_indices k T1 f) (map_indices (S k) T2 f)
   | T_exists T1 T2 => T_exists (map_indices k T1 f) (map_indices (S k) T2 f)
   | T_abs T => T_abs (map_indices k T f)
@@ -128,7 +126,7 @@ Proof.
   eauto using wf_map_succ with omega.
 Qed.
 
-Hint Resolve wf_shift: bwf.
+Hint Resolve wf_shift: wf.
 
 Lemma pfv_map_indices:
   forall t i f tag,
@@ -151,5 +149,5 @@ Lemma psubstitute_map_indices:
     psubstitute (map_indices i t f) l tag = map_indices i (psubstitute t l tag) f.
 Proof.
   induction t; repeat step || t_equality || rewrite map_nothing in *;
-    eauto with bwf omega.
+    eauto with wf omega.
 Qed.

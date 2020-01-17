@@ -1,4 +1,4 @@
-Require Import SystemFR.Trees.
+Require Export SystemFR.Trees.
 
 Definition is_pair (v: tree): tree :=
   match v with

@@ -1,18 +1,15 @@
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.TermList.
-Require Import SystemFR.WFLemmas.
-
+Require Export SystemFR.TermList.
+Require Export SystemFR.WFLemmas.
 
 Lemma satisfies_wfs:
   forall p lterms gamma k,
     satisfies p gamma lterms ->
     wfs lterms k.
 Proof.
-  induction lterms; repeat step || step_inversion satisfies; eauto with bwf omega.
+  induction lterms; repeat step || step_inversion satisfies; eauto with wf omega.
 Qed.
 
-Hint Resolve satisfies_wfs: bwf.
+Hint Resolve satisfies_wfs: wf.
 
 Lemma satisfies_twfs:
   forall p lterms gamma k,

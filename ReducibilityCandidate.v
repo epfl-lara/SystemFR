@@ -1,9 +1,9 @@
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Sets.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.SmallStep.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.ErasedTermLemmas.
+Require Export SystemFR.Syntax.
+
+Require Export SystemFR.Tactics.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.AssocList.
+Require Export SystemFR.ErasedTermLemmas.
 
 
 Require Import PeanoNat.
@@ -13,7 +13,7 @@ Open Scope list_scope.
 Definition reducibility_candidate (P: tree -> Prop): Prop :=
   forall v, P v ->
        is_erased_term v /\
-       is_value v /\
+       cbv_value v /\
        wf v 0 /\
        pfv v term_var = nil.
 
@@ -59,7 +59,7 @@ Lemma in_valid_interpretation_value: forall theta v X P,
   valid_interpretation theta ->
   lookup Nat.eq_dec theta X = Some P ->
   P v ->
-  is_value v.
+  cbv_value v.
 Proof.
   induction theta; repeat step || eauto || apply_any.
 Qed.
@@ -112,7 +112,7 @@ Lemma valid_interpretation_equiv:
     (forall x, P1 x <-> P2 x) ->
     valid_pre_interpretation P2 ptheta.
 Proof.
-  induction ptheta; steps; eauto with beapply_any.
+  induction ptheta; steps; eauto with eapply_any.
 Qed.
 
 Ltac t_valid_interpretation_equiv :=
@@ -121,9 +121,9 @@ Ltac t_valid_interpretation_equiv :=
   end.
 
 Definition push_one (a: tree) (l: list (nat * (tree -> tree -> Prop))): interpretation :=
-  mapValues (fun rc => rc a) l.
+  map_values (fun rc => rc a) l.
 Definition push_all (P: tree -> Prop) (l: list (nat * (tree -> tree -> Prop))): interpretation :=
-  mapValues (fun (rc: tree -> tree -> Prop) (v: tree) => (forall a, P a -> rc a v)) l.
+  map_values (fun (rc: tree -> tree -> Prop) (v: tree) => (forall a, P a -> rc a v)) l.
 
 Lemma valid_interpretation_one:
   forall a (P: tree -> Prop) theta,

@@ -1,6 +1,6 @@
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Trees.
-Require Import SystemFR.AssocList.
+Require Export SystemFR.Tactics.
+Require Export SystemFR.Trees.
+Require Export SystemFR.AssocList.
 
 Open Scope list_scope.
 
@@ -19,7 +19,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-Hint Resolve erased_term_in_list: berased.
+Hint Resolve erased_term_in_list: erased.
 
 Fixpoint annotated_types (l: list (nat * tree)) :=
   match l with
@@ -36,7 +36,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-Hint Resolve annotated_type_in_list: bannot.
+Hint Immediate annotated_type_in_list: bannot.
 
 Lemma annotated_types_append:
   forall l1 l2,
@@ -47,5 +47,3 @@ Proof.
     try solve [ apply (IH l1); steps ];
     try solve [ apply (IH l2); steps ].
 Qed.
-
-Hint Rewrite annotated_types_append: bannot.

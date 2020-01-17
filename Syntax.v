@@ -3,11 +3,10 @@ Require Import Coq.Lists.List.
 
 Require Import PeanoNat.
 
-Require Import SystemFR.ListUtils.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.Tactics.
+Require Export SystemFR.AssocList.
 Require Export SystemFR.Trees.
-Require Import SystemFR.Sets.
+
+Close Scope string_scope.
 
 Lemma tag_eq_dec:
   forall tag1 tag2: fv_tag, { tag1 = tag2 } + { tag1 <> tag2 }.
@@ -16,7 +15,7 @@ Proof.
   decide equality.
 Qed.
 
-Fixpoint pfv t tag: set nat :=
+Fixpoint pfv t tag: list nat :=
   match t with
   | fvar y tag' =>
     if (tag_eq_dec tag tag')
@@ -83,13 +82,11 @@ Fixpoint pfv t tag: set nat :=
   | T_prod A B => pfv A tag ++ pfv B tag
   | T_arrow A B => pfv A tag ++ pfv B tag
   | T_sum A B => pfv A tag ++ pfv B tag
-  | T_let t B => pfv t tag ++ pfv B tag
-  | T_singleton t => pfv t tag
   | T_intersection A B => pfv A tag ++ pfv B tag
   | T_union A B => pfv A tag ++ pfv B tag
   | T_top => nil
   | T_bot => nil
-  | T_equal t1 t2 => pfv t1 tag ++ pfv t2 tag
+  | T_equiv t1 t2 => pfv t1 tag ++ pfv t2 tag
   | T_forall A B => pfv A tag ++ pfv B tag
   | T_exists A B => pfv A tag ++ pfv B tag
   | T_abs T => pfv T tag
@@ -219,13 +216,11 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | T_sum T1 T2 => T_sum (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_refine T p => T_refine (psubstitute T l tag) (psubstitute p l tag)
   | T_type_refine T1 T2 => T_type_refine (psubstitute T1 l tag) (psubstitute T2 l tag)
-  | T_let t B => T_let (psubstitute t l tag) (psubstitute B l tag)
-  | T_singleton t => T_singleton (psubstitute t l tag)
   | T_intersection T1 T2 => T_intersection (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_union T1 T2 => T_union (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (psubstitute t1 l tag) (psubstitute t2 l tag)
+  | T_equiv t1 t2 => T_equiv (psubstitute t1 l tag) (psubstitute t2 l tag)
   | T_forall T1 T2 => T_forall (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_exists T1 T2 => T_exists (psubstitute T1 l tag) (psubstitute T2 l tag)
   | T_abs T => T_abs (psubstitute T l tag)
@@ -324,13 +319,11 @@ Fixpoint wf t k :=
   | T_sum T1 T2 => wf T1 k /\ wf T2 k
   | T_refine T p => wf T k /\ wf p (S k)
   | T_type_refine T1 T2 => wf T1 k /\ wf T2 (S k)
-  | T_let t B => wf t k /\ wf B (S k)
-  | T_singleton t => wf t k
   | T_intersection T1 T2 => wf T1 k /\ wf T2 k
   | T_union T1 T2 => wf T1 k /\ wf T2 k
   | T_top => True
   | T_bot => True
-  | T_equal t1 t2 => wf t1 k /\ wf t2 k
+  | T_equiv t1 t2 => wf t1 k /\ wf t2 k
   | T_forall T1 T2 => wf T1 k /\ wf T2 (S k)
   | T_exists T1 T2 => wf T1 k /\ wf T2 (S k)
   | T_abs T => wf T k
@@ -414,13 +407,11 @@ Fixpoint twf t k :=
   | T_sum T1 T2 => twf T1 k /\ twf T2 k
   | T_refine T p => twf T k /\ twf p k
   | T_type_refine T1 T2 => twf T1 k /\ twf T2 k
-  | T_let t B => twf t k /\ twf B k
-  | T_singleton t => twf t k
   | T_intersection T1 T2 => twf T1 k /\ twf T2 k
   | T_union T1 T2 => twf T1 k /\ twf T2 k
   | T_top => True
   | T_bot => True
-  | T_equal t1 t2 => twf t1 k /\ twf t2 k
+  | T_equiv t1 t2 => twf t1 k /\ twf t2 k
   | T_forall T1 T2 => twf T1 k /\ twf T2 k
   | T_exists T1 T2 => twf T1 k /\ twf T2 k
   | T_abs T => twf T (S k)
@@ -517,13 +508,11 @@ Fixpoint open (k: nat) (t rep: tree) :=
   | T_sum T1 T2 => T_sum (open k T1 rep) (open k T2 rep)
   | T_refine T p => T_refine (open k T rep) (open (S k) p rep)
   | T_type_refine T1 T2 => T_type_refine (open k T1 rep) (open (S k) T2 rep)
-  | T_let t B => T_let (open k t rep) (open (S k) B rep)
-  | T_singleton t => T_singleton (open k t rep)
   | T_intersection T1 T2 => T_intersection (open k T1 rep) (open k T2 rep)
   | T_union T1 T2 => T_union (open k T1 rep) (open k T2 rep)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (open k t1 rep) (open k t2 rep)
+  | T_equiv t1 t2 => T_equiv (open k t1 rep) (open k t2 rep)
   | T_forall T1 T2 => T_forall (open k T1 rep) (open (S k) T2 rep)
   | T_exists T1 T2 => T_exists (open k T1 rep) (open (S k) T2 rep)
   | T_abs T => T_abs (open k T rep)
@@ -608,13 +597,11 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
   | T_sum T1 T2 => T_sum (close k T1 x) (close k T2 x)
   | T_refine T p => T_refine (close k T x) (close (S k) p x)
   | T_type_refine T1 T2 => T_type_refine (close k T1 x) (close (S k) T2 x)
-  | T_let t B => T_let (close k t x) (close (S k) B x)
-  | T_singleton t => T_singleton (close k t x)
   | T_intersection T1 T2 => T_intersection (close k T1 x) (close k T2 x)
   | T_union T1 T2 => T_union (close k T1 x) (close k T2 x)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (close k t1 x) (close k t2 x)
+  | T_equiv t1 t2 => T_equiv (close k t1 x) (close k t2 x)
   | T_forall T1 T2 => T_forall (close k T1 x) (close (S k) T2 x)
   | T_exists T1 T2 => T_exists (close k T1 x) (close (S k) T2 x)
   | T_abs T => T_abs (close k T x)
@@ -701,13 +688,11 @@ Fixpoint topen (k: nat) (t rep: tree) :=
   | T_sum T1 T2 => T_sum (topen k T1 rep) (topen k T2 rep)
   | T_refine T p => T_refine (topen k T rep) (topen k p rep)
   | T_type_refine T1 T2 => T_type_refine (topen k T1 rep) (topen k T2 rep)
-  | T_let t B => T_let (topen k t rep) (topen k B rep)
-  | T_singleton t => T_singleton (topen k t rep)
   | T_intersection T1 T2 => T_intersection (topen k T1 rep) (topen k T2 rep)
   | T_union T1 T2 => T_union (topen k T1 rep) (topen k T2 rep)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (topen k t1 rep) (topen k t2 rep)
+  | T_equiv t1 t2 => T_equiv (topen k t1 rep) (topen k t2 rep)
   | T_forall T1 T2 => T_forall (topen k T1 rep) (topen k T2 rep)
   | T_exists T1 T2 => T_exists (topen k T1 rep) (topen k T2 rep)
   | T_abs T => T_abs (topen (S k) T rep)
@@ -793,13 +778,11 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   | T_sum T1 T2 => T_sum (tclose k T1 x) (tclose k T2 x)
   | T_refine T p => T_refine (tclose k T x) (tclose k p x)
   | T_type_refine T1 T2 => T_type_refine (tclose k T1 x) (tclose k T2 x)
-  | T_let t B => T_let (tclose k t x) (tclose k B x)
-  | T_singleton t => T_singleton (tclose k t x)
   | T_intersection T1 T2 => T_intersection (tclose k T1 x) (tclose k T2 x)
   | T_union T1 T2 => T_union (tclose k T1 x) (tclose k T2 x)
   | T_top => t
   | T_bot => t
-  | T_equal t1 t2 => T_equal (tclose k t1 x) (tclose k t2 x)
+  | T_equiv t1 t2 => T_equiv (tclose k t1 x) (tclose k t2 x)
   | T_forall T1 T2 => T_forall (tclose k T1 x) (tclose k T2 x)
   | T_exists T1 T2 => T_exists (tclose k T1 x) (tclose k T2 x)
   | T_abs T => T_abs (tclose (S k) T x)

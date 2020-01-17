@@ -2,14 +2,14 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
-Require Import SystemFR.TermProperties.
-Require Import SystemFR.Sets.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.FVLemmas.
-Require Import SystemFR.TermList.
-Require Import SystemFR.ListUtils.
+Require Export SystemFR.Syntax.
+Require Export SystemFR.Tactics.
+
+
+Require Export SystemFR.AssocList.
+Require Export SystemFR.FVLemmas.
+Require Export SystemFR.TermList.
+Require Export SystemFR.ListUtils.
 
 Lemma satisfies_closed_mapping:
   forall P lterms gamma tag,
@@ -21,7 +21,7 @@ Proof.
            unfold closed_term in *; eauto.
 Qed.
 
-Hint Extern 50 => eapply satisfies_closed_mapping: bfv.
+Hint Extern 50 => eapply satisfies_closed_mapping: fv.
 
 Lemma closed_mapping_append1:
   forall l1 l2 tag,
@@ -65,7 +65,7 @@ Proof.
   eapply satisfies_closed_mapping; eauto.
 Qed.
 
-Hint Extern 50 => eapply satisfies_fv_nil: bfv.
+Hint Extern 50 => eapply satisfies_fv_nil: fv.
 
 Lemma fv_satisfies_nil:
   forall P gamma lterms t,
@@ -74,10 +74,10 @@ Lemma fv_satisfies_nil:
     fv (substitute t lterms) = nil.
 Proof.
   repeat step || t_termlist || t_listutils || apply fv_nils2 || rewrite_any;
-    eauto with bfv b_cmap.
+    eauto with fv b_cmap.
 Qed.
 
-Hint Extern 50 => eapply fv_satisfies_nil: bfv.
+Hint Extern 50 => eapply fv_satisfies_nil: fv.
 
 Lemma fv_subst_different_tag:
   forall t l tag tag',
@@ -85,7 +85,7 @@ Lemma fv_subst_different_tag:
     tag <> tag' ->
     pfv (psubstitute t l tag') tag = pfv t tag.
 Proof.
-  induction t; repeat step || f_equal; eauto with bfv.
+  induction t; repeat step || f_equal; eauto with fv.
 Qed.
 
 Lemma pfv_in_subst:
@@ -97,18 +97,15 @@ Proof.
   destruct tag1, tag2; repeat step || rewrite fv_subst_different_tag in * by steps.
   - epose proof (fv_subst2 _ _ _ X H0);
     repeat step || t_listutils;
-    eauto using closed_mapping_fv with falsity.
+    eauto using closed_mapping_fv with exfalso.
   - epose proof (fv_subst2 _ _ _ X H0);
     repeat step || t_listutils;
-    eauto using closed_mapping_fv with falsity.
+    eauto using closed_mapping_fv with exfalso.
 Qed.
 
 Ltac t_pfv_in_subst :=
   match goal with
-  | H: _ ∈ pfv (psubstitute _ _ term_var) type_var |- _ =>
-      poseNew (Mark H "pfv_in_subst");
-      unshelve epose proof (pfv_in_subst _ _ _ _ _ _ H)
-  | H: _ ∈ pfv (psubstitute _ _ type_var) term_var |- _ =>
+  | H: _ ∈ pfv (psubstitute _ _ _) _ |- _ =>
       poseNew (Mark H "pfv_in_subst");
       unshelve epose proof (pfv_in_subst _ _ _ _ _ _ H)
   end.

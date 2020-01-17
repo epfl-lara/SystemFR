@@ -1,8 +1,8 @@
-Require Import SystemFR.Tactics.
-Require Import SystemFR.Sets.
-Require Import SystemFR.AssocList.
-Require Import SystemFR.NoTypeFVar.
-Require Import SystemFR.EqualWithRelation.
+Require Export SystemFR.Tactics.
+
+Require Export SystemFR.AssocList.
+Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.EqualWithRelation.
 
 Require Import PeanoNat.
 
@@ -15,11 +15,11 @@ Definition similar_sets (rel: map nat nat) (vars vars': list nat): Prop :=
 Lemma no_type_fvar_rename:
   forall T T' vars vars' rel,
     no_type_fvar T vars ->
-    equal_with_relation rel T T' ->
+    equal_with_relation type_var rel T T' ->
     similar_sets rel vars vars' ->
     no_type_fvar T' vars'.
 Proof.
   unfold no_type_fvar, similar_sets;
     repeat step || t_equal_with_relation_pfv2 || t_lookup_same;
-    eauto with beapply_any.
+    eauto with eapply_any.
 Qed.

@@ -1,6 +1,4 @@
-Require Import SystemFR.Trees.
-Require Import SystemFR.Syntax.
-Require Import SystemFR.Tactics.
+Require Export SystemFR.Syntax.
 
 (* always 0 for non-values *)
 Fixpoint tsize_semantics t: nat :=
