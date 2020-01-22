@@ -13,7 +13,7 @@ Lemma nat_value_fv:
     is_nat_value v -> pfv v tag = nil.
 Proof.
   induction 1;
-    repeat step || t_listutils.
+    repeat step || list_utils.
 Qed.
 
 Hint Immediate nat_value_fv: fv.
@@ -65,10 +65,10 @@ Lemma fv_smallstep:
       x ∈ pfv t tag.
 Proof.
   induction 1;
-    repeat step || t_listutils || t_fv_open || unfold subset in * ||
+    repeat step || list_utils || t_fv_open || unfold subset in * ||
            (rewrite nat_value_fv in * by eauto using is_nat_value_build_nat) ||
            (autorewrite with rfv in *);
-    eauto with fv blistutils.
+    eauto with fv list_utils.
 Qed.
 
 Hint Resolve fv_smallstep: fv.

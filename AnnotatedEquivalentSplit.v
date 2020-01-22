@@ -16,6 +16,8 @@ Lemma annotated_equivalent_ite:
     ~(x ∈ fv t3) ->
     wf t2 0 ->
     wf t3 0 ->
+    subset (fv t2) (support gamma) ->
+    subset (fv t3) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : T_bool ]]->
     [[ tvars; (x, T_equiv t1 ttrue) :: gamma ⊨ t2 ≡ t  ]]->
     [[ tvars; (x, T_equiv t1 tfalse) :: gamma ⊨ t3 ≡ t ]] ->
@@ -41,6 +43,8 @@ Lemma annotated_equivalent_match:
       ~(n = p) ->
       wf t0 0 ->
       wf ts 1 ->
+      subset (fv t0) (support gamma) ->
+      subset (fv ts) (support gamma) ->
       is_annotated_term ts ->
       [[ tvars; gamma ⊨ tn : T_nat ]] ->
       [[ tvars; (p, T_equiv tn zero) :: gamma ⊨ t0 ≡ t ]] ->
@@ -73,6 +77,8 @@ Lemma annotated_equivalent_rec:
     is_annotated_term ts ->
     wf t0 0 ->
     wf ts 2 ->
+    subset (fv t0) (support gamma) ->
+    subset (fv ts) (support gamma) ->
     [[ tvars; gamma ⊨ tn : T_nat ]] ->
     [[ tvars; (p, T_equiv tn zero) :: gamma ⊨ t0 ≡ t ]] ->
     [[ tvars;

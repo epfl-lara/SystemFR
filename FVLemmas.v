@@ -28,7 +28,7 @@ Lemma fv_context_support:
    x ∈ support gamma ->
    x ∈ pfv_context gamma tag.
 Proof.
-  induction gamma; repeat step || t_listutils.
+  induction gamma; repeat step || list_utils.
 Qed.
 
 Hint Resolve fv_context_support: fv.
@@ -39,7 +39,7 @@ Lemma fv_lookup:
     subset (pfv T tag) (pfv_context gamma tag).
 Proof.
   induction gamma;
-    repeat step || unfold subset in * || t_listutils; eauto.
+    repeat step || unfold subset in * || list_utils; eauto.
 Qed.
 
 Lemma fv_lookup2:
@@ -48,7 +48,7 @@ Lemma fv_lookup2:
     y ∈ pfv T tag ->
     y ∈ pfv_context gamma tag.
 Proof.
-  induction gamma; repeat step || t_sets || unfold subset in * || t_listutils; eauto.
+  induction gamma; repeat step || t_sets || unfold subset in * || list_utils; eauto.
 Qed.
 
 Lemma fv_lookup3:
@@ -56,7 +56,7 @@ Lemma fv_lookup3:
     lookup Nat.eq_dec gamma x = Some T ->
     x ∈ pfv_context gamma tag.
 Proof.
-  induction gamma; repeat step || t_listutils; eauto.
+  induction gamma; repeat step || list_utils; eauto.
 Qed.
 
 Lemma fv_lookup4:
@@ -65,7 +65,7 @@ Lemma fv_lookup4:
     y ∈ pfv T tag ->
     y ∈ pfv_range l tag.
 Proof.
-  induction l; repeat step || t_sets || unfold subset in * || t_listutils; eauto.
+  induction l; repeat step || t_sets || unfold subset in * || list_utils; eauto.
 Qed.
 
 Hint Resolve fv_lookup: fv.
@@ -151,7 +151,7 @@ Lemma fv_nils_open:
 Proof.
   intros;
   rewrite <- (empty_list_rewrite nat) in *;
-    repeat step || t_listutils || t_fv_open; eauto.
+    repeat step || list_utils || t_fv_open; eauto.
 Qed.
 
 Hint Resolve fv_nils_open: fv.
@@ -164,7 +164,7 @@ Lemma fv_nils_topen:
 Proof.
   intros;
   rewrite <- (empty_list_rewrite nat) in *;
-    repeat step || t_listutils || t_fv_open; eauto.
+    repeat step || list_utils || t_fv_open; eauto.
 Qed.
 
 Hint Resolve fv_nils_topen: fv.
@@ -175,7 +175,7 @@ Lemma fv_subst_lemma:
     subset s2 (s2' - x ++ s3) ->
     subset (s1 ++ s2) ((s1' ++ s2') - x ++ s3).
 Proof.
-  unfold subset; repeat step || t_listutils || instantiate_any.
+  unfold subset; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma fv_subst:
@@ -196,7 +196,7 @@ Lemma fv_subst2_lemma:
     subset s2 (s2' -- s ++ s3) ->
     subset (s1 ++ s2) ((s1' ++ s2') -- s ++ s3).
 Proof.
-  unfold subset; repeat step || t_listutils || instantiate_any.
+  unfold subset; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma fv_subst2:
@@ -207,7 +207,7 @@ Proof.
   induction t;
     repeat step || apply fv_subst2_lemma;
     eauto 2 with sets;
-    try solve [ unfold subset; repeat step || t_listutils; eauto with fv blookup ].
+    try solve [ unfold subset; repeat step || list_utils; eauto with fv blookup ].
 Qed.
 
 Hint Resolve fv_subst2: fv.
@@ -223,7 +223,7 @@ Proof.
     | H1: forall a b c d, _,
       H2: ?z ∈ pfv ?t ?tag |- _ =>
        solve [ eapply H1 in H2; steps; eauto ]
-    | _ => step || t_listutils || unfold subset in *
+    | _ => step || list_utils || unfold subset in *
     end.
 Qed.
 
@@ -261,7 +261,7 @@ Proof.
     repeat match goal with
            | H: forall x, _ -> _ -> _, H1: _, H2: _ |- _ => pose proof (H _ H1 H2); clear H
            | H: _ = nil |- _ => rewrite H
-           | _ => step || t_listutils
+           | _ => step || list_utils
            end; eauto with fv.
 Qed.
 
@@ -273,7 +273,7 @@ Lemma closed_mapping_fv:
     x ∈ pfv_range l tag ->
     False.
 Proof.
-  induction l; repeat step || t_listutils; eauto.
+  induction l; repeat step || list_utils; eauto.
 Qed.
 
 Lemma closed_mapping_fv2:
@@ -283,7 +283,7 @@ Lemma closed_mapping_fv2:
     y ∈ pfv t tag ->
     False.
 Proof.
-  induction l; repeat step || t_listutils; eauto.
+  induction l; repeat step || list_utils; eauto.
 Qed.
 
 Lemma fv_nils2:
@@ -294,7 +294,7 @@ Lemma fv_nils2:
 Proof.
   induction t;
     repeat match goal with
-           | _ => step || t_listutils
+           | _ => step || list_utils
            end;
       eauto 2 with fv;
       eauto 2 using closed_mapping_fv with exfalso;

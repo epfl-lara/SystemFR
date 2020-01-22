@@ -37,7 +37,7 @@ Lemma lambda_normalizing:
     pfv t type_var = nil ->
     scbv_normalizing (notype_lambda t).
 Proof.
-  repeat step || t_listutils || apply values_normalizing || unfold closed_value, closed_term;
+  repeat step || list_utils || apply values_normalizing || unfold closed_value, closed_term;
     eauto with values.
 Qed.
 

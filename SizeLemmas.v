@@ -1,4 +1,5 @@
 Require Export SystemFR.SwapTypeHoles.
+Require Export SystemFR.SwapTermHoles.
 
 Require Import Omega.
 
@@ -63,10 +64,18 @@ Qed.
 
 Hint Rewrite type_nodes_topening_var: bsize.
 
-Lemma type_nodes_swap:
+Lemma type_nodes_swap_type_holes:
   forall t i j, type_nodes (swap_type_holes t i j) = type_nodes t.
 Proof.
   induction t; steps.
 Qed.
 
-Hint Rewrite type_nodes_swap: bsize.
+Hint Rewrite type_nodes_swap_type_holes: bsize.
+
+Lemma type_nodes_swap_term_holes:
+  forall t i j, type_nodes (swap_term_holes t i j) = type_nodes t.
+Proof.
+  induction t; steps.
+Qed.
+
+Hint Rewrite type_nodes_swap_term_holes: bsize.

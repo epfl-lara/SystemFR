@@ -91,7 +91,7 @@ Proof.
   induction m1; steps.
 Qed.
 
-Hint Rewrite support_append: blistutils.
+Hint Rewrite support_append: list_utils.
 
 Fixpoint map_values {X Y Z} (f: Y -> Z) (l: map X Y) :=
   match l with

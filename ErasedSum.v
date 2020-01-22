@@ -3,8 +3,8 @@ Require Import Equations.Equations.
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.ErasedLetTermRules.
-Require Export SystemFR.ReducibilityStep.
+Require Export SystemFR.ErasedLet2.
+Require Export SystemFR.ReducibilityOpenEquivalent.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -22,8 +22,8 @@ Qed.
 
 Lemma open_reducible_left:
   forall tvars gamma t A B,
-    open_reducible tvars gamma t A ->
-    open_reducible tvars gamma (tleft t) (T_sum A B).
+    [ tvars; gamma ⊨ t : A ] ->
+    [ tvars; gamma ⊨ tleft t : T_sum A B ].
 Proof.
   unfold open_reducible; steps; eauto using reducible_left.
 Qed.
@@ -41,19 +41,20 @@ Qed.
 
 Lemma open_reducible_right:
   forall tvars gamma t A B,
-    open_reducible tvars gamma t B ->
-    open_reducible tvars gamma (tright t) (T_sum A B).
+    [ tvars; gamma ⊨ t : B ] ->
+    [ tvars; gamma ⊨ tright t : T_sum A B ].
 Proof.
   unfold open_reducible; steps; eauto using reducible_right.
 Qed.
 
 Lemma open_reducible_sum_match:
-  forall tvars (gamma : context) t tl tr T1 T2 T y p,
+  forall tvars gamma t tl tr T1 T2 T y p,
     subset (fv t) (support gamma) ->
     subset (fv tl) (support gamma) ->
     subset (fv tr) (support gamma) ->
     subset (fv T1) (support gamma) ->
     subset (fv T2) (support gamma) ->
+    subset (fv T) (support gamma) ->
     wf T 1 ->
     wf T1 0 ->
     wf T2 0 ->
@@ -75,38 +76,34 @@ Lemma open_reducible_sum_match:
     is_erased_term tl ->
     is_erased_term tr ->
     is_erased_type T ->
-    open_reducible tvars gamma t (T_sum T1 T2) ->
-    open_reducible tvars
-                   ((p, T_equiv t (tleft (fvar y term_var))) :: (y, T1) :: gamma)
-                   (open 0 tl (fvar y term_var))
-                   (open 0 T (tleft (fvar y term_var))) ->
-    open_reducible tvars
-                   ((p, T_equiv t (tright (fvar y term_var))) :: (y, T2) :: gamma)
-                   (open 0 tr (fvar y term_var))
-                   (open 0 T (tright (fvar y term_var))) ->
-    open_reducible tvars gamma (sum_match t tl tr) (open 0 T t).
+    [ tvars; gamma ⊨ t : T_sum T1 T2 ] ->
+    [ tvars; (p, T_equiv t (tleft (fvar y term_var))) :: (y, T1) :: gamma ⊨
+        open 0 tl (fvar y term_var) : open 0 T (tleft (fvar y term_var)) ] ->
+    [ tvars; (p, T_equiv t (tright (fvar y term_var))) :: (y, T2) :: gamma ⊨
+        open 0 tr (fvar y term_var) : open 0 T (tright (fvar y term_var)) ] ->
+    [ tvars; gamma ⊨ sum_match t tl tr : open 0 T t ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold reducible || top_level_unfold reduces_to || simp_red || t_substitutions.
 
   - eapply reducibility_rtl; eauto; t_closer.
 
-    unshelve epose proof (H26 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
+    unshelve epose proof (H27 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star;
-      try solve [ apply equivalent_star; steps; eauto with wf; eauto with erased ].
+      try solve [ equivalent_star ].
 
     eapply star_backstep_reducible; eauto with cbvlemmas;
-      repeat step || t_listutils; t_closer.
+      repeat step || list_utils; t_closer.
     eapply backstep_reducible; eauto with smallstep;
-      repeat step || t_listutils; t_closer.
+      repeat step || list_utils; t_closer.
 
   - eapply reducibility_rtl; eauto; t_closer.
 
-    unshelve epose proof (H27 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
+    unshelve epose proof (H28 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star;
-      try solve [ apply equivalent_star; steps; eauto with wf; eauto with erased ].
+      try solve [ equivalent_star ].
 
     eapply star_backstep_reducible; eauto with cbvlemmas;
-      repeat step || t_listutils; t_closer.
+      repeat step || list_utils; t_closer.
     eapply backstep_reducible; eauto with smallstep;
-      repeat step || t_listutils; t_closer.
+      repeat step || list_utils; t_closer.
 Qed.

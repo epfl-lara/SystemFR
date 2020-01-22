@@ -30,10 +30,12 @@ Lemma annotated_reducible_app:
     is_annotated_type V ->
     is_annotated_term t2 ->
     wf V 1 ->
+    subset (fv V) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : T_arrow U V ]] ->
     [[ tvars; gamma ⊨ t2 : U ]] ->
     [[ tvars; gamma ⊨ app t1 t2 : open 0 V t2 ]].
 Proof.
   unfold annotated_reducible; intros; erase_open.
-  apply open_reducible_app with (erase_type U); auto with erased; eauto with wf.
+  apply open_reducible_app with (erase_type U);
+    side_conditions.
 Qed.

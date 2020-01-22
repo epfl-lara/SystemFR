@@ -1,5 +1,5 @@
 Require Export SystemFR.ErasedLet.
-Require Export SystemFR.ReducibilityStep.
+Require Export SystemFR.ReducibilityOpenEquivalent.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -15,7 +15,7 @@ Lemma reducible_forall:
     reducible theta t (T_forall U V).
 Proof.
   unfold reducible, reduces_to;
-  repeat step || t_listutils || unfold reducible, reduces_to || simp_red ||
+  repeat step || list_utils || unfold reducible, reduces_to || simp_red ||
          rewrite reducibility_rewrite;
     eauto 2 with cbvlemmas;
     eauto with fv wf;
@@ -31,13 +31,13 @@ Lemma open_reducible_forall:
     ~(x ∈ fv U) ->
     ~(x ∈ fv V) ->
     ~(x ∈ fv_context gamma) ->
-    open_reducible tvars gamma t A ->
     wf U 0 ->
     subset (fv U) (support gamma) ->
     subset (fv t) (support gamma) ->
     is_erased_type V ->
-    open_reducible tvars ((x, U) :: gamma) t (open 0 V (term_fvar x)) ->
-    open_reducible tvars gamma t (T_forall U V).
+    [ tvars; gamma ⊨ t : A ] ->
+    [ tvars; (x, U) :: gamma ⊨ t : open 0 V (term_fvar x) ] ->
+    [ tvars; gamma ⊨ t : T_forall U V ].
 Proof.
   unfold open_reducible in *; repeat step || t_instantiate_sat3.
 
@@ -66,21 +66,21 @@ Lemma open_reducible_exists_elim:
     is_erased_term t ->
     subset (fv U) (support gamma) ->
     subset (fv V) (support gamma) ->
+    subset (fv T) (support gamma) ->
     subset (fv t) (support gamma) ->
-    open_reducible tvars gamma p (T_exists U V) ->
-    open_reducible tvars
-                   ((v, open 0 V (term_fvar u)) :: (u, U) :: gamma)
-                   (open 0 t (term_fvar v)) T ->
-    open_reducible tvars gamma (app (notype_lambda t) p) T.
+    [ tvars; gamma ⊨ p : T_exists U V ] ->
+    [ tvars; (v, open 0 V (term_fvar u)) :: (u, U) :: gamma ⊨
+        open 0 t (term_fvar v) : T ] ->
+    [ tvars; gamma ⊨ app (notype_lambda t) p : T ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
   pose proof H5 as Copy.
   unfold reducible, reduces_to in H5.
-  repeat step || t_instantiate_sat3 || t_listutils || simp_red || t_deterministic_star ||
+  repeat step || t_instantiate_sat3 || list_utils || simp_red || t_deterministic_star ||
          apply reducible_let2 with
              (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var)); t_closer.
 
-  unshelve epose proof (H20 theta ((v, v1) :: (u,a) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H21 theta ((v, v1) :: (u,a) :: lterms) _ _ _); tac1.
 Qed.
 
 Lemma open_reducible_forall_inst:
@@ -90,11 +90,12 @@ Lemma open_reducible_forall_inst:
     wf t1 0 ->
     wf t2 0 ->
     wf V 1 ->
-    subset (pfv t1 term_var) (support gamma) ->
-    subset (pfv t2 term_var) (support gamma) ->
-    open_reducible tvars gamma t1 (T_forall U V) ->
-    open_reducible tvars gamma t2 U ->
-    open_reducible tvars gamma t1 (open 0 V t2).
+    subset (fv t1) (support gamma) ->
+    subset (fv t2) (support gamma) ->
+    subset (fv V) (support gamma) ->
+    [ tvars; gamma ⊨ t1 : T_forall U V ] ->
+    [ tvars; gamma ⊨ t2 : U ] ->
+    [ tvars; gamma ⊨ t1 : open 0 V t2 ].
 Proof.
   repeat step || unfold open_reducible, reducible, reduces_to in * || simp_red ||
          t_instantiate_sat3 || find_smallstep_value;
@@ -103,6 +104,5 @@ Proof.
 
   rewrite substitute_open; eauto with wf.
   eapply reducibility_values_rtl; try eassumption; steps;
-    eauto with wf;
-    eauto with erased.
+    eauto with wf fv erased.
 Qed.

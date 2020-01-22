@@ -1,3 +1,7 @@
+Require Import Psatz.
+Require Import Omega.
+
+
 Require Export SystemFR.Syntax.
 Require Export SystemFR.SmallStep.
 Require Export SystemFR.Tactics.
@@ -13,8 +17,6 @@ Require Import Coq.Program.Program.
 (* Lexicographic order used for the termination argument of reducibility *)
 (* Follows the lexicographic order definition given in Equations *)
 (* The measure used is: (size, recursive index) *)
-
-Require Import Omega.
 
 Definition index (T: tree): tree :=
   match T with
@@ -177,4 +179,35 @@ Proof.
     eauto using right_lex, left_lex with omega.
   - apply right_lex, right_lex; steps.
   - apply right_lex, left_lex; omega.
+Qed.
+
+Lemma type_nodes_get_measure:
+  forall T1 T2,
+    type_nodes T1 < type_nodes T2 ->
+    get_measure T1 << get_measure T2.
+Proof.
+  unfold get_measure; intros; apply left_lex; auto.
+Qed.
+
+Hint Extern 1 => solve [
+  apply type_nodes_get_measure; repeat step || autorewrite with bsize; eauto with erased lia
+]: measure.
+
+Hint Extern 1 => solve [
+  apply right_lex; steps; eauto using lt_index_step
+]: measure.
+
+Definition prop_at (P: tree -> Prop) m T := get_measure T = m -> P T.
+
+Definition prop_until (P: tree -> Prop) (m: measure_domain): Prop :=
+  forall m', m' << m -> forall T, prop_at P m' T.
+
+Lemma prop_until_at:
+  forall P m T,
+    prop_until P m ->
+    get_measure T << m ->
+    P T.
+Proof.
+  unfold prop_until, prop_at;
+    steps; eauto.
 Qed.

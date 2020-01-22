@@ -53,7 +53,7 @@ Proof.
   induction 1; steps; eauto using is_nat_value_build_nat with step_tactic wf.
 Qed.
 
-Hint Resolve wf_smallstep: wf.
+Hint Immediate wf_smallstep: wf.
 
 Lemma wf_star_smallstep:
   forall t1 t2,
@@ -64,4 +64,4 @@ Proof.
   induction 1; steps; eauto using wf_smallstep.
 Qed.
 
-Hint Resolve wf_star_smallstep: wf.
+Hint Immediate wf_star_smallstep: wf.

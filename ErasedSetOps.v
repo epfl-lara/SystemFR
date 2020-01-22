@@ -46,6 +46,7 @@ Lemma open_reducible_union_elim:
     subset (fv t') (support gamma) ->
     subset (fv T1) (support gamma) ->
     subset (fv T2) (support gamma) ->
+    subset (fv T) (support gamma) ->
     wf t' 1 ->
     wf T1 0 ->
     wf T2 0 ->
@@ -64,12 +65,12 @@ Lemma open_reducible_union_elim:
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold reducible || top_level_unfold reduces_to || simp_red.
 
-  - unshelve epose proof (H14 theta ((z, v) :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star ||
-             apply reducible_let2 with (psubstitute (T_union T1 T2) lterms term_var);
-      eauto with erased.
   - unshelve epose proof (H15 theta ((z, v) :: lterms) _ _ _);
       repeat tac1 || t_values_info2 || t_deterministic_star ||
              apply reducible_let2 with (psubstitute (T_union T1 T2) lterms term_var);
-      eauto with erased.
+      eauto with erased; eauto with fv.
+  - unshelve epose proof (H16 theta ((z, v) :: lterms) _ _ _);
+      repeat tac1 || t_values_info2 || t_deterministic_star ||
+             apply reducible_let2 with (psubstitute (T_union T1 T2) lterms term_var);
+      eauto with erased; eauto with fv.
 Qed.

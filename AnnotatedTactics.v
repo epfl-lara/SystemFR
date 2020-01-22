@@ -29,18 +29,3 @@ Ltac side_conditions :=
   eauto 2 with btwf;
   eauto 2 with erased;
   try solve [ eapply_anywhere fv_context_support; eauto 2 ].
-
-(*
-Ltac side_conditions :=
-  repeat
-    step || t_fv_erase || t_subset_erase || apply erase_term_wf || apply erase_type_wf ||
-    (progress rewrite erase_context_append in * ) ||
-    (progress rewrite erased_context_support in * ) || t_erase_open ||
-    unshelve eauto with wf wft ||
-    unshelve eauto with btwf ||
-    unshelve eauto 3 with bfv ||
-    unshelve eauto 2 with bfv2 ||
-    unshelve eauto 2 with erased;
-    try solve [ steps; eauto 2 using subset_transitive with sets ];
-    try solve [ repeat t_wf_info; steps ].
-*)

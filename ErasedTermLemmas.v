@@ -89,7 +89,7 @@ Lemma is_erased_term_tfv:
     is_erased_term t ->
     pfv t type_var = nil.
 Proof.
-  induction t; repeat step || t_listutils.
+  induction t; repeat step || list_utils.
 Qed.
 
 Hint Resolve is_erased_term_tfv: fv.
@@ -158,20 +158,6 @@ Qed.
 
 Hint Immediate erase_scbv_step: erased.
 
-(*
-Lemma erase_cbv_step:
-  forall t1 t2,
-    cbv_step t1 t2 ->
-    is_erased_term t1 ->
-    is_erased_term t2.
-Proof.
-  induction 1; steps; eauto 3 using is_erased_open with step_tactic;
-    eauto with erased.
-Qed.
-
-Hint Immediate erase_cbv_step: erased.
-*)
-
 Lemma erase_star_scbv_step:
   forall t1 t2,
     star scbv_step t1 t2 ->
@@ -182,19 +168,6 @@ Proof.
 Qed.
 
 Hint Immediate erase_star_scbv_step: erased.
-
-(*
-Lemma erase_star_cbv_step:
-  forall t1 t2,
-    star cbv_step t1 t2 ->
-    is_erased_term t1 ->
-    is_erased_term t2.
-Proof.
-  induction 1; steps; eauto using erase_cbv_step.
-Qed.
-
-Hint Immediate erase_star_cbv_step: erased.
-*)
 
 Lemma is_erased_subst:
   forall t l,

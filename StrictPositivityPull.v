@@ -6,59 +6,12 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.StarInversions.
-Require Export SystemFR.RelationClosures.
-Require Export SystemFR.SmallStep.
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Trees.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.Equivalence.
-Require Export SystemFR.OpenTOpen.
-
-Require Export SystemFR.SizeLemmas.
-
-Require Export SystemFR.WFLemmas.
-Require Export SystemFR.TWFLemmas.
-Require Export SystemFR.ErasedTermLemmas.
-
-Require Export SystemFR.ReducibilityCandidate.
-Require Export SystemFR.ReducibilityDefinition.
-Require Export SystemFR.ReducibilityLemmas.
-Require Export SystemFR.RedTactics.
-Require Export SystemFR.ReducibilityMeasure.
-Require Export SystemFR.ReducibilitySubst.
-Require Export SystemFR.ReducibilityRenaming.
-Require Export SystemFR.ReducibilityUnused.
-Require Export SystemFR.RedTactics2.
-
-Require Export SystemFR.IdRelation.
-Require Export SystemFR.EqualWithRelation.
-
-Require Export SystemFR.EquivalentWithRelation.
-Require Export SystemFR.AssocList.
-
-Require Export SystemFR.Freshness.
-
-Require Export SystemFR.ListUtils.
-Require Export SystemFR.TOpenTClose.
-Require Export SystemFR.StrictPositivity.
-Require Export SystemFR.StrictPositivityLemmas.
 Require Export SystemFR.StrictPositivityLemma.
-
-
-Require Export SystemFR.FVLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
 Opaque reducible_values.
 Opaque strictly_positive.
-
-Lemma cons_app:
-  forall X (x: X) (xs: list X),
-    x :: xs = (x :: nil) ++ xs.
-Proof.
-  steps.
-Qed.
 
 Lemma strictly_positive_pull_forall:
   forall T theta A B v X,
@@ -72,6 +25,9 @@ Lemma strictly_positive_pull_forall:
     is_erased_type A ->
     is_erased_type B ->
     is_erased_type T ->
+    pfv A term_var = nil ->
+    pfv B term_var = nil ->
+    pfv T term_var = nil ->
     valid_interpretation theta ->
     strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
     reducible_values theta v (topen 0 T (T_forall A B)) ->
@@ -88,10 +44,11 @@ Proof.
        pfv (open 0 B a) type_var ::
        nil
     ));
-    repeat step || t_listutils || apply twf_open || apply wf_open;
+    repeat step || list_utils || apply twf_open || apply wf_open;
     try finisher;
       eauto with btwf;
       eauto with wf;
+      eauto with fv;
       eauto with erased.
 
   rewrite cons_app.
@@ -101,11 +58,13 @@ Proof.
       ((X, fun a2 v => reducible_values theta v (T_forall A B)) :: nil) A
   end;
     repeat step || apply wf_topen || apply twf_topen || unfold non_empty ||
-           apply is_erased_type_topen || t_listutils || simp_red ||
+           apply is_erased_type_topen || list_utils || simp_red ||
            apply reducibility_subst_head2 || t_instantiate_reducible ||
+           apply reducibility_is_candidate ||
            (eapply strictly_positive_rename_one; eauto);
     eauto;
     try finisher;
-    eauto using reducibility_is_candidate;
-    eauto with erased.
+    eauto with erased wf;
+    eauto 2 with fv step_tactic;
+    eauto with fv.
 Qed.

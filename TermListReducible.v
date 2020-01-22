@@ -30,8 +30,8 @@ Lemma satisfies_weaken:
     satisfies (reducible_values theta) (gamma1 ++ (x, T') :: gamma2) l.
 Proof.
   induction gamma1;
-    repeat step || t_listutils || apply SatCons || step_inversion NoDup ||
+    repeat step || list_utils || apply SatCons || step_inversion NoDup ||
            step_inversion satisfies.
 
-  apply IHgamma1 with T; repeat step || t_listutils; eauto.
+  apply IHgamma1 with T; repeat step || list_utils; eauto.
 Qed.

@@ -39,10 +39,10 @@ Ltac t_instantiate_reducible2 :=
   | H0: no_type_fvar ?T (support ?theta'),
     H1: reducible_values _ ?v ?T,
     H2: is_erased_term ?v,
-    H3: forall a, _ -> reducible_values (push_one _ ?ptheta ++ ?theta) a ?T -> _,
+    H3: forall a, _ -> _ -> _ -> reducible_values (push_one _ ?ptheta ++ ?theta) a ?T -> _,
     H4: forall_implies _ ?ptheta ?theta'
     |- _ => poseNew (Mark (v, H3) "t_instantiate_reducible2");
-          unshelve epose proof (H3 v H2 _)
+          unshelve epose proof (H3 v H2 _ _ _)
   end.
 
 Ltac t_rewrite_support :=
@@ -51,7 +51,7 @@ Ltac t_rewrite_support :=
   end.
 
 Ltac t_rewriter :=
-  repeat step || t_listutils || unfold no_type_fvar in * || t_forall_implies_support ||
+  repeat step || list_utils || unfold no_type_fvar in * || t_forall_implies_support ||
          t_fv_open ||
          (rewrite is_erased_term_tfv in * by (steps; eauto with erased)) ||
          rewrite support_push_all in * || rewrite support_push_one in *;
@@ -88,27 +88,23 @@ Definition sp_push_forall_prop T: Prop :=
     strictly_positive T (support theta') ->
     is_erased_type A ->
     is_erased_type T ->
+    pfv A term_var = nil ->
+    pfv T term_var = nil ->
     (forall a,
       reducible_values theta a A ->
       reducible_values (push_one a pre_theta ++ theta) v T) ->
     forall_implies (fun a => reducible_values theta a A) pre_theta theta' ->
     reducible_values (theta' ++ theta) v T.
 
-Definition sp_push_forall_prop_aux m T: Prop := get_measure T = m -> sp_push_forall_prop T.
-
-Definition sp_push_forall_until m: Prop := forall m', m' << m -> forall T', sp_push_forall_prop_aux m' T'.
-
-Hint Unfold sp_push_forall_prop: u_push.
-Hint Unfold sp_push_forall_until: u_push.
-Hint Unfold sp_push_forall_prop_aux: u_push.
-
-Lemma sp_push_forall_fvar: forall m n f, sp_push_forall_prop_aux m (fvar n f).
+Lemma sp_push_forall_fvar: forall m n f, prop_at sp_push_forall_prop m (fvar n f).
 Proof.
-  autounfold with u_push;
+  unfold prop_at, sp_push_forall_prop;
   unfold push_all, push_one;
-  intros; t_instantiate_non_empty;
+  intros;
+  t_instantiate_non_empty;
     repeat match goal with
-           | _ => step || simp_red || t_instantiate_reducible || rewrite support_map_values in * || t_listutils
+           | _ => step || simp_red || t_instantiate_reducible ||
+                 rewrite support_map_values in * || list_utils
            | _ => t_lookup_same || t_lookupor || t_lookup_rewrite || t_lookupMap2 || t_lookup
            | _ => t_forall_implies_apply || t_forall_implies_support
            end.
@@ -123,7 +119,7 @@ Ltac t_spos_proof HH :=
     | H: star scbv_step _ zero |- _ \/ _ => left
     | |- exists x, tfold ?v = tfold x /\ _ => unshelve exists v
     | _ =>
-      step ||
+      step || list_utils ||
       simp_red ||
       simp_spos ||
       t_topen_none ||
@@ -146,7 +142,7 @@ Ltac t_spos_proof HH :=
     end;
     try omega;
     eauto using reducible_values_closed;
-    eauto with erased wf btwf;
+    eauto with erased wf btwf fv;
     try solve [ apply twf_open; eauto with btwf ];
     eauto with b_red_is_val;
     eauto using no_type_fvar_strictly_positive;
@@ -154,9 +150,11 @@ Ltac t_spos_proof HH :=
     eauto with btwf2.
 
 Lemma sp_push_forall_arrow:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_arrow T1 T2).
+  forall m T1 T2,
+    prop_until sp_push_forall_prop m ->
+    prop_at sp_push_forall_prop m (T_arrow T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   t_spos_proof H.
 Qed.
@@ -164,9 +162,9 @@ Qed.
 Hint Immediate sp_push_forall_arrow: b_push.
 
 Lemma sp_push_forall_prod:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_prod T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_prod T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   t_spos_proof H.
 Qed.
@@ -174,9 +172,9 @@ Qed.
 Hint Immediate sp_push_forall_prod: b_push.
 
 Lemma sp_push_forall_sum:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_sum T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_sum T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   - find_exists; t_spos_proof H.
   - find_exists; t_spos_proof H.
@@ -185,9 +183,9 @@ Qed.
 Hint Immediate sp_push_forall_sum: b_push.
 
 Lemma sp_push_forall_refine:
-  forall m T b, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_refine T b).
+  forall m T b, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_refine T b).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   t_spos_proof H.
 Qed.
@@ -195,9 +193,9 @@ Qed.
 Hint Immediate sp_push_forall_refine: b_push.
 
 Lemma sp_push_forall_type_refine:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_type_refine T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_type_refine T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   - t_spos_proof H.
   - t_spos_proof H.
@@ -206,9 +204,9 @@ Qed.
 Hint Immediate sp_push_forall_type_refine: b_push.
 
 Lemma sp_push_forall_intersection:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_intersection T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_intersection T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   - t_spos_proof H.
   - t_spos_proof H.
@@ -217,9 +215,9 @@ Qed.
 Hint Immediate sp_push_forall_intersection: b_push.
 
 Lemma sp_push_forall_union:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_union T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_union T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   - t_spos_proof H.
   - t_spos_proof H.
@@ -228,9 +226,9 @@ Qed.
 Hint Immediate sp_push_forall_union: b_push.
 
 Lemma sp_push_forall_forall:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_forall T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_forall T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   t_spos_proof H.
 Qed.
@@ -238,9 +236,9 @@ Qed.
 Hint Immediate sp_push_forall_forall: b_push.
 
 Lemma sp_push_forall_exists:
-  forall m T1 T2, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_exists T1 T2).
+  forall m T1 T2, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_exists T1 T2).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   t_spos_proof H.
 Qed.
@@ -248,9 +246,9 @@ Qed.
 Hint Immediate sp_push_forall_exists: b_push.
 
 Lemma sp_push_forall_abs:
-  forall m T, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_abs T).
+  forall m T, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_abs T).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     repeat step || simp_red || simp_spos.
   t_spos_proof H.
 
@@ -261,7 +259,7 @@ Proof.
          pfv A type_var ::
          pfv T type_var ::
          nil));
-    repeat step || finisher || t_instantiate_rc || find_smallstep_value || t_listutils;
+    repeat step || finisher || t_instantiate_rc || find_smallstep_value || list_utils;
       try solve [ repeat unfold closed_term, closed_value in * || step ].
 
   lazymatch goal with
@@ -274,7 +272,7 @@ Proof.
            apply equal_with_relation_refl2 ||
            rewrite idrel_lookup || t_fv_open ||
            rewrite idrel_lookup_swap || t_fv_open ||
-           t_listutils;
+           list_utils;
       eauto with b_valid_interp;
       eauto using reducibility_is_candidate;
       try solve [ unfold equivalent_rc; steps; eauto ];
@@ -295,13 +293,14 @@ Proof.
       apply wf_topen;
     try finisher;
     eauto with wf btwf omega erased;
+    eauto 2 with fv step_tactic;
     eauto 2 using red_is_val with step_tactic;
     eauto with b_red_is_val;
     try solve [ apply_any; assumption ].
 
   + apply reducible_unused2; steps; try finisher; eauto with apply_any.
-  + apply reducible_unused3 in H16; repeat step; try finisher; eauto with apply_any.
-  + apply reducible_unused3 in H16;
+  + apply reducible_unused3 in H31; repeat step; try finisher; eauto with apply_any.
+  + apply reducible_unused3 in H31;
       repeat step || t_instantiate_reducible || t_deterministic_star ||
              t_instantiate_rc || simp_red || unfold reduces_to in *;
       try finisher; eauto with apply_any;
@@ -310,15 +309,15 @@ Proof.
       eauto with b_valid_interp;
       try finisher.
   + apply reducible_unused2; steps; try finisher; eauto with apply_any.
-  + apply reducible_unused3 in H16; steps; try finisher; eauto with apply_any.
+  + apply reducible_unused3 in H31; steps; try finisher; eauto with apply_any.
 Qed.
 
 Hint Immediate sp_push_forall_abs: b_push.
 
 Lemma sp_push_forall_rec:
-  forall m n T0 Ts, sp_push_forall_until m -> sp_push_forall_prop_aux m (T_rec n T0 Ts).
+  forall m n T0 Ts, prop_until sp_push_forall_prop m -> prop_at sp_push_forall_prop m (T_rec n T0 Ts).
 Proof.
-  repeat autounfold with u_push; intros; t_instantiate_non_empty;
+  unfold prop_at; intros; unfold sp_push_forall_prop; intros; t_instantiate_non_empty;
     t_spos_proof H.
 
   (** Recursive type at n+1: case where the variables do not appear in the recursive type **)
@@ -332,16 +331,15 @@ Proof.
                        pfv Ts type_var ::
                        pfv n'0 type_var ::
                        nil));
-      repeat step || simp_red || t_listutils ||
+      repeat step || simp_red || list_utils ||
              t_instantiate_reducible ||
              t_deterministic_star ||
              t_topen_none;
         eauto with omega;
         try finisher.
 
-      repeat
-        rewrite reducible_unused_middle in * by (
-          repeat step || t_listutils || t_forall_implies_support || t_rewrite_support ||
+        repeat rewrite reducible_unused_middle in * by (
+          repeat step || list_utils || t_forall_implies_support || t_rewrite_support ||
                  apply valid_interpretation_append ||
                  (eapply valid_interpretation_one; eauto) ||
                  apply no_type_fvar_in_topen ||
@@ -349,7 +347,8 @@ Proof.
                  rewrite support_push_all in * ||
                  apply reducibility_is_candidate;
           try solve [ apply_any; assumption ];
-          try finisher
+          try finisher;
+          eauto with wf fv erased
         ).
 
       eapply reducible_rename_one_rc; eauto;
@@ -371,7 +370,7 @@ Proof.
                        pfv Ts type_var ::
                        pfv n'0 type_var ::
                        nil));
-      repeat step || simp_red || t_listutils ||
+      repeat step || simp_red || list_utils ||
              t_instantiate_reducible ||
              t_deterministic_star ||
              t_topen_none;
@@ -386,35 +385,39 @@ Proof.
           apply H with (get_measure T) ((X, fun a t => reducible_values (push_one a pre_theta ++ theta) t R) :: ptheta) A
       end;
         repeat
-          step || apply left_lex || autorewrite with bsize in * || t_deterministic_star ||
+          step || list_utils || apply left_lex || autorewrite with bsize in * || t_deterministic_star ||
           apply is_erased_type_topen || t_instantiate_reducible ||
           apply wf_topen || apply twf_topen || apply reducibility_is_candidate ||
           (poseNew (Mark 0 "strictly_positive_topen2"); apply strictly_positive_topen2);
         try omega;
         eauto with b_valid_interp;
-        try finisher.
+        try finisher;
+        eauto with erased wf fv;
+        eauto 2 with fv step_tactic.
 
       + eapply strictly_positive_rename_one; eauto;
           repeat step;
           try finisher.
-      + simp reducible_values in H38;
+      + simp reducible_values in H42;
           repeat step || t_deterministic_star.
         eapply reducible_rename_one; eauto;
           repeat step; eauto using reducibility_is_candidate with b_valid_interp;
             try finisher.
       + (* We apply one last time the induction hypothesis for rec(n) *)
         apply_induction H;
-          repeat step || apply right_lex || simp_spos; eauto using lt_index_step;
-            eauto with wf btwf erased.
+          repeat step || apply right_lex || simp_spos || list_utils; eauto using lt_index_step;
+            eauto with wf btwf erased fv.
 Qed.
 
 Hint Immediate sp_push_forall_rec: b_push.
 
-Lemma strictly_positive_push_forall_aux: forall (m: measure_domain) T, sp_push_forall_prop_aux m T.
+Lemma strictly_positive_push_forall_aux: forall (m: measure_domain) T, prop_at sp_push_forall_prop m T.
 Proof.
   induction m using measure_induction; destruct T;
     eauto 2 with b_push;
-    try solve [ autounfold with u_push; intros; t_instantiate_non_empty; repeat step || simp_red ].
+    try solve [
+      unfold prop_at, sp_push_forall_prop; intros; t_instantiate_non_empty; repeat step || simp_red
+    ].
 Qed.
 
 Lemma strictly_positive_push_forall: forall T, sp_push_forall_prop T.

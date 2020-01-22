@@ -24,6 +24,7 @@ Lemma annotated_reducible_union_elim:
     subset (fv t') (support gamma) ->
     subset (fv T1) (support gamma) ->
     subset (fv T2) (support gamma) ->
+    subset (fv T) (support gamma) ->
     wf t' 1 ->
     wf T1 0 ->
     wf T2 0 ->

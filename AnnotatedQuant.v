@@ -11,6 +11,7 @@ Lemma annotated_reducible_forall_inst:
     wf V 1 ->
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
+    subset (fv V) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : T_forall U V ]] ->
     [[ tvars; gamma ⊨ t2 : U ]] ->
     [[ tvars; gamma ⊨ forall_inst t1 t2 : open 0 V t2 ]].
@@ -63,6 +64,7 @@ Lemma annotated_reducible_exists_elim:
     wf t 1 ->
     subset (fv U) (support gamma) ->
     subset (fv V) (support gamma) ->
+    subset (fv T) (support gamma) ->
     subset (fv t) (support gamma) ->
     is_annotated_term t ->
     is_annotated_type V ->

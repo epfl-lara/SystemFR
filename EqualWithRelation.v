@@ -341,7 +341,7 @@ Lemma equal_with_relation_refl:
     pfv t tag = nil ->
     equal_with_relation tag rel t t.
 Proof.
-  induction t; repeat step || t_listutils || destruct_tag;
+  induction t; repeat step || list_utils || destruct_tag;
     try solve [ unfold singleton in *; unfold add in *; steps ];
     eauto 6 with equal_with_relation.
 Qed.
@@ -352,7 +352,7 @@ Lemma equal_with_relation_refl2:
     (forall x, x ∈ pfv t tag -> lookup Nat.eq_dec (swap rel) x = Some x) ->
     equal_with_relation tag rel t t.
 Proof.
-  induction t; repeat step || t_listutils || constructor || apply_any || destruct_tag.
+  induction t; repeat step || list_utils || constructor || apply_any || destruct_tag.
 Qed.
 
 Lemma equal_with_relation_topen:
@@ -365,7 +365,7 @@ Lemma equal_with_relation_topen:
                           (topen k t1 (fvar x tag))
                           (topen k t2 (fvar y tag)).
 Proof.
-  induction 1; repeat step || constructor || t_listutils || apply_any.
+  induction 1; repeat step || constructor || list_utils || apply_any.
 Qed.
 
 Lemma equal_with_relation_open:
@@ -378,21 +378,8 @@ Lemma equal_with_relation_open:
                           (open k t1 (fvar x tag))
                           (open k t2 (fvar y tag)).
 Proof.
-  induction 1; repeat step || constructor || t_listutils || apply_any.
+  induction 1; repeat step || constructor || list_utils || apply_any.
 Qed.
-
-(*
-Lemma equal_with_relation_open:
-  forall rel t1 t2,
-    equal_with_relation tag rel t1 t2 ->
-    forall a k,
-      pfv a type_var = nil ->
-      equal_with_relation tag rel (open k t1 a) (open k t2 a).
-Proof.
-  induction 1; repeat step || constructor;
-    eauto using equal_with_relation_refl.
-Qed.
-*)
 
 Lemma equal_with_relation_open2:
   forall tag rel t1 t2,
@@ -426,9 +413,9 @@ Proof.
            | H1: equal_with_relation ?tag ?rel ?T ?T',
              H2: ?X ∈ pfv ?T ?tag,
              H3: forall _ _ _, _ -> _ -> _ |- _ => pose proof (H3 _ _ _ H1 H2); clear H3
-           | _ => step || t_listutils || destruct_tag
+           | _ => step || list_utils || destruct_tag
            end;
-    try solve [ eexists; repeat step || t_listutils; eauto ].
+    try solve [ eexists; repeat step || list_utils; eauto ].
 Qed.
 
 Ltac t_equal_with_relation_pfv :=
@@ -468,7 +455,7 @@ Lemma equal_with_relation_pfv_nil:
     pfv T tag = nil ->
     pfv T' tag = nil.
 Proof.
-  induction 1; repeat step || t_listutils || unfold singleton, add in *.
+  induction 1; repeat step || list_utils || unfold singleton, add in *.
 Qed.
 
 Lemma equal_with_relation_pfv_nil2:
@@ -477,7 +464,7 @@ Lemma equal_with_relation_pfv_nil2:
     pfv T' tag = nil ->
     pfv T tag = nil.
 Proof.
-  induction 1; repeat step || t_listutils || unfold singleton, add in *.
+  induction 1; repeat step || list_utils || unfold singleton, add in *.
 Qed.
 
 Ltac t_ewr_nil :=

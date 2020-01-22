@@ -100,19 +100,19 @@ Proof.
   steps.
   unfold reducible, reduces_to in H6; steps.
   eapply star_backstep_reducible with (tmatch v t0 ts);
-    repeat step || t_listutils || simp reducible_values in *; t_closer;
+    repeat step || list_utils || simp reducible_values in *; t_closer;
       eauto with cbvlemmas.
 
   t_invert_nat_value; steps.
 
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
-      repeat step || t_listutils || apply_any; eauto with fv;
+      repeat step || list_utils || apply_any; eauto with fv;
       try solve [ eapply equivalent_star; steps; t_closer ].
 
   - (* succ v *)
     apply backstep_reducible with (open 0 ts v0);
-      repeat step || t_listutils || apply reducible_nat_value ||
+      repeat step || list_utils || apply reducible_nat_value ||
       match goal with
       | H: forall n, _ -> _ -> reducible _ _ _ |-  _ => apply H
       end;
@@ -188,19 +188,19 @@ Proof.
 
   - (* zero *)
     eapply backstep_reducible; eauto with smallstep;
-      repeat step || t_listutils;
+      repeat step || list_utils;
       eauto with wf;
       eauto with erased;
       eauto with fv.
   - (* succ v *)
-    eapply backstep_reducible; repeat step || t_listutils;
+    eapply backstep_reducible; repeat step || list_utils;
       eauto 3 with smallstep values;
       eauto with fv;
       eauto 2 with wf;
       eauto with erased.
 
     apply_any;
-      repeat step || unfold scbv_normalizing in * || t_listutils;
+      repeat step || unfold scbv_normalizing in * || list_utils;
       eauto 2 with fv;
       eauto 4 with wf;
       eauto with values smallstep;
@@ -211,7 +211,7 @@ Proof.
                apply reducible_intersection || tac1 ||
                (rewrite open_none by t_rewrite); eauto with erased.
 
-    + apply equivalent_refl; repeat step || t_listutils;
+    + apply equivalent_refl; repeat step || list_utils;
         eauto with erased fv;
         try solve [ unshelve eauto with wf; auto ].
 Qed.
@@ -240,7 +240,7 @@ Proof.
   repeat step.
   unfold reducible, reduces_to in H6; steps.
   eapply star_backstep_reducible with (notype_rec _ t0 ts);
-    repeat step || t_listutils ||
+    repeat step || list_utils ||
       unshelve eauto with cbvlemmas ||
       t_closer.
 

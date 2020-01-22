@@ -145,7 +145,7 @@ Proof.
            | |- exists r, _ /\ equivalent_rc r ?R => exists R
            | H: _ |- _ => rewrite lookup_remove2 in H by steps
            | _ => rewrite lookup_remove2 by steps
-           | _ => step || t_lookup_rewrite || t_idrel || t_lookup || t_listutils ||
+           | _ => step || t_lookup_rewrite || t_idrel || t_lookup || list_utils ||
                  rewrite obvious_lookup in * by steps ||
                  t_lookupor || t_lookup_same
            end;
@@ -186,7 +186,7 @@ Proof.
            | |- exists r, _ /\ equivalent_rc r ?R => exists R
            | H: _ |- _ => rewrite lookup_remove2 in H by steps
            | _ => rewrite lookup_remove2 by steps
-           | _ => step || t_lookup_rewrite || t_idrel || t_lookup || t_listutils ||
+           | _ => step || t_lookup_rewrite || t_idrel || t_lookup || list_utils ||
                  rewrite obvious_lookup in * by steps ||
                  t_lookupor || t_lookup_same
            end;

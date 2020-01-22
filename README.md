@@ -17,7 +17,7 @@ After installing Coq, you can compile the proofs using:
 
 ```
 ./configure
-make -j4     # should take around 15 to 20 minutes
+make -j4     # should take around 25 minutes
 ```
 
 ### Overview of the proofs

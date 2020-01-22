@@ -227,6 +227,30 @@ Qed.
 
 Hint Resolve wf_shift_open: wf.
 
+Lemma pfv_shift:
+  forall t k i tag,
+    pfv t tag = nil ->
+    pfv (shift k t i) tag = nil.
+Proof.
+  induction t;
+    repeat step || list_utils.
+Qed.
+
+Hint Resolve pfv_shift: fv.
+
+Lemma pfv_shift_open:
+  forall t k rep tag,
+    pfv t tag = nil ->
+    pfv rep tag = nil ->
+    pfv (shift_open k t rep) tag = nil.
+Proof.
+  induction t;
+    repeat step || list_utils;
+    eauto using pfv_shift.
+Qed.
+
+Hint Resolve pfv_shift_open: fv.
+
 Lemma open_shift:
   forall C t k i,
     wf C (S k) ->

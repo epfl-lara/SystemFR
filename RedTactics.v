@@ -2,7 +2,7 @@ Require Import Coq.Strings.String.
 
 Require Export SystemFR.SubstitutionErase.
 Require Export SystemFR.TermListReducible.
-Require Export SystemFR.LiftEquivalenceLemmas.
+Require Export SystemFR.EquivalentStar.
 Require Export SystemFR.TermListLemmas.
 Require Export SystemFR.RewriteTactics.
 
@@ -11,7 +11,7 @@ Require Export SystemFR.ReducibilityLemmas.
 Opaque reducible_values.
 
 Ltac tac0_aux :=
-  repeat step || t_listutils || finisher || apply SatCons ||
+  repeat step || list_utils || finisher || apply SatCons ||
          apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
            t_substitutions ||
            t_closer;
@@ -53,6 +53,8 @@ Ltac find_smallstep_value2 :=
 Ltac find_exists :=
   match goal with
   | |- exists a b _, pp ?c ?d = pp a b /\ _ => exists c, d
+  | |- exists a b _, _ /\ pp ?c ?d = pp a b /\ _ => exists c, d
+  | |- exists a b _, _ /\ _ /\ pp ?c ?d = pp a b /\ _ => exists c, d
   | |- (exists x, tleft ?v = tleft x /\ _) \/ _  => left; exists v
   | |- _ \/ (exists x, tright ?v = tright x /\ _)  => right; exists v
   end.
@@ -136,7 +138,7 @@ Ltac t_reduces_to :=
 Ltac t_reduces_to2 :=
   match goal with
   | H1: reducible_values _ ?a _,
-    H2: forall a, _ ->
+    H2: forall a, _ -> _ -> _ ->
             reducible_values ?theta a _ ->
             reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _
       |- reduces_to _ _ =>
@@ -146,19 +148,19 @@ Ltac t_reduces_to2 :=
 
 Ltac t_instantiate_reducible :=
   match goal with
-  | H1: reducible_values _ ?v ?T, H3: forall a, _ -> _ -> _ |- _ =>
-    poseNew (Mark (v,H3) "t_instantiate_reducible");
-    unshelve epose proof (H3 v _ H1)
+  | H1: reducible_values _ ?v ?T, H3: forall a, _ |- _ =>
+    poseNew (Mark (v, H3) "t_instantiate_reducible");
+    unshelve epose proof (H3 v _ _ _ H1)
   | H1: reducible_values _ ?v ?T, H2: forall a, _ -> _ |- _ =>
-    poseNew (Mark (v,H2) "t_instantiate_reducible");
+    poseNew (Mark (v, H2) "t_instantiate_reducible");
     pose proof (H2 v H1)
   end.
 
 Ltac t_instantiate_reducible_erased :=
   match goal with
-  | H2: is_erased_term ?v, H3: forall a, _ -> _ -> _ |- _ =>
+  | H2: is_erased_term ?v, H3: forall a, _ |- _ =>
     poseNew (Mark (v,H2) "t_instantiate_reducible");
-    unshelve epose proof (H3 v H2 _)
+    unshelve epose proof (H3 v H2 _ _ _)
   end.
 
 Ltac t_instantiate_rc :=

@@ -17,7 +17,7 @@ Lemma satisfies_insert:
     satisfies P (gamma1 ++ (x,T) :: gamma2) (l1 ++ (x,t) :: l2).
 Proof.
   induction gamma1; destruct l1;
-    repeat step || step_inversion satisfies || apply SatCons || t_listutils ||
+    repeat step || step_inversion satisfies || apply SatCons || list_utils ||
            (rewrite substitute_skip by (steps; eauto with fv b_cmap)); eauto.
 Qed.
 
@@ -29,6 +29,6 @@ Lemma satisfies_drop:
     satisfies P (gamma1 ++ gamma2) (l1 ++ l2).
 Proof.
   induction gamma1; destruct l1;
-    repeat step || step_inversion satisfies || apply SatCons || t_listutils ||
+    repeat step || step_inversion satisfies || apply SatCons || list_utils ||
            (rewrite substitute_skip in * by (steps; eauto with fv b_cmap)); eauto.
 Qed.

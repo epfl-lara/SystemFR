@@ -2,15 +2,12 @@ Require Import Coq.Strings.String.
 
 Require Import Equations.Equations.
 
-Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.TermList.
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.SmallStepSubstitutions.
 Require Export SystemFR.StarLemmas.
 Require Export SystemFR.StarInversions.
 Require Export SystemFR.ErasedTermLemmas.
-
-Require Export SystemFR.RelationClosures.
 
 Require Export SystemFR.FVLemmasEval.
 Require Export SystemFR.WFLemmasEval.
@@ -93,15 +90,21 @@ Qed.
 
 Hint Resolve reducible_val_fv: fv.
 
-Lemma fv_in_reducible_val:
-  forall theta v T x tag,
-    reducible_values theta v T ->
+Lemma fv_red:
+  forall t x tag theta T,
     valid_interpretation theta ->
-    x ∈ pfv v tag ->
+    reducible_values theta t T ->
+    x ∈ pfv t tag ->
     False.
 Proof.
-  intros. erewrite reducible_val_fv in *; eauto.
+  intros; erewrite reducible_val_fv in *; eauto; steps.
 Qed.
+
+Ltac t_fv_red :=
+  match goal with
+  | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?t _, H3: _ ∈ pfv ?t _ |- _ =>
+    apply False_ind; apply (fv_red _ _ _ _ _ H1 H2 H3)
+  end.
 
 Lemma reducible_val_wf:
   forall theta t T,
@@ -180,9 +183,6 @@ Ltac t_reduction :=
 
 Ltac t_values_info2 :=
   match goal with
-(*  | H: cbv_value ?v, H2: context[erase ?v] |- _ =>
-    poseNew (Mark v "erase_value");
-    pose proof (erase_value v H) *)
   | H1: valid_interpretation ?theta, H2: reducible_values ?theta ?t ?T  |- _ =>
     poseNew (Mark t "redvalval");
     pose proof (red_is_val _ _ _ H2 H1)
@@ -372,6 +372,7 @@ Ltac t_values_info3 :=
     unshelve epose proof (cbv_value_subst _ H l _); eauto 2 using reducible_values_list
   end.
 
+(*
 Lemma reducibility_is_candidate:
   forall (theta : interpretation) V,
     valid_interpretation theta ->
@@ -382,3 +383,4 @@ Proof.
     eauto using red_is_val;
     eauto with erased.
 Qed.
+*)

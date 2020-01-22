@@ -60,16 +60,16 @@ Proof.
   induction S; repeat step || rewrite IHS in *.
 Qed.
 
-Hint Rewrite in_remove: blistutils.
+Hint Rewrite in_remove: list_utils.
 
 Lemma in_diff:
   forall S2 x S1,
    x ∈ S1 -- S2 <-> x ∈ S1 /\ ~(x ∈ S2).
 Proof.
-  induction S2; repeat step || rewrite IHS2 in * || autorewrite with blistutils in *.
+  induction S2; repeat step || rewrite IHS2 in * || autorewrite with list_utils in *.
 Qed.
 
-Hint Rewrite in_diff: blistutils.
+Hint Rewrite in_diff: list_utils.
 
 Lemma app_eq_nil_iff:
   forall A (l l': list A),
@@ -78,7 +78,9 @@ Proof.
   destruct l; steps.
 Qed.
 
-Ltac t_listutils :=
+Hint Rewrite List.app_nil_r: list_utils.
+
+Ltac list_utils :=
   match goal with
   | H: _ = nil |- _ => rewrite H in *
   | H: nil = _ ++ _ :: _ |- _ => apply False_ind; apply (app_cons_not_nil _ _ _ H)
@@ -95,7 +97,7 @@ Ltac t_listutils :=
     poseNew (not_in_append l1 l2 x H)
   | |- context[?l1 ++ ?l2 = nil]  => rewrite (app_eq_nil_iff _ l1 l2)
   | H: context[?l1 ++ ?l2 = nil] |- _  => rewrite (app_eq_nil_iff _ l1 l2) in H
-  | _ => progress (autorewrite with blistutils in *)
+  | _ => progress (autorewrite with list_utils in *)
   end.
 
 Lemma empty_list:
@@ -106,9 +108,9 @@ Proof.
   destruct l; steps; eauto with exfalso.
 Qed.
 
-Hint Resolve empty_list: blistutils.
+Hint Resolve empty_list: list_utils.
 
-Hint Extern 50 => t_listutils: blistutils.
+Hint Extern 50 => list_utils: list_utils.
 
 Lemma empty_list_rewrite:
   forall A (l: list A),
@@ -134,7 +136,7 @@ Lemma NoDup_append:
     x ∈ l2 ->
     False.
 Proof.
-  induction l1; repeat step || step_inversion NoDup || t_listutils; eauto.
+  induction l1; repeat step || step_inversion NoDup || list_utils; eauto.
 Qed.
 
 Lemma cons_append:

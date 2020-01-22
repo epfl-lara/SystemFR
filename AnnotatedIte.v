@@ -15,6 +15,7 @@ Lemma annotated_reducible_T_ite:
     wf t2 0 ->
     wf T1 0 ->
     wf T2 0 ->
+    subset (fv b) (support gamma) ->
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
     subset (fv T1) (support gamma) ->

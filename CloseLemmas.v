@@ -13,7 +13,7 @@ Lemma close_nothing:
     close k t x = t.
 Proof.
   induction t;
-    repeat step || t_equality || t_listutils.
+    repeat step || t_equality || list_utils.
 Qed.
 
 Lemma close_nothing2:
@@ -40,7 +40,7 @@ Lemma tclose_nothing:
     tclose k t x = t.
 Proof.
   induction t;
-    repeat step || t_equality || t_listutils.
+    repeat step || t_equality || list_utils.
 Qed.
 
 Lemma tclose_nothing2:

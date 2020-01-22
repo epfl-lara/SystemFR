@@ -73,6 +73,8 @@ Lemma reducible_inst:
     wf V 0 ->
     twf V 0 ->
     pfv V term_var = nil ->
+    wf U 0 ->
+    pfv U term_var = nil ->
     valid_interpretation theta ->
     is_erased_type U ->
     is_erased_type V ->
@@ -80,24 +82,26 @@ Lemma reducible_inst:
     reducible theta t (topen 0 U V).
 Proof.
   unfold reducible, reduces_to in *;
-    repeat step || t_listutils || simp_red || unfold reduces_to in *.
+    repeat step || list_utils || simp_red || unfold reduces_to in *.
   match goal with
   | H: forall RC, reducibility_candidate RC -> _ |- _ =>
       unshelve epose proof (H (fun v => reducible_values theta v V) _); steps;
         eauto using reducibility_is_candidate
   end.
   exists v; steps; eauto using star_trans with cbvlemmas.
-  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H10;
+  apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H12;
     repeat step || finisher; eauto using reducibility_is_candidate.
-  eapply reducibility_subst_head; eauto; repeat step || t_listutils || finisher.
+  eapply reducibility_subst_head; eauto; repeat step || list_utils || finisher.
 Qed.
 
 Lemma open_reducible_inst:
   forall tvars (gamma : context) t U V,
+    wf U 0 ->
     wf V 0 ->
     twf V 0 ->
     is_erased_type U ->
     is_erased_type V ->
+    subset (fv U) (support gamma) ->
     subset (fv V) (support gamma) ->
     open_reducible tvars gamma t (T_abs U) ->
     open_reducible tvars gamma t (topen 0 U V).

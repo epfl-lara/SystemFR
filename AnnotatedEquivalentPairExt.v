@@ -14,19 +14,17 @@ Proof.
     repeat step || t_instantiate_sat3 || simp_red.
 
   apply equivalent_trans with (pp a b).
-  - equivalent_star; eauto with erased wf.
+  - equivalent_star; t_closer.
   - apply equivalent_trans with (pp (pi1 (psubstitute (erase_term t) l term_var) ) b).
-    + unshelve epose proof (equivalent_context (pp (lvar 0 term_var) b) a (pi1 (psubstitute (erase_term t) l term_var)) _ _ _);
+    + unshelve epose proof (equivalent_context (pp (lvar 0 term_var) b) a (pi1 (psubstitute (erase_term t) l term_var)) _ _ _ _);
         repeat step || rewrite (open_none b) in * by t_closer;
-        eauto with erased;
-        eauto with wf.
+        eauto with erased wf fv.
       apply equivalent_sym;
-        try solve [ equivalent_star; eauto with erased; eauto with wf ].
+        try solve [ equivalent_star; t_closer ].
     + unshelve epose proof (equivalent_context (pp (pi1 (psubstitute (erase_term t) l term_var)) (lvar 0 term_var))
-        b (pi2 (psubstitute (erase_term t) l term_var))_ _ _);
-        repeat step || rewrite open_none in * by t_closer;
-        eauto with erased;
-        eauto with wf.
+        b (pi2 (psubstitute (erase_term t) l term_var)) _ _ _ _);
+        repeat step || list_utils || rewrite open_none in * by t_closer;
+        t_closer.
       apply equivalent_sym;
-        try solve [ equivalent_star; eauto with erased; eauto with wf ].
+        try solve [ equivalent_star; t_closer ].
 Qed.

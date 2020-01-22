@@ -47,6 +47,12 @@ Proof.
              erase_open ||
              apply_any;
       eauto using has_polarities_subst_erase;
-      eauto with btwf;
-      eauto with wf.
+      side_conditions;
+      eauto with btwf wf fv.
+
+  - apply fv_nils2; eauto with fv.
+    eapply subset_same_support; eauto; repeat step || t_subset_erase || rewrite erased_context_support.
+
+  - apply fv_nils2; eauto with fv.
+    eapply subset_same_support; eauto; repeat step || t_subset_erase || rewrite erased_context_support.
 Qed.

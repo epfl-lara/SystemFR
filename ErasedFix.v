@@ -14,7 +14,7 @@ Opaque makeFresh.
 Opaque tlt.
 
 Lemma reducible_fix_zero:
-  forall (theta : interpretation) (T ts : tree),
+  forall theta T ts,
     wf ts 1 ->
     pfv ts term_var = nil ->
     valid_interpretation theta ->
@@ -32,10 +32,10 @@ Proof.
   eapply backstep_reducible; eauto with smallstep;
     repeat
         step || apply_any || simp_red || rewrite open_tlt in * ||
-        rewrite (open_none ts) by (steps; eauto with wf);
-      try solve [ t_closing ];
+        rewrite (open_none ts) by (steps; unshelve eauto with wf; auto);
+      try solve [ unshelve t_closing; auto ];
       eauto using tlt_a_zero with exfalso;
-      eauto 4 using equivalent_refl with erased wf fv step_tactic.
+      try solve [ unshelve eauto 4 using equivalent_refl with erased wf fv step_tactic; auto ].
 Qed.
 
 Lemma scbv_step_eq:
@@ -83,27 +83,27 @@ Proof.
   induction n; repeat step || simp_red || apply reducible_let; try omega;
     eauto using reducible_fix_zero.
     eapply backstep_reducible;
-      repeat step || t_listutils || apply_any || simp reducible_values || rewrite reducibility_rewrite;
+      repeat step || list_utils || apply_any || simp reducible_values || rewrite reducibility_rewrite;
       eauto using scbv_step_fix_open;
       eauto 3 with smallstep values;
       eauto with fv;
-      eauto 2 with wf;
+      try solve [ unshelve eauto 2 with wf; auto ];
       eauto with erased;
       eauto using reducible_nat_value;
-      try t_closing;
+      try solve [ unshelve t_closing; auto ];
       try solve [ apply equivalent_refl; steps; eauto with wf ].
 
   eapply backstep_reducible; eauto using red_is_val with smallstep;
     repeat
-      step || t_listutils || rewrite open_shift ||
+      step || list_utils || rewrite open_shift ||
       rewrite open_none by (steps; eauto with wf) ||
       rewrite (open_none ts) in * by (steps; eauto with wf);
-      eauto with wf fv.
+      try solve [ unshelve eauto with wf fv; auto ].
 
   apply_any;
     repeat step || simp_red || rewrite open_tlt in * || t_tlt_sound ||
     rewrite open_none in * by (steps; eauto with wf);
-    try solve [ t_closer ];
+    try solve [ unshelve t_closer; auto ];
     try omega.
 Qed.
 
@@ -203,7 +203,7 @@ Proof.
     repeat
       tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any ||
       rewrite pfv_tlt in * || rewrite pfv_map_indices in * ||
-      rewrite psubstitute_tlt in * || rewrite open_tlt in * || t_listutils ||
+      rewrite psubstitute_tlt in * || rewrite open_tlt in * || list_utils ||
       rewrite psubstitute_map_indices in * || rewrite open_shift in * ||
       (progress rewrite open_none in * by (steps; eauto with wf)) ||
       t_tlt_sound.
@@ -213,7 +213,7 @@ Proof.
     eauto with wf;
     eauto using reducible_unit.
 
-  unshelve epose proof (H27 a _ _);
+  unshelve epose proof (H29 a _ _ _ _);
     repeat step || simp reducible_values || rewrite open_tlt in * ||
            (progress rewrite open_shift in * by (repeat step || unshelve eauto with wf)) ||
            (progress rewrite open_none in * by (repeat step || unshelve eauto with wf));
@@ -243,11 +243,11 @@ Proof.
 
   - (* zero *)
     eapply backstep_reducible; eauto using scbv_step_fix_open;
-      repeat step || t_listutils || apply_any || simp_red;
+      repeat step || list_utils || apply_any || simp_red;
       t_closer.
   - (* succ v *)
     eapply backstep_reducible; eauto using scbv_step_fix_open;
-      repeat step || t_listutils || apply_any;
+      repeat step || list_utils || apply_any;
       eauto 3 with smallstep values;
       eauto with fv;
       eauto 2 with wf;

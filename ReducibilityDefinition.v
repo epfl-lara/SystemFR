@@ -55,6 +55,8 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     exists (_: is_erased_type B),
     closed_value v /\
     forall a (p: is_erased_term a),
+      wf a 0 ->
+      pfv a term_var = nil ->
       reducible_values theta a A ->
       reduces_to (fun t => reducible_values theta t (open 0 B a)) (app v a);
 
@@ -62,6 +64,8 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     exists (_: is_erased_type B),
     closed_value v /\
     exists a b (_: is_erased_term a),
+      wf a 0 /\
+      pfv a term_var = nil /\
       v = pp a b /\
       reducible_values theta a A /\
       reducible_values theta b (open 0 B a);
@@ -77,6 +81,7 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     reducible_values theta v T /\
     is_erased_term p /\
     wf p 1 /\
+    pfv p term_var = nil /\
     star scbv_step (open 0 p v) ttrue;
 
   reducible_values theta v (T_type_refine T1 T2) :=
@@ -109,6 +114,8 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     exists (_: is_erased_type B),
     closed_value v /\
     forall a (p: is_erased_term a),
+      wf a 0 ->
+      pfv a term_var = nil ->
       reducible_values theta a A ->
       reducible_values theta v (open 0 B a);
 
@@ -116,6 +123,8 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     exists (_: is_erased_type B),
     closed_value v /\
     exists a (_: is_erased_term a),
+      wf a 0 /\
+      pfv a term_var = nil /\
       reducible_values theta a A /\
       reducible_values theta v (open 0 B a);
 

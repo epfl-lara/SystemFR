@@ -69,7 +69,7 @@ Lemma pfv_base_type:
       x ∈ pfv B tag ->
       x ∈ pfv A tag.
 Proof.
-  induction 1; repeat step || t_listutils.
+  induction 1; repeat step || list_utils.
 Qed.
 
 Ltac t_pfv_base_type :=
@@ -101,7 +101,7 @@ Lemma pfv_base_type2:
     X ∈ pfv B type_var ->
     False.
 Proof.
-  induction 1; repeat step || t_listutils.
+  induction 1; repeat step || list_utils.
 Qed.
 
 Hint Extern 1000 => apply False_ind; eapply pfv_base_type2; eassumption: fv.

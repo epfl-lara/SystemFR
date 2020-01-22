@@ -32,8 +32,10 @@ Lemma annotated_reducible_type_inst:
   forall tvars gamma t U V,
     is_annotated_type U ->
     is_annotated_type V ->
+    wf U 0 ->
     wf V 0 ->
     twf V 0 ->
+    subset (fv U) (support gamma) ->
     subset (fv V) (support gamma) ->
     [[ tvars; gamma ⊨ t : T_abs U ]] ->
     [[ tvars; gamma ⊨ type_inst t V : topen 0 U V ]].

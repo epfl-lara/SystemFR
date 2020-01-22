@@ -74,6 +74,8 @@ Lemma reducible_equivalent_ite:
     is_erased_term t3 ->
     wf t2 0 ->
     wf t3 0 ->
+    subset (fv t2) (support gamma) ->
+    subset (fv t3) (support gamma) ->
     valid_interpretation theta ->
     [ support theta; gamma ⊨ t1 : T_bool ] ->
     satisfies (reducible_values theta) gamma l ->
@@ -111,6 +113,8 @@ Lemma reducible_equivalent_match:
     is_erased_term ts ->
     wf t0 0 ->
     wf ts 1 ->
+    subset (fv t0) (support gamma) ->
+    subset (fv ts) (support gamma) ->
     (forall l,
        satisfies (reducible_values theta) ((p, T_equiv tn zero) :: gamma) l ->
        equivalent_terms (substitute t0 l) (substitute t l)) ->
@@ -147,6 +151,8 @@ Lemma reducible_equivalent_rec:
     is_erased_term ts ->
     wf t0 0 ->
     wf ts 2 ->
+    subset (fv t0) (support gamma) ->
+    subset (fv ts) (support gamma) ->
     [ support theta; gamma ⊨ tn : T_nat ] ->
     valid_interpretation theta ->
     (forall l,
