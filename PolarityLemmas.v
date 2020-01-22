@@ -44,7 +44,7 @@ Proof.
       eauto with omega;
       eauto with b_polarity.
   exists X; repeat
-         step || t_fv_open || t_listutils ||
+         step || t_fv_open || list_utils ||
          (progress rewrite is_erased_term_tfv in * by steps) ||
          (rewrite <- open_topen by (steps; eauto with btwf)).
 
@@ -237,7 +237,7 @@ Proof.
            apply equivalent_with_pairs_cons || apply equivalent_pairs_with_relation ||
            apply equivalent_with_pairs_refl || rewrite swap_idrel in * ||
            apply idrel_lookup || apply equal_with_relation_refl2 ||
-           rewrite range_idrel in * || t_listutils.
+           rewrite range_idrel in * || list_utils.
 Qed.
 
 Lemma has_polarities_swap_aux:
@@ -249,7 +249,7 @@ Proof.
   induction n; destruct T; repeat step || constructor || apply_any || step_inversion has_polarities;
     eauto with omega.
 
-  exists X; repeat step || rewrite pfv_swap in *.
+  exists X; repeat step || rewrite pfv_swap_type_holes in *.
   rewrite topen_swap2; steps.
   apply IHn; repeat step || autorewrite with bsize in *; try omega.
 Qed.

@@ -7,12 +7,13 @@ Lemma annotated_reducible_pp:
     wf B 1 ->
     is_annotated_type B ->
     is_annotated_term t1 ->
+    subset (fv B) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : A ]] ->
     [[ tvars; gamma ⊨ t2 : open 0 B t1 ]] ->
     [[ tvars; gamma ⊨ pp t1 t2 : T_prod A B ]].
 Proof.
   unfold annotated_reducible; steps.
-  apply open_reducible_pp; repeat step || erase_open; eauto with wf erased.
+  apply open_reducible_pp; repeat step || erase_open; side_conditions.
 Qed.
 
 Lemma annotated_reducible_pi1:
@@ -28,9 +29,12 @@ Lemma annotated_reducible_pi2:
     wf B 1 ->
     is_annotated_type B ->
     is_annotated_term t ->
+    subset (fv B) (support gamma) ->
     [[ tvars; gamma ⊨ t : T_prod A B ]] ->
     [[ tvars; gamma ⊨ pi2 t : open 0 B (pi1 t) ]].
 Proof.
-  unfold annotated_reducible; repeat step || erase_open;
-    eauto using open_reducible_pi2 with erased wf.
+  unfold annotated_reducible; repeat step || erase_open.
+  eapply open_reducible_pi2;
+    steps;
+    side_conditions.
 Qed.

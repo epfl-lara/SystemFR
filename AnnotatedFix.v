@@ -5,6 +5,7 @@ Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedFix.
 Require Export SystemFR.NatCompareErase.
 Require Export SystemFR.LVarOperationsErase.
+Require Export SystemFR.LVarOperations.
 
 Lemma annotated_reducible_fix:
   forall tvars gamma ts T n y p,

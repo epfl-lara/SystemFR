@@ -63,7 +63,7 @@ Proof.
     try solve [ left; repeat step || apply no_type_fvar_open ];
     try solve [ right; eexists; eauto; repeat step || apply no_type_fvar_open ].
 
-  right. exists X; repeat step || t_fv_open || t_listutils || rewrite is_erased_term_tfv in * by steps.
+  right. exists X; repeat step || t_fv_open || list_utils || rewrite is_erased_term_tfv in * by steps.
   rewrite <- open_topen;
     repeat step || apply IHn || autorewrite with bsize in * || apply is_erased_type_topen;
     eauto with btwf wf omega.
@@ -121,7 +121,7 @@ Lemma no_type_fvar_strictly_positive:
     strictly_positive T vars.
 Proof.
   induction T; repeat step || simp_spos || destruct_tag || unfold no_type_fvar in * || apply_any || left;
-    try solve [ eapply_any; eauto; repeat step || t_listutils ].
+    try solve [ eapply_any; eauto; repeat step || list_utils ].
 Qed.
 
 Ltac t_red_is_val :=
@@ -182,7 +182,7 @@ Lemma no_type_fvar_swap:
     no_type_fvar T vars ->
     no_type_fvar (swap_type_holes T i j) vars.
 Proof.
-  unfold no_type_fvar; repeat step || rewrite pfv_swap in *; eauto.
+  unfold no_type_fvar; repeat step || rewrite pfv_swap_type_holes in *; eauto.
 Qed.
 
 Lemma strictly_positive_swap_aux:
@@ -194,7 +194,7 @@ Proof.
   induction n; destruct T; repeat step || simp_spos || apply_any;
     try omega;
     eauto using no_type_fvar_swap.
-  right; exists X; repeat step || rewrite pfv_swap in *.
+  right; exists X; repeat step || rewrite pfv_swap_type_holes in *.
   rewrite topen_swap2; steps.
   apply IHn; repeat step || autorewrite with bsize in *; try omega.
 Qed.

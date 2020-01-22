@@ -173,11 +173,13 @@ Proof.
   induction T; steps.
 Qed.
 
-Lemma pfv_swap:
+Lemma pfv_swap_type_holes:
   forall T i j tag, pfv (swap_type_holes T i j) tag = pfv T tag.
 Proof.
   induction T; steps.
 Qed.
+
+Hint Extern 1 => rewrite pfv_swap_type_holes: fv.
 
 Lemma topen_swap:
   forall T i j rep,

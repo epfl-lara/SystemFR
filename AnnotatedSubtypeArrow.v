@@ -1,6 +1,6 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
-Require Export SystemFR.ErasedSubtypeRules.
+Require Export SystemFR.ErasedSubtype.
 
 Lemma annotated_subtype_arrow:
   forall tvars gamma A1 A2 B1 B2 x,

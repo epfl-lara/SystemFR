@@ -35,7 +35,7 @@ Lemma base_type_open:
     is_erased_term a ->
     base_type X (open k T a) (open k T0 a).
 Proof.
-  induction 1; repeat step || constructor || t_fv_open || t_listutils || rewrite is_erased_term_tfv in * by assumption;
+  induction 1; repeat step || constructor || t_fv_open || list_utils || rewrite is_erased_term_tfv in * by assumption;
     eauto with fv;
     eauto with erased.
 Qed.

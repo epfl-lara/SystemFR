@@ -7,7 +7,6 @@ Inductive cbv_value: tree -> Prop :=
 | IVSucc: forall v, cbv_value v -> cbv_value (succ v)
 | IVFalse: cbv_value tfalse
 | IVTrue: cbv_value ttrue
-| IVVar: forall x, cbv_value (fvar x term_var)
 | IVPair: forall v1 v2, cbv_value v1 -> cbv_value v2 -> cbv_value (pp v1 v2)
 | IVLambda: forall t, cbv_value (notype_lambda t)
 | IVLeft: forall v, cbv_value v -> cbv_value (tleft v)
@@ -34,7 +33,6 @@ Ltac cbv_value t :=
         | ttrue => idtac
         | succ ?v => cbv_value v
         | pp ?v1 ?v2 => cbv_value v1; cbv_value v2
-        | fvar _ term_var => idtac
         | notype_lambda _ => idtac
         | tleft ?v => cbv_value v
         | tright ?v => cbv_value v
@@ -105,7 +103,7 @@ Lemma fv_nil_top_level_var:
     ~ top_level_var t.
 Proof.
   induction t;
-    repeat step || t_listutils || unfold singleton, add in *.
+    repeat step || list_utils || unfold singleton, add in *.
 Qed.
 
 Inductive scbv_step: tree -> tree -> Prop :=
@@ -166,26 +164,22 @@ Inductive scbv_step: tree -> tree -> Prop :=
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-(*      pfv v term_var = nil -> *)
       scbv_step (tsize v) (build_nat (tsize_semantics v))
 
 | SPBetaIsPair:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-(*      pfv v term_var = nil -> *)
       scbv_step (boolean_recognizer 0 v) (is_pair v)
 | SPBetaIsSucc:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-(*      pfv v term_var = nil -> *)
       scbv_step (boolean_recognizer 1 v) (is_succ v)
 | SPBetaIsLambda:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-(*      pfv v term_var = nil -> *)
       scbv_step (boolean_recognizer 2 v) (is_lambda v)
 
 (* reduction inside terms *)

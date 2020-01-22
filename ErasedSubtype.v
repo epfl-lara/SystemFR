@@ -4,13 +4,11 @@ Require Import Coq.Strings.String.
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.ReducibilityStep.
+Require Export SystemFR.ReducibilityOpenEquivalent.
 
 Opaque reducible_values.
 Opaque Nat.eq_dec.
 Opaque makeFresh.
-
-Set Program Mode.
 
 Lemma subtype_arrow2:
   forall tvars theta x f gamma l A B T v,
@@ -49,6 +47,7 @@ Lemma reducible_ext_pair:
     reducible theta (pi2 v) (open 0 B (pi1 v)) ->
     is_erased_type B ->
     wf B 1 ->
+    pfv B term_var = nil ->
     exists a b,
       v = pp a b /\
       reducible_values theta a A /\
@@ -68,24 +67,26 @@ Proof.
               end.
 
   eexists; eexists; steps; eauto.
-  eapply reducibility_values_ltr; eauto; steps;
+  eapply reducibility_values_ltr; eauto; repeat step || list_utils;
     eauto with wf;
+    eauto with fv;
     eauto with erased.
 Qed.
 
 Lemma subtype_prod2:
-  forall tvars theta gamma l A B T v x,
+  forall theta gamma l A B T v x,
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv A) ->
     ~(x ∈ fv B) ->
     ~(x ∈ fv T) ->
     valid_interpretation theta ->
-    support theta = tvars ->
-    open_reducible tvars ((x, T) :: gamma) (pi1 (term_fvar x)) A ->
-    open_reducible tvars ((x, T) :: gamma) (pi2 (term_fvar x)) (open 0 B (pi1 (term_fvar x))) ->
+    open_reducible (support theta) ((x, T) :: gamma) (pi1 (term_fvar x)) A ->
+    open_reducible (support theta)
+                   ((x, T) :: gamma) (pi2 (term_fvar x)) (open 0 B (pi1 (term_fvar x))) ->
     satisfies (reducible_values theta) gamma l ->
     is_erased_type B ->
     wf B 1 ->
+    subset (fv B) (support gamma) ->
     reducible_values theta v (substitute T l) ->
     reducible_values theta v (T_prod (substitute A l) (substitute B l)).
 Proof.
@@ -95,13 +96,14 @@ Proof.
 
   unfold open_reducible in *.
 
-  unshelve epose proof (H5 theta ((x,v) :: l) _ _ _) as HP1;
-  unshelve epose proof (H6 theta ((x,v) :: l) _ _ _) as HP2;
+  unshelve epose proof (H4 theta ((x,v) :: l) _ _ _) as HP1;
+  unshelve epose proof (H5 theta ((x,v) :: l) _ _ _) as HP2;
     tac1.
-  unshelve epose proof reducible_ext_pair _ _ _ _ _ _ HP1 HP2 _ _; steps;
+  unshelve epose proof reducible_ext_pair _ _ _ _ _ _ HP1 HP2 _ _ _; steps;
     eauto with values;
+    eauto with fv;
     try solve [ unshelve eauto with wf; auto ].
-  unshelve exists a, b; steps; eauto with erased.
+  unshelve exists a, b; steps; eauto with erased wf fv.
 Qed.
 
 Lemma reducible_values_refine_subtype:
@@ -109,6 +111,7 @@ Lemma reducible_values_refine_subtype:
     wf p 1 ->
     wf q 1 ->
     is_erased_term q ->
+    pfv q term_var = nil ->
     star scbv_step (open 0 q v) ttrue ->
     reducible_values theta v (T_refine A p) ->
     reducible_values theta v (T_refine A q).
@@ -128,11 +131,11 @@ Lemma reducible_values_arrow_subtype:
    reducible_values theta t (T_arrow A1 A2) ->
    reducible_values theta t (T_arrow B1 B2).
 Proof.
-  repeat step || simp reducible_values in * || unfold reduces_to || t_listutils;
+  repeat step || simp reducible_values in * || unfold reduces_to || list_utils;
     t_closer.
     match goal with
     | H: forall a, _ |- _ =>
-      unshelve epose proof (H a _ _); repeat step || unfold reduces_to in *; eauto
+      unshelve epose proof (H a _ _ _ _); repeat step || unfold reduces_to in *; eauto
     end.
 Qed.
 

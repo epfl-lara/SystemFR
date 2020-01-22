@@ -61,6 +61,7 @@ Lemma annotated_subtype_forall:
     is_annotated_type T2 ->
     is_annotated_term t ->
     wf T2 1 ->
+    subset (fv T2) (support gamma) ->
     [[ tvars; gamma ⊨ t : T1 ]] ->
     [[ tvars; gamma ⊨ T_forall T1 T2 <: open 0 T2 t ]].
 Proof.
@@ -69,7 +70,7 @@ Proof.
 
   eapply subtype_forall; steps; try eassumption;
     repeat step;
-    eauto with wf.
+    side_conditions.
 Qed.
 
 Lemma annotated_subtype_exists:
@@ -80,6 +81,7 @@ Lemma annotated_subtype_exists:
     is_annotated_type T2 ->
     is_annotated_term t ->
     wf T2 1 ->
+    subset (fv T2) (support gamma) ->
     [[ tvars; gamma ⊨ t : T1 ]] ->
     [[ tvars; gamma ⊨ open 0 T2 t <: T_exists T1 T2 ]].
   unfold annotated_subtype, subtype, annotated_reducible;
@@ -87,6 +89,5 @@ Lemma annotated_subtype_exists:
 
   eapply subtype_exists; steps; try eassumption;
     repeat step;
-    eauto with wf;
-    eauto with erased.
+    side_conditions.
 Qed.

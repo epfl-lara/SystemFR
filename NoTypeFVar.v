@@ -24,7 +24,7 @@ Lemma no_type_fvar_open:
     no_type_fvar (open k T rep) vars.
 Proof.
   unfold no_type_fvar;
-    repeat step || t_fv_open || t_listutils ||
+    repeat step || t_fv_open || list_utils ||
            rewrite is_erased_term_tfv in * by steps; eauto.
 Qed.
 
@@ -54,7 +54,7 @@ Lemma no_type_fvar_in_topen:
     ~(X ∈ vars) ->
     no_type_fvar (topen k T (fvar X type_var)) vars.
 Proof.
-  unfold no_type_fvar; repeat step || t_fv_open || t_listutils; eauto.
+  unfold no_type_fvar; repeat step || t_fv_open || list_utils; eauto.
 Qed.
 
 Lemma no_type_fvar_append:
@@ -63,7 +63,7 @@ Lemma no_type_fvar_append:
     no_type_fvar T vars2 ->
     no_type_fvar T (vars1 ++ vars2).
 Proof.
-  unfold no_type_fvar; repeat step || t_listutils; eauto.
+  unfold no_type_fvar; repeat step || list_utils; eauto.
 Qed.
 
 Lemma no_type_fvar_subst:

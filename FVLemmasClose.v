@@ -17,7 +17,7 @@ Lemma fv_close1:
     False.
 Proof.
   induction t;
-    repeat step || t_listutils; eauto.
+    repeat step || list_utils; eauto.
 Qed.
 
 Lemma fv_close2:
@@ -27,7 +27,7 @@ Lemma fv_close2:
 Proof.
   induction t;
     repeat match goal with
-           | _ => step || t_listutils || instantiate_any
+           | _ => step || list_utils || instantiate_any
            end;
     eauto 3 using fv_close1;
     eauto 5 with eapply_any.
@@ -40,7 +40,7 @@ Lemma fv_close3:
 Proof.
   induction t;
     repeat match goal with
-           | _ => step || t_listutils || instantiate_any
+           | _ => step || list_utils || instantiate_any
            end;
     eauto with eapply_any.
 Qed.
@@ -51,7 +51,7 @@ Lemma tfv_close1:
     False.
 Proof.
   induction t;
-    repeat step || t_listutils; eauto.
+    repeat step || list_utils; eauto.
 Qed.
 
 Lemma tfv_close2:
@@ -61,7 +61,7 @@ Lemma tfv_close2:
 Proof.
   induction t;
     repeat match goal with
-           | _ => step || t_listutils || instantiate_any
+           | _ => step || list_utils || instantiate_any
            end;
     eauto 3 using tfv_close1;
     eauto 5 with eapply_any.
@@ -74,7 +74,7 @@ Lemma tfv_close3:
 Proof.
   induction t;
     repeat match goal with
-           | _ => step || t_listutils || instantiate_any
+           | _ => step || list_utils || instantiate_any
            end;
     eauto with eapply_any.
 Qed.

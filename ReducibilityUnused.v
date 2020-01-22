@@ -21,7 +21,7 @@ Lemma reducible_unused2:
     reducible_values ((X, RC) :: theta) t T.
 Proof.
   intros.
-  unshelve epose proof (reducible_rename T T t theta ((X,RC) :: theta) (idrel (pfv T type_var)) _ _ _ _ _); repeat step || apply equivalent_with_idrel || apply equal_with_idrel || apply equivalent_rc_refl.
+  unshelve epose proof (reducible_rename T T t theta ((X,RC) :: theta) (idrel (pfv T type_var)) _ _ _); repeat step || apply equivalent_with_idrel || apply equal_with_idrel || apply equivalent_rc_refl.
 Qed.
 
 Lemma reducible_unused3:
@@ -33,7 +33,7 @@ Lemma reducible_unused3:
     reducible_values theta t T.
 Proof.
   intros.
-  unshelve epose proof (reducible_rename T T t ((X,RC) :: theta) theta (idrel (pfv T type_var)) _ _ _ _ _);    repeat step || apply equivalent_with_idrel2 || apply equal_with_idrel || apply equivalent_rc_refl.
+  unshelve epose proof (reducible_rename T T t ((X,RC) :: theta) theta (idrel (pfv T type_var)) _ _ _);    repeat step || apply equivalent_with_idrel2 || apply equal_with_idrel || apply equivalent_rc_refl.
 Qed.
 
 Lemma satisfies_unused:
@@ -45,7 +45,7 @@ Lemma satisfies_unused:
     satisfies (reducible_values ((X, RC) :: theta)) gamma lterms.
 Proof.
   induction gamma as [ | [ x T ] gamma' IH ]; destruct lterms;
-    repeat step || t_termlist || step_inversion satisfies || t_listutils ||
+    repeat step || t_termlist || step_inversion satisfies || list_utils ||
            apply SatCons || apply reducible_unused2 ||
            (rewrite fv_subst_different_tag in * by (steps; eauto with fv)).
 Qed.

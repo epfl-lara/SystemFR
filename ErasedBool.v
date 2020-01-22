@@ -52,17 +52,17 @@ Proof.
          top_level_unfold closed_term ||
          simp reducible_values in *.
 
-  - apply star_backstep_reducible with (ite ttrue t1 t2); repeat step || t_listutils;
+  - apply star_backstep_reducible with (ite ttrue t1 t2); repeat step || list_utils;
       auto with cbvlemmas; eauto with fv; eauto with wf.
-    eapply backstep_reducible; repeat step || t_listutils;
+    eapply backstep_reducible; repeat step || list_utils;
       eauto 2 with smallstep;
       eauto with fv;
       eauto with wf;
       eauto using equivalent_star.
 
-  - apply star_backstep_reducible with (ite tfalse t1 t2); repeat step || t_listutils;
+  - apply star_backstep_reducible with (ite tfalse t1 t2); repeat step || list_utils;
       auto with cbvlemmas; eauto with fv; eauto with wf.
-    eapply backstep_reducible; repeat step || t_listutils;
+    eapply backstep_reducible; repeat step || list_utils;
       eauto 2 with smallstep;
       eauto with fv;
       eauto with wf;

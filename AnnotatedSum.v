@@ -57,6 +57,7 @@ Lemma annotated_reducible_sum_match:
     subset (fv tr) (support gamma) ->
     subset (fv A) (support gamma) ->
     subset (fv B) (support gamma) ->
+    subset (fv T) (support gamma) ->
     [[ tvars; gamma ⊨ t : T_sum A B ]] ->
     [[
       tvars; (p, T_equiv t (tleft (fvar y term_var))) :: (y, A) :: gamma ⊨

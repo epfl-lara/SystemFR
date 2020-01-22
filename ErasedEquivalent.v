@@ -20,13 +20,6 @@ Proof.
     repeat step || step_inversion satisfies || tac1.
 Qed.
 
-Ltac equivalence_instantiate C :=
-  match goal with
-  | H: equivalent_terms _ _ |- _ =>
-    poseNew (Mark (H) "equivalence_instantiate");
-    unshelve epose proof ((proj2 (proj2 (proj2 (proj2 H)))) C _ _)
-  end.
-
 Lemma equivalent_error:
   forall tvars theta gamma t T l,
     open_reducible tvars gamma t T ->
@@ -42,21 +35,3 @@ Proof.
     repeat step;
     eauto using red_is_val.
 Qed.
-
-(*
-Lemma equivalent_pair_eta:
-  forall tvars theta (gamma : context) t A B l,
-    valid_interpretation theta ->
-    open_reducible tvars gamma t (T_prod A B) ->
-    support theta = tvars ->
-    satisfies (reducible_values theta) gamma l ->
-    equivalent (substitute t l) (pp (pi1 (substitute t l)) (pi2 (substitute t l))).
-Proof.
-  unfold equivalent, open_reducible, reducible in *;
-      repeat step || simp_red || unfold reduces_to in * ||
-             t_values_info2 || t_invert_star ||
-             t_deterministic_star || apply star_smallstep_pp ||
-             t_instantiate_sat3;
-      eauto using star_trans with smallstep cbvlemmas.
-Qed.
- *)

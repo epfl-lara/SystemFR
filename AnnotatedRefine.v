@@ -19,6 +19,7 @@ Lemma annotated_reducible_refine:
     wf b 1 ->
     is_annotated_term b ->
     subset (fv t) (support gamma) ->
+    subset (fv b) (support gamma) ->
     [[ tvars; gamma ⊨ t : A ]] ->
     [[ tvars; (x,A) :: gamma ⊨ open 0 b (term_fvar x) : T_bool ]] ->
     [[ tvars; (p, T_equiv (term_fvar x) t) :: (x,A) :: gamma ⊨ open 0 b (term_fvar x) ≡ ttrue ]] ->

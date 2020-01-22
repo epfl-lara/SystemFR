@@ -1,6 +1,6 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
-Require Export SystemFR.ErasedSubtypeRules.
+Require Export SystemFR.ErasedSubtype.
 
 Lemma annotated_subtype_prod:
   forall tvars gamma A1 A2 B1 B2 x,
@@ -35,6 +35,7 @@ Lemma annotated_subtype_prod2:
     ~(x ∈ tvars) ->
     is_annotated_type B ->
     wf B 1 ->
+    subset (fv B) (support gamma) ->
     [[ tvars; (x,T) :: gamma ⊨ pi1 (term_fvar x) : A ]] ->
     [[ tvars; (x,T) :: gamma ⊨ pi2 (term_fvar x) : open 0 B (pi1 (term_fvar x)) ]] ->
     [[ tvars; gamma ⊨ T  <: T_prod A B ]].
@@ -42,7 +43,7 @@ Proof.
   unfold annotated_reducible, annotated_subtype, subtype;
     repeat step.
 
-  apply subtype_prod2 with (support theta) (erase_context gamma) (erase_type T) x;
+  apply subtype_prod2 with (erase_context gamma) (erase_type T) x;
     repeat step || erase_open;
     side_conditions.
 Qed.

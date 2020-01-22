@@ -5,7 +5,7 @@ Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
 Require Export SystemFR.ErasedLet.
-Require Export SystemFR.ReducibilityStep.
+Require Export SystemFR.ReducibilityOpenEquivalent.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -15,6 +15,7 @@ Lemma reducible_type_refine:
     valid_interpretation theta ->
     is_erased_type B ->
     wf B 1 ->
+    fv B = nil ->
     reducible theta t1 A ->
     reducible theta t2 (open 0 B t1) ->
     reducible theta t1 (T_type_refine A B).
@@ -32,14 +33,18 @@ Lemma open_reducible_type_refine:
   forall tvars gamma t1 t2 A B,
     is_erased_type B ->
     wf B 1 ->
-    open_reducible tvars gamma t1 A ->
-    open_reducible tvars gamma t2 (open 0 B t1) ->
-    open_reducible tvars gamma t1 (T_type_refine A B).
+    subset (fv B) (support gamma) ->
+    [ tvars; gamma ⊨ t1 : A ] ->
+    [ tvars; gamma ⊨ t2 : open 0 B t1 ] ->
+    [ tvars; gamma ⊨ t1 : T_type_refine A B ].
 Proof.
   unfold open_reducible;
-    repeat step || t_instantiate_sat3 || t_substitutions || eapply reducible_type_refine;
-    eauto with erased;
-    try solve [ unshelve eauto with wf; auto ].
+    repeat step || t_instantiate_sat3 || t_substitutions;
+    try solve [
+      eapply reducible_type_refine;
+      eauto with erased fv;
+      try solve [ unshelve eauto with wf; auto ]
+    ].
 Qed.
 
 Lemma open_reducible_get_refinement_witness:
@@ -57,19 +62,19 @@ Lemma open_reducible_get_refinement_witness:
     is_erased_term t2 ->
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
-    open_reducible tvars gamma t1 (T_type_refine A B) ->
-    open_reducible tvars ((x, open 0 B t1) :: gamma) t2 T ->
-    open_reducible tvars gamma (app (notype_lambda t2) uu) T.
+    subset (fv B) (support gamma) ->
+    [ tvars; gamma ⊨ t1 : T_type_refine A B ] ->
+    [ tvars; (x, open 0 B t1) :: gamma ⊨ t2 : T ] ->
+    [ tvars; gamma ⊨ app (notype_lambda t2) uu : T ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
   eapply backstep_reducible; eauto with smallstep values;
-    repeat step || t_listutils; eauto with fv wf erased.
+    repeat step || list_utils; eauto with fv wf erased.
   rewrite open_none; eauto with wf.
   top_level_unfold reducible; top_level_unfold reduces_to; repeat step || simp_red.
 
-  unshelve epose proof (H13 theta ((x, p) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H14 theta ((x, p) :: lterms) _ _ _); tac1.
   eapply reducibility_values_rtl; eauto;
     repeat step;
-    eauto with wf;
-    eauto with erased.
+    eauto with wf fv erased.
 Qed.

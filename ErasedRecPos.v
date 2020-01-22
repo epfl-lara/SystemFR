@@ -21,6 +21,8 @@ Lemma reducible_values_rec_pos_induction:
       wf Ts 0 ->
       is_erased_type T0 ->
       is_erased_type Ts ->
+      pfv T0 term_var = nil ->
+      pfv Ts term_var = nil ->
       valid_interpretation theta ->
       reducible_values theta t (T_rec v2 T0 Ts) ->
       equivalent_terms (tlt v1 (succ v2)) ttrue ->
@@ -43,15 +45,15 @@ Proof.
        eauto 3 using smallstep_succ_zero with exfalso.
     left; repeat step || find_exists || apply_any.
     apply reducibility_subst_head with X;
-      repeat step || t_listutils || rewrite nat_value_fv in * by assumption;
+      repeat step || list_utils || rewrite nat_value_fv in * by assumption;
       eauto 2 with btwf;
       eauto 2 with wf.
-    apply (reducible_rename_one _ _ _ _ _ X) in H21; steps; eauto using reducibility_is_candidate.
+    apply (reducible_rename_one _ _ _ _ _ X) in H23; steps; eauto using reducibility_is_candidate.
     eapply positive_grow; eauto 1;
-      repeat step || autounfold with u_short;
-      eauto using reducibility_is_candidate.
+      repeat step || unfold subset_rc || apply reducibility_is_candidate || list_utils;
+      eauto with fv wf erased.
     apply IHis_nat_value with X; repeat step || apply equivalent_star || apply tlt_complete2;
-      eauto with wf;
+      eauto with wf fv;
       eauto using INVSucc;
       eauto with omega.
 
@@ -59,14 +61,16 @@ Proof.
       eauto 2 with erased;
       eauto 3 using smallstep_succ_zero with exfalso.
     right; repeat step.
-    apply (reducible_rename_one _ _ _ _ _ X) in H21; steps; eauto using reducibility_is_candidate.
+    apply (reducible_rename_one _ _ _ _ _ X) in H23; steps; eauto using reducibility_is_candidate.
     exists v1', X; steps.
     eapply positive_grow; eauto 1;
-      repeat step || autounfold with u_short;
-      eauto using reducibility_is_candidate.
-    apply IHis_nat_value with X; repeat step || apply equivalent_star || apply tlt_complete2;
+      repeat step || unfold subset_rc || apply reducibility_is_candidate || list_utils;
+      eauto with fv wf erased.
+    apply IHis_nat_value with X;
+      repeat step || list_utils || apply equivalent_star || apply tlt_complete2;
       eauto with erased;
       eauto with wf;
+      eauto with fv;
       eauto using INVSucc;
       eauto with omega.
 Qed.
@@ -95,7 +99,9 @@ Lemma reducible_values_rec_pos:
     is_erased_type T0 ->
     is_erased_type Ts ->
     valid_interpretation theta ->
-    reducible_values theta t (T_rec t2 T0 Ts) ->
+    pfv T0 term_var = nil ->
+    pfv Ts term_var = nil ->
+   reducible_values theta t (T_rec t2 T0 Ts) ->
     equivalent_terms (tlt t1 (succ t2)) ttrue ->
      ~(X ∈ pfv T0 type_var) ->
      ~(X ∈ pfv Ts type_var) ->

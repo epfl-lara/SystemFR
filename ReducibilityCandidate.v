@@ -1,23 +1,27 @@
-Require Export SystemFR.Syntax.
-
-Require Export SystemFR.Tactics.
-Require Export SystemFR.SmallStep.
-Require Export SystemFR.AssocList.
-Require Export SystemFR.ErasedTermLemmas.
-
-
 Require Import PeanoNat.
+
+Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.EquivalenceLemmas.
 
 Open Scope list_scope.
 
 Definition reducibility_candidate (P: tree -> Prop): Prop :=
   forall v, P v ->
-       is_erased_term v /\
-       cbv_value v /\
-       wf v 0 /\
-       pfv v term_var = nil.
+    is_erased_term v /\
+    cbv_value v /\
+    wf v 0 /\
+    pfv v term_var = nil /\
+    (
+      forall v1 v2,
+        P v1 ->
+        equivalent_terms v1 v2 ->
+        cbv_value v2 ->
+        P v2
+    )
+.
 
-(* an interpretation for every type variable, as a reducibility candidate *)
+
+(* an interpretation is a map from type variables to reducibility candidates *)
 Definition interpretation: Type := list (nat * (tree -> Prop)).
 
 Definition pre_interpretation: Type := list (nat * (tree -> tree -> Prop)).
@@ -98,6 +102,30 @@ Lemma in_valid_interpretation_twf: forall theta v X P,
   twf v 0.
 Proof.
   eauto using is_erased_term_twf, in_valid_interpretation_erased.
+Qed.
+
+Lemma in_valid_interpretation_equiv: forall theta v1 v2 X P,
+  valid_interpretation theta ->
+  lookup Nat.eq_dec theta X = Some P ->
+  P v1 ->
+  equivalent_terms v1 v2 ->
+  cbv_value v2 ->
+  P v2.
+Proof.
+  induction theta; repeat step || unfold reducibility_candidate in * || instantiate_any;
+    try solve [ eapply_any; eauto ].
+Qed.
+
+Lemma in_valid_interpretation_equiv2: forall theta v1 v2 X P,
+  valid_interpretation theta ->
+  lookup Nat.eq_dec theta X = Some P ->
+  P v1 ->
+  equivalent_terms v2 v1 ->
+  cbv_value v2 ->
+  P v2.
+Proof.
+  intros.
+  eapply in_valid_interpretation_equiv; eauto using equivalent_sym.
 Qed.
 
 Fixpoint valid_pre_interpretation (P: tree -> Prop) (theta: list (nat * (tree -> tree -> Prop))) : Prop :=

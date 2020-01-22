@@ -10,6 +10,16 @@ Hint Extern 50 => lia: lia.
 Hint Extern 50 => cbn: cbn.
 Hint Extern 50 => cbn; intuition auto: cbn_intuition.
 
+Ltac destruct_and :=
+  match goal with
+  | H: _ /\ _ |- _ => destruct H
+  end.
+
+Ltac destruct_or :=
+  match goal with
+  | H: _ \/ _ |- _ => destruct H
+  end.
+
 Ltac success t := (t; fail) || (t; []).
 
 Ltac light :=
@@ -135,7 +145,7 @@ Inductive Marked {T}: T -> string -> Type :=
 | Mark: forall t s, Marked t s
 .
 
-Ltac clearMarked :=
+Ltac clear_marked :=
   repeat match goal with
          | H: Marked _ _ |- _ => clear H
          end.

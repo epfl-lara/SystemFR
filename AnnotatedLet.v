@@ -24,6 +24,7 @@ Lemma annotated_reducible_let:
     is_annotated_term t2 ->
     subset (fv t2) (support gamma) ->
     subset (fv A) (support gamma) ->
+    subset (fv B) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : A ]] ->
     [[ tvars; (p,T_equiv (term_fvar x) t1) :: (x,A) :: gamma ⊨ open 0 t2 (term_fvar x) : open 0 B (term_fvar x) ]] ->
     [[ tvars; gamma ⊨ tlet t1 A t2 : open 0 B t1 ]].

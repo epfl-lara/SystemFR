@@ -1,15 +1,8 @@
-
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Tactics.
-
-
-Require Export SystemFR.AssocList.
 Require Export SystemFR.FVLemmas.
-Require Export SystemFR.TermList.
-Require Export SystemFR.ListUtils.
+Require Export SystemFR.TypeErasureLemmas.
 
 Lemma satisfies_closed_mapping:
   forall P lterms gamma tag,
@@ -39,8 +32,8 @@ Proof.
   induction l1; steps.
 Qed.
 
-Hint Extern 50 => eapply closed_mapping_append1: b_cmap.
-Hint Extern 50 => eapply closed_mapping_append2: b_cmap.
+Hint Extern 50 => solve [ eapply closed_mapping_append1; eauto 1 ]: b_cmap.
+Hint Extern 50 => solve [ eapply closed_mapping_append2; eauto 1 ]: b_cmap.
 
 Lemma closed_mapping_append:
   forall l1 l2 tag,
@@ -73,11 +66,37 @@ Lemma fv_satisfies_nil:
     subset (fv t) (support gamma) ->
     fv (substitute t lterms) = nil.
 Proof.
-  repeat step || t_termlist || t_listutils || apply fv_nils2 || rewrite_any;
+  repeat step || t_termlist || list_utils || apply fv_nils2 || rewrite_any;
     eauto with fv b_cmap.
 Qed.
 
 Hint Extern 50 => eapply fv_satisfies_nil: fv.
+
+Lemma subset_same_support:
+  forall P gamma lterms S,
+    satisfies P gamma lterms ->
+    subset S (support gamma) ->
+    subset S (support lterms).
+Proof.
+  repeat step || t_termlist || rewrite_any.
+Qed.
+
+Hint Immediate subset_same_support: fv.
+
+Lemma fv_nils3:
+  forall P gamma t l,
+    is_annotated_term t ->
+    subset (pfv t term_var) (support gamma) ->
+    satisfies P (erase_context gamma) l ->
+    pfv (psubstitute (erase_term t) l term_var) term_var = nil.
+Proof.
+  intros.
+  apply fv_nils2; eauto with fv.
+  eapply subset_same_support; eauto;
+    repeat step || t_subset_erase || rewrite erased_context_support.
+Qed.
+
+Hint Immediate fv_nils3: fv.
 
 Lemma fv_subst_different_tag:
   forall t l tag tag',
@@ -96,10 +115,10 @@ Lemma pfv_in_subst:
 Proof.
   destruct tag1, tag2; repeat step || rewrite fv_subst_different_tag in * by steps.
   - epose proof (fv_subst2 _ _ _ X H0);
-    repeat step || t_listutils;
+    repeat step || list_utils;
     eauto using closed_mapping_fv with exfalso.
   - epose proof (fv_subst2 _ _ _ X H0);
-    repeat step || t_listutils;
+    repeat step || list_utils;
     eauto using closed_mapping_fv with exfalso.
 Qed.
 

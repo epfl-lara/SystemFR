@@ -40,7 +40,7 @@ Lemma erase_term_term_var:
     x ∈ pfv (erase_term t) term_var ->
     x ∈ pfv t term_var.
 Proof.
-  induction t; repeat step || t_listutils.
+  induction t; repeat step || list_utils.
 Qed.
 
 Hint Immediate erase_term_term_var: fv.
@@ -50,7 +50,7 @@ Lemma erase_term_type_var:
     x ∈ pfv (erase_term t) type_var ->
     False.
 Proof.
-  induction t; repeat step || t_listutils; eauto.
+  induction t; repeat step || list_utils; eauto.
 Qed.
 
 Hint Immediate erase_term_type_var: fv.
@@ -70,7 +70,7 @@ Lemma erase_type_var:
     x ∈ pfv (erase_type t) tag ->
     x ∈ pfv t tag.
 Proof.
-  induction t; destruct tag; repeat step || t_listutils;
+  induction t; destruct tag; repeat step || list_utils;
     eauto using erase_term_term_var, erase_term_type_var with exfalso.
 Qed.
 
@@ -81,7 +81,7 @@ Lemma erase_context_var:
     x ∈ pfv_context (erase_context gamma) tag ->
     x ∈ pfv_context gamma tag.
 Proof.
-  induction gamma; repeat step || t_listutils; eauto with fv.
+  induction gamma; repeat step || list_utils; eauto with fv.
 Qed.
 
 Hint Immediate erase_context_var: fv.

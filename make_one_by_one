@@ -1,0 +1,6 @@
+#! /bin/bash
+
+for f in *.v
+do
+  make "$(basename "$f" .v).vo"
+done

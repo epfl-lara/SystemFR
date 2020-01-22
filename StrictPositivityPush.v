@@ -6,43 +6,7 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.StarInversions.
-Require Export SystemFR.RelationClosures.
-Require Export SystemFR.SmallStep.
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Trees.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.Equivalence.
-Require Export SystemFR.OpenTOpen.
-
-Require Export SystemFR.SizeLemmas.
-
-Require Export SystemFR.WFLemmas.
-Require Export SystemFR.TWFLemmas.
-Require Export SystemFR.ErasedTermLemmas.
-
-Require Export SystemFR.ReducibilityMeasure.
-Require Export SystemFR.ReducibilitySubst.
-Require Export SystemFR.ReducibilityRenaming.
-Require Export SystemFR.ReducibilityUnused.
-Require Export SystemFR.RedTactics2.
-
-Require Export SystemFR.IdRelation.
-Require Export SystemFR.EqualWithRelation.
-
-Require Export SystemFR.EquivalentWithRelation.
-Require Export SystemFR.AssocList.
-
-Require Export SystemFR.Freshness.
-
-Require Export SystemFR.ListUtils.
-Require Export SystemFR.TOpenTClose.
-Require Export SystemFR.StrictPositivity.
-Require Export SystemFR.StrictPositivityLemmas.
 Require Export SystemFR.StrictPositivityLemma.
-
-
-Require Export SystemFR.FVLemmas.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -62,6 +26,9 @@ Lemma strictly_positive_push_forall2:
     is_erased_type A ->
     is_erased_type B ->
     is_erased_type T ->
+    pfv A term_var = nil ->
+    pfv B term_var = nil ->
+    pfv T term_var = nil ->
     valid_interpretation theta ->
     strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
     (forall a,
@@ -77,7 +44,7 @@ Proof.
        pfv B type_var ::
        nil
     ));
-    repeat step || t_listutils;
+    repeat step || list_utils;
     try finisher.
 
   rewrite cons_app.
@@ -87,13 +54,13 @@ Proof.
       ((X, fun a v => reducible_values theta v (open 0 B a)) :: nil) A
   end; eauto;
     repeat step || apply wf_topen || apply twf_topen || apply is_erased_type_topen ||
-           t_fv_open || t_listutils || apply wf_open || apply twf_open ||
+           t_fv_open || list_utils || apply wf_open || apply twf_open ||
+           apply reducibility_is_candidate ||
            t_instantiate_reducible || apply reducibility_subst_head2 || simp_red || t_closing;
-    eauto using reducibility_is_candidate with b_valid_interp;
     try finisher;
     eauto with btwf;
-    eauto with wf.
-
+    eauto with wf;
+    eauto 2 with fv step_tactic.
   - eapply strictly_positive_rename_one; eauto; steps; try finisher.
   - rewrite (is_erased_term_tfv a0) in *; (steps; eauto with erased).
 Qed.

@@ -53,7 +53,7 @@ Lemma length_makeFresh:
     l ∈ ll ->
     makeFresh ll > max l.
 Proof.
-  induction ll; repeat step || t_listutils || instantiate_any;
+  induction ll; repeat step || list_utils || instantiate_any;
     eauto with omega.
 Qed.
 

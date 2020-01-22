@@ -85,7 +85,7 @@ Lemma star_smallstep_app_inv:
         star scbv_step (app v1 v2) v.
 Proof.
   induction 1; repeat step || step_inversion cbv_value; eauto with smallstep.
-  inversion H; repeat step || t_listutils; eauto 3 with cbvlemmas smallstep values.
+  inversion H; repeat step || list_utils; eauto 3 with cbvlemmas smallstep values.
   - exists (notype_lambda t), t4; repeat step;
       eauto 4 with smallstep cbvlemmas values star.
 
@@ -523,48 +523,46 @@ Ltac t_invert_star :=
     poseNew (Mark H "inv app");
     unshelve epose proof (star_smallstep_app_inv _ v H _ t1 t2 eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (pp ?t1 ?t2) ?v |- _ =>
+  | H2: star scbv_step (pp ?t1 ?t2) ?v |- _ =>
+    cbv_value v;
     (not_cbv_value t1 || not_cbv_value t2);
     poseNew (Mark H2 "inv pair");
-    unshelve epose proof (star_smallstep_pp_inv _ v H2 H1 t1 t2 eq_refl)
+    unshelve epose proof (star_smallstep_pp_inv _ v H2 _ t1 t2 eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (pi1 ?t) ?v |- _ =>
-    not_cbv_value t;
+  | H2: star scbv_step (pi1 ?t) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv pi1");
-    unshelve epose proof (star_smallstep_pi1_inv _ v H2 H1 t eq_refl)
+    unshelve epose proof (star_smallstep_pi1_inv _ v H2 _ t eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (pi2 ?t) ?v |- _ =>
-    not_cbv_value t;
+  | H2: star scbv_step (pi2 ?t) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv pi2");
-    unshelve epose proof (star_smallstep_pi2_inv _ v H2 H1 t eq_refl)
+    unshelve epose proof (star_smallstep_pi2_inv _ v H2 _ t eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (ite _ _ _) ?v |- _ =>
+  | H2: star scbv_step (ite _ _ _) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv ite");
-    unshelve epose proof (star_smallstep_ite_inv _ v H2 H1 _ _ _ eq_refl)
+    unshelve epose proof (star_smallstep_ite_inv _ v H2 _ _ _ _ eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (succ _) ?v |- _ =>
+  | H2: star scbv_step (succ _) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv succ");
-    unshelve epose proof (star_smallstep_succ_inv _ v H2 H1 _ eq_refl)
+    unshelve epose proof (star_smallstep_succ_inv _ v H2 _ _ eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (tleft _) ?v |- _ =>
+  | H2: star scbv_step (tleft _) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv left");
-    unshelve epose proof (star_smallstep_tleft_inv _ v H2 H1 _ eq_refl)
+    unshelve epose proof (star_smallstep_tleft_inv _ v H2 _ _ eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (tright _) ?v |- _ =>
+  | H2: star scbv_step (tright _) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv right");
-    unshelve epose proof (star_smallstep_tright_inv _ v H2 H1 _ eq_refl)
+    unshelve epose proof (star_smallstep_tright_inv _ v H2 _ _ eq_refl)
 
-  | H1: cbv_value ?v,
-    H2: star scbv_step (tsize _) ?v |- _ =>
+  | H2: star scbv_step (tsize _) ?v |- _ =>
+    cbv_value v;
     poseNew (Mark H2 "inv tsize");
-    unshelve epose proof (star_smallstep_tsize_inv _ v H2 H1 _ eq_refl)
+    unshelve epose proof (star_smallstep_tsize_inv _ v H2 _ _ eq_refl)
 
   | H: star scbv_step (notype_rec (succ ?v2) _ _) ?v1 |- _ =>
     cbv_value v1;
@@ -597,6 +595,11 @@ Ltac t_invert_star :=
     cbv_value v;
     poseNew (Mark H "inv match");
     unshelve epose proof (star_smallstep_match_inv _ v H _ _ _ _ eq_refl)
+
+  | H: star scbv_step (sum_match _ _ _) ?v |- _ =>
+    cbv_value v;
+    poseNew (Mark H "inv sum match");
+    unshelve epose proof (star_smallstep_sum_match_inv _ v H _ _ _ _ eq_refl)
 
   | H: star scbv_step notype_err _ |- _ => inversion H; clear H
   | _ => t_invert_step || star_smallstep_value
@@ -642,3 +645,21 @@ Ltac t_invert_ite :=
   | H1: star scbv_step (ite ?b ?t1 ?t2) ?v |- star scbv_step ?t2 ?v =>
       apply star_smallstep_ite_inv_false with b t1
   end.
+
+Lemma star_pp:
+  forall t t',
+    star scbv_step t t' ->
+    forall t1 t2, t = pp t1 t2 ->
+      exists t1' t2', t'= pp t1' t2'.
+Proof.
+  induction 1; repeat step || t_invert_step; eauto.
+Qed.
+
+Lemma star_pp_succ:
+  forall t1 t2 t,
+    star scbv_step (pp t1 t2) (succ t) ->
+    False.
+Proof.
+  intros.
+  pose proof (star_pp _ _ H); steps.
+Qed.

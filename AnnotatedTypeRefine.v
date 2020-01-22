@@ -7,6 +7,7 @@ Lemma annotated_reducible_type_refine:
     wf B 1 ->
     is_annotated_type B ->
     is_annotated_term t1 ->
+    subset (fv B) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : A ]] ->
     [[ tvars; gamma ⊨ t2 : open 0 B t1 ]] ->
     [[ tvars; gamma ⊨ because t1 t2 : T_type_refine A B ]].
@@ -14,8 +15,7 @@ Proof.
   unfold annotated_reducible; intros.
   eapply open_reducible_type_refine; try eassumption;
     repeat step || erase_open;
-    eauto with erased;
-    eauto with wf.
+    side_conditions.
 Qed.
 
 Lemma annotated_reducible_get_refinement_witness:
@@ -32,6 +32,7 @@ Lemma annotated_reducible_get_refinement_witness:
     wf B 1 ->
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
+    subset (fv B) (support gamma) ->
     is_annotated_type B ->
     is_annotated_term t1 ->
     is_annotated_term t2 ->

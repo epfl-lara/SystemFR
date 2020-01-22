@@ -5,14 +5,14 @@ Require Export SystemFR.SubstitutionLemmas.
 Require Export SystemFR.ErasedTermLemmas.
 
 Ltac t_rewrite :=
-  repeat step || t_listutils || t_fv_open || finisher;
+  repeat step || list_utils || t_fv_open || finisher;
     eauto with wf;
     eauto with btwf;
     eauto with fv;
     eauto with b_cmap fv.
 
 Ltac t_closing :=
-  unfold closed_value, closed_term in *; repeat step || t_listutils;
+  unfold closed_value, closed_term in *; repeat step || list_utils;
     eauto with erased;
     eauto with wf;
     eauto with fv;

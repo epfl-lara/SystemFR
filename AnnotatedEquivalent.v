@@ -1,6 +1,6 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
-Require Export SystemFR.LiftEquivalenceLemmas.
+Require Export SystemFR.EquivalentStar.
 Require Export SystemFR.TermListReducible.
 Require Export SystemFR.SubstitutionErase.
 

@@ -35,7 +35,7 @@ Lemma scbv_normalizing_ite_true:
     scbv_normalizing (ite ttrue t1 t2) <-> scbv_normalizing t1.
 Proof.
   unfold scbv_normalizing;
-    repeat step || t_listutils || t_invert_star; eauto with smallstep star.
+    repeat step || list_utils || t_invert_star; eauto with smallstep star.
 Qed.
 
 Lemma scbv_normalizing_ite_false:
@@ -45,7 +45,7 @@ Lemma scbv_normalizing_ite_false:
     scbv_normalizing (ite tfalse t1 t2) <-> scbv_normalizing t2.
 Proof.
   unfold scbv_normalizing;
-    repeat step || t_listutils || t_invert_star; eauto with smallstep star.
+    repeat step || list_utils || t_invert_star; eauto with smallstep star.
 Qed.
 
 Lemma scbv_normalizing_zero:

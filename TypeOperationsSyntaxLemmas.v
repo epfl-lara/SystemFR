@@ -79,7 +79,7 @@ Lemma pfv_ite:
 Proof.
   induction 1;
     repeat match goal with
-           | _ => step || t_listutils
+           | _ => step || list_utils
            | H1: forall _ _, _ -> _, H2: _ ∈ _ |- _ => pose proof (H1 _ _ H2); clear H2
            end.
 Qed.

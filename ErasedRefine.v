@@ -3,7 +3,7 @@ Require Import Equations.Equations.
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.ErasedLetTermRules.
+Require Export SystemFR.ErasedLet2.
 Require Export SystemFR.NatCompare.
 
 Opaque reducible_values.
@@ -16,6 +16,7 @@ Lemma reducible_refine:
     wf t 0 ->
     valid_interpretation theta ->
     is_erased_term b ->
+    fv b = nil ->
     (forall v,
         reducible_values theta v A ->
         equivalent_terms t v ->
@@ -32,7 +33,6 @@ Qed.
 
 Lemma open_reducible_refine:
   forall tvars gamma t A b x p,
-    open_reducible tvars gamma t A ->
     wf b 1 ->
     wf t 0 ->
     subset (fv t) (support gamma) ->
@@ -45,12 +45,14 @@ Lemma open_reducible_refine:
     ~(x ∈ fv_context gamma) ->
     ~(x = p) ->
     is_erased_term b ->
+    subset (fv b) (support gamma) ->
     (forall theta l,
         valid_interpretation theta ->
         support theta = tvars ->
         satisfies (reducible_values theta) ((p,T_equiv (term_fvar x) t) :: (x, A) :: gamma) l ->
         equivalent_terms (substitute (open 0 b (term_fvar x)) l) ttrue) ->
-    open_reducible tvars gamma t (T_refine A b).
+    [ tvars; gamma ⊨ t : A ] ->
+    [ tvars; gamma ⊨ t : T_refine A b ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
 
@@ -61,15 +63,15 @@ Proof.
 Qed.
 
 Lemma subtype_refine:
-  forall tvars theta (gamma : context) A B p q (x : nat) t l,
+  forall theta (gamma : context) A B p q (x : nat) t l,
     wf q 1 ->
     is_erased_term q ->
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv A) ->
     ~(x ∈ fv p) ->
     ~(x ∈ fv q) ->
+    subset (fv q) (support gamma) ->
     valid_interpretation theta ->
-    support theta = tvars ->
     (forall l,
         satisfies (reducible_values theta) ((x, T_refine A p) :: gamma) l ->
         equivalent_terms (substitute (open 0 q (term_fvar x)) l) ttrue) ->
@@ -80,7 +82,7 @@ Lemma subtype_refine:
     reducible_values theta t (T_refine (substitute A l) (substitute p l)) ->
     reducible_values theta t (T_refine (substitute B l) (substitute q l)).
 Proof.
-  repeat step || simp_red; unshelve eauto with wf; eauto with erased.
+  repeat step || simp_red || unshelve eauto with wf erased fv.
 
   unshelve epose proof (H7 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.
@@ -93,6 +95,7 @@ Lemma subtype_refine4:
     ~(x ∈ fv p) ->
     is_erased_term p ->
     wf p 1 ->
+    subset (fv p) (support gamma) ->
     valid_interpretation theta ->
     (forall l,
         satisfies (reducible_values theta) ((x, T) :: gamma) l ->
@@ -106,12 +109,12 @@ Lemma subtype_refine4:
 Proof.
   repeat step || simp_red || unshelve t_closer.
 
-  unshelve epose proof (H5 ((x,t) :: l) _); tac1;
+  unshelve epose proof (H6 ((x,t) :: l) _); tac1;
     eauto using equivalent_true.
 Qed.
 
 Lemma subtype_refine5:
-  forall tvars theta gamma T A b (x p : nat) t l,
+  forall theta gamma T A b (x p : nat) t l,
     ~(p ∈ fv_context gamma) ->
     ~(p ∈ fv A) ->
     ~(p ∈ fv T) ->
@@ -121,12 +124,9 @@ Lemma subtype_refine5:
     ~(x ∈ fv T) ->
     ~(x ∈ fv b) ->
     ~(x = p) ->
-    open_reducible tvars
-                   ((p, T_equiv (open 0 b (term_fvar x)) ttrue) :: (x, A) :: gamma)
-                   (term_fvar x)
-                   T ->
+    [ support theta; (p, T_equiv (open 0 b (term_fvar x)) ttrue) :: (x, A) :: gamma ⊨
+        term_fvar x : T ] ->
     valid_interpretation theta ->
-    support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->
     reducible_values theta t (T_refine (substitute A l) (substitute b l)) ->
     reducible_values theta t (substitute T l).
@@ -135,5 +135,5 @@ Proof.
 
   unshelve epose proof (H8 theta ((p, uu) :: (x,t) :: l) _ _ _); tac1;
     eauto using red_is_val, reducible_expr_value;
-    try solve [ apply equivalent_star; eauto with erased; eauto with wf ].
+    try solve [ apply equivalent_star; eauto with erased wf fv ].
 Qed.

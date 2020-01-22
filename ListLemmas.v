@@ -61,7 +61,7 @@ Lemma union_weaken1:
     subset (l1 ++ l2) s ->
     subset l1 s.
 Proof.
-  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+  induction l1; unfold subset in *; repeat step || apply_any || list_utils.
 Qed.
 
 Lemma union_weaken2:
@@ -69,7 +69,7 @@ Lemma union_weaken2:
     subset (l1 ++ l2) s ->
     subset l2 s.
 Proof.
-  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+  induction l1; unfold subset in *; repeat step || apply_any || list_utils.
 Qed.
 
 Lemma union_weaken3:
@@ -77,7 +77,7 @@ Lemma union_weaken3:
     subset (l1 ++ l2 ++ l3 ++ l4) s ->
     subset l3 s.
 Proof.
-  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+  induction l1; unfold subset in *; repeat step || apply_any || list_utils.
 Qed.
 
 Lemma union_weaken4:
@@ -85,7 +85,7 @@ Lemma union_weaken4:
     subset (l1 ++ l2 ++ l3 ++ l4) s ->
     subset l4 s.
 Proof.
-  induction l1; unfold subset in *; repeat step || apply_any || t_listutils.
+  induction l1; unfold subset in *; repeat step || apply_any || list_utils.
 Qed.
 
 Hint Resolve union_weaken1: sets.
@@ -205,7 +205,7 @@ Lemma subset_insert:
     subset A (B1 ++ x :: B2).
 Proof.
   induction B1;
-    repeat step || t_listutils || unfold subset in * || instantiate_any.
+    repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
 Hint Resolve subset_insert: sets.
@@ -229,7 +229,7 @@ Hint Rewrite (@singleton_subset nat): t_simp_set.
 
 Ltac t_sets2 :=
   repeat autorewrite with t_simp_set in * || step ||
-         t_listutils || unfold subset in * || instantiate_any.
+         list_utils || unfold subset in * || instantiate_any.
 
 Lemma subset_same:
   forall T (A B C: list T),
@@ -256,7 +256,7 @@ Lemma in_left:
     x ∈ l1 ->
     x ∈ l1 ++ l2.
 Proof.
-  repeat step || t_listutils.
+  repeat step || list_utils.
 Qed.
 
 Lemma in_right:
@@ -264,7 +264,7 @@ Lemma in_right:
     x ∈ l2 ->
     x ∈ l1 ++ l2.
 Proof.
-  repeat step || t_listutils.
+  repeat step || list_utils.
 Qed.
 
 Lemma fair_split:
@@ -274,7 +274,7 @@ Lemma fair_split:
     x ∈ l1 ++ l2 ->
     x ∈ l1' ++ l2'.
 Proof.
-  repeat step || t_listutils.
+  repeat step || list_utils.
 Qed.
 
 Ltac t_fair_split :=
@@ -289,7 +289,7 @@ Lemma strange_split:
     x ∈ l1 ++ l2 ->
     x ∈ (l1' ++ l2') ++ l3.
 Proof.
-  repeat step || t_listutils || instantiate_any.
+  repeat step || list_utils || instantiate_any.
 Qed.
 
 Ltac t_strange_split :=
@@ -306,7 +306,7 @@ Lemma strange_split3:
     x ∈ l1 ++ l2 ++ l3 ->
     x ∈ (l1' ++ l2' ++ l3') ++ l4.
 Proof.
-  repeat step || t_listutils || instantiate_any.
+  repeat step || list_utils || instantiate_any.
 Qed.
 
 Ltac t_strange_split3 :=
@@ -324,7 +324,7 @@ Lemma strange_split4:
     x ∈ l1 ++ l2 ++ l3 ++ l4 ->
     x ∈ (l1' ++ l2' ++ l3' ++ l4') ++ l5.
 Proof.
-  repeat step || t_listutils || instantiate_any.
+  repeat step || list_utils || instantiate_any.
 Qed.
 
 Ltac t_strange_split4 :=
@@ -365,7 +365,7 @@ Lemma subset_middle:
     subset s (s1 ++ x :: s2) ->
     subset s (s1 ++ s2).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Hint Immediate subset_middle: sets2.
@@ -378,7 +378,7 @@ Lemma subset_middle2:
     subset s (s1 ++ x :: y :: s2) ->
     subset s (s1 ++ s2).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma subset_middle3:
@@ -387,7 +387,7 @@ Lemma subset_middle3:
     subset s (s1 ++ x :: y :: s2) ->
     subset s (s1 ++ x :: s2).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma subset_middle4:
@@ -397,7 +397,7 @@ Lemma subset_middle4:
     subset s (s1 ++ x :: y :: z :: s2) ->
     subset s (s1 ++ x :: s2).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma subset_middle5:
@@ -406,7 +406,7 @@ Lemma subset_middle5:
     subset s ((s1 ++ x :: s2) ++ s3) ->
     subset s ((s1 ++ s2) ++ s3).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma subset_middle6:
@@ -416,7 +416,7 @@ Lemma subset_middle6:
     subset s ((s1 ++ x :: y :: s2) ++ s3) ->
     subset s ((s1 ++ s2) ++ s3).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Hint Immediate subset_middle5: sets2.
@@ -427,7 +427,7 @@ Lemma subset_middle7:
     subset s ((s1 ++ x :: y :: s2) ++ s3) ->
     subset s ((s1 ++ x :: s2) ++ s3).
 Proof.
-  unfold subset; induction s1; repeat step || t_listutils || instantiate_any.
+  unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
 Lemma subset_middle_indirect:
@@ -477,7 +477,7 @@ Lemma subset_right4:
     subset s1 (s3 ++ s4) ->
     subset s1 ((s2 ++ x :: s3) ++ s4).
 Proof.
-  repeat step || t_listutils || unfold subset in * || instantiate_any.
+  repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
 Lemma subset_right5:
@@ -493,7 +493,7 @@ Lemma subset_right6:
     subset s (s2 ++ s3) ->
     subset s ((s1 ++ s2) ++ s3).
 Proof.
-  repeat step || t_listutils || unfold subset in * || instantiate_any.
+  repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
 Hint Immediate subset_right: sets2.

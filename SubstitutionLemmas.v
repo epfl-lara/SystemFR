@@ -20,7 +20,7 @@ Proof.
     repeat match goal with
            | _ => progress (
                    step ||
-                   t_listutils ||
+                   list_utils ||
                    (rewrite in_app_iff in *) ||
                    unfold fv in * ||
                    t_equality ||
@@ -68,7 +68,7 @@ Lemma substitute_nothing5:
     pfv t tag = nil ->
     psubstitute t l tag = t.
 Proof.
-  intros; apply substitute_nothing; repeat step || t_listutils.
+  intros; apply substitute_nothing; repeat step || list_utils.
 Qed.
 
 Lemma substitute_cons:
@@ -265,7 +265,7 @@ Lemma NoDup_cons:
     ~(x ∈ l) ->
     NoDup (l ++ x :: nil).
 Proof.
-  induction l; repeat step || t_listutils || step_inversion NoDup.
+  induction l; repeat step || list_utils || step_inversion NoDup.
 Qed.
 
 Lemma substitute_cons4:
@@ -324,13 +324,13 @@ Lemma weak_subst_permutation:
 Proof.
   unfold weak_equivalent_subst; induction t;
     repeat match goal with
-           | _ => step || t_equality || t_listutils
+           | _ => step || t_equality || list_utils
            | _ => solve [ rewrite_any; steps ]
            | _ => solve [ rewrite_back_any; steps ]
            | _ => solve [
-                   apply_any; repeat step || t_listutils;
-                   apply_any; repeat step || t_listutils;
-                    eauto with step_tactic blistutils
+                   apply_any; repeat step || list_utils;
+                   apply_any; repeat step || list_utils;
+                    eauto with step_tactic list_utils
                  ]
            end.
 Qed.
@@ -394,7 +394,7 @@ Lemma equivalent_append:
     equivalent_subst (l1 ++ l) (l2 ++ l).
 Proof.
   unfold equivalent_subst;
-    repeat step || t_lookup || t_lookupor || t_listutils;
+    repeat step || t_lookup || t_lookupor || list_utils;
     auto using lookupWeaken with bcongruence apply_any;
     auto 6 using lookupRight2, lookupNoneSupport with apply_any step_tactic.
 Qed.

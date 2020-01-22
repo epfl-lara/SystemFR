@@ -11,6 +11,7 @@ Lemma annotated_subtype_refine:
     ~(x ∈ tvars) ->
     wf q 1 ->
     is_annotated_term q ->
+    subset (fv q) (support gamma) ->
     [[ tvars; (x, T_refine A p) :: gamma ⊨ open 0 q (term_fvar x) ≡ ttrue ]] ->
     [[ tvars; gamma ⊨ A <: B ]] ->
     [[ tvars; gamma ⊨ T_refine A p <: T_refine B q ]].
@@ -19,7 +20,7 @@ Proof.
     repeat step.
 
   apply subtype_refine with
-    (support theta) (erase_context gamma) (erase_type A) (erase_term p) x;
+    (erase_context gamma) (erase_type A) (erase_term p) x;
     repeat step || t_instantiate_sat3 || erase_open;
     side_conditions.
 Qed.
@@ -50,6 +51,7 @@ Lemma annotated_subtype_refine4:
     ~(x ∈ tvars) ->
     wf p 1 ->
     is_annotated_term p ->
+    subset (fv p) (support gamma) ->
     [[ tvars; (x, T) :: gamma ⊨ open 0 p (term_fvar x) ≡ ttrue ]] ->
     [[ tvars; gamma ⊨ T <: A ]] ->
     [[ tvars; gamma ⊨ T <: T_refine A p ]].
@@ -82,7 +84,7 @@ Proof.
   unfold annotated_equivalent, equivalent, annotated_subtype, subtype, annotated_reducible;
     repeat step.
 
-  apply subtype_refine5 with (support theta) (erase_context gamma) (erase_type A) (erase_term b) x p;
+  apply subtype_refine5 with (erase_context gamma) (erase_type A) (erase_term b) x p;
     repeat step || t_instantiate_sat3 || erase_open;
     side_conditions.
 Qed.

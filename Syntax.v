@@ -119,7 +119,7 @@ Proof.
   induction gamma1; repeat step || rewrite app_assoc_reverse.
 Qed.
 
-Hint Rewrite fv_context_append: blistutils.
+Hint Rewrite fv_context_append: list_utils.
 
 Fixpoint pfv_range (m: list (nat * tree)) tag :=
   match m with

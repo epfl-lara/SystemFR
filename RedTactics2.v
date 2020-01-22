@@ -10,7 +10,7 @@ Require Export SystemFR.TermList.
 Require Export SystemFR.TermListLemmas.
 Require Export SystemFR.AssocList.
 Require Export SystemFR.FVLemmasLists.
-Require Export SystemFR.LiftEquivalenceLemmas.
+Require Export SystemFR.EquivalentStar.
 Require Export SystemFR.SubstitutionErase.
 Require Export SystemFR.TreeLists.
 Require Export SystemFR.TermListReducible.

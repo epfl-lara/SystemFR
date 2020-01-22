@@ -12,6 +12,8 @@ Lemma annotated_reducible_unfold_gen:
     twf Ts 1 ->
     is_annotated_type Ts ->
     is_annotated_type T0 ->
+    subset (fv T0) (support gamma) ->
+    subset (fv Ts) (support gamma) ->
     ~(X ∈ pfv Ts type_var) ->
     strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
     [[ tvars; gamma ⊨ t : intersect T0 Ts ]] ->
@@ -59,6 +61,8 @@ Lemma annotated_reducible_unfold_gen_in:
     wf t1 0 ->
     subset (fv t1) (support gamma) ->
     subset (fv t2) (support gamma) ->
+    subset (fv T0) (support gamma) ->
+    subset (fv Ts) (support gamma) ->
     [[ tvars; gamma ⊨ t1 : intersect T0 Ts ]] ->
     [[ tvars; (p, T_equiv t1 (tfold  (intersect T0 Ts) (fvar y term_var))) ::
              (y, topen 0 Ts (intersect T0 Ts)) ::
@@ -77,7 +81,6 @@ Proof.
   rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
     eauto 2 with bannot.
 Qed.
-
 
 Lemma annotated_reducible_fold_gen:
   forall tvars gamma t T0 Ts X,
@@ -114,6 +117,7 @@ Lemma annotated_reducible_fold_gen2:
     twf T0 0 ->
     wf Ts 0 ->
     twf Ts 1 ->
+    subset (fv T0) (support gamma) ->
     subset (fv Ts) (support gamma) ->
     base_type X (topen 0 Ts (fvar X type_var)) T0 ->
     is_annotated_type Ts ->
