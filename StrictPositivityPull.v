@@ -7,6 +7,7 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
 Require Export SystemFR.StrictPositivityLemma.
+Require Export SystemFR.ReducibilitySubst.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -46,7 +47,7 @@ Proof.
     ));
     repeat step || list_utils || apply twf_open || apply wf_open;
     try finisher;
-      eauto with btwf;
+      eauto with twf;
       eauto with wf;
       eauto with fv;
       eauto with erased.

@@ -5,13 +5,13 @@ coqdep -Q . SystemFR -dumpgraph dependencies.dot *.v
 finished=0
 total=0
 
-for f in *.vo
+for v in *.v
 do
-  base=$(basename "$f" .vo)
-  v="$base.v"
+  base=$(basename "$v" .v)
+  vo="$base.vo"
   echo "Checking $base"
   total=$((total+1))
-  if $(make -q $f)
+  if $(make -q $vo)
   then
     finished=$((finished+1))
     sed -i s/=\"$base\"/=\"$base\",fillcolor=lightgreen,style=filled/g dependencies.dot

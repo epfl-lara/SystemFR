@@ -23,7 +23,8 @@ Lemma reducible_fix_zero:
     (forall tx n : tree,
         reducible_values theta n T_nat ->
         reducible_values theta tx
-                         (T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) (T_arrow T_unit (shift T))) ->
+                         (T_forall (T_refine T_nat (tlt (lvar 0 term_var) n))
+                                   (T_arrow T_unit (shift 0 T 1))) ->
         equivalent_terms tx (notype_lambda (notype_tfix ts)) ->
         reducible theta (open 0 ts tx) (open 0 T n)) ->
     reducible theta (notype_tfix ts) (open 0 T zero).
@@ -38,22 +39,13 @@ Proof.
       try solve [ unshelve eauto 4 using equivalent_refl with erased wf fv step_tactic; auto ].
 Qed.
 
-Lemma scbv_step_eq:
-  forall t1 t2 t3,
-    scbv_step t1 t2 ->
-    t2 = t3 ->
-    scbv_step t1 t3.
-Proof.
-  steps.
-Qed.
-
 Lemma scbv_step_fix_open:
   forall ts : tree,
     wf ts 1 ->
     scbv_step (notype_tfix ts) (open 0 ts (notype_lambda (notype_tfix ts))).
 Proof.
   intros.
-  eapply scbv_step_eq; eauto with smallstep.
+  eapply scbv_step_same; eauto with smallstep.
   rewrite (open_none ts); steps; eauto with wf.
 Qed.
 
@@ -73,7 +65,7 @@ Lemma reducible_fix_strong_induction_aux:
        reducible_values theta tx
          (T_forall
             (T_refine T_nat (tlt (lvar 0 term_var) n))
-            (T_arrow T_unit (shift T))) ->
+            (T_arrow T_unit (shift 0 T 1))) ->
        equivalent_terms tx (notype_lambda (notype_tfix ts)) ->
        reducible theta
          (open 0 ts tx)
@@ -95,14 +87,14 @@ Proof.
 
   eapply backstep_reducible; eauto using red_is_val with smallstep;
     repeat
-      step || list_utils || rewrite open_shift ||
+      step || list_utils || rewrite <- open_shift_zero in * ||
       rewrite open_none by (steps; eauto with wf) ||
       rewrite (open_none ts) in * by (steps; eauto with wf);
       try solve [ unshelve eauto with wf fv; auto ].
 
   apply_any;
     repeat step || simp_red || rewrite open_tlt in * || t_tlt_sound ||
-    rewrite open_none in * by (steps; eauto with wf);
+    rewrite open_none in * by t_closer;
     try solve [ unshelve t_closer; auto ];
     try omega.
 Qed.
@@ -122,7 +114,7 @@ Lemma reducible_fix_strong_induction:
        reducible_values theta tx
          (T_forall
             (T_refine T_nat (tlt (lvar 0 term_var) n))
-            (T_arrow T_unit (shift T))) ->
+            (T_arrow T_unit (shift 0 T 1))) ->
        equivalent_terms tx (notype_lambda (notype_tfix ts)) ->
        reducible theta
          (open 0 ts tx)
@@ -146,7 +138,7 @@ Lemma reducible_fix_strong_induction_forall:
        reducible_values theta tx
                         (T_forall
                            (T_refine T_nat (tlt (lvar 0 term_var) n))
-                           (T_arrow T_unit (shift T))) ->
+                           (T_arrow T_unit (shift 0 T 1))) ->
        equivalent_terms tx (notype_lambda (notype_tfix ts)) ->
        reducible theta
          (open 0 ts tx)
@@ -179,17 +171,16 @@ Lemma open_reducible_fix_strong_induction:
     is_erased_term ts ->
     is_erased_type T ->
     NoDup (n :: y :: p :: nil) ->
-    open_reducible tvars (
+    [ tvars;
         (p, T_equiv (fvar y term_var) (notype_lambda (notype_tfix ts))) ::
         (y,
           (T_forall
              (T_refine T_nat (tlt (lvar 0 term_var) (fvar n term_var)))
-             (T_arrow T_unit (shift T)))) ::
+             (T_arrow T_unit (shift 0 T 1)))) ::
         (n, T_nat) ::
-        gamma)
-      (open 0 ts (fvar y term_var))
-      (open 0 T (fvar n term_var)) ->
-    open_reducible tvars gamma (notype_tfix ts) (T_forall T_nat T).
+        gamma ⊨
+      open 0 ts (fvar y term_var) : open 0 T (fvar n term_var) ] ->
+    [ tvars; gamma ⊨ notype_tfix ts : T_forall T_nat T ].
 Proof.
   unfold open_reducible in *; steps.
 
@@ -200,24 +191,14 @@ Proof.
     try solve [ rewrite substitute_open2; eauto with wf ].
 
   unshelve epose proof (H14 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _) as HH;
-    repeat
-      tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any ||
-      rewrite pfv_tlt in * || rewrite pfv_map_indices in * ||
-      rewrite psubstitute_tlt in * || rewrite open_tlt in * || list_utils ||
-      rewrite psubstitute_map_indices in * || rewrite open_shift in * ||
-      (progress rewrite open_none in * by (steps; eauto with wf)) ||
-      t_tlt_sound.
+    repeat step || apply SatCons || nodup || rewrite pfv_tlt in * || rewrite pfv_shift2 in * || list_utils;
+    eauto 2 with fv;
+    eauto 2 with wf;
+    eauto 2 with twf.
 
-  rewrite reducibility_rewrite.
-  eapply reducible_app2; steps;
-    eauto with wf;
-    eauto using reducible_unit.
-
-  unshelve epose proof (H29 a _ _ _ _);
-    repeat step || simp reducible_values || rewrite open_tlt in * ||
-           (progress rewrite open_shift in * by (repeat step || unshelve eauto with wf)) ||
-           (progress rewrite open_none in * by (repeat step || unshelve eauto with wf));
-    eauto using reducible_value_expr.
+  - repeat step || simp_red || t_substitutions.
+  - repeat step || rewrite psubstitute_tlt in * || (rewrite substitute_shift in * by eauto 2 with wf step_tactic) || t_substitutions.
+  - repeat step || t_substitutions || nodup.
 Qed.
 
 Lemma reducible_fix_induction:
@@ -257,8 +238,9 @@ Proof.
 
     apply reducible_lambda;
       repeat apply reducible_let with T_unit || simp reducible_values ||
-             apply reducible_intersection || tac1 ||
-             (rewrite open_none by t_rewrite); eauto with erased.
+             apply reducible_intersection || step || list_utils || t_substitutions ||
+             (rewrite open_none by t_rewrite);
+      eauto with erased wf.
 Qed.
 
 Lemma reducible_fix_induction_forall:
@@ -313,18 +295,14 @@ Lemma open_reducible_fix:
     is_erased_term ts ->
     is_erased_type T ->
     NoDup (n :: y :: p :: nil) ->
-    open_reducible tvars
-                   ((y, T_top) :: gamma)
-                   (open 0 ts (fvar y term_var))
-                   (open 0 T zero) ->
-    open_reducible tvars (
+    [ tvars; (y, T_top) :: gamma ⊨ open 0 ts (fvar y term_var) : open 0 T zero ] ->
+    [ tvars;
         (p, T_equiv (fvar y term_var) (notype_lambda (notype_tfix ts))) ::
         (y, T_arrow T_unit (open 0 T (fvar n term_var))) ::
         (n, T_nat) ::
-        gamma)
-      (open 0 ts (fvar y term_var))
-      (open 0 T (succ (fvar n term_var))) ->
-    open_reducible tvars gamma (notype_tfix ts) (T_forall T_nat T).
+        gamma ⊨
+          open 0 ts (fvar y term_var) : open 0 T (succ (fvar n term_var)) ] ->
+    [ tvars; gamma ⊨ notype_tfix ts : T_forall T_nat T ].
 Proof.
   unfold open_reducible in *; steps.
 
@@ -335,8 +313,17 @@ Proof.
     try solve [ rewrite substitute_open2; eauto with wf ].
 
   - unshelve epose proof (H14 theta ((y, tx) :: lterms) _ _ _);
-      repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
+      repeat step || list_utils || t_substitutions || simp_red || apply SatCons ||
+             step_inversion NoDup || rewrite substitute_open in * || apply_any;
+        t_closer.
 
   - unshelve epose proof (H15 theta ((p, uu) :: (y,tx) :: (n,n0) :: lterms) _ _ _);
-      repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
+      repeat step || apply SatCons || nodup || list_utils || fv_open;
+        eauto 2 with fv;
+        eauto 2 with wf;
+        eauto 2 with twf.
+
+    + repeat step || simp_red || t_substitutions.
+    + repeat step || rewrite psubstitute_tlt in * || (rewrite substitute_shift in * by eauto 2 with wf step_tactic) || t_substitutions.
+    + repeat step || t_substitutions || nodup.
 Qed.

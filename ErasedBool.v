@@ -13,8 +13,8 @@ Proof.
 Qed.
 
 Lemma open_reducible_true:
-  forall theta gamma,
-    open_reducible theta gamma ttrue T_bool.
+  forall tvars gamma,
+    [ tvars; gamma ⊨ ttrue : T_bool ].
 Proof.
   unfold open_reducible, reducible, reduces_to, closed_term in *; steps;
     eauto using reducible_true with star.
@@ -27,8 +27,8 @@ Proof.
 Qed.
 
 Lemma open_reducible_false:
-  forall theta gamma,
-    open_reducible theta gamma tfalse T_bool.
+  forall tvars gamma,
+    [ tvars; gamma ⊨ tfalse : T_bool ].
 Proof.
   unfold open_reducible, reducible, reduces_to, closed_term in *; steps;
     eauto using reducible_false with star.
@@ -50,7 +50,7 @@ Lemma reducible_ite:
 Proof.
   repeat step || top_level_unfold reducible || top_level_unfold reduces_to ||
          top_level_unfold closed_term ||
-         simp reducible_values in *.
+         simp_red.
 
   - apply star_backstep_reducible with (ite ttrue t1 t2); repeat step || list_utils;
       auto with cbvlemmas; eauto with fv; eauto with wf.
@@ -82,10 +82,10 @@ Lemma open_reducible_ite:
     is_erased_term b ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    open_reducible tvars gamma b T_bool ->
-    open_reducible tvars ((x, T_equiv b ttrue) :: gamma) t1 T ->
-    open_reducible tvars ((x, T_equiv b tfalse) :: gamma) t2 T ->
-    open_reducible tvars gamma (ite b t1 t2) T.
+    [ tvars; gamma ⊨ b : T_bool ] ->
+    [ tvars; (x, T_equiv b ttrue) :: gamma ⊨ t1 : T ] ->
+    [ tvars; (x, T_equiv b tfalse) :: gamma ⊨ t2 : T ] ->
+    [ tvars; gamma ⊨ ite b t1 t2 : T ].
 Proof.
   intros; unfold open_reducible; steps.
 
@@ -94,6 +94,8 @@ Proof.
     eauto using subset_same with fv;
     eauto with erased.
 
-  - unshelve epose proof (H11 _ ((x, uu) :: lterms) _ _ _); tac1.
-  - unshelve epose proof (H12 _ ((x, uu) :: lterms) _ _ _); tac1.
+  - unshelve epose proof (H11 _ ((x, uu) :: lterms) _ _ _);
+      repeat step || apply SatCons || list_utils || simp_red || t_substitutions.
+  - unshelve epose proof (H12 _ ((x, uu) :: lterms) _ _ _);
+      repeat step || apply SatCons || list_utils || simp_red || t_substitutions.
 Qed.

@@ -181,7 +181,7 @@ Qed.
 
 Lemma true_is_irred: irred ttrue.
 Proof.
-  unfold irred; repeat step || t_nostep.
+  unfold irred; repeat step || no_step.
 Qed.
 
 Lemma equivalent_tlt_steps:
@@ -200,8 +200,8 @@ Proof.
            (notype_rec v1 (notype_lambda (tmatch (lvar 0 term_var) tfalse ttrue))
               (notype_lambda
                  (tmatch (lvar 0 term_var) tfalse (app (app (lvar 2 term_var) uu) (lvar 0 term_var)))))
-           t2)) in H; eauto with cbvlemmas; repeat step || unfold irred || t_nostep.
-  inversion H; repeat step || t_invert_step || t_nostep || step_inversion cbv_value.
+           t2)) in H; eauto with cbvlemmas; repeat step || unfold irred || no_step.
+  inversion H; repeat step || t_invert_step || no_step || step_inversion cbv_value.
 
   - eapply Trans; eauto with smallstep; steps.
     eapply star_many_steps; eauto with cbvlemmas values; eauto using true_is_irred.

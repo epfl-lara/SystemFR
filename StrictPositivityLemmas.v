@@ -6,16 +6,11 @@ Require Import Omega.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.OpenTOpen.
-
-Require Export SystemFR.ErasedTermLemmas.
-
-Require Export SystemFR.ReducibilitySubst.
-
 Require Export SystemFR.TOpenTClose.
-Require Export SystemFR.NoTypeFVar.
+Require Export SystemFR.OpenTOpen.
 Require Export SystemFR.StrictPositivity.
 Require Export SystemFR.NoTypeFVarLemmas.
+Require Export SystemFR.ReducibilityUnused.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -25,18 +20,18 @@ Opaque strictly_positive.
 Definition non_empty theta A := exists v, reducible_values theta v A.
 
 Lemma instantiate_non_empty:
-  forall theta (A: tree) (P: tree -> Prop),
+  forall theta A,
     non_empty theta A ->
-    (forall a, reducible_values theta a A -> P a) ->
-    exists a, reducible_values theta a A /\ P a.
+    exists a, reducible_values theta a A.
 Proof.
   unfold non_empty; steps; eauto.
 Qed.
 
-Ltac t_instantiate_non_empty :=
+Ltac instantiate_non_empty :=
   match goal with
-  | H1: non_empty ?theta ?A, H2: forall a, reducible_values ?theta a ?A -> _ |- _ =>
-    pose proof (instantiate_non_empty _ _ _ H1 H2)
+  | H: non_empty ?theta ?A |- _ =>
+    poseNew (Mark (theta,A) "instantiate_non_empty");
+    pose proof (instantiate_non_empty _ _ H)
   end.
 
 Lemma non_empty_extend:
@@ -63,10 +58,10 @@ Proof.
     try solve [ left; repeat step || apply no_type_fvar_open ];
     try solve [ right; eexists; eauto; repeat step || apply no_type_fvar_open ].
 
-  right. exists X; repeat step || t_fv_open || list_utils || rewrite is_erased_term_tfv in * by steps.
+  right. exists X; repeat step || fv_open || list_utils || rewrite is_erased_term_tfv in * by steps.
   rewrite <- open_topen;
     repeat step || apply IHn || autorewrite with bsize in * || apply is_erased_type_topen;
-    eauto with btwf wf omega.
+    eauto with twf wf omega.
 Qed.
 
 Lemma strictly_positive_open:
@@ -140,15 +135,16 @@ Lemma strictly_positive_rename_aux:
     similar_sets rel vars vars' ->
     strictly_positive T' vars'.
 Proof.
-  induction n; destruct T; inversion 3;
-    repeat (intuition auto) || simp_spos || destruct_tag || step_inversion equal_with_relation; try omega;
+  induction n;
+    try solve [ intros; omega ];
+    destruct T; inversion 3;
     repeat match goal with
+           | _ => step || simp_spos || destruct_tag
            | H1: equal_with_relation _ ?rel ?T ?T',
              H2: strictly_positive ?T ?vars |-
                strictly_positive ?T' ?vars' =>
              apply IHn with T vars rel
-           | _ => step || destruct_tag || simp_spos
-           end;
+            end;
     eauto using no_type_fvar_rename;
     try omega.
 
@@ -248,7 +244,7 @@ Lemma support_push_all:
   forall theta P,
     support (push_all P theta) = support theta.
 Proof.
-  unfold push_one; repeat step || rewrite support_map_values.
+  unfold push_all; repeat step || rewrite support_map_values.
 Qed.
 
 Lemma strictly_positive_topen:

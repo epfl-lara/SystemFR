@@ -36,7 +36,7 @@ Proof.
   rewrite <- erase_type_topen; steps.
   apply_any;
     repeat step || autorewrite with bsize in * ||
-    unshelve eauto 2 with bannot omega step_tactic.
+    unshelve eauto 2 with annot omega step_tactic.
 Qed.
 
 Lemma strictly_positive_erased:

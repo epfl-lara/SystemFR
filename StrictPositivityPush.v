@@ -7,6 +7,7 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
 Require Export SystemFR.StrictPositivityLemma.
+Require Export SystemFR.ReducibilitySubst.
 
 Opaque makeFresh.
 Opaque Nat.eq_dec.
@@ -36,7 +37,7 @@ Lemma strictly_positive_push_forall2:
         reducible_values theta v (topen 0 T (open 0 B a))) ->
     reducible_values theta v (topen 0 T (T_forall A B)).
 Proof.
-  intros; t_instantiate_non_empty; repeat step.
+  intros; instantiate_non_empty; repeat step.
   apply reducibility_subst_head with
     (makeFresh (
        pfv T type_var ::
@@ -54,11 +55,11 @@ Proof.
       ((X, fun a v => reducible_values theta v (open 0 B a)) :: nil) A
   end; eauto;
     repeat step || apply wf_topen || apply twf_topen || apply is_erased_type_topen ||
-           t_fv_open || list_utils || apply wf_open || apply twf_open ||
+           fv_open || list_utils || apply wf_open || apply twf_open ||
            apply reducibility_is_candidate ||
            t_instantiate_reducible || apply reducibility_subst_head2 || simp_red || t_closing;
     try finisher;
-    eauto with btwf;
+    eauto with twf;
     eauto with wf;
     eauto 2 with fv step_tactic.
   - eapply strictly_positive_rename_one; eauto; steps; try finisher.

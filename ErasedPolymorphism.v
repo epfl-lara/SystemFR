@@ -51,7 +51,7 @@ Lemma open_reducible_type_abs:
     (X ∈ tvars -> False) ->
     is_erased_term t ->
     open_reducible (X :: tvars) gamma t (topen 0 T (fvar X type_var)) ->
-    open_reducible tvars gamma t (T_abs T).
+    [ tvars; gamma ⊨ t : T_abs T ].
 Proof.
   unfold open_reducible; repeat step || t_termlist.
 
@@ -63,8 +63,9 @@ Proof.
 
   match goal with
   | H: forall _ _, _ |- _ =>
-      unshelve epose proof (H ((X,RC) :: theta) lterms _ _ _); tac1
+      unshelve epose proof (H ((X,RC) :: theta) lterms _ _ _)
   end;
+    repeat step || t_substitutions;
     eauto using satisfies_unused.
 Qed.
 
@@ -103,12 +104,12 @@ Lemma open_reducible_inst:
     is_erased_type V ->
     subset (fv U) (support gamma) ->
     subset (fv V) (support gamma) ->
-    open_reducible tvars gamma t (T_abs U) ->
-    open_reducible tvars gamma t (topen 0 U V).
+    [ tvars; gamma ⊨ t : T_abs U ] ->
+    [ tvars; gamma ⊨ t : topen 0 U V ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen || apply reducible_inst ||
       rewrite fv_subst_different_tag in * by (steps; eauto with fv);
     t_closer;
-    eauto with btwf.
+    eauto with twf.
 Qed.

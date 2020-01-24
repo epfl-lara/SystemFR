@@ -46,7 +46,7 @@ Proof.
     left; repeat step || find_exists || apply_any.
     apply reducibility_subst_head with X;
       repeat step || list_utils || rewrite nat_value_fv in * by assumption;
-      eauto 2 with btwf;
+      eauto 2 with twf;
       eauto 2 with wf.
     apply (reducible_rename_one _ _ _ _ _ X) in H23; steps; eauto using reducibility_is_candidate.
     eapply positive_grow; eauto 1;

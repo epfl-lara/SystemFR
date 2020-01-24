@@ -335,7 +335,7 @@ Proof.
   exists X; steps.
   eapply reducibility_equivalent_inst; eauto; steps;
     eauto 3 using reducibility_equivalent_prop_until_inst_size2 with lia step_tactic;
-    eauto 2 with erased fv wf wft step_tactic;
+    eauto 2 with erased fv wf step_tactic;
     eauto with prop_until.
 Qed.
 
@@ -353,7 +353,7 @@ Proof.
 
   - right; eexists; eexists; steps; eauto.
     eapply reducibility_equivalent_inst; eauto; repeat step || unfold reducibility_candidate;
-      eauto 2 with wf wft fv erased step_tactic;
+      eauto 2 with wf fv erased step_tactic;
       eauto with prop_until;
       t_closer.
 

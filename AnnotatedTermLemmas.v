@@ -45,8 +45,8 @@ Proof.
   apply annotated_open.
 Qed.
 
-Hint Immediate annotated_open_1: bannot.
-Hint Immediate annotated_open_2: bannot.
+Hint Immediate annotated_open_1: annot.
+Hint Immediate annotated_open_2: annot.
 
 Lemma annotated_topen:
   forall t k rep,
@@ -75,8 +75,8 @@ Proof.
   apply annotated_topen.
 Qed.
 
-Hint Immediate annotated_topen_1: bannot.
-Hint Immediate annotated_topen_2: bannot.
+Hint Immediate annotated_topen_1: annot.
+Hint Immediate annotated_topen_2: annot.
 
 Lemma annotated_open_build:
   forall t k rep,
@@ -86,7 +86,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
-Hint Extern 50 => apply annotated_open_build; steps: bannot.
+Hint Extern 50 => apply annotated_open_build; steps: annot.
 
 Lemma annotated_topen_build:
   forall t k V,
@@ -96,7 +96,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
-Hint Extern 50 => apply annotated_topen_build; steps: bannot.
+Hint Extern 50 => apply annotated_topen_build; steps: annot.
 
 Ltac t_annotated_open :=
   match goal with

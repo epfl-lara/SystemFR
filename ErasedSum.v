@@ -88,8 +88,11 @@ Proof.
   - eapply reducibility_rtl; eauto; t_closer.
 
     unshelve epose proof (H27 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star;
-      try solve [ equivalent_star ].
+      repeat step || apply SatCons || list_utils || t_substitutions || simp_red ||
+             t_values_info2 || t_deterministic_star;
+      try solve [ equivalent_star ];
+      t_closer;
+      eauto with twf.
 
     eapply star_backstep_reducible; eauto with cbvlemmas;
       repeat step || list_utils; t_closer.
@@ -99,8 +102,11 @@ Proof.
   - eapply reducibility_rtl; eauto; t_closer.
 
     unshelve epose proof (H28 theta ((p, uu) :: (y,v') :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star;
-      try solve [ equivalent_star ].
+      repeat step || apply SatCons || list_utils || t_substitutions || simp_red ||
+             t_values_info2 || t_deterministic_star;
+      try solve [ equivalent_star ];
+      t_closer;
+      eauto with twf.
 
     eapply star_backstep_reducible; eauto with cbvlemmas;
       repeat step || list_utils; t_closer.

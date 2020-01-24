@@ -3,6 +3,8 @@ Require Export SystemFR.ErasedEquivalentIte.
 Require Export SystemFR.ErasedEquivalentMatch.
 Require Export SystemFR.ErasedEquivalentRec.
 
+Opaque reducible_values.
+
 Lemma equivalent_split_bool:
   forall theta gamma1 gamma2 b t t' x l,
     ~(x ∈ fv b) ->
@@ -24,8 +26,8 @@ Lemma equivalent_split_bool:
 Proof.
   unfold open_reducible, reducible, reduces_to;
     repeat step || simp_red || t_sat_cut || t_instantiate_sat3 || t_sat_add;
-    eauto 2 with b_sat;
-    eauto 2 with b_equiv_subst.
+    eauto 2 with b_equiv_subst;
+    try solve [ eapply satisfies_insert2; eauto; t_closer ].
 Qed.
 
 Lemma equivalent_split_nat:
@@ -59,8 +61,9 @@ Proof.
     repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
 
   force_invert is_nat_value; repeat step || t_sat_add;
-    eauto 2 with b_sat;
-    eauto 2 with b_equiv_subst.
+    eauto 2 with b_equiv_subst;
+    try solve [ eapply satisfies_insert2; eauto; t_closer ];
+    try solve [ eapply satisfies_insert_nat_succ; eauto; t_closer ].
 Qed.
 
 Lemma reducible_equivalent_ite:
@@ -90,9 +93,9 @@ Lemma reducible_equivalent_ite:
    unfold open_reducible;
      repeat step || apply equivalent_ite || t_instantiate_sat3 || simp_red ||
             t_deterministic_star || unfold reducible, reduces_to in * || t_sat_add;
-     eauto 2 with b_sat;
      eauto 2 with b_equiv_subst;
-     t_closer.
+     t_closer;
+     try solve [ eapply satisfies_insert3; eauto; t_closer ].
 Qed.
 
 Lemma reducible_equivalent_match:
@@ -129,9 +132,10 @@ Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_match; eauto;
     repeat step || t_sat_add || step_inversion is_nat_value;
-      eauto 2 with b_sat;
       eauto 2 with b_equiv_subst;
-      t_closer.
+      t_closer;
+      try solve [ eapply satisfies_insert3; eauto; t_closer ];
+      try solve [ eapply satisfies_cons_nat_succ; eauto; t_closer ].
 Qed.
 
 Lemma reducible_equivalent_rec:
@@ -174,7 +178,8 @@ Proof.
   unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
   eapply equivalent_rec; eauto;
     repeat step || t_sat_add || step_inversion is_nat_value;
-    eauto 2 with b_sat;
     eauto 2 with b_equiv_subst;
-    t_closer.
+    t_closer;
+    try solve [ eapply satisfies_insert3; eauto; t_closer ];
+    try solve [ eapply satisfies_cons_nat_succ; eauto; t_closer ].
 Qed.

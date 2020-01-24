@@ -365,7 +365,7 @@ Proof.
   induction 1; repeat step;
     eauto 6 with term_lift;
     try solve [
-      top_level_unfold inter_reducible; repeat step || rewrite topen_none by eauto with btwf;
+      top_level_unfold inter_reducible; repeat step || rewrite topen_none by eauto with twf;
         eauto using star_lift_inter_reducible, term_lift_sym, inter_reducible_sym
     ].
 Qed.
@@ -697,7 +697,7 @@ Ltac equivalent_star :=
   apply equivalent_star; repeat step || list_utils;
     try solve [
       unfold equivalent_terms in *; repeat step || list_utils;
-      eauto with wf; eauto with erased; eauto with fv
+      t_closer
     ];
     eauto using star_trans with cbvlemmas smallstep values.
 

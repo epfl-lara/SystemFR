@@ -13,7 +13,6 @@ Require Export SystemFR.TWFLemmas.
 Require Export SystemFR.ErasedTermLemmas.
 
 Require Export SystemFR.ReducibilitySubst.
-Require Export SystemFR.RedTactics2.
 
 Require Export SystemFR.IdRelation.
 Require Export SystemFR.EqualWithRelation.
@@ -44,9 +43,9 @@ Proof.
       eauto with omega;
       eauto with b_polarity.
   exists X; repeat
-         step || t_fv_open || list_utils ||
+         step || fv_open || list_utils ||
          (progress rewrite is_erased_term_tfv in * by steps) ||
-         (rewrite <- open_topen by (steps; eauto with btwf)).
+         (rewrite <- open_topen by (steps; eauto with twf)).
 
   apply_any; repeat step || autorewrite with bsize; try omega.
 Qed.

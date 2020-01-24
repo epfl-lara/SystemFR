@@ -59,18 +59,19 @@ Lemma open_reducible_union_elim:
     is_erased_term t' ->
     is_erased_type T ->
     [ tvars; gamma ⊨ t : T_union T1 T2 ] ->
-    [ tvars; (z, T1) :: gamma ⊨ open 0 t' (term_fvar z) : T ] ->
-    [ tvars; (z, T2) :: gamma ⊨ open 0 t' (term_fvar z) :  T ] ->
+    [ tvars; (z, T1) :: gamma ⊨ open 0 t' (fvar z term_var) : T ] ->
+    [ tvars; (z, T2) :: gamma ⊨ open 0 t' (fvar z term_var) :  T ] ->
     [ tvars; gamma ⊨ app (notype_lambda t') t : T ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3 || top_level_unfold reducible || top_level_unfold reduces_to || simp_red.
 
   - unshelve epose proof (H15 theta ((z, v) :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star ||
+      repeat step || list_utils || apply SatCons || t_values_info2 || t_deterministic_star || t_substitutions ||
              apply reducible_let2 with (psubstitute (T_union T1 T2) lterms term_var);
-      eauto with erased; eauto with fv.
+      eauto with erased; eauto with fv; eauto with wf; eauto with twf.
+
   - unshelve epose proof (H16 theta ((z, v) :: lterms) _ _ _);
-      repeat tac1 || t_values_info2 || t_deterministic_star ||
+      repeat step || list_utils || apply SatCons || t_values_info2 || t_deterministic_star || t_substitutions ||
              apply reducible_let2 with (psubstitute (T_union T1 T2) lterms term_var);
-      eauto with erased; eauto with fv.
+      eauto with erased; eauto with fv; eauto with wf; eauto with twf.
 Qed.

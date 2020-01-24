@@ -1,13 +1,9 @@
 Require Import Psatz.
 Require Import Omega.
 
-
-Require Export SystemFR.Syntax.
-Require Export SystemFR.SmallStep.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.RelationClosures.
 Require Export SystemFR.StarInversions.
 Require Export SystemFR.SizeLemmas.
+Require Export SystemFR.RewriteTactics.
 
 Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm. (* lexicographic ordering *)
@@ -190,7 +186,7 @@ Proof.
 Qed.
 
 Hint Extern 1 => solve [
-  apply type_nodes_get_measure; repeat step || autorewrite with bsize; eauto with erased lia
+  apply left_lex; repeat step || autorewrite with bsize; eauto 2 with lia; t_closer
 ]: measure.
 
 Hint Extern 1 => solve [
@@ -211,3 +207,5 @@ Proof.
   unfold prop_until, prop_at;
     steps; eauto.
 Qed.
+
+Hint Extern 1 => solve [ eapply prop_until_at; eauto with measure ]: prop_until.

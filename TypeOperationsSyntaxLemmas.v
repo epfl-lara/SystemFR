@@ -30,7 +30,7 @@ Ltac t_is_annotated_type_ite :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- is_annotated_type ?T => apply is_annotated_type_ite with b T1 T2
   end.
 
-Hint Extern 50 => t_is_annotated_type_ite: bannot.
+Hint Extern 50 => t_is_annotated_type_ite: annot.
 
 Lemma wf_ite:
   forall b T1 T2 T,
@@ -60,7 +60,7 @@ Lemma twf_ite:
       twf T2 k ->
       twf T k.
 Proof.
-  induction 1; steps; eauto with btwf.
+  induction 1; steps; eauto with twf.
 Qed.
 
 Ltac t_twf_ite :=
@@ -68,7 +68,7 @@ Ltac t_twf_ite :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- twf ?T _ => apply twf_ite with b T1 T2
   end.
 
-Hint Extern 50 => t_twf_ite: btwf.
+Hint Extern 50 => t_twf_ite: twf.
 
 Lemma pfv_ite:
   forall b T1 T2 T,

@@ -1,7 +1,6 @@
-Require Export SystemFR.AssocList.
-Require Export SystemFR.Trees.
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.TypeErasure.
 
 Fixpoint shift (k: nat) (t: tree) (i: nat) :=
   match t with
@@ -203,6 +202,28 @@ Qed.
 
 Hint Resolve is_erased_term_shift_open: erased.
 
+Lemma is_erased_type_shift:
+  forall T k i,
+    is_erased_type T ->
+    is_erased_type (shift k T i).
+Proof.
+  induction T; steps; eauto with erased.
+Qed.
+
+Hint Resolve is_erased_type_shift: erased.
+
+Lemma is_erased_type_shift_open:
+  forall T k rep,
+    is_erased_type T ->
+    is_erased_term rep ->
+    is_erased_type (shift_open k T rep).
+Proof.
+  induction T;
+    repeat step; eauto with erased.
+Qed.
+
+Hint Resolve is_erased_type_shift_open: erased.
+
 Lemma wf_shift:
   forall t k k' k'' i,
     wf t k ->
@@ -250,6 +271,14 @@ Proof.
 Qed.
 
 Hint Resolve pfv_shift_open: fv.
+
+Lemma pfv_shift2:
+  forall t k i tag,
+    pfv (shift k t i) tag = pfv t tag.
+Proof.
+  induction t;
+    repeat step || list_utils.
+Qed.
 
 Lemma open_shift:
   forall C t k i,
@@ -307,4 +336,34 @@ Proof.
   intros.
   rewrite <- (shift_nothing C2 0) at 2;
     eauto using open_shift_open.
+Qed.
+
+Lemma shift_nothing2:
+  forall t k i,
+    wf t k ->
+    shift k t i = t.
+Proof.
+  induction t; repeat step || t_equality; eauto with omega.
+Qed.
+
+Lemma substitute_shift:
+  forall t k i l tag,
+    wfs l 0 ->
+    psubstitute (shift k t i) l tag = shift k (psubstitute t l tag) i.
+Proof.
+  induction t; repeat step || t_equality || rewrite shift_nothing2 by eauto with wf.
+Qed.
+
+Lemma erase_term_shift:
+  forall t k i,
+    erase_term (shift k t i) = shift k (erase_term t) i.
+Proof.
+  induction t; steps.
+Qed.
+
+Lemma erase_type_shift:
+  forall T k i,
+    erase_type (shift k T i) = shift k (erase_type T) i.
+Proof.
+  induction T; repeat step || rewrite erase_term_shift in *.
 Qed.

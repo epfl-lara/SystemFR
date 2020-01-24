@@ -1,15 +1,8 @@
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.WFLemmas.
-Require Export SystemFR.TWFLemmas.
-Require Export SystemFR.ListUtils.
-Require Export SystemFR.SmallStep.
-Require Export SystemFR.RelationClosures.
 Require Export SystemFR.SubstitutionLemmas.
 Require Export SystemFR.PrimitiveSize.
-Require Export SystemFR.SmallStep.
 Require Export SystemFR.PrimitiveRecognizers.
-Require Export SystemFR.LVarOperations.
+Require Export SystemFR.SmallStep.
+Require Export SystemFR.RelationClosures.
 
 Lemma is_erased_term_twf:
   forall t k,
@@ -19,7 +12,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve is_erased_term_twf: btwf.
+Hint Immediate is_erased_term_twf: twf.
 
 Lemma twf_open2:
   forall T k i v,
@@ -27,10 +20,10 @@ Lemma twf_open2:
     closed_value v ->
     twf (open i T v) k.
 Proof.
-  unfold closed_value, closed_term; intros; apply twf_open; steps; eauto with btwf.
+  unfold closed_value, closed_term; intros; apply twf_open; steps; eauto with twf.
 Qed.
 
-Hint Resolve twf_open2: btwf2.
+Hint Immediate twf_open2: twf.
 
 Lemma is_erased_open:
   forall t k rep,
@@ -63,7 +56,7 @@ Proof.
   unfold closed_value, closed_term; intros; apply is_erased_type_open; steps.
 Qed.
 
-Hint Resolve is_erased_type_open2: erased.
+Hint Immediate is_erased_type_open2: erased.
 
 Lemma is_erased_type_topen:
   forall t k rep,
@@ -71,7 +64,7 @@ Lemma is_erased_type_topen:
     is_erased_type rep ->
     is_erased_type (topen k t rep).
 Proof.
-  induction t; repeat step || rewrite topen_none by eauto with btwf.
+  induction t; repeat step || rewrite topen_none by eauto with twf.
 Qed.
 
 Hint Resolve is_erased_type_topen: erased.
@@ -92,7 +85,7 @@ Proof.
   induction t; repeat step || list_utils.
 Qed.
 
-Hint Resolve is_erased_term_tfv: fv.
+Hint Immediate is_erased_term_tfv: fv.
 
 Lemma is_erased_topen:
   forall t k rep,
@@ -176,36 +169,6 @@ Lemma is_erased_subst:
 Proof.
   intros; rewrite substitute_nothing5; eauto with fv.
 Qed.
-
-Lemma is_erased_term_map_indices:
-  forall t k f,
-    is_erased_term t ->
-    is_erased_term (map_indices k t f).
-Proof.
-  induction t; steps.
-Qed.
-
-Hint Resolve is_erased_term_map_indices: erased.
-
-Lemma is_erased_type_map_indices:
-  forall T k f,
-    is_erased_type T ->
-    is_erased_type (map_indices k T f).
-Proof.
-  induction T; steps; eauto using is_erased_term_map_indices.
-Qed.
-
-Hint Resolve is_erased_type_map_indices: erased.
-
-Lemma is_erased_type_shift:
-  forall T,
-    is_erased_type T ->
-    is_erased_type (shift T).
-Proof.
-  intros; apply is_erased_type_map_indices; assumption.
-Qed.
-
-Hint Resolve is_erased_type_shift: erased.
 
 Lemma is_erased_term_type:
   forall t,

@@ -308,7 +308,7 @@ Proof.
   end;
     repeat step || autorewrite with bsize in * ||
            apply has_polarities_topen; try finisher;
-      eauto 2 with wft fv erased step_tactic.
+      eauto 2 with wf fv erased step_tactic.
 Qed.
 
 Hint Immediate polarity_variance_abs: b_polarity_variance.
@@ -355,7 +355,7 @@ Proof.
     try solve [ eapply has_polarities_rename_one; eauto 1; steps; try finisher ];
     eauto with omega;
     eauto with wf fv erased;
-    eauto 2 with wft fv erased step_tactic.
+    eauto 2 with wf fv erased step_tactic.
 
   eapply H; eauto 1;
     repeat step || list_utils || apply right_lex || apply PolRec || apply reducibility_is_candidate;
@@ -394,5 +394,5 @@ Proof.
   intros.
   eapply (polarity_variance _ _ ((X,rc1) :: theta)); eauto 1; steps;
     eauto 2 using respect_polarities_refl;
-    eauto 2 with erased fv wft step_tactic.
+    eauto 2 with erased fv wf step_tactic.
 Qed.

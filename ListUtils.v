@@ -152,3 +152,32 @@ Lemma cons_app:
 Proof.
   steps.
 Qed.
+
+Lemma NoDup_false:
+  forall T (x: T) l,
+    NoDup (x :: x :: l) ->
+    False.
+Proof.
+  repeat step || step_inversion NoDup.
+Qed.
+
+Lemma NoDup_false2:
+  forall T (x y: T) l,
+    NoDup (x :: y :: x :: l) ->
+    False.
+Proof.
+  repeat step || step_inversion NoDup.
+Qed.
+
+Lemma NoDup_false3:
+  forall T (x y: T) l,
+    NoDup (y :: x :: x :: l) ->
+    False.
+Proof.
+  repeat step || step_inversion NoDup.
+Qed.
+
+Ltac nodup :=
+  apply_anywhere NoDup_false ||
+  apply_anywhere NoDup_false2 ||
+  apply_anywhere NoDup_false3.

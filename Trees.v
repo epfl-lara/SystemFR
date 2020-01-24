@@ -90,12 +90,6 @@ Inductive tree: Set :=
 (* types defined in terms out of the previous types *)
 Definition intersect T0 Ts := T_forall T_nat (T_rec (lvar 0 term_var) T0 Ts).
 
-Definition term_fvar s := fvar s term_var.
-Definition type_fvar s := fvar s type_var.
-
-Hint Unfold term_fvar: core.
-Hint Unfold type_fvar: core.
-
 Fixpoint is_annotated_term t :=
   match t with
   | fvar y term_var => True

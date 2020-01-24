@@ -13,7 +13,7 @@ Lemma annotated_subtype_prod:
     is_annotated_type A2 ->
     is_annotated_type B2 ->
     [[ tvars; gamma ⊨ A1 <: B1 ]] ->
-    [[ tvars; (x,A1) :: gamma ⊨ open 0 A2 (term_fvar x) <: open 0 B2 (term_fvar x) ]] ->
+    [[ tvars; (x,A1) :: gamma ⊨ open 0 A2 (fvar x term_var) <: open 0 B2 (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ T_prod A1 A2 <: T_prod B1 B2 ]].
 Proof.
   unfold annotated_subtype, subtype;
@@ -36,8 +36,8 @@ Lemma annotated_subtype_prod2:
     is_annotated_type B ->
     wf B 1 ->
     subset (fv B) (support gamma) ->
-    [[ tvars; (x,T) :: gamma ⊨ pi1 (term_fvar x) : A ]] ->
-    [[ tvars; (x,T) :: gamma ⊨ pi2 (term_fvar x) : open 0 B (pi1 (term_fvar x)) ]] ->
+    [[ tvars; (x,T) :: gamma ⊨ pi1 (fvar x term_var) : A ]] ->
+    [[ tvars; (x,T) :: gamma ⊨ pi2 (fvar x term_var) : open 0 B (pi1 (fvar x term_var)) ]] ->
     [[ tvars; gamma ⊨ T  <: T_prod A B ]].
 Proof.
   unfold annotated_reducible, annotated_subtype, subtype;

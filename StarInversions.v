@@ -9,7 +9,7 @@ Lemma star_one_step:
     irred v ->
     star scbv_step t2 v.
 Proof.
-  unfold irred; destruct 1; repeat step || t_deterministic_step; eauto with exfalso.
+  unfold irred; destruct 1; repeat step || deterministic_step; eauto with exfalso.
 Qed.
 
 Lemma star_one_step2:
@@ -19,7 +19,7 @@ Lemma star_one_step2:
       (t1 = t2 \/ star scbv_step t2' t2).
 Proof.
   inversion 1;
-    repeat step || t_deterministic_step.
+    repeat step || deterministic_step.
 Qed.
 
 Lemma star_many_steps:
@@ -255,7 +255,7 @@ Lemma star_smallstep_rec_succ:
            v.
 Proof.
   induction 1;
-    repeat step || step_inversion cbv_value || t_invert_step || t_nostep.
+    repeat step || step_inversion cbv_value || t_invert_step || no_step.
 Qed.
 
 Hint Resolve scbv_normalizing_pair: cbvlemmas.
@@ -426,7 +426,7 @@ Lemma star_smallstep_value:
     cbv_value v1 ->
     v1 = v2.
 Proof.
-  induction 1; repeat step || t_nostep.
+  induction 1; repeat step || no_step.
 Qed.
 
 Ltac t_star_smallstep_from_value :=
@@ -486,7 +486,7 @@ Lemma star_smallstep_deterministic:
       v = v'.
 Proof.
   induction 1; steps; eauto using star_smallstep_value with smallstep.
-  inversion H3; repeat step || t_deterministic_step || t_nostep.
+  inversion H3; repeat step || deterministic_step || no_step.
 Qed.
 
 Lemma star_smallstep_app_onestep:
@@ -497,7 +497,7 @@ Lemma star_smallstep_app_onestep:
     star scbv_step (open 0 t v1) v2.
 Proof.
   inversion 1; repeat step || step_inversion cbv_value scbv_step.
-  inversion H0; repeat step || t_nostep.
+  inversion H0; repeat step || no_step.
 Qed.
 
 Ltac t_deterministic_star :=

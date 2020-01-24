@@ -36,13 +36,16 @@ Lemma open_reducible_forall:
     subset (fv t) (support gamma) ->
     is_erased_type V ->
     [ tvars; gamma ⊨ t : A ] ->
-    [ tvars; (x, U) :: gamma ⊨ t : open 0 V (term_fvar x) ] ->
+    [ tvars; (x, U) :: gamma ⊨ t : open 0 V (fvar x term_var) ] ->
     [ tvars; gamma ⊨ t : T_forall U V ].
 Proof.
   unfold open_reducible in *; repeat step || t_instantiate_sat3.
 
   eapply reducible_forall; steps; t_closer.
-  unshelve epose proof (H8 theta ((x,u) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H8 theta ((x,u) :: lterms) _ _ _);
+    repeat step || list_utils || apply SatCons || t_substitutions;
+    t_closer;
+    eauto with twf.
 Qed.
 
 Lemma open_reducible_exists_elim:
@@ -69,8 +72,8 @@ Lemma open_reducible_exists_elim:
     subset (fv T) (support gamma) ->
     subset (fv t) (support gamma) ->
     [ tvars; gamma ⊨ p : T_exists U V ] ->
-    [ tvars; (v, open 0 V (term_fvar u)) :: (u, U) :: gamma ⊨
-        open 0 t (term_fvar v) : T ] ->
+    [ tvars; (v, open 0 V (fvar u term_var)) :: (u, U) :: gamma ⊨
+        open 0 t (fvar v term_var) : T ] ->
     [ tvars; gamma ⊨ app (notype_lambda t) p : T ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
@@ -80,7 +83,10 @@ Proof.
          apply reducible_let2 with
              (T_exists (psubstitute U lterms term_var) (psubstitute V lterms term_var)); t_closer.
 
-  unshelve epose proof (H21 theta ((v, v1) :: (u,a) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H21 theta ((v, v1) :: (u,a) :: lterms) _ _ _);
+    repeat step || list_utils || apply SatCons || t_substitutions || fv_open;
+    t_closer;
+    eauto with twf.
 Qed.
 
 Lemma open_reducible_forall_inst:

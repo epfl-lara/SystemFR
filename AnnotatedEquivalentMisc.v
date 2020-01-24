@@ -5,6 +5,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.ErasedEquivalent.
 Require Export SystemFR.TermListReducible.
 
+Opaque reducible_values.
+
 Lemma annotated_equivalent_weaken:
   forall tvars gamma x T u v,
     ~(x ∈ support gamma) ->

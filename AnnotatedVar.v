@@ -7,7 +7,7 @@ Require Export SystemFR.ErasedVar.
 Lemma annotated_reducible_var:
   forall tvars gamma x T,
     lookup Nat.eq_dec gamma x = Some T ->
-    [[ tvars; gamma ⊨ term_fvar x : T ]].
+    [[ tvars; gamma ⊨ fvar x term_var : T ]].
 Proof.
   unfold annotated_reducible; intros;
     apply open_reducible_var; auto using in_erased_context.

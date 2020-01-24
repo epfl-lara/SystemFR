@@ -3,6 +3,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.RedTactics.
 Require Export SystemFR.EquivalentContext.
 
+Opaque reducible_values.
+
 Lemma annotated_equivalent_pair_ext:
   forall tvars gamma t A B,
     is_annotated_term t ->
@@ -18,7 +20,7 @@ Proof.
   - apply equivalent_trans with (pp (pi1 (psubstitute (erase_term t) l term_var) ) b).
     + unshelve epose proof (equivalent_context (pp (lvar 0 term_var) b) a (pi1 (psubstitute (erase_term t) l term_var)) _ _ _ _);
         repeat step || rewrite (open_none b) in * by t_closer;
-        eauto with erased wf fv.
+        t_closer.
       apply equivalent_sym;
         try solve [ equivalent_star; t_closer ].
     + unshelve epose proof (equivalent_context (pp (pi1 (psubstitute (erase_term t) l term_var)) (lvar 0 term_var))

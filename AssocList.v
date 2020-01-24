@@ -1,7 +1,7 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
-Require Export SystemFR.ListLemmas.
+Require Export SystemFR.ListSetLemmas.
 
 Require Import PeanoNat.
 
@@ -124,7 +124,7 @@ Lemma lookupSomeSupport:
     lookup eq_dec m x = Some A ->
     x ∈ support m.
 Proof.
-  induction m; repeat step || unfold fv_context in * || set_solver; eauto.
+  induction m; repeat step || unfold fv_context in * || sets; eauto.
 Qed.
 
 Hint Immediate lookupSomeSupport: blookup.
@@ -159,7 +159,7 @@ Lemma lookupAppendNoDup:
     ~(x ∈ support l1) ->
     lookup eq_dec l2 x = lookup eq_dec (l1 ++ l2)%list x.
 Proof.
-  induction l1; repeat step || set_solver || unfold fv_context in *.
+  induction l1; repeat step || sets || unfold fv_context in *.
 Qed.
 
 Hint Resolve lookupAppendNoDup: blookup.

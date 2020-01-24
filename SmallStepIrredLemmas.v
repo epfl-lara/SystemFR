@@ -1,7 +1,9 @@
 Require Export SystemFR.StarInversions.
-Require Export SystemFR.RelationClosures.
 
 Require Import Coq.Strings.String.
+
+(** Lemmas about operational semantics and stuck terms.              **)
+(** At the moment, this file is not used in the rest of the proofs . **)
 
 Lemma star_smallstep_app_inv_irred:
   forall t v,
@@ -45,7 +47,7 @@ Proof.
   induction 1; unfold irred; repeat step || t_invert_star.
   - inversion H1; steps; eauto with smallstep values exfalso.
   - eapply_any; repeat step.
-    inversion H3; repeat step || t_deterministic_step || t_nostep.
+    inversion H3; repeat step || deterministic_step || no_step.
 Qed.
 
 Lemma star_smallstep_pp_inv_irred:
@@ -75,7 +77,7 @@ Lemma star_smallstep_pp_inv_irred2:
 Proof.
   induction 1; repeat step || t_invert_step || unfold irred in *.
   - inversion H1; steps; eauto with star smallstep.
-  - eapply_any; eauto; steps. inversion H3; repeat step || t_nostep || t_deterministic_step.
+  - eapply_any; eauto; steps. inversion H3; repeat step || no_step || deterministic_step.
   - pose proof (H5 _ _ _ eq_refl H3); steps.
     eauto with star.
 Qed.
@@ -94,8 +96,8 @@ Lemma star_smallstep_pp_inv_irred3:
 Proof.
   induction 1; repeat step || t_invert_step || unfold irred in *.
   - inversion H1; steps; inversion H2; steps; eauto with smallstep exfalso.
-  - eapply_any; eauto; steps. inversion H3; repeat step || t_nostep || t_deterministic_step.
-  - eapply_any; eauto; steps. inversion H4; repeat step || t_nostep || t_deterministic_step.
+  - eapply_any; eauto; steps. inversion H3; repeat step || no_step || deterministic_step.
+  - eapply_any; eauto; steps. inversion H4; repeat step || no_step || deterministic_step.
 Qed.
 
 Lemma star_smallstep_pi1_inv_irred:
@@ -110,7 +112,7 @@ Lemma star_smallstep_pi1_inv_irred:
 Proof.
   induction 1; repeat step || t_invert_step || unfold irred in *;
     eauto 5 with star smallstep.
-  exists (pp t2 v2); repeat step || t_invert_step || t_nostep.
+  exists (pp t2 v2); repeat step || t_invert_step || no_step.
 Qed.
 
 Lemma star_smallstep_pi1_inv_irred2:
@@ -126,8 +128,8 @@ Lemma star_smallstep_pi1_inv_irred2:
 Proof.
   induction 1; repeat step || t_invert_step || unfold irred in *.
   - inversion H3; steps; eauto 4 with exfalso smallstep.
-  - inversion H5; repeat step || t_invert_star || t_nostep; eauto with values.
-  - eapply_any; eauto; steps. inversion H5; repeat step || t_deterministic_step || t_nostep.
+  - inversion H5; repeat step || t_invert_star || no_step; eauto with values.
+  - eapply_any; eauto; steps. inversion H5; repeat step || deterministic_step || no_step.
 Qed.
 
 Lemma star_smallstep_pi2_inv_irred:
@@ -142,7 +144,7 @@ Lemma star_smallstep_pi2_inv_irred:
 Proof.
   induction 1; repeat step || t_invert_step || unfold irred in *;
     eauto 5 with star smallstep.
-  exists (pp v1 t2); repeat step || t_invert_step || t_nostep.
+  exists (pp v1 t2); repeat step || t_invert_step || no_step.
 Qed.
 
 Lemma star_smallstep_pi2_inv_irred2:
@@ -158,8 +160,8 @@ Lemma star_smallstep_pi2_inv_irred2:
 Proof.
   induction 1; repeat step || t_invert_step || unfold irred in *.
   - inversion H3; steps; eauto 4 with exfalso smallstep.
-  - inversion H5; repeat step || t_invert_star || t_nostep; eauto with values.
-  - apply H6 with t0 a; steps. inversion H5; repeat step || t_deterministic_step || t_nostep.
+  - inversion H5; repeat step || t_invert_star || no_step; eauto with values.
+  - apply H6 with t0 a; steps. inversion H5; repeat step || deterministic_step || no_step.
 Qed.
 
 Lemma star_smallstep_succ_inv_irred:
@@ -191,8 +193,8 @@ Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
   - inversion H; repeat step.
-    + exists ttrue; repeat step || t_nostep || step_inversion scbv_step; eauto with star smallstep.
-    + exists tfalse; repeat step || t_nostep || step_inversion scbv_step; eauto with star smallstep.
+    + exists ttrue; repeat step || no_step || step_inversion scbv_step; eauto with star smallstep.
+    + exists tfalse; repeat step || no_step || step_inversion scbv_step; eauto with star smallstep.
     + exists v1; steps; repeat step; eauto with star smallstep.
 Qed.
 
@@ -232,8 +234,8 @@ Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
   - inversion H; repeat step.
-    + exists zero; repeat step || t_nostep; eauto 2 with star smallstep.
-    + exists (succ v); steps; repeat step || t_invert_step || t_nostep; eauto 3 with star smallstep.
+    + exists zero; repeat step || no_step; eauto 2 with star smallstep.
+    + exists (succ v); steps; repeat step || t_invert_step || no_step; eauto 3 with star smallstep.
     + exists v1; steps; repeat step; eauto 2 with star smallstep.
 Qed.
 
@@ -251,8 +253,8 @@ Proof.
   induction 1; unfold irred; repeat step.
   - exists t1; steps; eauto with smallstep.
   - inversion H; repeat step.
-    + exists zero; repeat step || t_nostep; eauto with star smallstep.
-    + exists (succ v); steps; repeat step || t_invert_step || t_nostep; eauto with star smallstep.
+    + exists zero; repeat step || no_step; eauto with star smallstep.
+    + exists (succ v); steps; repeat step || t_invert_step || no_step; eauto with star smallstep.
     + exists v1; steps; repeat step; eauto with star smallstep.
 Qed.
 
@@ -267,7 +269,7 @@ Lemma star_smallstep_irred:
 Proof.
   induction 1; unfold irred; steps; eauto.
   - inversion H; repeat step; eauto with exfalso.
-  - inversion H1; repeat step || t_deterministic_step; eauto with exfalso.
+  - inversion H1; repeat step || deterministic_step; eauto with exfalso.
 Qed.
 
 Ltac t_deterministic_star_irred :=

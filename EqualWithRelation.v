@@ -1,10 +1,8 @@
 Require Import Coq.Strings.String.
+Require Import PeanoNat.
 
 Require Export SystemFR.SizeLemmas.
-Require Export SystemFR.RelationClosures.
 Require Export SystemFR.StarLemmas.
-
-Require Import PeanoNat.
 
 Open Scope list_scope.
 

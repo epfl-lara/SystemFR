@@ -1,8 +1,22 @@
 Require Import Coq.Strings.String.
+Require Import Coq.Lists.List.
 
 Require Export SystemFR.RedTactics.
 
 Opaque reducible_values.
+
+Lemma in_satisfies_left_right:
+  forall gamma1 gamma2 S l1 l2 P z,
+    satisfies P (gamma1 ++ gamma2) (l1 ++ l2) ->
+    subset S (support gamma2) ->
+    z ∈ support gamma1 ->
+    z ∈ S ->
+    False.
+Proof.
+  repeat step || t_satisfies_nodup || rewrite support_append in * || list_utils ||
+         apply_anywhere NoDup_append;
+    eauto using NoDup_append with sets.
+Qed.
 
 Lemma satisfies_insert_nat_succ:
   forall theta gamma1 gamma2 b x y l1 l2 v,
@@ -25,11 +39,11 @@ Lemma satisfies_insert_nat_succ:
               (gamma1 ++ (x, T_equiv b (succ (fvar y term_var))) :: (y, T_nat) :: gamma2)
               (l1 ++ (x, uu) :: (y, v) :: l2).
 Proof.
-  tac1;
-    try solve [ apply equivalent_star; t_closer ].
+  repeat step || apply satisfies_insert || list_utils || simp_red || t_substitutions;
+    try solve [ apply equivalent_star; t_closer ];
+    eauto 2 with fv wf twf;
+    eauto 2 using in_satisfies_left_right.
 Qed.
-
-Hint Resolve satisfies_insert_nat_succ: b_sat.
 
 Lemma satisfies_cons_nat_succ:
   forall theta gamma b x y l v,
@@ -46,11 +60,11 @@ Lemma satisfies_cons_nat_succ:
               ((x, T_equiv b (succ (fvar y term_var))) :: (y, T_nat) :: gamma)
               ((x, uu) :: (y, v) :: l).
 Proof.
-  tac1;
-    try solve [ apply equivalent_star; t_closer ].
+  repeat step || apply SatCons || list_utils || simp_red || t_substitutions;
+    try solve [ apply equivalent_star; t_closer ];
+    eauto 2 with fv wf twf;
+    eauto 2 using in_satisfies_left_right.
 Qed.
-
-Hint Resolve satisfies_cons_nat_succ: b_sat.
 
 Lemma satisfies_insert2:
   forall theta gamma1 gamma2 b x l1 l2 t,
@@ -68,12 +82,12 @@ Lemma satisfies_insert2:
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equiv b t) :: gamma2)
               (l1 ++ (x, uu) :: l2).
 Proof.
-  unfold closed_term; repeat tac1 || rewrite (substitute_nothing5 t) by steps;
-    try solve [ apply equivalent_star; t_closer ].
+  repeat step || apply satisfies_insert || list_utils || simp_red || t_substitutions ||
+         rewrite (substitute_nothing5 t) by t_closer;
+    try solve [ equivalent_star ];
+    t_closer;
+    eauto 2 using in_satisfies_left_right.
 Qed.
-
-Hint Resolve satisfies_insert2: b_sat.
-Hint Extern 50 => eapply satisfies_insert2; eauto 1; t_closing: b_sat.
 
 Lemma satisfies_insert3:
   forall theta gamma b x l t,
@@ -87,9 +101,9 @@ Lemma satisfies_insert3:
               ((x, T_equiv b t) :: gamma)
               ((x, uu) :: l).
 Proof.
-  unfold closed_term; repeat tac1 || rewrite (substitute_nothing5 t) by steps;
-    try solve [ apply equivalent_star; t_closer ].
+  repeat step || apply SatCons || list_utils || simp_red || t_substitutions ||
+         rewrite (substitute_nothing5 t) by t_closer;
+    try solve [ equivalent_star ];
+    t_closer;
+    eauto 2 using in_satisfies_left_right.
 Qed.
-
-Hint Resolve satisfies_insert3: b_sat.
-Hint Extern 50 => eapply satisfies_insert3; eauto; t_closing: b_sat.

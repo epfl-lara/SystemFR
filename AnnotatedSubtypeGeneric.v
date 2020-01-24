@@ -2,12 +2,14 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ReducibilityLemmas.
 
+Opaque reducible_values.
+
 Lemma annotated_subtype_generic:
   forall tvars gamma A B x,
     ~(x ∈ fv_context gamma) ->
     ~(x ∈ fv A) ->
     ~(x ∈ fv B) ->
-    [[ tvars; (x, A) :: gamma ⊨ term_fvar x : B ]] ->
+    [[ tvars; (x, A) :: gamma ⊨ fvar x term_var : B ]] ->
     [[ tvars; gamma ⊨ A <: B ]].
 Proof.
   unfold annotated_reducible, open_reducible, annotated_subtype, subtype;

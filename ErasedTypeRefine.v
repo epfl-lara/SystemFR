@@ -73,8 +73,11 @@ Proof.
   rewrite open_none; eauto with wf.
   top_level_unfold reducible; top_level_unfold reduces_to; repeat step || simp_red.
 
-  unshelve epose proof (H14 theta ((x, p) :: lterms) _ _ _); tac1.
+  unshelve epose proof (H14 theta ((x, p) :: lterms) _ _ _);
+    repeat step || list_utils || apply SatCons || t_substitutions || fv_open;
+    t_closer;
+    eauto with twf.
   eapply reducibility_values_rtl; eauto;
     repeat step;
-    eauto with wf fv erased.
+    t_closer.
 Qed.

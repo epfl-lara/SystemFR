@@ -4,8 +4,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedFix.
 Require Export SystemFR.NatCompareErase.
-Require Export SystemFR.LVarOperationsErase.
-Require Export SystemFR.LVarOperations.
+
+Opaque reducible_values.
 
 Lemma annotated_reducible_fix:
   forall tvars gamma ts T n y p,
@@ -29,12 +29,12 @@ Lemma annotated_reducible_fix:
     is_annotated_type T ->
     is_annotated_term ts ->
     [[ tvars;
-        (p, T_equiv (term_fvar y) (lambda T_unit (tfix T ts))) ::
-        (y, T_arrow T_unit (open 0 T (term_fvar n))) ::
+        (p, T_equiv (fvar y term_var) (lambda T_unit (tfix T ts))) ::
+        (y, T_arrow T_unit (open 0 T (fvar n term_var))) ::
         (n, T_nat) ::
         gamma ⊨
-          open 0 (open 1 ts (succ (fvar n term_var))) (term_fvar y) :
-          open 0 T (succ (term_fvar n))
+          open 0 (open 1 ts (succ (fvar n term_var))) (fvar y term_var) :
+          open 0 T (succ (fvar n term_var))
     ]] ->
     [[ tvars; (y, T_top) :: gamma ⊨
         open 0 (open 1 ts zero) (fvar y term_var) :
@@ -70,15 +70,15 @@ Lemma annotated_reducible_fix_strong_induct:
     is_annotated_type T ->
     is_annotated_term ts ->
     [[ tvars;
-        (p, T_equiv (term_fvar y) (lambda T_unit (tfix T ts))) ::
+        (p, T_equiv (fvar y term_var) (lambda T_unit (tfix T ts))) ::
         (y,
           (T_forall
              (T_refine T_nat (annotated_tlt (lvar 0 term_var) (fvar n term_var)))
-             (T_arrow T_unit (shift T)))) ::
+             (T_arrow T_unit (shift 0 T 1)))) ::
         (n, T_nat) ::
         gamma ⊨
-        open 0 (open 1 ts (fvar n term_var)) (term_fvar y) :
-        open 0 T (term_fvar n) ]]
+        open 0 (open 1 ts (fvar n term_var)) (fvar y term_var) :
+        open 0 T (fvar n term_var) ]]
     ->
     [[ tvars; gamma ⊨ tfix T ts : T_forall T_nat T ]].
 Proof.
@@ -86,7 +86,7 @@ Proof.
   apply open_reducible_fix_strong_induction with n y p;
     repeat step || erase_open ||
            (rewrite (open_none (erase_term ts)) in * by auto) ||
-           (rewrite erase_type_map_indices in *);
+           (rewrite erase_type_shift in *);
     side_conditions.
 Qed.
 

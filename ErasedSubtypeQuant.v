@@ -1,5 +1,7 @@
 Require Export SystemFR.ReducibilityOpenEquivalent.
 
+Opaque reducible_values.
+
 Lemma subtype_forall:
   forall theta gamma t T1 T2 v l,
     valid_interpretation theta ->

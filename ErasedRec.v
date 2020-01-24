@@ -160,10 +160,10 @@ Lemma open_reducible_unfold:
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
-      eauto with btwf.
+      eauto with twf.
 
   apply reducible_unfold; steps;
-    eauto with wf btwf erased fv.
+    eauto with wf twf erased fv.
 Qed.
 
 Lemma spos_succ_pred:
@@ -231,9 +231,9 @@ Lemma open_reducible_unfold2:
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen || t_instantiate_sat3 || t_reducible_trec;
-      eauto with btwf.
+      eauto with twf.
 
-  apply reducible_unfold; repeat step || list_utils; eauto with wf btwf fv erased.
+  apply reducible_unfold; repeat step || list_utils; eauto with wf twf fv erased.
 
   eapply reducible_rec_equivalent; steps;
     eauto with erased;
@@ -302,11 +302,11 @@ Proof.
   apply reducible_fold; steps;
     eauto with wf;
     eauto with fv;
-    eauto 3 with btwf;
+    eauto 3 with twf;
     eauto with erased.
 
   rewrite substitute_topen in *; steps;
-    eauto with btwf.
+    eauto with twf.
 Qed.
 
 Lemma reducible_unfold_zero:
@@ -341,10 +341,10 @@ Lemma open_reducible_unfold_zero:
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
-      eauto with btwf.
+      eauto with twf.
 
   eapply reducible_unfold_zero; steps;
-    eauto with wf btwf erased.
+    eauto with wf twf erased.
 Qed.
 
 Lemma open_reducible_unfold_zero2:
@@ -366,10 +366,10 @@ Lemma open_reducible_unfold_zero2:
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen;
-      eauto with btwf.
+      eauto with twf.
 
   apply reducible_unfold_zero with (psubstitute Ts lterms term_var); steps;
-    eauto with wf btwf erased.
+    eauto with wf twf erased.
 
   apply reducible_rec_equivalent with (psubstitute n lterms term_var); steps;
     eauto with erased.
@@ -412,7 +412,7 @@ Proof.
 
   apply reducible_fold_zero; steps;
     eauto with wf;
-    eauto 3 with btwf;
+    eauto 3 with twf;
     eauto with erased.
 Qed.
 
@@ -452,10 +452,13 @@ Proof.
 
   - apply reducible_rec_equivalent with zero; t_closing;
       eauto using equivalent_sym, equivalent_star.
-    apply reducible_fold_zero; steps; eauto with wf btwf erased.
+    apply reducible_fold_zero; steps; eauto with wf twf erased.
     unshelve epose proof (H19 theta ((p, uu) :: lterms) _ _ _);
-      repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any;
-      eauto using equivalent_star.
+      repeat step || list_utils || apply SatCons || simp_red || t_substitutions ||
+             step_inversion NoDup || rewrite substitute_open in * || apply_any;
+      eauto using equivalent_star;
+      t_closer;
+      eauto with twf.
 
   - apply reducible_rec_equivalent with (succ v0); steps;
       try solve [ apply equivalent_sym, equivalent_star; t_closing ].
@@ -463,13 +466,17 @@ Proof.
     apply reducible_fold; steps;
       eauto with wf;
       eauto with fv;
-      eauto 3 with btwf;
+      eauto 3 with twf;
       eauto with erased;
       eauto using equivalent_sym, equivalent_star;
       try solve [ unfold reducible, reduces_to; repeat step || simp_red || eexists; try t_closing; eauto with smallstep ].
+
     unshelve epose proof (H20 theta ((p, uu) :: (pn, v0) :: lterms) _ _ _);
-      repeat tac1 || step_inversion NoDup || rewrite substitute_open in *;
-      try solve [ apply equivalent_star; t_closing ].
+      repeat step || list_utils || nodup || apply SatCons || simp_red || t_substitutions ||
+             rewrite substitute_open in *;
+      try solve [ apply equivalent_star; t_closing ];
+      t_closer;
+      eauto with twf.
 Qed.
 
 Lemma reducible_unfold_in:
@@ -528,7 +535,7 @@ Proof.
 
   - apply reducibility_subst_head in H26;
       repeat step || list_utils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with erased);
-    eauto with wf btwf fv;
+    eauto with wf twf fv;
     eauto with erased;
     eauto using equivalent_star.
 
@@ -600,18 +607,21 @@ Proof.
   eapply reducible_unfold_in; try eassumption;
     steps;
     eauto with wf;
-    eauto with btwf;
+    eauto with twf;
     eauto with fv;
     eauto with erased.
 
   - unshelve epose proof (H45 theta ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
-      repeat step_inversion NoDup || tac1.
+      repeat step || list_utils || nodup || apply SatCons || simp_red || t_substitutions;
+      t_closer.
+
   - unshelve epose proof (H46 theta ((p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat match goal with
              | |- reducible_values _ _ T_nat => simp reducible_values
              | |- reducible_values _ _ (T_equiv _ _) => simp reducible_values
-             | _ => step_inversion NoDup || tac0
-             end.
+             | _ => repeat step || list_utils || nodup || apply SatCons || t_substitutions || fv_open
+             end;
+      t_closer.
 Qed.
 
 Lemma equivalent_zero_contradiction:
@@ -677,7 +687,7 @@ Proof.
     eauto using reducibility_is_candidate.
   - apply reducibility_subst_head in H26;
       repeat step || list_utils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with erased);
-    eauto with wf btwf fv.
+    eauto with wf twf fv.
 
     apply_any; steps; eauto using equivalent_star.
 
@@ -744,7 +754,7 @@ Proof.
   eapply reducible_unfold_pos_in; try eassumption;
     steps;
     eauto with wf;
-    eauto with btwf;
+    eauto with twf;
     eauto with fv;
     eauto with erased.
 
@@ -752,6 +762,7 @@ Proof.
     repeat match goal with
            | |- reducible_values _ _ T_nat => simp reducible_values
            | |- reducible_values _ _ (T_equiv _ _) => simp reducible_values
-           | _ => step_inversion NoDup || tac0
-           end.
+           | _ => repeat step || list_utils || nodup || apply SatCons || t_substitutions || fv_open
+           end;
+      t_closer.
 Qed.

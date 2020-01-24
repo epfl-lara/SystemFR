@@ -1,5 +1,7 @@
 Require Export SystemFR.RedTactics.
 
+Opaque reducible_values.
+
 Lemma open_reducible_refl:
   forall tvars gamma t1 t2,
     [ tvars; gamma ⊨ t1 ≡ t2 ] ->

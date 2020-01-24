@@ -2,14 +2,11 @@ Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import Equations.Equations.
 
-Require Export SystemFR.ReducibilitySubst.
 Require Export SystemFR.ErasedRec.
 Require Export SystemFR.ErasedNat.
 
 Require Export SystemFR.FVLemmasLists.
 Require Export SystemFR.WFLemmasLists.
-
-Require Export SystemFR.NoTypeFVar.
 
 Require Export SystemFR.StrictPositivityPush.
 Require Export SystemFR.StrictPositivityPull.
@@ -74,7 +71,7 @@ Proof.
   apply reducibility_subst_head in H23;
     repeat step || t_invert_star || list_utils ||
            (rewrite (is_erased_term_tfv v') in * by eauto with erased);
-      eauto with btwf wf erased fv values.
+      eauto with twf wf erased fv values.
 
   lazymatch goal with
   | H: star scbv_step ?v1 ?v2 |- _ =>
@@ -123,7 +120,7 @@ Lemma open_reducible_unfold_gen:
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
-    eauto with btwf.
+    eauto with twf.
 
   apply reducible_unfold_gen with
     (makeFresh (
@@ -133,16 +130,16 @@ Proof.
     )); steps;
     eauto with wf;
     eauto with fv;
-    eauto with btwf;
+    eauto with twf;
     eauto with erased;
     try finisher.
 
   rewrite substitute_topen2;
     repeat step;
-    eauto with btwf.
+    eauto with twf.
 
   apply strictly_positive_subst;
-    repeat step || apply is_erased_type_topen; eauto with btwf; eauto with fv.
+    repeat step || apply is_erased_type_topen; eauto with twf; eauto with fv.
   eapply strictly_positive_rename_one; eauto;
     repeat step; try finisher.
 Qed.
@@ -182,11 +179,11 @@ Proof.
 
   eapply star_backstep_reducible; eauto with cbvlemmas values;
     repeat step || list_utils;
-    eauto with wf btwf fv erased.
+    eauto with wf twf fv erased.
 
   eapply backstep_reducible; eauto with smallstep values;
     repeat step || list_utils;
-    eauto with wf btwf fv erased;
+    eauto with wf twf fv erased;
     try t_closing.
 
   apply_any;
@@ -238,7 +235,7 @@ Lemma open_reducible_unfold_in_gen:
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
-    eauto with btwf.
+    eauto with twf.
 
   apply reducible_unfold_in_gen with
     (psubstitute T0 lterms term_var)
@@ -249,25 +246,26 @@ Proof.
       nil
     )); steps;
     eauto with wf;
-    eauto with btwf;
+    eauto with twf;
     eauto with erased;
     eauto with fv;
     try finisher.
 
   - rewrite substitute_topen2;
       repeat step;
-      eauto with btwf.
+      eauto with twf.
 
     apply strictly_positive_subst;
-      repeat step || apply is_erased_type_topen; eauto with btwf; eauto with fv.
+      repeat step || apply is_erased_type_topen; eauto with twf; eauto with fv.
     eapply strictly_positive_rename_one; eauto;
       repeat step; try finisher.
 
   - unshelve epose proof (H33 theta ((p, uu) :: (y,v) :: lterms) _ _ _);
       repeat match goal with
              | |- reducible_values _ _ (T_equiv _ _) => simp reducible_values
-             | _ => tac0
-             end.
+             | _ => step || list_utils || nodup || apply SatCons || t_substitutions || fv_open
+             end;
+        t_closer.
 Qed.
 
 
@@ -322,7 +320,7 @@ Proof.
     apply reducibility_subst_head2;
       repeat step || list_utils;
       try finisher;
-      eauto with wf btwf.
+      eauto with wf twf.
 
     unshelve epose proof (HH v0 _); repeat step || simp_red || rewrite open_none in * by steps.
 Qed.
@@ -384,15 +382,15 @@ Proof.
   apply reducible_fold_gen with X;
     repeat step || apply subst_erased_type || t_instantiate_sat4;
     eauto with wf;
-    eauto with btwf;
+    eauto with twf;
     eauto using pfv_in_subst with fv;
     eauto with erased.
 
   - rewrite substitute_topen2;
       repeat step || apply strictly_positive_subst || apply is_erased_type_topen ||
-      eauto with btwf;
+      eauto with twf;
       eauto with fv.
-  - rewrite_anywhere substitute_topen; eauto with btwf.
+  - rewrite_anywhere substitute_topen; eauto with twf.
 Qed.
 
 Lemma open_reducible_fold_gen2:
@@ -418,10 +416,10 @@ Proof.
     eauto with wf fv;
     eauto with erased.
 
-  rewrite <- substitute_topen2; steps; eauto with btwf.
+  rewrite <- substitute_topen2; steps; eauto with twf.
   apply reducibility_subst_head2;
     repeat step || list_utils || apply reducibility_is_candidate ||
            rewrite fv_subst_different_tag in * by (steps; eauto with fv);
-    eauto with fv wf btwf erased;
+    eauto with fv wf twf erased;
     eauto using reducibility_is_candidate.
 Qed.

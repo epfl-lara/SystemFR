@@ -63,14 +63,14 @@ Lemma topen_twice:
       topen k (tclose k (topen (S k) A (topen 0 B (fvar X type_var))) X) R.
 Proof.
   induction A; repeat step || t_equality || apply_any || list_utils;
-    eauto with btwf omega.
+    eauto with twf omega.
   - rewrite topen_tclose;
-      repeat step || t_fv_open || list_utils || apply twf_topen;
-      eauto with btwf omega.
+      repeat step || fv_open || list_utils || apply twf_topen;
+      eauto with twf omega.
     + rewrite substitute_topen3; steps.
       rewrite substitute_nothing; steps.
-      rewrite topen_none; steps; eauto with btwf.
-      apply twf_monotone with 0; eauto with btwf omega.
+      rewrite topen_none; steps; eauto with twf.
+      apply twf_monotone with 0; eauto with twf omega.
     + apply twf_monotone with 0; try omega.
       apply twf_topen; steps.
 Qed.

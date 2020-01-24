@@ -69,7 +69,7 @@ Lemma reducible_values_pi1:
     reducible_values theta t (T_prod U V) ->
     reducible theta (pi1 t) U.
 Proof.
-  repeat step || t_values_info2 || simp reducible_values in *.
+  repeat step || t_values_info2 || simp_red.
   eapply backstep_reducible; repeat step || list_utils;
     eauto with smallstep;
     eauto with fv wf;
@@ -107,8 +107,8 @@ Lemma reducible_values_pi2:
     reducible_values theta t (T_prod U V) ->
     reducible theta (pi2 t) (open 0 V (pi1 t)).
 Proof.
-  repeat step || t_values_info2 || simp reducible_values in *.
-  eapply backstep_reducible; repeat step || list_utils || simp reducible_values in *;
+  repeat step || t_values_info2 || simp_red.
+  eapply backstep_reducible; repeat step || list_utils || simp_red;
     eauto with smallstep;
     eauto with fv wf;
     eauto using reducible_value_expr;

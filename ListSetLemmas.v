@@ -88,10 +88,10 @@ Proof.
   induction l1; unfold subset in *; repeat step || apply_any || list_utils.
 Qed.
 
-Hint Resolve union_weaken1: sets.
-Hint Resolve union_weaken2: sets.
-Hint Resolve union_weaken3: sets.
-Hint Resolve union_weaken4: sets.
+Hint Immediate union_weaken1: sets.
+Hint Immediate union_weaken2: sets.
+Hint Immediate union_weaken3: sets.
+Hint Immediate union_weaken4: sets.
 
 Lemma empty_is_subset:
   forall {T} (l: list T),
@@ -133,7 +133,6 @@ Proof.
   eauto with sets.
 Qed.
 
-
 Hint Resolve subset_union2: sets.
 
 Lemma subset_union3:
@@ -151,8 +150,6 @@ Proof.
   repeat step || unfold subset in *.
 Qed.
 
-Hint Resolve subset_add: sets.
-
 Lemma subset_add2:
   forall T (x: T) A B,
     subset A B ->
@@ -161,7 +158,7 @@ Proof.
   repeat step || unfold subset in *.
 Qed.
 
-Hint Resolve subset_add2: sets.
+Hint Immediate subset_add2: sets.
 
 Lemma subset_add3:
   forall T (x: T) A B,
@@ -172,7 +169,7 @@ Proof.
   repeat step || unfold subset in * || instantiate_any.
 Qed.
 
-Hint Resolve subset_add3: sets.
+Hint Immediate subset_add3: sets.
 
 Lemma subset_add4:
   forall T (x y: T) A B,
@@ -184,7 +181,7 @@ Proof.
   repeat step || unfold subset in * || instantiate_any.
 Qed.
 
-Hint Resolve subset_add4: sets.
+Hint Immediate subset_add4: sets.
 
 Lemma subset_add5:
   forall T (x y z: T) A B,
@@ -197,7 +194,7 @@ Proof.
   repeat step || unfold subset in * || instantiate_any.
 Qed.
 
-Hint Resolve subset_add5: sets.
+Hint Immediate subset_add5: sets.
 
 Lemma subset_insert:
   forall T (x: T) A B1 B2,
@@ -208,28 +205,20 @@ Proof.
     repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
-Hint Resolve subset_insert: sets.
+Hint Immediate subset_insert: sets.
 
-Ltac t_sets :=
+Hint Rewrite <- (@subset_union3 nat): simp_set.
+Hint Rewrite (@subset_add nat): simp_set.
+Hint Rewrite (@singleton_subset nat): simp_set.
+
+Ltac sets :=
   match goal with
   | H1: subset ?L1 ?L2, H2: ?X ∈ ?L1 |- _ =>
     poseNew (Mark (L1,L2,X) "in_subset");
     poseNew (in_subset L1 L2 X)
-  | _ => rewrite <- subset_union3 in *
-  | _ => rewrite subset_add in *
-  | _ => rewrite singleton_subset in *
+  | _ => autorewrite with simp_set in * || list_utils
   | _ => apply subset_union2
   end.
-
-Ltac set_solver := t_sets.
-
-Hint Rewrite <- (@subset_union3 nat): t_simp_set.
-Hint Rewrite (@subset_add nat): t_simp_set.
-Hint Rewrite (@singleton_subset nat): t_simp_set.
-
-Ltac t_sets2 :=
-  repeat autorewrite with t_simp_set in * || step ||
-         list_utils || unfold subset in * || instantiate_any.
 
 Lemma subset_same:
   forall T (A B C: list T),
@@ -239,8 +228,6 @@ Lemma subset_same:
 Proof.
   intuition.
 Qed.
-
-Hint Resolve subset_same: sets.
 
 Lemma subset_singleton:
   forall A (x: A) l,
@@ -340,7 +327,7 @@ Proof.
   induction s1; steps.
 Qed.
 
-Hint Immediate in_middle: sets2.
+Hint Immediate in_middle: sets.
 
 Lemma subset_left:
   forall A (s1 s2 s3: list A),
@@ -357,7 +344,7 @@ Proof.
   induction s1; steps.
 Qed.
 
-Hint Immediate in_middle2: sets2.
+Hint Immediate in_middle2: sets.
 
 Lemma subset_middle:
   forall A (x: A) (s s1 s2: list A),
@@ -368,8 +355,7 @@ Proof.
   unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
-Hint Immediate subset_middle: sets2.
-
+Hint Immediate subset_middle: sets.
 
 Lemma subset_middle2:
   forall A (x y: A) (s s1 s2: list A),
@@ -419,7 +405,7 @@ Proof.
   unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
-Hint Immediate subset_middle5: sets2.
+Hint Immediate subset_middle5: sets.
 
 Lemma subset_middle7:
   forall A (x y: A) (s s1 s2 s3: list A),
@@ -437,7 +423,7 @@ Proof.
   intros; eauto with sets.
 Qed.
 
-Hint Immediate subset_middle_indirect: sets2.
+Hint Immediate subset_middle_indirect: sets.
 
 Lemma subset_middle_indirect2:
   forall A (x: A) (s1 s2: list A),
@@ -446,7 +432,7 @@ Proof.
   intros; eauto with sets.
 Qed.
 
-Hint Immediate subset_middle_indirect2: sets2.
+Hint Immediate subset_middle_indirect2: sets.
 
 Lemma subset_right:
   forall A (s1 s2 s3: list A),
@@ -461,7 +447,7 @@ Lemma subset_right2:
     subset s1 s3 ->
     subset s1 (s2 ++ x :: s3).
 Proof.
-  eauto with sets.
+  repeat step || apply subset_right; eauto 2 with sets.
 Qed.
 
 Lemma subset_right3:
@@ -469,7 +455,7 @@ Lemma subset_right3:
     subset s1 s3 ->
     subset s1 ((s2 ++ x :: s3) ++ s4).
 Proof.
-  eauto using subset_left with sets.
+  eauto using subset_left, subset_right, subset_add2.
 Qed.
 
 Lemma subset_right4:
@@ -496,9 +482,9 @@ Proof.
   repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
-Hint Immediate subset_right: sets2.
-Hint Immediate subset_right2: sets2.
-Hint Immediate subset_right3: sets2.
-Hint Immediate subset_right4: sets2.
-Hint Immediate subset_right5: sets2.
-Hint Immediate subset_right6: sets2.
+Hint Immediate subset_right: sets.
+Hint Immediate subset_right2: sets.
+Hint Immediate subset_right3: sets.
+Hint Immediate subset_right4: sets.
+Hint Immediate subset_right5: sets.
+Hint Immediate subset_right6: sets.

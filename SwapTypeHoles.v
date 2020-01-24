@@ -110,7 +110,7 @@ Lemma open_swap:
     topen j1 (topen j2 t rep2) rep1 =
     topen j1 (topen j2 (swap_type_holes t j1 j2) rep1) rep2).
 Proof.
-  induction t; repeat step || t_equality || rewrite topen_none; eauto with btwf omega.
+  induction t; repeat step || t_equality || rewrite topen_none; eauto with twf omega.
 Qed.
 
 Lemma swap_nothing:
@@ -129,7 +129,7 @@ Lemma is_erased_swap:
     is_erased_type (swap_type_holes T i j).
 Proof.
   induction T; repeat step || apply_any || rewrite (swap_nothing _ 0);
-    eauto with omega btwf.
+    eauto with omega twf.
 Qed.
 
 Hint Resolve is_erased_swap: erased.
@@ -140,10 +140,10 @@ Lemma twf_swap:
     twf T (S k) ->
     twf (topen (S k) (swap_type_holes T k (S k)) rep) k.
 Proof.
-  induction T; steps; eauto with btwf omega.
+  induction T; steps; eauto with twf omega.
 Qed.
 
-Hint Resolve twf_swap: btwf.
+Hint Resolve twf_swap: twf.
 
 Lemma twf_swap2:
   forall T k rep,
@@ -151,10 +151,10 @@ Lemma twf_swap2:
     twf T (S (S k)) ->
     twf (topen (S k) (swap_type_holes T k (S k)) rep) (S k).
 Proof.
-  induction T; repeat step || unshelve eauto with btwf omega.
+  induction T; repeat step || unshelve eauto with twf omega.
 Qed.
 
-Hint Resolve twf_swap2: btwf.
+Hint Resolve twf_swap2: twf.
 
 Lemma wf_swap:
   forall T k i j,

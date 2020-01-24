@@ -1,7 +1,3 @@
-Require Export SystemFR.Trees.
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.AssocList.
 Require Export SystemFR.TreeLists.
 Require Export SystemFR.ErasedTermLemmas.
 

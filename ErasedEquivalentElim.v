@@ -1,5 +1,7 @@
 Require Export SystemFR.ReducibilityEquivalent.
 
+Opaque reducible_values.
+
 Lemma reducibility_equivalent2:
   forall T t1 t2 theta,
     equivalent_terms t1 t2 ->

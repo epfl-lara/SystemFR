@@ -1,9 +1,4 @@
-Require Export SystemFR.Tactics.
-
-Require Export SystemFR.Syntax.
 Require Export SystemFR.ErasedTermLemmas.
-Require Export SystemFR.ListUtils.
-Require Export SystemFR.FVLemmas.
 Require Export SystemFR.FVLemmasLists.
 
 Definition no_type_fvar T vars :=
@@ -24,7 +19,7 @@ Lemma no_type_fvar_open:
     no_type_fvar (open k T rep) vars.
 Proof.
   unfold no_type_fvar;
-    repeat step || t_fv_open || list_utils ||
+    repeat step || fv_open || list_utils ||
            rewrite is_erased_term_tfv in * by steps; eauto.
 Qed.
 
@@ -54,7 +49,7 @@ Lemma no_type_fvar_in_topen:
     ~(X ∈ vars) ->
     no_type_fvar (topen k T (fvar X type_var)) vars.
 Proof.
-  unfold no_type_fvar; repeat step || t_fv_open || list_utils; eauto.
+  unfold no_type_fvar; repeat step || fv_open || list_utils; eauto.
 Qed.
 
 Lemma no_type_fvar_append:

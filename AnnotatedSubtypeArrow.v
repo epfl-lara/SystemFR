@@ -2,6 +2,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedSubtype.
 
+Opaque reducible_values.
+
 Lemma annotated_subtype_arrow:
   forall tvars gamma A1 A2 B1 B2 x,
     ~(x ∈ fv_context gamma) ->
@@ -12,7 +14,7 @@ Lemma annotated_subtype_arrow:
     is_annotated_type A2 ->
     is_annotated_type B2 ->
     [[ tvars; gamma ⊨ B1 <: A1 ]] ->
-    [[ tvars; (x,B1) :: gamma ⊨ open 0 A2 (term_fvar x) <: open 0 B2 (term_fvar x) ]] ->
+    [[ tvars; (x,B1) :: gamma ⊨ open 0 A2 (fvar x term_var) <: open 0 B2 (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ T_arrow A1 A2 <: T_arrow B1 B2 ]].
 Proof.
   unfold annotated_subtype, subtype;
@@ -39,7 +41,8 @@ Lemma annotated_subtype_arrow2:
     ~(x ∈ tvars) ->
     ~(f ∈ tvars) ->
     is_annotated_type B ->
-    [[ tvars; (x,A) :: (f,T) :: gamma ⊨ app (term_fvar f) (term_fvar x) : open 0 B (term_fvar x) ]] ->
+    [[ tvars; (x,A) :: (f,T) :: gamma ⊨
+         app (fvar f term_var) (fvar x term_var) : open 0 B (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ T <: T_arrow A B ]].
 Proof.
   unfold annotated_reducible, annotated_subtype, subtype;
