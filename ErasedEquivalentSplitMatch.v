@@ -45,8 +45,8 @@ Lemma equivalent_split_match:
     (forall l,
           satisfies (reducible_values theta)
                     (gamma1 ++
-                            (x, T_equiv (open 0 e2 (term_fvar v)) e)
-                            :: (y, T_equiv n (succ (term_fvar v))) :: (v, T_nat) :: gamma2) l ->
+                            (x, T_equiv (open 0 e2 (fvar v term_var)) e)
+                            :: (y, T_equiv n (succ (fvar v term_var))) :: (v, T_nat) :: gamma2) l ->
           equivalent_terms (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equiv (tmatch n e1 e2) e) :: gamma2) l ->
     wf n 0 ->
@@ -62,14 +62,20 @@ Proof.
   t_invert_nat_value; steps.
 
   - unshelve epose proof (H28 (l1 ++ (x, uu) :: (y, uu) :: lterms) _);
-      repeat tac1 || step_inversion NoDup;
-      eauto 2 using satisfies_drop;
+      repeat step || apply satisfies_insert || step_inversion NoDup ||
+             list_utils || t_substitutions || simp_red;
+      t_closer;
       eauto using equivalent_match_zero2;
+      eauto using satisfies_drop;
       try solve [ equivalent_star ].
 
   - unshelve epose proof (H29 (l1 ++ (x, uu) :: (y, uu) :: (v, v1) :: lterms) _);
-      clear H28; clear H29; repeat tac1 || step_inversion NoDup;
-      eauto 2 using satisfies_drop;
+      clear H28; clear H29;
+      repeat step || apply satisfies_insert || step_inversion NoDup ||
+             list_utils || t_substitutions || simp_red || fv_open;
+      t_closer;
+      eauto with twf;
       eauto using equivalent_match_succ2 with values erased wf;
+      eauto using satisfies_drop;
       try solve [ equivalent_star ].
 Qed.

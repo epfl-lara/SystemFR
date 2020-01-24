@@ -1,28 +1,11 @@
 Require Import Coq.Strings.String.
 
 Require Export SystemFR.SubstitutionErase.
-Require Export SystemFR.TermListReducible.
 Require Export SystemFR.EquivalentStar.
+Require Export SystemFR.TermListReducible.
 Require Export SystemFR.TermListLemmas.
-Require Export SystemFR.RewriteTactics.
-
-Require Export SystemFR.ReducibilityLemmas.
 
 Opaque reducible_values.
-
-Ltac tac0_aux :=
-  repeat step || list_utils || finisher || apply SatCons ||
-         apply satisfies_insert || t_satisfies_nodup || t_fv_open ||
-           t_substitutions ||
-           t_closer;
-           eauto with wf fv;
-           eauto with btwf;
-           eauto with erased;
-           eauto 3 using NoDup_append with sets.
-
-Ltac tac0 := unshelve tac0_aux.
-
-Ltac tac1 := repeat tac0 || simp_red.
 
 Lemma instantiate_open_reducible:
   forall theta gamma t T lterms,
@@ -146,6 +129,17 @@ Ltac t_reduces_to2 :=
     apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T a))
   end.
 
+Ltac t_reduces_to3 :=
+  match goal with
+  | H1: reducible_values _ ?a ?A,
+    H2: forall a, _ -> _ -> _ ->
+            reducible_values ?theta a ?A ->
+            reduces_to (fun t => reducible_values ?theta t (open 0 ?T _)) _
+      |- reduces_to _ _ =>
+    poseNew (Mark (H1,H2) "t_reduces_to2");
+    apply reduces_to_equiv with (fun t => reducible_values theta t (open 0 T a))
+  end.
+
 Ltac t_instantiate_reducible :=
   match goal with
   | H1: reducible_values _ ?v ?T, H3: forall a, _ |- _ =>
@@ -178,7 +172,7 @@ Lemma equivalent_cons:
                (psubstitute t' ((x, r) :: l) term_var) ->
     equivalent_terms (psubstitute t l term_var) (psubstitute t' l term_var).
 Proof.
-  tac1.
+  repeat step || t_substitutions.
 Qed.
 
 Lemma equivalent_insert:
@@ -189,7 +183,7 @@ Lemma equivalent_insert:
                (psubstitute t' (l1 ++ (x, r) :: l2) term_var) ->
     equivalent_terms (psubstitute t (l1 ++ l2) term_var) (psubstitute t' (l1 ++ l2) term_var).
 Proof.
-  tac1.
+  repeat step || t_substitutions.
 Qed.
 
 Lemma equivalent_insert2:
@@ -202,7 +196,7 @@ Lemma equivalent_insert2:
                (psubstitute t' (l1 ++ (x, rx) :: (y, ry) :: l2) term_var) ->
     equivalent_terms (psubstitute t (l1 ++ l2) term_var) (psubstitute t' (l1 ++ l2) term_var).
 Proof.
-  tac1.
+  repeat step || t_substitutions.
 Qed.
 
 Lemma equivalent_cons_succ:
@@ -218,7 +212,7 @@ Lemma equivalent_cons_succ:
                (psubstitute t ((p, uu) :: (n, v) :: l) term_var) ->
     equivalent_terms (open 0 (psubstitute ts l term_var) v) (psubstitute t l term_var).
 Proof.
-  tac0.
+  repeat step || t_substitutions.
 Qed.
 
 Lemma equivalent_cons2:
@@ -242,7 +236,7 @@ Lemma equivalent_cons2:
             (notype_lambda (notype_rec v (psubstitute t0 l term_var) (psubstitute ts l term_var))))
       (psubstitute t l term_var).
 Proof.
-  tac0; steps.
+  repeat step || t_substitutions.
 Qed.
 
 Hint Resolve equivalent_cons: b_equiv_subst.

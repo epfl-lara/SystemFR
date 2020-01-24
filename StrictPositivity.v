@@ -2,10 +2,8 @@ Require Import Equations.Equations.
 
 Require Import Omega.
 
-Require Export SystemFR.Syntax.
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.NoTypeFVar.
-Require Export SystemFR.Tactics.
 
 Equations strictly_positive (T: tree) (vars: list nat): Prop
     by wf (type_nodes T) lt :=

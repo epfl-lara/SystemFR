@@ -15,7 +15,7 @@ Lemma open_topen:
 Proof.
   induction t;
     repeat step || t_equality || apply_any ||
-      (rewrite topen_none by (steps;eauto with btwf omega)) ||
+      (rewrite topen_none by (steps;eauto with twf omega)) ||
       (rewrite open_none by (steps;eauto with wf omega));
-        eauto with wf btwf omega.
+        eauto with wf twf omega.
 Qed.

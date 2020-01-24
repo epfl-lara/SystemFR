@@ -6,6 +6,8 @@ Require Export SystemFR.TypeSugar.
 
 Require Import Coq.Lists.List.
 
+Opaque reducible_values.
+
 Lemma open_reducible_T_ite:
   forall tvars gamma T1 T2 b t1 t2 x,
     wf t1 0 ->
@@ -40,35 +42,35 @@ Proof.
   repeat apply reducible_union || step || top_level_unfold reducible || top_level_unfold reduces_to || simp_red.
 
   - left.
-    apply reducible_refine; repeat step || (rewrite open_none by eauto with wf);
-      eauto with wf erased fv;
-      try solve [ apply equivalent_star; steps; eauto with fv wf erased ].
+    apply reducible_refine; repeat step || (rewrite open_none by t_closer);
+      try solve [ equivalent_star ];
+      t_closer.
 
     eapply star_backstep_reducible; repeat step || list_utils; eauto with cbvlemmas;
-      eauto with fv wf erased.
+      t_closer.
 
     eapply backstep_reducible; eauto with smallstep; repeat step || list_utils;
       eauto with fv wf erased.
 
-    unshelve epose proof (H23 theta ((x, uu) :: lterms) _ _); tac1;
-      try solve [ apply equivalent_star; steps; eauto with erased wf fv ].
+    unshelve epose proof (H23 theta ((x, uu) :: lterms) _ _);
+      repeat step || list_utils || apply SatCons || simp_red || t_substitutions;
+      equivalent_star.
 
   - right.
-    apply reducible_refine; repeat step || (rewrite open_none by eauto with wf) || list_utils;
-      eauto with wf fv erased;
+    apply reducible_refine; repeat step || (rewrite open_none by t_closer) || list_utils;
+      t_closer;
       try solve [
-        apply equivalent_star; repeat step || list_utils; eauto with erased wf fv;
+        apply equivalent_star; repeat step || list_utils; t_closer;
         eapply star_trans; eauto using star_smallstep_ite_cond; eauto using star_one with smallstep
       ].
 
     eapply star_backstep_reducible; repeat step || list_utils; eauto with cbvlemmas;
-      eauto with fv;
-      eauto with wf;
-      eauto with erased.
+      t_closer.
 
     eapply backstep_reducible; eauto with smallstep; repeat step || list_utils;
       eauto with fv wf erased.
 
-    unshelve epose proof (H24 theta ((x, uu) :: lterms) _ _); tac1;
-      try solve [ apply equivalent_star; steps; eauto with erased wf fv ].
+    unshelve epose proof (H24 theta ((x, uu) :: lterms) _ _);
+      repeat step || list_utils || apply SatCons || simp_red || t_substitutions;
+      equivalent_star.
 Qed.

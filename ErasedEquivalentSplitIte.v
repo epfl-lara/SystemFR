@@ -31,10 +31,14 @@ Lemma equivalent_split_ite:
     wf e1 0 ->
     wf e2 0 ->
     (forall l,
-       satisfies (reducible_values theta) (gamma1 ++ (x, T_equiv e1 e) :: (y, T_equiv b ttrue) :: gamma2) l ->
+       satisfies (reducible_values theta)
+                 (gamma1 ++ (x, T_equiv e1 e) :: (y, T_equiv b ttrue) :: gamma2)
+                 l ->
        equivalent_terms (substitute t l) (substitute t' l)) ->
     (forall l,
-       satisfies (reducible_values theta) (gamma1 ++ (x, T_equiv e2 e) :: (y, T_equiv b tfalse) :: gamma2) l ->
+       satisfies (reducible_values theta)
+                 (gamma1 ++ (x, T_equiv e2 e) :: (y, T_equiv b tfalse) :: gamma2)
+                 l ->
        equivalent_terms (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equiv (ite b e1 e2) e) :: gamma2) l ->
     equivalent_terms (substitute t l) (substitute t' l).
@@ -43,13 +47,17 @@ Proof.
     repeat step || list_utils || t_sat_cut || t_instantiate_sat3 || t_termlist || step_inversion satisfies ||
            simp_red.
 
-  - unshelve epose proof (H23 (l1 ++ (x, uu) :: (y, uu) :: lterms) _); tac1;
-      eauto 2 using satisfies_drop;
+  - unshelve epose proof (H23 (l1 ++ (x, uu) :: (y, uu) :: lterms) _);
+      repeat step || apply satisfies_insert || list_utils || t_substitutions || simp_red;
+      t_closer;
       eauto using equivalent_ite_true3;
+      eauto using satisfies_drop;
       try solve [ equivalent_star ].
 
-  - unshelve epose proof (H24 (l1 ++ (x, uu) :: (y, uu) :: lterms) _); tac1;
-      eauto 2 using satisfies_drop;
+  - unshelve epose proof (H24 (l1 ++ (x, uu) :: (y, uu) :: lterms) _);
+      repeat step || apply satisfies_insert || list_utils || t_substitutions || simp_red;
+      t_closer;
       eauto using equivalent_ite_false3;
+      eauto using satisfies_drop;
       try solve [ equivalent_star ].
 Qed.

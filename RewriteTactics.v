@@ -5,22 +5,11 @@ Require Export SystemFR.SubstitutionLemmas.
 Require Export SystemFR.ErasedTermLemmas.
 
 Ltac t_rewrite :=
-  repeat step || list_utils || t_fv_open || finisher;
+  repeat step || list_utils || fv_open || finisher;
     eauto with wf;
-    eauto with btwf;
+    eauto with twf;
     eauto with fv;
     eauto with b_cmap fv.
-
-Ltac t_closing :=
-  unfold closed_value, closed_term in *; repeat step || list_utils;
-    eauto with erased;
-    eauto with wf;
-    eauto with fv;
-    eauto with values;
-    eauto using is_erased_term_tfv;
-    eauto using is_erased_term_twf.
-
-Ltac t_closer := try solve [ t_closing ].
 
 Ltac t_substitutions :=
   (autorewrite with bsubst in *) ||
@@ -35,3 +24,15 @@ Ltac t_substitutions :=
   (rewrite (substitute_nothing5 (is_pair _)) by auto with fv) ||
   (rewrite (substitute_nothing5 (is_succ _)) by auto with fv) ||
   (rewrite (substitute_nothing5 (is_lambda _)) by auto with fv).
+
+Ltac t_closing :=
+  unfold closed_value, closed_term in *; repeat step || list_utils;
+    eauto 2 with erased;
+    eauto 2 with wf;
+    eauto 2 with twf;
+    eauto 2 with fv;
+    eauto 2 with values;
+    eauto 2 using is_erased_term_tfv;
+    eauto 2 using is_erased_term_twf.
+
+Ltac t_closer := try solve [ t_closing ].

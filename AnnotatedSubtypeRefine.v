@@ -2,6 +2,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedRefine.
 
+Opaque reducible_values.
+
 Lemma annotated_subtype_refine:
   forall tvars gamma A B p q x,
     ~(x ∈ fv_context gamma) ->
@@ -12,7 +14,7 @@ Lemma annotated_subtype_refine:
     wf q 1 ->
     is_annotated_term q ->
     subset (fv q) (support gamma) ->
-    [[ tvars; (x, T_refine A p) :: gamma ⊨ open 0 q (term_fvar x) ≡ ttrue ]] ->
+    [[ tvars; (x, T_refine A p) :: gamma ⊨ open 0 q (fvar x term_var) ≡ ttrue ]] ->
     [[ tvars; gamma ⊨ A <: B ]] ->
     [[ tvars; gamma ⊨ T_refine A p <: T_refine B q ]].
 Proof.
@@ -52,7 +54,7 @@ Lemma annotated_subtype_refine4:
     wf p 1 ->
     is_annotated_term p ->
     subset (fv p) (support gamma) ->
-    [[ tvars; (x, T) :: gamma ⊨ open 0 p (term_fvar x) ≡ ttrue ]] ->
+    [[ tvars; (x, T) :: gamma ⊨ open 0 p (fvar x term_var) ≡ ttrue ]] ->
     [[ tvars; gamma ⊨ T <: A ]] ->
     [[ tvars; gamma ⊨ T <: T_refine A p ]].
 Proof.
@@ -78,7 +80,7 @@ Lemma annotated_subtype_refine5:
     ~(x ∈ tvars) ->
     ~(p ∈ tvars) ->
     is_annotated_term b ->
-    [[ tvars; (p, T_equiv (open 0 b (term_fvar x)) ttrue) :: (x, A) :: gamma ⊨ term_fvar x: T ]] ->
+    [[ tvars; (p, T_equiv (open 0 b (fvar x term_var)) ttrue) :: (x, A) :: gamma ⊨ fvar x term_var: T ]] ->
     [[ tvars; gamma ⊨ T_refine A b <: T ]].
 Proof.
   unfold annotated_equivalent, equivalent, annotated_subtype, subtype, annotated_reducible;

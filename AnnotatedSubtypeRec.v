@@ -6,6 +6,7 @@ Require Export SystemFR.ErasedRecPos.
 
 Opaque tlt.
 Opaque annotated_tlt.
+Opaque reducible_values.
 
 Lemma annotated_subtype_rec:
   forall tvars gamma n1 n2 T0 Ts,
@@ -48,7 +49,7 @@ Proof.
              apply_any;
       eauto using has_polarities_subst_erase;
       side_conditions;
-      eauto with btwf wf fv.
+      eauto with twf wf fv.
 
   - apply fv_nils2; eauto with fv.
     eapply subset_same_support; eauto; repeat step || t_subset_erase || rewrite erased_context_support.

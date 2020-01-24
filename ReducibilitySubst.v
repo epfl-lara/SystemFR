@@ -269,7 +269,7 @@ Proof.
 
     apply reducibility_subst_induct_1 with P;
       repeat step || apply reducible_unused2;
-      eauto 3 with erased fv wf wft step_tactic;
+      eauto 3 with erased fv wf step_tactic;
       eauto with prop_until;
       eauto with apply_any;
       try finisher;
@@ -293,7 +293,7 @@ Proof.
 
     apply reducibility_subst_induct_2 with V X P;
       repeat step || apply reducible_unused2;
-      eauto 3 with erased fv wf wft step_tactic;
+      eauto 3 with erased fv wf step_tactic;
       eauto with prop_until;
       eauto with apply_any;
       try finisher;
@@ -339,7 +339,7 @@ Proof.
     + apply reducibility_subst_induct_1 with P;
         repeat step || apply reducible_unused2 || apply reducibility_is_candidate || list_utils ||
                (rewrite fv_subst_different_tag in * by steps);
-        eauto 3 with erased fv wf wft step_tactic;
+        eauto 3 with erased fv wf step_tactic;
         eauto with prop_until;
         eauto with apply_any;
         try finisher.
@@ -377,7 +377,7 @@ Proof.
 
     + apply reducibility_subst_induct_2 with V X P;
         repeat step || apply reducibility_is_candidate || list_utils;
-        eauto 3 with erased fv wf wft step_tactic;
+        eauto 3 with erased fv wf step_tactic;
         eauto with prop_until;
         try finisher.
 
@@ -464,7 +464,7 @@ Lemma reducibility_subst_head:
 Proof.
   intros.
   apply reducible_unused3 with X (fun v => reducible_values theta v V);
-    repeat step || t_fv_open  || list_utils || apply reducibility_is_candidate.
+    repeat step || fv_open  || list_utils || apply reducibility_is_candidate.
 
   lazymatch goal with
   | H: reducible_values ((?X,?RC) :: ?theta) ?v ?U |- _ =>
@@ -473,11 +473,11 @@ Proof.
                          (fun v => reducible_values theta v V)
                          _ _ _ _ _ _ _ _ _ _ _) H)
   end;
-    repeat tac1 || rewrite substitute_nothing3 in *;
+    repeat step || list_utils || t_substitutions || rewrite substitute_nothing3 in *;
       eauto using reducibility_is_candidate;
       try solve [ eapply reducible_unused2; steps; eauto using reducibility_is_candidate ];
       try solve [ eapply reducible_unused3 with X _; steps; eauto using reducibility_is_candidate ];
-      eauto 2 with fv wft erased step_tactic.
+      eauto 2 with fv wf erased step_tactic.
 Qed.
 
 Lemma reducibility_subst_head2:
@@ -498,7 +498,7 @@ Lemma reducibility_subst_head2:
 Proof.
   intros.
   apply (reducible_unused2 _ _ X _ (fun v => reducible_values theta v V)) in H9;
-    repeat step || t_fv_open  || list_utils;
+    repeat step || fv_open  || list_utils;
     eauto using reducibility_is_candidate.
 
   lazymatch goal with
@@ -508,9 +508,9 @@ Proof.
                          (fun v => reducible_values theta v V)
                          _ _ _ _ _ _ _ _ _ _ _)
   end;
-    repeat tac1 || rewrite substitute_nothing3 in *;
+    repeat step || list_utils || t_substitutions || rewrite substitute_nothing3 in *;
       eauto using reducibility_is_candidate;
       try solve [ eapply reducible_unused2; steps; eauto using reducibility_is_candidate ];
       try solve [ eapply reducible_unused3 with X _; steps; eauto using reducibility_is_candidate ];
-      eauto 2 with wft fv erased step_tactic.
+      eauto 2 with wf fv erased step_tactic.
 Qed.

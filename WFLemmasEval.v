@@ -5,7 +5,7 @@ Require Export SystemFR.PrimitiveRecognizers.
 Require Export SystemFR.RelationClosures.
 
 Lemma wf_nat_value:
-  forall v, is_nat_value v -> wf v 0.
+  forall v k, is_nat_value v -> wf v k.
 Proof.
   induction 1; steps.
 Qed.
@@ -13,15 +13,15 @@ Qed.
 Hint Immediate wf_nat_value: wf.
 
 Lemma twf_nat_value:
-  forall v, is_nat_value v -> twf v 0.
+  forall v k, is_nat_value v -> twf v k.
 Proof.
   induction 1; steps.
 Qed.
 
-Hint Immediate twf_nat_value: btwf.
+Hint Immediate twf_nat_value: twf.
 
 Lemma wf_is_pair:
-  forall v, wf (is_pair v) 0.
+  forall v k, wf (is_pair v) k.
 Proof.
   destruct v; steps.
 Qed.
@@ -29,7 +29,7 @@ Qed.
 Hint Immediate wf_is_pair: wf.
 
 Lemma wf_is_succ:
-  forall v, wf (is_succ v) 0.
+  forall v k, wf (is_succ v) k.
 Proof.
   destruct v; steps.
 Qed.
@@ -37,7 +37,7 @@ Qed.
 Hint Immediate wf_is_succ: wf.
 
 Lemma wf_is_lambda:
-  forall v, wf (is_lambda v) 0.
+  forall v k, wf (is_lambda v) k.
 Proof.
   destruct v; steps.
 Qed.

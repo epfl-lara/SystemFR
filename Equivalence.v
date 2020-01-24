@@ -1,6 +1,7 @@
 Require Import Coq.Strings.String.
 
 Require Export SystemFR.StarLemmas.
+Require Export SystemFR.ErasedTermLemmas.
 
 (* Two terms `t1` and `t2` are observationally equivalent if for any context,   *)
 (* `C[t1]` is scbv_normalizing iff `C[t2]` is scbv_normalizing                  *)
@@ -63,20 +64,39 @@ Hint Immediate equivalent_terms_erased1: erased.
 Hint Immediate equivalent_terms_erased2: erased.
 
 Lemma equivalent_terms_wf1:
-  forall t1 t2,
+  forall t1 t2 k,
     equivalent_terms t1 t2 ->
-    wf t1 0.
+    wf t1 k.
 Proof.
-  unfold equivalent_terms; steps.
+  unfold equivalent_terms; steps; eauto with wf.
 Qed.
 
 Lemma equivalent_terms_wf2:
-  forall t1 t2,
+  forall t1 t2 k,
     equivalent_terms t1 t2 ->
-    wf t2 0.
+    wf t2 k.
 Proof.
-  unfold equivalent_terms; steps.
+  unfold equivalent_terms; steps; eauto with wf.
 Qed.
 
 Hint Immediate equivalent_terms_wf1: wf.
 Hint Immediate equivalent_terms_wf2: wf.
+
+Lemma equivalent_terms_twf1:
+  forall t1 t2 k,
+    equivalent_terms t1 t2 ->
+    twf t1 k.
+Proof.
+  unfold equivalent_terms; steps; eauto with twf.
+Qed.
+
+Lemma equivalent_terms_twf2:
+  forall t1 t2 k,
+    equivalent_terms t1 t2 ->
+    twf t2 k.
+Proof.
+  unfold equivalent_terms; steps; eauto with twf.
+Qed.
+
+Hint Immediate equivalent_terms_twf1: twf.
+Hint Immediate equivalent_terms_twf2: twf.

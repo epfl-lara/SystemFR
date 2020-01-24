@@ -31,8 +31,8 @@ Lemma annotated_reducible_union_elim:
     wf T 0 ->
     is_annotated_term t' ->
     [[ tvars; gamma ⊨ t : T_union T1 T2 ]] ->
-    [[ tvars; (z,T1) :: gamma ⊨ open 0 t' (term_fvar z) : T ]] ->
-    [[ tvars; (z,T2) :: gamma ⊨ open 0 t' (term_fvar z) : T ]] ->
+    [[ tvars; (z,T1) :: gamma ⊨ open 0 t' (fvar z term_var) : T ]] ->
+    [[ tvars; (z,T2) :: gamma ⊨ open 0 t' (fvar z term_var) : T ]] ->
     [[ tvars; gamma ⊨ tlet t (T_union T1 T2) t' : T ]].
 Proof.
   unfold annotated_reducible;

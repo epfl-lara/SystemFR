@@ -20,7 +20,7 @@ Lemma ite_type_open:
     wf b 0 ->
     T_ite_push b (open k T1 a) (open k T2 a) (open k T a).
 Proof.
-  induction 1; repeat step || constructor || t_fv_open || list_utils ||
+  induction 1; repeat step || constructor || fv_open || list_utils ||
                       rewrite (open_none b) in * by (eauto with wf omega) ||
                       rewrite is_erased_term_tfv in * by assumption;
     eauto with fv.
@@ -31,8 +31,8 @@ Lemma ite_type_topen:
     twf b 0 ->
     T_ite_push b (topen k T1 (fvar X type_var)) (topen k T2 (fvar X type_var)) (topen k T (fvar X type_var)).
 Proof.
-  induction 1; repeat step || constructor || t_fv_open || list_utils ||
-                      rewrite (topen_none b) in * by (eauto with btwf omega) ||
+  induction 1; repeat step || constructor || fv_open || list_utils ||
+                      rewrite (topen_none b) in * by (eauto with twf omega) ||
                       rewrite is_erased_term_tfv in * by assumption;
     eauto with fv.
 Qed.

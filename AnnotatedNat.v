@@ -41,11 +41,11 @@ Lemma annotated_reducible_match:
     [[ tvars; gamma ⊨ tn : T_nat ]] ->
     [[ tvars; (p, T_equiv tn zero) :: gamma ⊨ t0 : T ]] ->
     [[ tvars; (
-      (p, T_equiv tn (succ (term_fvar n))) ::
+      (p, T_equiv tn (succ (fvar n term_var))) ::
       (n, T_nat) ::
       gamma
     ) ⊨
-      open 0 ts (term_fvar n) :
+      open 0 ts (fvar n term_var) :
       T
     ]]
     ->
@@ -86,13 +86,13 @@ Lemma annotated_reducible_rec:
     [[ tvars; gamma ⊨ tn : T_nat ]] ->
     [[ tvars; gamma ⊨ t0 : open 0 T zero ]] ->
     [[ tvars;
-        (p, T_equiv (term_fvar y) (lambda T_unit (rec T (term_fvar n) t0 ts))) ::
-        (y, T_arrow T_unit (open 0 T (term_fvar n))) ::
+        (p, T_equiv (fvar y term_var) (lambda T_unit (rec T (fvar n term_var) t0 ts))) ::
+        (y, T_arrow T_unit (open 0 T (fvar n term_var))) ::
         (n, T_nat) ::
         gamma ⊨
 
-        open 0 (open 1 ts (term_fvar n)) (term_fvar y) :
-        open 0 T (succ (term_fvar n))
+        open 0 (open 1 ts (fvar n term_var)) (fvar y term_var) :
+        open 0 T (succ (fvar n term_var))
     ]]
     ->
     [[ tvars; gamma ⊨ rec T tn t0 ts : open 0 T tn ]].

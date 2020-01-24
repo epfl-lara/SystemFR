@@ -146,8 +146,6 @@ Proof.
            end; eauto with wf.
 Qed.
 
-Hint Resolve substitute_open: bsubst.
-
 Lemma substitute_topen:
   forall t, forall k rep l tag,
      twfs l k ->
@@ -158,7 +156,7 @@ Proof.
     repeat match goal with
            | |- ?t = topen ?k ?t ?rep => symmetry; apply topen_none
            | _ => step || t_equality
-           end; eauto with btwf.
+           end; eauto with twf.
 Qed.
 
 Lemma substitute_open2:
@@ -170,8 +168,6 @@ Proof.
   intros; rewrite <- (substitute_nothing rep l) at 1; steps; eauto.
   symmetry; apply substitute_open; steps.
 Qed.
-
-Hint Resolve substitute_open2: bsubst.
 
 Lemma substitute_topen2:
   forall t, forall k rep l tag,
@@ -195,8 +191,6 @@ Proof.
   rewrite substitute_open; steps.
   rewrite substitute_nothing2; steps.
 Qed.
-
-Hint Resolve substitute_open3: bsubst.
 
 Lemma substitute_topen3:
   forall t k x rep l tag,
@@ -229,8 +223,6 @@ Proof.
   induction gamma; steps.
 Qed.
 
-Hint Resolve lookup_subst: bsubst.
-
 Lemma lookup_subst2:
   forall gamma x l tag,
     lookup Nat.eq_dec gamma x = None ->
@@ -238,8 +230,6 @@ Lemma lookup_subst2:
 Proof.
   induction gamma; steps.
 Qed.
-
-Hint Immediate lookup_subst2: bsubst.
 
 Definition equivalent_subst (l1 l2: list (nat * tree)): Prop :=
   forall s t,

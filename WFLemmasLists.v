@@ -9,14 +9,14 @@ Proof.
   induction lterms; repeat step || step_inversion satisfies; eauto with wf omega.
 Qed.
 
-Hint Resolve satisfies_wfs: wf.
+Hint Immediate satisfies_wfs: wf.
 
 Lemma satisfies_twfs:
   forall p lterms gamma k,
     satisfies p gamma lterms ->
     twfs lterms k.
 Proof.
-  induction lterms; repeat step || step_inversion satisfies; eauto with btwf omega.
+  induction lterms; repeat step || step_inversion satisfies; eauto with twf omega.
 Qed.
 
-Hint Resolve satisfies_twfs: btwf.
+Hint Immediate satisfies_twfs: twf.

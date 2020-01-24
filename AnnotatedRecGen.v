@@ -4,6 +4,8 @@ Require Export SystemFR.ErasedRecGen.
 Require Export SystemFR.StrictPositivityErased.
 Require Export SystemFR.BaseTypeErase.
 
+Opaque reducible_values.
+
 Lemma annotated_reducible_unfold_gen:
   forall tvars gamma t T0 Ts X,
     wf T0 0 ->
@@ -28,7 +30,7 @@ Proof.
 
   change (fvar X type_var) with (erase_type (fvar X type_var)).
   rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
-    eauto 2 with bannot.
+    eauto 2 with annot.
 Qed.
 
 Lemma annotated_reducible_unfold_gen_in:
@@ -79,7 +81,7 @@ Proof.
 
   change (fvar X type_var) with (erase_type (fvar X type_var)).
   rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
-    eauto 2 with bannot.
+    eauto 2 with annot.
 Qed.
 
 Lemma annotated_reducible_fold_gen:
@@ -106,7 +108,7 @@ Proof.
 
   - change (fvar X type_var) with (erase_type (fvar X type_var)).
     rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
-      eauto 2 with bannot.
+      eauto 2 with annot.
 
   - apply_any; repeat step || erase_open || t_substitutions.
 Qed.
@@ -134,7 +136,7 @@ Proof.
 
   - change (fvar X type_var) with (erase_type (fvar X type_var)).
     rewrite <- erase_type_topen; repeat step || apply strictly_positive_erased;
-      eauto 2 with bannot.
+      eauto 2 with annot.
   - change (fvar X type_var) with (erase_type (fvar X type_var)).
     rewrite <- erase_type_topen; repeat step || apply base_type_erase.
 Qed.

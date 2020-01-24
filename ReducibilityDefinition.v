@@ -1,12 +1,6 @@
 Require Import Coq.Strings.String.
 
-Require Export SystemFR.WFLemmas.
-
-Require Export SystemFR.SizeLemmas.
-Require Export SystemFR.Equivalence.
-Require Export SystemFR.StarInversions.
 Require Export SystemFR.TermList.
-
 Require Export SystemFR.ReducibilityMeasure.
 Require Export SystemFR.ReducibilityCandidate.
 
@@ -28,7 +22,7 @@ Proof.
   unfold reduces_to; repeat step; eauto.
 Qed.
 
-Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
+Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
     by wf (get_measure T) lt_measure :=
   reducible_values theta v (fvar X type_var) :=
     match lookup Nat.eq_dec theta X with
@@ -49,7 +43,7 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
       ~(X ∈ pfv T type_var) /\
       forall RC,
         reducibility_candidate RC ->
-        reducible_values ((X,RC) :: theta) v (topen 0 T (type_fvar X));
+        reducible_values ((X,RC) :: theta) v (topen 0 T (fvar X type_var));
 
   reducible_values theta v (T_arrow A B) :=
     exists (_: is_erased_type B),
@@ -147,16 +141,16 @@ Equations reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
 
 Hint Transparent lt_measure: core.
 
-Ltac t_reducibility_definition :=
+Ltac reducibility_definition :=
   repeat step || autorewrite with bsize || unfold "<<", get_measure, closed_value, closed_term in *;
     try solve [ apply right_lex, right_lex, lt_index_step; steps ];
     try solve [ apply right_lex, lt_index_step; steps ];
     try solve [ apply leq_lt_measure; omega ];
     try solve [ apply left_lex; omega ].
 
-Solve Obligations with t_reducibility_definition.
+Solve Obligations with reducibility_definition.
 
-Fail Next Obligation.
+Fail Next Obligation. (* no more obligations for reducible_values *)
 
 Definition reducible (theta: interpretation) t T : Prop :=
   reduces_to (fun t => reducible_values theta t T) t.
@@ -201,16 +195,6 @@ Lemma reducibility_rewrite:
     reducible theta t T.
 Proof.
   reflexivity.
-Qed.
-
-Lemma obvious_reducible:
-  forall theta t T,
-    reducible theta t T ->
-    exists v,
-      star scbv_step t v /\
-      reducible_values theta v T.
-Proof.
-  unfold reducible, reduces_to; steps; eauto.
 Qed.
 
 Ltac simp_red :=

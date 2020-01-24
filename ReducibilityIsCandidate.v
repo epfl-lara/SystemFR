@@ -1,5 +1,7 @@
 Require Export SystemFR.ReducibilityEquivalent.
 
+Opaque reducible_values.
+
 Lemma reducibility_is_candidate:
   forall theta T,
     valid_interpretation theta ->

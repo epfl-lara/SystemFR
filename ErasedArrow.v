@@ -13,13 +13,12 @@ Lemma reducible_lambda:
     wf t 1 ->
     pfv U term_var = nil ->
     pfv t term_var = nil ->
-    pfv t type_var = nil ->
     valid_interpretation theta ->
     is_erased_type V ->
     (forall u, reducible_values theta u U -> reducible theta (open 0 t u) (open 0 V u)) ->
     reducible_values theta (notype_lambda t) (T_arrow U V).
 Proof.
-  repeat step || list_utils || simp reducible_values in * || unfold closed_value, closed_term ||
+  repeat step || list_utils || simp_red || unfold closed_value, closed_term ||
          rewrite reducibility_rewrite;
     eauto 2 with cbvlemmas.
 
@@ -41,19 +40,20 @@ Lemma open_reducible_lambda:
     ~(x ∈ fv V) ->
     is_erased_term t ->
     is_erased_type V ->
-    [ tvars; (x, U) :: gamma ⊨ open 0 t (term_fvar x) : open 0 V (term_fvar x) ] ->
+    [ tvars; (x, U) :: gamma ⊨ open 0 t (fvar x term_var) : open 0 V (fvar x term_var) ] ->
     [ tvars; gamma ⊨ notype_lambda t : T_arrow U V ].
 Proof.
   unfold open_reducible in *; steps.
 
   apply reducible_value_expr; repeat step.
-  apply reducible_lambda; tac1;
+  apply reducible_lambda; repeat step;
     eauto with wf;
     eauto with fv;
     eauto with erased.
 
-  unshelve epose proof (H9 theta ((x,u) :: lterms) _ _ _); repeat tac1 || t_sets;
-    eauto using reducible_let with erased.
+  unshelve epose proof (H9 theta ((x,u) :: lterms) _ _ _);
+    repeat step || apply SatCons || t_substitutions;
+    eauto with fv wf twf.
 Qed.
 
 Lemma reducible_app:
@@ -68,7 +68,7 @@ Lemma reducible_app:
 Proof.
   intros theta U V t1 t2 H1 H2.
   unfold reducible, reduces_to in *;
-    repeat step || list_utils || simp reducible_values in * || unfold reduces_to in *;
+    repeat step || list_utils || simp_red || unfold reduces_to in *;
     t_closer.
 
   lazymatch goal with
@@ -78,7 +78,7 @@ Proof.
   end; steps; unfold closed_value, closed_term in *; repeat step || list_utils;
     eauto with erased wf fv.
 
-  exists v1; repeat step || simp reducible_values in *;
+  exists v1; repeat step || simp_red;
     eauto using star_trans with cbvlemmas values;
     t_closer;
     eauto using reducibility_values_rtl.
@@ -93,7 +93,7 @@ Lemma reducible_app2:
     reducible theta (app e1 e2) V.
 Proof.
   intros; unfold reducible in *; unfold reduces_to in *;
-    repeat step || list_utils || simp reducible_values in * || instantiate_any || unfold reduces_to in *;
+    repeat step || list_utils || simp_red || instantiate_any || unfold reduces_to in *;
       t_closer.
 
   match goal with
@@ -110,11 +110,12 @@ Lemma open_reducible_app:
     is_erased_type V ->
     wf V 1 ->
     subset (fv V) (support gamma) ->
-    open_reducible tvars gamma t1 (T_arrow U V) ->
-    open_reducible tvars gamma t2 U ->
-    open_reducible tvars gamma (app t1 t2) (open 0 V t2).
+    [ tvars; gamma ⊨ t1 : T_arrow U V ] ->
+    [ tvars; gamma ⊨ t2 : U ] ->
+    [ tvars; gamma ⊨  app t1 t2 : open 0 V t2 ].
 Proof.
-  unfold open_reducible in *; tac1;
+  unfold open_reducible in *;
+    repeat step || t_substitutions;
     eapply reducible_app;
     eauto with erased;
     try solve [ unshelve eauto with wf; auto ];

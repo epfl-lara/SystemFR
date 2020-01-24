@@ -2,6 +2,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedArrow.
 
+Opaque reducible_values.
+
 Lemma annotated_reducible_lambda:
   forall tvars gamma t U V x,
     ~(x ∈ fv_context gamma) ->
@@ -15,7 +17,7 @@ Lemma annotated_reducible_lambda:
     subset (fv t) (support gamma) ->
     is_annotated_term t ->
     is_annotated_type V ->
-    [[ tvars; (x,U) :: gamma ⊨ open 0 t (term_fvar x): open 0 V (term_fvar x) ]] ->
+    [[ tvars; (x,U) :: gamma ⊨ open 0 t (fvar x term_var): open 0 V (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ lambda U t: T_arrow U V ]].
 Proof.
   unfold annotated_reducible; intros.

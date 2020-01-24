@@ -49,8 +49,8 @@ Lemma open_reducible_refine:
     (forall theta l,
         valid_interpretation theta ->
         support theta = tvars ->
-        satisfies (reducible_values theta) ((p,T_equiv (term_fvar x) t) :: (x, A) :: gamma) l ->
-        equivalent_terms (substitute (open 0 b (term_fvar x)) l) ttrue) ->
+        satisfies (reducible_values theta) ((p,T_equiv (fvar x term_var) t) :: (x, A) :: gamma) l ->
+        equivalent_terms (substitute (open 0 b (fvar x term_var)) l) ttrue) ->
     [ tvars; gamma ⊨ t : A ] ->
     [ tvars; gamma ⊨ t : T_refine A b ].
 Proof.
@@ -58,8 +58,10 @@ Proof.
 
   apply reducible_refine; steps; t_closer.
 
-  unshelve epose proof (H12 theta ((p, uu) :: (x,v) :: lterms) _ _ _); tac1;
-    eauto using equivalent_sym.
+  unshelve epose proof (H12 theta ((p, uu) :: (x,v) :: lterms) _ _ _);
+    repeat step || apply SatCons || list_utils || t_substitutions || simp_red;
+    eauto using equivalent_sym;
+    eauto with fv wf twf.
 Qed.
 
 Lemma subtype_refine:
@@ -74,7 +76,7 @@ Lemma subtype_refine:
     valid_interpretation theta ->
     (forall l,
         satisfies (reducible_values theta) ((x, T_refine A p) :: gamma) l ->
-        equivalent_terms (substitute (open 0 q (term_fvar x)) l) ttrue) ->
+        equivalent_terms (substitute (open 0 q (fvar x term_var)) l) ttrue) ->
     (forall t l,
         satisfies (reducible_values theta) gamma l ->
         reducible_values theta t (substitute A l) -> reducible_values theta t (substitute B l)) ->
@@ -84,8 +86,10 @@ Lemma subtype_refine:
 Proof.
   repeat step || simp_red || unshelve eauto with wf erased fv.
 
-  unshelve epose proof (H7 ((x,t) :: l) _); tac1;
-    eauto using equivalent_true.
+  unshelve epose proof (H7 ((x,t) :: l) _);
+    repeat step || apply SatCons || list_utils || t_substitutions || simp_red;
+    eauto using equivalent_true;
+    eauto with fv wf twf.
 Qed.
 
 Lemma subtype_refine4:
@@ -99,7 +103,7 @@ Lemma subtype_refine4:
     valid_interpretation theta ->
     (forall l,
         satisfies (reducible_values theta) ((x, T) :: gamma) l ->
-        equivalent_terms (substitute (open 0 p (term_fvar x)) l) ttrue) ->
+        equivalent_terms (substitute (open 0 p (fvar x term_var)) l) ttrue) ->
     (forall t l,
         satisfies (reducible_values theta) gamma l ->
         reducible_values theta t (substitute T l) -> reducible_values theta t (substitute A l)) ->
@@ -109,8 +113,10 @@ Lemma subtype_refine4:
 Proof.
   repeat step || simp_red || unshelve t_closer.
 
-  unshelve epose proof (H6 ((x,t) :: l) _); tac1;
-    eauto using equivalent_true.
+  unshelve epose proof (H6 ((x,t) :: l) _);
+    repeat step || apply SatCons || list_utils || t_substitutions || simp_red;
+    eauto using equivalent_true;
+    eauto with fv wf twf.
 Qed.
 
 Lemma subtype_refine5:
@@ -124,8 +130,8 @@ Lemma subtype_refine5:
     ~(x ∈ fv T) ->
     ~(x ∈ fv b) ->
     ~(x = p) ->
-    [ support theta; (p, T_equiv (open 0 b (term_fvar x)) ttrue) :: (x, A) :: gamma ⊨
-        term_fvar x : T ] ->
+    [ support theta; (p, T_equiv (open 0 b (fvar x term_var)) ttrue) :: (x, A) :: gamma ⊨
+        fvar x term_var : T ] ->
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
     reducible_values theta t (T_refine (substitute A l) (substitute b l)) ->
@@ -133,7 +139,9 @@ Lemma subtype_refine5:
 Proof.
   unfold open_reducible; repeat step || simp_red; eauto with wf.
 
-  unshelve epose proof (H8 theta ((p, uu) :: (x,t) :: l) _ _ _); tac1;
+  unshelve epose proof (H8 theta ((p, uu) :: (x,t) :: l) _ _ _);
+    repeat step || apply SatCons || list_utils || t_substitutions || simp_red || fv_open;
+    eauto with fv wf twf;
     eauto using red_is_val, reducible_expr_value;
-    try solve [ apply equivalent_star; eauto with erased wf fv ].
+    try solve [ equivalent_star ].
 Qed.

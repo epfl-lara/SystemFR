@@ -32,7 +32,7 @@ Lemma annotated_reducible_forall:
     subset (fv U) (support gamma) ->
     subset (fv t) (support gamma) ->
     is_annotated_type V ->
-    [[ tvars; (x,U) :: gamma ⊨ t : open 0 V (term_fvar x) ]] ->
+    [[ tvars; (x,U) :: gamma ⊨ t : open 0 V (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ t : A ]] ->
     [[ tvars; gamma ⊨ t : T_forall U V ]].
 Proof.
@@ -69,7 +69,7 @@ Lemma annotated_reducible_exists_elim:
     is_annotated_term t ->
     is_annotated_type V ->
     [[ tvars; gamma ⊨ p : T_exists U V ]] ->
-    [[ tvars; (y, open 0 V (term_fvar x)) :: (x, U) :: gamma ⊨ open 0 t (term_fvar y) : T ]] ->
+    [[ tvars; (y, open 0 V (fvar x term_var)) :: (x, U) :: gamma ⊨ open 0 t (fvar y term_var) : T ]] ->
     [[ tvars; gamma ⊨ tlet p (T_exists U V) t : T ]].
 Proof.
   unfold annotated_reducible;

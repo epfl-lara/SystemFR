@@ -21,8 +21,8 @@ Lemma annotated_reducible_refine:
     subset (fv t) (support gamma) ->
     subset (fv b) (support gamma) ->
     [[ tvars; gamma ⊨ t : A ]] ->
-    [[ tvars; (x,A) :: gamma ⊨ open 0 b (term_fvar x) : T_bool ]] ->
-    [[ tvars; (p, T_equiv (term_fvar x) t) :: (x,A) :: gamma ⊨ open 0 b (term_fvar x) ≡ ttrue ]] ->
+    [[ tvars; (x,A) :: gamma ⊨ open 0 b (fvar x term_var) : T_bool ]] ->
+    [[ tvars; (p, T_equiv (fvar x term_var) t) :: (x,A) :: gamma ⊨ open 0 b (fvar x term_var) ≡ ttrue ]] ->
     [[ tvars; gamma ⊨ t : T_refine A b ]].
 Proof.
   unfold annotated_reducible, annotated_equivalent, equivalent;

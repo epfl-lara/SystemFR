@@ -45,10 +45,10 @@ Lemma equivalent_split_rec:
        satisfies (reducible_values theta)
                     (gamma1 ++
                             (x, T_equiv
-                                   (open 0 (open 1 e2 (term_fvar v))
-                                     (notype_lambda (notype_rec (term_fvar v) e1 e2)))
+                                   (open 0 (open 1 e2 (fvar v term_var))
+                                     (notype_lambda (notype_rec (fvar v term_var) e1 e2)))
                                  e)
-                            :: (y, T_equiv n (succ (term_fvar v))) :: (v, T_nat) :: gamma2) l ->
+                            :: (y, T_equiv n (succ (fvar v term_var))) :: (v, T_nat) :: gamma2) l ->
           equivalent_terms (substitute t l) (substitute t' l)) ->
     satisfies (reducible_values theta) (gamma1 ++ (x, T_equiv (notype_rec n e1 e2) e) :: gamma2) l ->
     equivalent_terms (substitute t l) (substitute t' l).
@@ -61,15 +61,20 @@ Proof.
   t_invert_nat_value; steps.
 
   - unshelve epose proof (H29 (l1 ++ (x, uu) :: (y, uu) :: lterms) _);
-      repeat tac1 || step_inversion NoDup;
-      eauto 2 using satisfies_drop;
+      repeat step || apply satisfies_insert || step_inversion NoDup ||
+             list_utils || t_substitutions || simp_red;
+      t_closer;
       eauto using equivalent_rec_zero2;
+      eauto using satisfies_drop;
       try solve [ equivalent_star ].
 
   - unshelve epose proof (H30 (l1 ++ (x, uu) :: (y, uu) :: (v, v1) :: lterms) _);
       clear H29; clear H30;
-      repeat tac1 || step_inversion NoDup;
-      eauto 2 using satisfies_drop;
+      repeat step || apply satisfies_insert || step_inversion NoDup ||
+             list_utils || t_substitutions || simp_red || fv_open;
+      t_closer;
       eauto using equivalent_rec_succ2 with values erased wf;
-      try solve [ equivalent_star ].
+      eauto using satisfies_drop;
+      try solve [ equivalent_star ];
+      eauto with twf.
 Qed.

@@ -6,7 +6,7 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma equivalent_weaken:
-  forall theta (gamma : context) (x : nat) T u v l,
+  forall theta gamma x T u v l,
     subset (fv u) (support gamma) ->
     subset (fv v) (support gamma) ->
     (forall l,
@@ -16,8 +16,7 @@ Lemma equivalent_weaken:
     equivalent_terms (substitute u l) (substitute v l).
 Proof.
   intros.
-  unfold open_reducible, subset in *;
-    repeat step || step_inversion satisfies || tac1.
+    repeat step || step_inversion satisfies || t_substitutions.
 Qed.
 
 Lemma equivalent_error:

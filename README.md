@@ -9,7 +9,7 @@ This project aims to formalize in Coq part of the [Stainless project](https://gi
 The proofs require Coq and Coq-Equations, which can be installed using `opam` with the `coq` and `coq-equations` packages. Some instructions are available [here](https://github.com/coq/coq/wiki/Installation-of-Coq-on-Linux) and [there](https://github.com/mattam82/Coq-Equations).
 
 * Coq 8.10.2
-* Coq-Equations 1.2+8.10
+* Coq-Equations 1.2.1+8.10
 
 ### Compiling the Proofs
 

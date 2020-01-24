@@ -37,7 +37,7 @@ Lemma annotated_reducible_get_refinement_witness:
     is_annotated_term t1 ->
     is_annotated_term t2 ->
     [[ tvars; gamma ⊨ t1 : T_type_refine A B ]] ->
-    [[ tvars; (x, open 0 B t1) :: gamma ⊨ open 0 t2 (term_fvar x) : T ]] ->
+    [[ tvars; (x, open 0 B t1) :: gamma ⊨ open 0 t2 (fvar x term_var) : T ]] ->
     [[ tvars; gamma ⊨ get_refinement_witness t1 t2 : T ]].
 Proof.
   unfold annotated_reducible; intros.

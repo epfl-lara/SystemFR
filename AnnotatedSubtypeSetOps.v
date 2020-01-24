@@ -2,6 +2,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedSubtypeQuant.
 
+Opaque reducible_values.
+
 Lemma annotated_subtype_bot:
   forall tvars gamma T,
     [[ tvars; gamma ⊨ T_bot <: T ]].

@@ -113,7 +113,9 @@ Proof.
   match goal with
   | H: star scbv_step _ ?v |- _ =>
     unshelve epose proof (H18 theta ((p, uu) :: (x, v) :: lterms) _ _)
-  end; tac1;
-    eauto with erased;
-    try solve [ apply equivalent_sym, equivalent_star; steps; eauto with erased wf fv ].
+  end;
+    repeat step || apply SatCons || list_utils || t_substitutions || simp_red;
+    t_closer;
+    try solve [ apply equivalent_sym; equivalent_star ];
+    eauto with twf.
 Qed.

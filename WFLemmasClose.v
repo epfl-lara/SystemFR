@@ -45,6 +45,6 @@ Proof.
 Qed.
 
 Hint Resolve wf_close: wf.
-Hint Resolve twf_tclose: btwf.
+Hint Resolve twf_tclose: twf.
 Hint Resolve wf_tclose: wf.
-Hint Resolve twf_close: btwf.
+Hint Resolve twf_close: twf.

@@ -76,7 +76,7 @@ Proof.
       step || step_inversion has_polarities || constructor || exists X || t_fv_erase ||
       rewrite <- erase_type_topen2 || apply_any || autorewrite with bsize in *;
         eauto with omega;
-        eauto 2 with bannot step_tactic.
+        eauto 2 with annot step_tactic.
 Qed.
 
 Lemma has_polarities_erase:
@@ -122,7 +122,7 @@ Lemma has_polarities_subst_erase:
 Proof.
   steps.
   apply has_polarities_erase in H0;
-    repeat step || rewrite erase_type_topen in * by steps; eauto 2 with bannot step_tactic.
-  rewrite substitute_topen2; steps; eauto with btwf.
-  apply has_polarities_subst; steps; eauto with fv btwf.
+    repeat step || rewrite erase_type_topen in * by steps; eauto 2 with annot step_tactic.
+  rewrite substitute_topen2; steps; eauto with twf.
+  apply has_polarities_subst; steps; eauto with fv twf.
 Qed.

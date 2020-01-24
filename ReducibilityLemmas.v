@@ -65,7 +65,7 @@ Proof.
   pose proof (reducible_values_props theta t T term_var H1 H2); steps.
 Qed.
 
-Hint Resolve reducible_values_erased: erased.
+Hint Immediate reducible_values_erased: erased.
 
 Lemma reducible_erased:
   forall theta t T,
@@ -76,7 +76,7 @@ Proof.
   unfold reducible, reduces_to, closed_term; steps.
 Qed.
 
-Hint Resolve reducible_erased: erased.
+Hint Immediate reducible_erased: erased.
 
 Lemma reducible_val_fv:
   forall theta t T tag,
@@ -88,7 +88,7 @@ Proof.
   pose proof (reducible_values_props theta t T tag H1 H2); steps.
 Qed.
 
-Hint Resolve reducible_val_fv: fv.
+Hint Immediate reducible_val_fv: fv.
 
 Lemma fv_red:
   forall t x tag theta T,
@@ -107,29 +107,29 @@ Ltac t_fv_red :=
   end.
 
 Lemma reducible_val_wf:
-  forall theta t T,
+  forall theta t T k,
     reducible_values theta t T ->
     valid_interpretation theta ->
-    wf t 0.
+    wf t k.
 Proof.
-  intros theta t T H1 H2.
-  pose proof (reducible_values_props theta t T term_var H1 H2); steps.
+  intros theta t T k H1 H2.
+  pose proof (reducible_values_props theta t T term_var H1 H2); steps; eauto with wf.
 Qed.
 
-Hint Resolve reducible_val_wf: wf.
+Hint Immediate reducible_val_wf: wf.
 
 Lemma reducible_val_twf:
-  forall theta t T,
+  forall theta t T k,
     reducible_values theta t T ->
     valid_interpretation theta ->
-    twf t 0.
+    twf t k.
 Proof.
-  intros theta t T H1 H2.
+  intros theta t T k H1 H2.
   pose proof (reducible_values_props theta t T term_var H1 H2); steps;
     eauto using is_erased_term_twf.
 Qed.
 
-Hint Resolve reducible_val_twf: btwf.
+Hint Immediate reducible_val_twf: twf.
 
 Lemma red_is_val:
   forall theta v T,
@@ -164,7 +164,7 @@ Qed.
 
 Ltac t_red :=
   match goal with
-         | _ => t_deterministic_step || step
+         | _ => deterministic_step || step
          | _ => progress (simp reducible in *)
          | H1: scbv_step ?t1 _,
            H2: star scbv_step ?t1 _ |- _ => inversion H2; clear H2
@@ -211,7 +211,7 @@ Proof.
          | H1: reducible_values _ ?v _,
            H2: scbv_step ?v ?t |- _ =>
               apply False_ind; apply evaluate_step with v t; eauto 4 with values
-         | _ => step || t_deterministic_step
+         | _ => step || deterministic_step
          end;
     eauto using red_is_val.
 Qed.
@@ -314,7 +314,7 @@ Proof.
   induction l; repeat step || step_inversion satisfies; eauto using red_is_val.
 Qed.
 
-Hint Resolve reducible_values_list: values.
+Hint Immediate reducible_values_list: values.
 
 Lemma reducible_expr_value:
   forall theta v T,
@@ -326,22 +326,22 @@ Proof.
 Qed.
 
 Lemma reducible_wf:
-  forall theta t T,
-    reducible theta t T -> wf t 0.
+  forall theta t T k,
+    reducible theta t T -> wf t k.
 Proof.
-  unfold reducible, reduces_to, closed_term; steps.
+  unfold reducible, reduces_to, closed_term; steps; eauto with wf.
 Qed.
 
-Hint Resolve reducible_wf: wf.
+Hint Immediate reducible_wf: wf.
 
 Lemma reducible_twf:
-  forall theta t T,
-    reducible theta t T -> twf t 0.
+  forall theta t T k,
+    reducible theta t T -> twf t k.
 Proof.
   unfold reducible, reduces_to, closed_term; steps; eauto using is_erased_term_twf.
 Qed.
 
-Hint Resolve reducible_twf: btwf.
+Hint Immediate reducible_twf: twf.
 
 Lemma reducible_fv:
   forall theta t T tag, reducible theta t T -> pfv t tag = nil.
@@ -349,7 +349,7 @@ Proof.
   destruct tag; unfold reducible, reduces_to, closed_term; steps; eauto using is_erased_term_tfv.
 Qed.
 
-Hint Resolve reducible_fv: fv.
+Hint Immediate reducible_fv: fv.
 
 Lemma reducible_value_expr:
   forall theta t T,
@@ -372,15 +372,15 @@ Ltac t_values_info3 :=
     unshelve epose proof (cbv_value_subst _ H l _); eauto 2 using reducible_values_list
   end.
 
-(*
-Lemma reducibility_is_candidate:
-  forall (theta : interpretation) V,
+Lemma reduces_to_value:
+  forall theta T t v,
+    reduces_to (fun v => reducible_values theta v T) t ->
     valid_interpretation theta ->
-    reducibility_candidate (fun v => reducible_values theta v V).
+    cbv_value v ->
+    star scbv_step t v ->
+    reducible_values theta v T.
 Proof.
-  unfold reducibility_candidate; steps;
-    eauto with wf fv;
-    eauto using red_is_val;
-    eauto with erased.
+  unfold reduces_to;
+    repeat step || t_deterministic_star;
+    eauto using red_is_val.
 Qed.
-*)

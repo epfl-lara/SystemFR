@@ -20,8 +20,8 @@ Proof.
 Qed.
 
 Lemma open_reducible_zero:
-  forall theta gamma,
-    open_reducible theta gamma zero T_nat.
+  forall tvars gamma,
+    [ tvars; gamma ⊨ zero : T_nat ].
 Proof.
   unfold open_reducible in *; repeat step;
     auto using reducible_zero.
@@ -70,8 +70,8 @@ Qed.
 
 Lemma open_reducible_succ:
   forall tvars gamma t,
-    open_reducible tvars gamma t T_nat ->
-    open_reducible tvars gamma (succ t) T_nat.
+    [ tvars; gamma ⊨ t : T_nat ] ->
+    [ tvars; gamma ⊨ succ t : T_nat ].
 Proof.
   unfold open_reducible in *; steps;
     eauto using reducible_succ.
@@ -100,7 +100,7 @@ Proof.
   steps.
   unfold reducible, reduces_to in H6; steps.
   eapply star_backstep_reducible with (tmatch v t0 ts);
-    repeat step || list_utils || simp reducible_values in *; t_closer;
+    repeat step || list_utils || simp_red; t_closer;
       eauto with cbvlemmas.
 
   t_invert_nat_value; steps.
@@ -139,15 +139,14 @@ Lemma open_reducible_match:
     ~(p = n) ->
     is_erased_term t0 ->
     is_erased_term ts ->
-    open_reducible tvars gamma tn T_nat ->
-    open_reducible tvars ((p, T_equiv tn zero) :: gamma) t0 T ->
-    open_reducible tvars (
-        (p, T_equiv tn (succ (term_fvar n))) ::
+    [ tvars; gamma ⊨ tn : T_nat ] ->
+    [ tvars; (p, T_equiv tn zero) :: gamma ⊨ t0 : T ] ->
+    [ tvars;
+        (p, T_equiv tn (succ (fvar n term_var))) ::
         (n, T_nat) ::
-        gamma)
-      (open 0 ts (term_fvar n))
-      T ->
-    open_reducible tvars gamma (tmatch tn t0 ts) T.
+        gamma ⊨
+          open 0 ts (fvar n term_var) : T ] ->
+    [ tvars; gamma ⊨ tmatch tn t0 ts : T ].
 Proof.
   unfold open_reducible in *; repeat step || t_instantiate_sat3.
 
@@ -157,10 +156,15 @@ Proof.
     eauto with erased.
 
   - (* zero *)
-    unshelve epose proof (H14 theta ((p, uu) :: lterms) _ _ _); tac1.
+    unshelve epose proof (H14 theta ((p, uu) :: lterms) _ _ _);
+      repeat step || apply SatCons || simp_red || t_substitutions;
+      t_closer.
 
   - (* successor *)
-    unshelve epose proof (H15 theta ((p, uu) :: (n,n0) :: lterms) _ _ _); tac1.
+    unshelve epose proof (H15 theta ((p, uu) :: (n,n0) :: lterms) _ _ _);
+      repeat step || apply SatCons || simp_red || t_substitutions;
+      t_closer;
+      eauto with twf.
 Qed.
 
 Lemma reducible_rec_induction:
@@ -207,13 +211,12 @@ Proof.
       eauto using reducible_nat_value.
 
     + apply reducible_lambda;
-        repeat apply reducible_let with T_unit || simp reducible_values ||
-               apply reducible_intersection || tac1 ||
-               (rewrite open_none by t_rewrite); eauto with erased.
+        repeat simp_red || apply reducible_intersection || step || list_utils ||
+               (rewrite open_none by t_rewrite);
+        eauto with erased wf fv.
 
     + apply equivalent_refl; repeat step || list_utils;
-        eauto with erased fv;
-        try solve [ unshelve eauto with wf; auto ].
+        eauto with erased fv wf.
 Qed.
 
 Lemma reducible_rec:
@@ -272,16 +275,16 @@ Lemma open_reducible_rec:
     is_erased_term ts ->
     NoDup (n :: y :: p :: nil) ->
     is_erased_type T ->
-    open_reducible tvars gamma tn T_nat ->
-    open_reducible tvars gamma t0 (open 0 T zero) ->
-    open_reducible tvars (
-        (p, T_equiv (term_fvar y) (notype_lambda (notype_rec (term_fvar n) t0 ts))) ::
-        (y, T_arrow T_unit (open 0 T (term_fvar n))) ::
+    [ tvars; gamma ⊨ tn : T_nat ] ->
+    [ tvars; gamma ⊨ t0 : open 0 T zero ] ->
+    [ tvars;
+        (p, T_equiv (fvar y term_var) (notype_lambda (notype_rec (fvar n term_var) t0 ts))) ::
+        (y, T_arrow T_unit (open 0 T (fvar n term_var))) ::
         (n, T_nat) ::
-        gamma)
-      (open 0 (open 1 ts (term_fvar n)) (term_fvar y))
-      (open 0 T (succ (term_fvar n))) ->
-    open_reducible tvars gamma (notype_rec tn t0 ts) (open 0 T tn).
+        gamma ⊨
+          open 0 (open 1 ts (fvar n term_var)) (fvar y term_var) :
+          open 0 T (succ (fvar n term_var)) ] ->
+    [ tvars; gamma ⊨ notype_rec tn t0 ts : open 0 T tn ].
 Proof.
   unfold open_reducible in *; repeat step || t_substitutions.
 
@@ -292,5 +295,8 @@ Proof.
     try solve [ rewrite substitute_open2; eauto with wf ].
 
   unshelve epose proof (H22 theta ((p, uu) :: (y, tx) :: (n, n0) :: lterms) _ _ _);
-      repeat tac1 || step_inversion NoDup || rewrite substitute_open in * || apply_any.
+      repeat step || list_utils || fv_open || t_substitutions || apply SatCons || simp_red ||
+             step_inversion NoDup || rewrite substitute_open in *;
+      t_closer;
+      eauto with twf.
 Qed.

@@ -181,7 +181,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve twf_swap_term_holes: btwf.
+Hint Resolve twf_swap_term_holes: twf.
 
 Lemma swap_term_holes_twice:
   forall t i j,

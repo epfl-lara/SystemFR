@@ -65,13 +65,13 @@ Lemma fv_smallstep:
       x ∈ pfv t tag.
 Proof.
   induction 1;
-    repeat step || list_utils || t_fv_open || unfold subset in * ||
+    repeat step || list_utils || fv_open || unfold subset in * ||
            (rewrite nat_value_fv in * by eauto using is_nat_value_build_nat) ||
            (autorewrite with rfv in *);
     eauto with fv list_utils.
 Qed.
 
-Hint Resolve fv_smallstep: fv.
+Hint Immediate fv_smallstep: fv.
 
 Lemma fv_smallstep_subset:
   forall t t' tag,
@@ -92,7 +92,7 @@ Proof.
   intros; eauto using subset_transitive with fv.
 Qed.
 
-Hint Resolve fv_smallstep_subset2: fv.
+Hint Immediate fv_smallstep_subset2: fv.
 
 Lemma fv_smallstep_nil:
   forall t t' tag,
@@ -103,7 +103,7 @@ Proof.
   repeat step || rewrite <- empty_list_rewrite in *; eauto with fv.
 Qed.
 
-Hint Resolve fv_smallstep_nil: fv.
+Hint Immediate fv_smallstep_nil: fv.
 
 Lemma fv_star_smallstep:
   forall t t',
@@ -115,7 +115,7 @@ Proof.
   induction 1; eauto using fv_smallstep.
 Qed.
 
-Hint Resolve fv_star_smallstep: fv.
+Hint Immediate fv_star_smallstep: fv.
 
 Lemma fv_star_smallstep_nil:
   forall t t' tag,
@@ -126,4 +126,4 @@ Proof.
   repeat step || rewrite <- empty_list_rewrite in *; eauto with fv.
 Qed.
 
-Hint Resolve fv_star_smallstep_nil: fv.
+Hint Immediate fv_star_smallstep_nil: fv.

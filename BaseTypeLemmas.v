@@ -1,29 +1,7 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
 
-Require Export SystemFR.Trees.
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.SizeLemmas.
-
-Require Export SystemFR.ListUtils.
-Require Export SystemFR.ErasedTermLemmas.
-Require Export SystemFR.SubstitutionErase.
-Require Export SystemFR.TreeLists.
-Require Export SystemFR.TermListLemmas.
-Require Export SystemFR.TermListReducible.
-
-Require Export SystemFR.ReducibilityDefinition.
-Require Export SystemFR.ReducibilityCandidate.
 Require Export SystemFR.ReducibilityUnused.
-Require Export SystemFR.ReducibilityLemmas.
-Require Export SystemFR.RedTactics.
-
-Require Export SystemFR.SubstitutionLemmas.
-
-Require Export SystemFR.FVLemmas.
-Require Export SystemFR.FVLemmasLists.
-
 Require Export SystemFR.BaseType.
 
 Require Import Omega.
@@ -35,7 +13,7 @@ Lemma base_type_open:
     is_erased_term a ->
     base_type X (open k T a) (open k T0 a).
 Proof.
-  induction 1; repeat step || constructor || t_fv_open || list_utils || rewrite is_erased_term_tfv in * by assumption;
+  induction 1; repeat step || constructor || fv_open || list_utils || rewrite is_erased_term_tfv in * by assumption;
     eauto with fv;
     eauto with erased.
 Qed.
@@ -48,7 +26,7 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve base_type_erased: erased.
+Hint Immediate base_type_erased: erased.
 
 Lemma base_type_approx_aux:
   forall n X Ts T theta l v RC,

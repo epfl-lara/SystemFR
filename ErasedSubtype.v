@@ -23,8 +23,8 @@ Lemma subtype_arrow2:
     ~(x = f) ->
     is_erased_type B ->
     open_reducible tvars ((x, A) :: (f, T) :: gamma)
-                   (app (term_fvar f) (term_fvar x))
-                   (open 0 B (term_fvar x)) ->
+                   (app (fvar f term_var) (fvar x term_var))
+                   (open 0 B (fvar x term_var)) ->
     valid_interpretation theta ->
     support theta = tvars ->
     satisfies (reducible_values theta) gamma l ->
@@ -36,7 +36,9 @@ Proof.
     eauto 3 with erased;
     eauto using reducible_values_closed.
   unfold open_reducible in *.
-  unshelve epose proof (H9 theta ((x,a) :: (f,v) :: l) _ _ _); tac1.
+  unshelve epose proof (H9 theta ((x,a) :: (f,v) :: l) _ _ _);
+    repeat step || list_utils || apply SatCons || t_substitutions;
+    eauto with fv wf erased twf.
 Qed.
 
 Lemma reducible_ext_pair:
@@ -80,9 +82,9 @@ Lemma subtype_prod2:
     ~(x ∈ fv B) ->
     ~(x ∈ fv T) ->
     valid_interpretation theta ->
-    open_reducible (support theta) ((x, T) :: gamma) (pi1 (term_fvar x)) A ->
+    open_reducible (support theta) ((x, T) :: gamma) (pi1 (fvar x term_var)) A ->
     open_reducible (support theta)
-                   ((x, T) :: gamma) (pi2 (term_fvar x)) (open 0 B (pi1 (term_fvar x))) ->
+                   ((x, T) :: gamma) (pi2 (fvar x term_var)) (open 0 B (pi1 (fvar x term_var))) ->
     satisfies (reducible_values theta) gamma l ->
     is_erased_type B ->
     wf B 1 ->
@@ -98,7 +100,8 @@ Proof.
 
   unshelve epose proof (H4 theta ((x,v) :: l) _ _ _) as HP1;
   unshelve epose proof (H5 theta ((x,v) :: l) _ _ _) as HP2;
-    tac1.
+    repeat step || list_utils || apply SatCons || t_substitutions;
+    eauto with fv wf erased twf.
   unshelve epose proof reducible_ext_pair _ _ _ _ _ _ HP1 HP2 _ _ _; steps;
     eauto with values;
     eauto with fv;
@@ -116,7 +119,7 @@ Lemma reducible_values_refine_subtype:
     reducible_values theta v (T_refine A p) ->
     reducible_values theta v (T_refine A q).
 Proof.
-  repeat step || simp reducible_values in *.
+  repeat step || simp_red.
 Qed.
 
 Lemma reducible_values_arrow_subtype:
@@ -131,7 +134,7 @@ Lemma reducible_values_arrow_subtype:
    reducible_values theta t (T_arrow A1 A2) ->
    reducible_values theta t (T_arrow B1 B2).
 Proof.
-  repeat step || simp reducible_values in * || unfold reduces_to || list_utils;
+  repeat step || simp_red || unfold reduces_to || list_utils;
     t_closer.
     match goal with
     | H: forall a, _ |- _ =>
@@ -149,8 +152,8 @@ Lemma reducible_arrow_subtype_subst:
     satisfies (reducible_values theta) gamma l ->
     (forall t l,
        satisfies (reducible_values theta) ((x, B1) :: gamma) l ->
-       reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
-       reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
+       reducible_values theta t (substitute (open 0 A2 (fvar x term_var)) l) ->
+       reducible_values theta t (substitute (open 0 B2 (fvar x term_var)) l)) ->
     (forall t, reducible_values theta t (substitute B1 l) -> reducible_values theta t (substitute A1 l)) ->
     is_erased_type B2 ->
     reducible_values theta t (T_arrow (substitute A1 l) (substitute A2 l)) ->
@@ -159,7 +162,9 @@ Proof.
   intros.
   apply reducible_values_arrow_subtype with (substitute A1 l) (substitute A2 l);
       steps; eauto with erased.
-  unshelve epose proof (H5 t0 ((x,a) :: l) _ _); tac1.
+  unshelve epose proof (H5 t0 ((x,a) :: l) _ _);
+    repeat step || list_utils || apply SatCons || t_substitutions;
+    eauto with fv wf erased twf.
 Qed.
 
 Lemma reducible_values_prod_subtype:
@@ -190,8 +195,8 @@ Lemma reducible_prod_subtype_subst:
     satisfies (reducible_values theta) gamma l ->
     (forall t l,
        satisfies (reducible_values theta) ((x, A1) :: gamma) l ->
-       reducible_values theta t (substitute (open 0 A2 (term_fvar x)) l) ->
-       reducible_values theta t (substitute (open 0 B2 (term_fvar x)) l)) ->
+       reducible_values theta t (substitute (open 0 A2 (fvar x term_var)) l) ->
+       reducible_values theta t (substitute (open 0 B2 (fvar x term_var)) l)) ->
     (forall t, reducible_values theta t (substitute A1 l) -> reducible_values theta t (substitute B1 l)) ->
     is_erased_type B2 ->
     reducible_values theta t (T_prod (substitute A1 l) (substitute A2 l)) ->
@@ -200,5 +205,8 @@ Proof.
   intros.
   apply reducible_values_prod_subtype with (substitute A1 l) (substitute A2 l);
       steps; eauto with erased.
-  unshelve epose proof (H6 t0 ((x,a) :: l) _ _); tac1.
+  unshelve epose proof (H6 t0 ((x,a) :: l) _ _);
+    repeat step || list_utils || apply SatCons || t_substitutions;
+    t_closer;
+    eauto with twf.
 Qed.

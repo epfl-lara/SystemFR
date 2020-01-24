@@ -38,7 +38,7 @@ Proof.
   induction 1; repeat step; eauto with fv.
 Qed.
 
-Hint Resolve satisfies_nodup: btermlist.
+Hint Immediate satisfies_nodup: btermlist.
 
 Ltac t_satisfies_nodup :=
   match goal with
@@ -80,7 +80,7 @@ Proof.
   induction 1; steps.
 Qed.
 
-Hint Resolve satisfies_same_support: btermlist.
+Hint Immediate satisfies_same_support: btermlist.
 
 Ltac t_instantiate_sat :=
   match goal with

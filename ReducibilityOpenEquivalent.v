@@ -68,8 +68,6 @@ Proof.
     try solve [ top_level_unfold equivalent_terms; steps ].
 Qed.
 
-Hint Extern 1 => solve [ eapply prop_until_at; eauto with measure ]: prop_until.
-
 Ltac reducibility_open_equivalent_induct_all :=
   (try solve [
     eapply reducibility_open_equivalent_induction; eauto 2 using equivalent_sym; eauto 2 with prop_until
@@ -129,7 +127,7 @@ Proof.
   repeat rewrite (swap_term_holes_open T'2); steps;
     try solve [ top_level_unfold equivalent_terms; steps ];
     t_closer.
-  apply equivalent_context; t_closer.
+  apply equivalent_context; t_closing; eauto with erased fv.
 Qed.
 
 Lemma reducibility_open_equivalent_type_refine:
@@ -208,17 +206,17 @@ Lemma reducibility_open_equivalent_abs:
 Proof.
   unfold prop_at; intros; unfold reducibility_open_equivalent_prop; destruct T';
     repeat step || simp_red || t_reduces_to2 ||
-           t_fv_open || list_utils || (eexists; steps; eauto) ||
+           fv_open || list_utils || (eexists; steps; eauto) ||
           rewrite is_erased_term_tfv in * by eauto with erased;
     eauto with fv.
 
-  rewrite <- open_topen; steps; eauto with btwf erased.
+  rewrite <- open_topen; steps; eauto with twf erased.
   eapply reducibility_open_equivalent_induction; eauto; repeat step || rewrite open_topen;
     eauto 2 with erased step_tactic;
-    eauto 2 with wf wft step_tactic;
+    eauto 2 with wf step_tactic;
     eauto 2 with fv step_tactic;
     eauto 2 with prop_until;
-    eauto with btwf erased.
+    eauto 2 with twf.
 Qed.
 
 Lemma open_T_rec:
@@ -243,24 +241,24 @@ Proof.
       eauto 3 using equivalent_context, equivalent_star_nat with step_tactic.
 
   - right; exists n', X;
-      repeat step || t_fv_open || list_utils ||
+      repeat step || fv_open || list_utils ||
              rewrite is_erased_term_tfv in * by eauto with erased;
       eauto 4 using equivalent_star_nat, INVSucc, equivalent_context with step_tactic;
       eauto with fv.
 
     apply reducible_rename_rc with
         (fun t => reducible_values theta t (T_rec n' (open 0 T'2 t1) (open 0 T'3 t1)));
-      repeat step || t_fv_open || unfold equivalent_rc || list_utils ||
+      repeat step || fv_open || unfold equivalent_rc || list_utils ||
              rewrite is_erased_term_tfv in * by eauto with erased;
       eauto with fv.
 
-    + rewrite <- open_topen; steps; eauto with btwf erased.
+    + rewrite <- open_topen; steps; eauto with twf erased.
       eapply reducibility_open_equivalent_induction; try eassumption; repeat step || rewrite open_topen;
         eauto 2 with erased step_tactic;
-        eauto 2 with wf wft step_tactic;
+        eauto 2 with wf step_tactic;
         eauto 2 with fv step_tactic;
         eauto 2 with prop_until;
-        eauto with btwf erased.
+        eauto with twf erased.
 
     + repeat rewrite <- open_T_rec in * by auto.
       eapply reducibility_open_equivalent_induction; try eassumption;

@@ -79,7 +79,7 @@ Lemma scbv_normalizing_step:
     scbv_normalizing t2.
 Proof.
   unfold scbv_normalizing; steps.
-  destruct H2; repeat step || t_nostep || t_deterministic_step;
+  destruct H2; repeat step || no_step || deterministic_step;
     eauto.
 Qed.
 

@@ -44,7 +44,7 @@ Ltac t_twf_base_type :=
   | H: base_type ?X ?A ?B |- twf ?B ?k => apply twf_base_type with X A
   end.
 
-Hint Extern 50 => t_twf_base_type: btwf.
+Hint Extern 50 => t_twf_base_type: twf.
 
 Lemma annotated_base_type:
   forall X A B,
@@ -60,7 +60,7 @@ Ltac t_annotated_base_type :=
   | H: base_type ?X ?A ?B |- is_annotated_type ?B => apply annotated_base_type with X A
   end.
 
-Hint Extern 50 => t_annotated_base_type: bannot.
+Hint Extern 50 => t_annotated_base_type: annot.
 
 Lemma pfv_base_type:
   forall X A B,

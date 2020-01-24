@@ -327,7 +327,7 @@ Qed.
 
 Hint Immediate is_nat_value_erased: erased.
 
-Ltac t_nostep :=
+Ltac no_step :=
   match goal with
   | H: cbv_value err |- _ => inversion H
   | H1: cbv_value ?v,
@@ -357,17 +357,17 @@ Lemma deterministic_step:
       t2 = t3.
 Proof.
   induction 1; repeat step || t_equality;
-    try solve [ repeat step || t_invert_step || t_nostep || t_equality ].
+    try solve [ repeat step || t_invert_step || no_step || t_equality ].
 Qed.
 
-Ltac t_deterministic_step :=
+Ltac deterministic_step :=
   match goal with
   | H1: scbv_step ?t1 ?t2,
     H2: scbv_step ?t1 ?t3 |- _ =>
     pose proof (deterministic_step _ _ H1 _ H2); clear H2
   end.
 
-Hint Extern 50 => t_deterministic_step: smallstep.
+Hint Extern 1 => deterministic_step: smallstep.
 
 Definition closed_term t :=
   pfv t term_var = nil /\

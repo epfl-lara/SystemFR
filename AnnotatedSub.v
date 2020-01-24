@@ -1,6 +1,8 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.ReducibilityLemmas.
 
+Opaque reducible_values.
+
 Lemma annotated_reducible_sub:
   forall tvars gamma t T1 T2,
     [[ tvars; gamma ⊨ T1 <: T2 ]] ->

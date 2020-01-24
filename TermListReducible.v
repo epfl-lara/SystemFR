@@ -15,7 +15,7 @@ Proof.
     eauto with erased.
 Qed.
 
-Hint Resolve satisfies_erased_terms: erased.
+Hint Immediate satisfies_erased_terms: erased.
 
 Lemma satisfies_weaken:
   forall theta gamma1 gamma2 x T T' l,

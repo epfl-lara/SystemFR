@@ -48,7 +48,7 @@ Lemma annotated_equivalent_match:
       is_annotated_term ts ->
       [[ tvars; gamma ⊨ tn : T_nat ]] ->
       [[ tvars; (p, T_equiv tn zero) :: gamma ⊨ t0 ≡ t ]] ->
-      [[ tvars; (p, T_equiv tn (succ (term_fvar n))) :: (n, T_nat) :: gamma ⊨ open 0 ts (term_fvar n) ≡ t ]] ->
+      [[ tvars; (p, T_equiv tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma ⊨ open 0 ts (fvar n term_var) ≡ t ]] ->
       [[ tvars; gamma ⊨ tmatch tn t0 ts ≡ t ]].
 Proof.
   unfold annotated_equivalent, equivalent;
@@ -82,8 +82,8 @@ Lemma annotated_equivalent_rec:
     [[ tvars; gamma ⊨ tn : T_nat ]] ->
     [[ tvars; (p, T_equiv tn zero) :: gamma ⊨ t0 ≡ t ]] ->
     [[ tvars;
-         (p, T_equiv tn (succ (term_fvar n))) :: (n, T_nat) :: gamma ⊨
-         open 0 (open 1 ts (term_fvar n)) (lambda T_unit (rec T (term_fvar n) t0 ts)) ≡ t ]] ->
+         (p, T_equiv tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma ⊨
+         open 0 (open 1 ts (fvar n term_var)) (lambda T_unit (rec T (fvar n term_var) t0 ts)) ≡ t ]] ->
     [[ tvars; gamma ⊨ rec T tn t0 ts ≡ t ]].
 Proof.
   unfold annotated_equivalent, equivalent;
@@ -131,7 +131,7 @@ Lemma annotated_equivalent_split_nat:
     subset (fv n) (support gamma2) ->
     [[ tvars; gamma2 ⊨ n : T_nat ]] ->
     [[ tvars; gamma1 ++ (x,T_equiv n zero) :: gamma2 ⊨ t ≡ t' ]] ->
-    [[ tvars; gamma1 ++ (x,T_equiv n (succ (term_fvar y))) :: (y, T_nat) :: gamma2 ⊨ t ≡ t' ]] ->
+    [[ tvars; gamma1 ++ (x,T_equiv n (succ (fvar y term_var))) :: (y, T_nat) :: gamma2 ⊨ t ≡ t' ]] ->
     [[ tvars; gamma1 ++ gamma2 ⊨ t ≡ t' ]].
 Proof.
   unfold annotated_reducible, annotated_equivalent, equivalent;
@@ -231,8 +231,8 @@ Lemma annotated_equivalent_split_match:
     is_annotated_term e2 ->
     [[ tvars; gamma2 ⊨ n : T_nat ]] ->
     [[ tvars; gamma1 ++ (x, T_equiv e1 e) :: (y, T_equiv n zero) :: gamma2 ⊨ t ≡ t' ]] ->
-    [[ tvars; gamma1 ++ (x, T_equiv (open 0 e2 (term_fvar z)) e) ::
-                         (y, T_equiv n (succ (term_fvar z))) ::
+    [[ tvars; gamma1 ++ (x, T_equiv (open 0 e2 (fvar z term_var)) e) ::
+                         (y, T_equiv n (succ (fvar z term_var))) ::
                          (z, T_nat) ::
                          gamma2 ⊨
               t ≡ t' ]] ->
@@ -299,10 +299,10 @@ Lemma annotated_equivalent_split_rec:
     [[ tvars; gamma2 ⊨ n : T_nat ]] ->
     [[ tvars; gamma1 ++ (x, T_equiv e1 e) :: (y, T_equiv n zero) :: gamma2 ⊨ t ≡ t' ]] ->
     [[ tvars; gamma1 ++ (x, T_equiv
-                               (open 0 (open 1 e2 (term_fvar z))
-                                             (lambda T_unit (rec T (term_fvar z) e1 e2)))
+                               (open 0 (open 1 e2 (fvar z term_var))
+                                             (lambda T_unit (rec T (fvar z term_var) e1 e2)))
                                e) ::
-                          (y, T_equiv n (succ (term_fvar z))) ::
+                          (y, T_equiv n (succ (fvar z term_var))) ::
                           (z, T_nat) ::
                           gamma2
                ⊨ t ≡ t' ]] ->

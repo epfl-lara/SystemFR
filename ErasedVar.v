@@ -14,15 +14,15 @@ Lemma open_reducible_weaken:
     ~(x ∈ support gamma) ->
     ~(x ∈ fv u) ->
     ~(x ∈ fv U) ->
-    open_reducible theta ((x, T) :: gamma) u U.
+    [ theta; (x, T) :: gamma ⊨ u : U ].
 Proof.
-    unfold open_reducible in *; repeat step || step_inversion satisfies || tac1.
+  unfold open_reducible in *; repeat step || step_inversion satisfies || t_substitutions.
 Qed.
 
 Lemma open_reducible_var:
   forall tvars gamma x T,
     lookup Nat.eq_dec gamma x = Some T ->
-    open_reducible tvars gamma (term_fvar x) T.
+    [ tvars; gamma ⊨ fvar x term_var : T ].
 Proof.
   unfold open_reducible;
     repeat step || t_termlist || t_lookup;

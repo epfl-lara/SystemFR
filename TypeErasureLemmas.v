@@ -120,7 +120,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Resolve erase_term_twf: btwf.
+Hint Resolve erase_term_twf: twf.
 
 Lemma erase_type_twf:
   forall T k,
@@ -130,7 +130,7 @@ Proof.
   induction T; steps; eauto using erase_term_twf.
 Qed.
 
-Hint Resolve erase_type_twf: btwf.
+Hint Resolve erase_type_twf: twf.
 
 Lemma pfv_erase_context_subst:
   forall S gamma tag,
@@ -194,7 +194,7 @@ Lemma topen_erase_term:
     topen k (erase_term t1) t2 = erase_term t1.
 Proof.
   intros; rewrite topen_none; steps;
-    eauto using is_erased_term_twf, erase_term_erased with btwf.
+    eauto using is_erased_term_twf, erase_term_erased with twf.
 Qed.
 
 Lemma erase_type_topen:

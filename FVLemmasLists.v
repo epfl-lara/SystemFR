@@ -3,6 +3,7 @@ Require Import Coq.Lists.List.
 
 Require Export SystemFR.FVLemmas.
 Require Export SystemFR.TypeErasureLemmas.
+Require Export SystemFR.TermList.
 
 Lemma satisfies_closed_mapping:
   forall P lterms gamma tag,
@@ -14,7 +15,7 @@ Proof.
            unfold closed_term in *; eauto.
 Qed.
 
-Hint Extern 50 => eapply satisfies_closed_mapping: fv.
+Hint Extern 50 => solve [ eapply satisfies_closed_mapping; eassumption ]: fv.
 
 Lemma closed_mapping_append1:
   forall l1 l2 tag,

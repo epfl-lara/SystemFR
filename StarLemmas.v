@@ -13,7 +13,7 @@ Lemma value_irred:
     cbv_value v ->
     irred v.
 Proof.
-  unfold irred; repeat step || t_nostep.
+  unfold irred; repeat step || no_step.
 Qed.
 
 Lemma values_normalizing:

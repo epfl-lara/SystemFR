@@ -1,7 +1,7 @@
 Require Export SystemFR.Syntax.
 
 Require Export SystemFR.Tactics.
-Require Export SystemFR.ListLemmas.
+Require Export SystemFR.ListSetLemmas.
 Require Export SystemFR.AssocList.
 Require Export SystemFR.ListUtils.
 Require Export SystemFR.EqualWithRelation.

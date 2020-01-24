@@ -17,7 +17,7 @@ Lemma annotated_reducible_type_abs:
     wf T 1 ->
     twf t 0 ->
     is_annotated_type T ->
-    [[ X :: tvars; gamma ⊨ topen 0 t (type_fvar X) : topen 0 T (type_fvar X) ]] ->
+    [[ X :: tvars; gamma ⊨ topen 0 t (fvar X type_var) : topen 0 T (fvar X type_var) ]] ->
     [[ tvars; gamma ⊨ type_abs t : T_abs T ]].
 Proof.
   unfold annotated_reducible; intros.

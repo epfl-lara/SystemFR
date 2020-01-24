@@ -1,6 +1,8 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.RedTactics.
 
+Opaque reducible_values.
+
 Lemma annotated_equivalent_proof_irrelevance:
   forall tvars gamma p t1 t2 t3 t4,
     [[ tvars; gamma ⊨ p : T_equiv t1 t2 ]] ->
