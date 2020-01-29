@@ -55,7 +55,7 @@ Lemma equivalent_split_match:
     equivalent_terms (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
-    repeat step || list_utils || t_sat_cut || t_instantiate_sat3 ||
+    repeat step || list_utils || satisfies_cut || t_instantiate_sat3 ||
            t_termlist || step_inversion satisfies ||
            simp_red.
 

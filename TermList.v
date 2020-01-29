@@ -146,9 +146,64 @@ Proof.
     exists ((n,t) :: l1), l2; repeat step.
 Qed.
 
-Ltac t_sat_cut :=
+Ltac satisfies_cut :=
   match goal with
   | H: satisfies ?P (?G1 ++ ?G2) ?L |- _ =>
     poseNew (Mark (P,G1,G2,L) "satisfies_cut");
     pose proof (satisfies_cut _ _ _ _ H)
   end.
+
+Lemma satisfies_fair_split:
+  forall P gamma1 gamma2 l1 l2 x t T,
+    satisfies P (gamma1 ++ (x, T) :: gamma2) (l1 ++ (x, t) :: l2) ->
+    support gamma1 = support l1.
+Proof.
+  induction gamma1;
+    repeat step || step_inversion satisfies || t_termlist || rewrite fv_context_append in * || list_utils.
+
+  - destruct l1; repeat step || t_satisfies_nodup || rewrite support_append in *.
+    exfalso. apply H5.
+    apply fv_context_support.
+    rewrite_any; auto using in_middle.
+
+  - destruct l1; repeat step || t_satisfies_nodup || rewrite support_append in * || t_equality;
+      eauto.
+Qed.
+
+Lemma x_not_in_support:
+  forall P gamma1 gamma2 l x T,
+    satisfies P (gamma1 ++ (x, T) :: gamma2) l ->
+    x ∈ support gamma1 ->
+    False.
+Proof.
+  repeat step || t_satisfies_nodup || rewrite support_append in *;
+    eauto using NoDup_append with step_tactic.
+Qed.
+
+Hint Immediate x_not_in_support: fv.
+
+Lemma x_not_in_support2:
+  forall P gamma1 gamma2 l1 l2 x t T,
+    satisfies P (gamma1 ++ (x, T) :: gamma2) (l1 ++ (x, t) :: l2) ->
+    x ∈ support l1 ->
+    False.
+Proof.
+  intros.
+  erewrite <- satisfies_fair_split in *; eauto;
+    eauto using x_not_in_support.
+Qed.
+
+Hint Immediate x_not_in_support2: fv.
+
+Lemma satisfies_y_in_support:
+  forall P gamma1 gamma2 l1 l2 x y t T,
+    satisfies P (gamma1 ++ (x, T) :: gamma2) (l1 ++ (x, t) :: l2) ->
+    y ∈ support l1 ->
+    y ∈ support gamma1.
+Proof.
+  intros.
+  erewrite satisfies_fair_split; eauto.
+Qed.
+
+Hint Immediate satisfies_y_in_support: fv.
+

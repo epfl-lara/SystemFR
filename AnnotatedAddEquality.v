@@ -1,6 +1,5 @@
 Require Export SystemFR.ErasedAddEquality.
-Require Export SystemFR.Judgments.
-Require Export SystemFR.AnnotatedTactics.
+Require Export SystemFR.AnnotatedRefineEquivalent.
 
 Opaque reducible_values.
 
@@ -20,5 +19,26 @@ Proof.
 
   apply open_reducible_add_equality with (erase_term e1') (erase_term e2') x;
     repeat step;
+    side_conditions.
+Qed.
+
+Lemma annotated_unfold_refinement:
+  forall tvars gamma gamma' e1 e2 x y T p,
+    ~ y ∈ pfv p term_var ->
+    ~ y ∈ pfv e1 term_var ->
+    ~ y ∈ pfv e2 term_var ->
+    ~ y ∈ pfv T term_var ->
+    ~ y ∈ pfv_context gamma term_var ->
+    ~ y ∈ pfv_context gamma' term_var ->
+    ~ x ∈ pfv p term_var ->
+    ~ x = y ->
+    is_annotated_term p ->
+    (forall z, z ∈ pfv p term_var -> z ∈ support gamma -> False) ->
+    [[ tvars; (y, T_equiv (open 0 p (fvar x term_var)) ttrue) :: gamma ++ (x, T_refine T p) :: gamma' ⊨ e1 ≡ e2 ]] ->
+    [[ tvars; gamma ++ (x, T_refine T p) :: gamma' ⊨ e1 ≡ e2 ]].
+Proof.
+  intros.
+  apply annotated_reducible_add_equality with (open 0 p (fvar x term_var)) ttrue y;
+    repeat step || fv_open || list_utils || apply annotated_equivalent_refine_equivalent;
     side_conditions.
 Qed.

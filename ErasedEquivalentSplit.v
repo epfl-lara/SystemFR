@@ -25,7 +25,7 @@ Lemma equivalent_split_bool:
     equivalent_terms (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
-    repeat step || simp_red || t_sat_cut || t_instantiate_sat3 || t_sat_add;
+    repeat step || simp_red || satisfies_cut || t_instantiate_sat3 || t_sat_add;
     eauto 2 with b_equiv_subst;
     try solve [ eapply satisfies_insert2; eauto; t_closer ].
 Qed.
@@ -58,7 +58,7 @@ Lemma equivalent_split_nat:
     equivalent_terms (substitute t l) (substitute t' l).
 Proof.
   unfold open_reducible, reducible, reduces_to;
-    repeat step || t_instantiate_sat3 || simp_red || t_sat_cut.
+    repeat step || t_instantiate_sat3 || simp_red || satisfies_cut.
 
   force_invert is_nat_value; repeat step || t_sat_add;
     eauto 2 with b_equiv_subst;

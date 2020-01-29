@@ -118,6 +118,16 @@ Proof.
            end.
 Qed.
 
+Lemma substitute_append2:
+  forall l1 l2 t tag,
+    (forall x, x ∈ pfv t tag -> x ∈ support l1 -> False) ->
+    psubstitute t (l1 ++ l2) tag = psubstitute t l2 tag.
+Proof.
+  induction l1;
+    repeat step || rewrite substitute_nothing2 in * by eauto;
+    eauto.
+Qed.
+
 Lemma substitute_cons_context:
   forall gamma x l rep tag,
     pfv rep tag = nil ->
