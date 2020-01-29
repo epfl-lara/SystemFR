@@ -1,5 +1,5 @@
 Require Export SystemFR.ErasedAddEquality.
-Require Export SystemFR.AnnotatedRefineEquivalent.
+Require Export SystemFR.AnnotatedEquivalentInContext.
 
 Opaque reducible_values.
 
