@@ -141,7 +141,7 @@ Inductive scbv_step: tree -> tree -> Prop :=
 (* `notype_tfix` has a dummy hole which is used for type annotation in the `tfix` tree.
    During evaluation, we fill it with a zero *)
 | SPBetaFix: forall ts,
-    scbv_step (notype_tfix ts) (open 0 (open 1 ts zero) (notype_lambda (notype_tfix ts)))
+    scbv_step (notype_tfix ts) (open 0 (open 1 ts zero) (notype_tfix ts))
 
 | SPBetaMatch0: forall t0 ts,
     scbv_step

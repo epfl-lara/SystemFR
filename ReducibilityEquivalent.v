@@ -400,3 +400,60 @@ Lemma reducibility_equivalent:
 Proof.
   intros; eapply reducibility_equivalent_aux; eauto.
 Qed.
+
+Lemma equivalent_terms_value:
+  forall t1 t2 v1,
+    equivalent_terms t1 t2 ->
+    star scbv_step t1 v1 ->
+    closed_value v1 ->
+    exists v2,
+      equivalent_terms v1 v2 /\
+      star scbv_step t2 v2 /\
+      closed_value v2.
+Proof.
+  intros.
+  equivalence_instantiate (lvar 0 term_var);
+    steps.
+  unshelve epose proof (H4 _);
+    unfold scbv_normalizing in *; steps.
+  - exists v1; t_closer.
+  - exists v2; steps;
+      try solve [ unfold equivalent_terms in *; repeat step || destruct_and; t_closer ].
+
+    apply equivalent_trans with t1.
+    + apply equivalent_sym; equivalent_star.
+    + eapply equivalent_trans; eauto;
+        equivalent_star.
+Qed.
+
+Ltac equivalent_terms_value :=
+  match goal with
+  | H1: equivalent_terms ?t1 ?t2,
+    H2: star scbv_step ?t1 ?v1 |- _ =>
+    poseNew (Mark H1 "equivalent_terms_value");
+    unshelve epose proof (equivalent_terms_value _ _ _ H1 H2 _)
+  end.
+
+Lemma reducibility_equivalent2:
+  forall T t1 t2 theta,
+    equivalent_terms t1 t2 ->
+    is_erased_type T ->
+    wf T 0 ->
+    pfv T term_var = nil ->
+    valid_interpretation theta ->
+    reducible theta t1 T ->
+    reducible theta t2 T.
+Proof.
+  unfold reducible, reduces_to;
+    repeat step;
+    t_closer.
+
+  equivalent_terms_value;
+    t_closer;
+    steps.
+
+  exists v2; steps.
+  eapply reducibility_equivalent;
+    steps; eauto;
+      t_closer.
+Qed.
