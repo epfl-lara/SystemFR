@@ -580,7 +580,7 @@ Proof.
       eauto using term_lift_inter_reducible_open with term_lift;
       eauto 6 using star_trans with cbvlemmas smallstep.
 
-  - exists (open 0 (open 1 t' zero) (notype_lambda (notype_tfix t')));
+  - exists (open 0 (open 1 t' zero) (notype_tfix t'));
       steps;
       eauto using term_lift_inter_reducible_open with term_lift;
       eauto 6 using star_trans with cbvlemmas smallstep.

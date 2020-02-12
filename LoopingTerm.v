@@ -3,7 +3,7 @@ Require Export SystemFR.WFLemmas.
 
 Require Import Psatz.
 
-Definition loop: tree := notype_tfix (app (lvar 0 term_var) uu).
+Definition loop: tree := notype_tfix (lvar 0 term_var).
 
 Lemma wf_loop:
   forall k, wf loop k.
@@ -36,7 +36,7 @@ Proof.
 Qed.
 
 Lemma scbv_step_loop:
-  scbv_step loop (app (notype_lambda loop) uu).
+  scbv_step loop loop.
 Proof.
   unfold loop.
   eauto using scbv_step_same with smallstep.
@@ -45,7 +45,7 @@ Qed.
 Lemma scbv_step_loop2:
   forall t,
     scbv_step loop t ->
-    t = app (notype_lambda loop) uu.
+    t = loop.
 Proof.
   intros; eauto using deterministic_step, scbv_step_loop.
 Qed.
@@ -53,7 +53,7 @@ Qed.
 Lemma not_star_scbv_step_loop':
   forall t v,
     star scbv_step t v ->
-    (t = loop \/ t = app (notype_lambda loop) uu) ->
+    t = loop ->
     cbv_value v ->
     False.
 Proof.
