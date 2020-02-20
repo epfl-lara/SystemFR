@@ -29,9 +29,6 @@ Definition equivalent_terms_at (theta: interpretation) T t1 t2 :=
     pfv C term_var = nil ->
     scbv_normalizing (open 0 C t1) <-> scbv_normalizing (open 0 C t2).
 
-Definition singleton t :=
-  T_type_refine T_top (T_equiv (lvar 0 term_var) (shift 0 t 1)).
-
 Lemma singleton_identity:
   is_singleton [] []
     (notype_lambda (lvar 0 term_var))
@@ -114,4 +111,18 @@ Proof.
   - t_substitutions.
     apply reducibility_open_equivalent2 with a0;
       repeat step || apply_any; t_closer.
+Qed.
+
+Definition singleton t :=
+  T_type_refine T_top (T_equiv (lvar 0 term_var) (shift 0 t 1)).
+
+Lemma sub_singleton_value:
+  forall v,
+    closed_value v ->
+    sub_singleton [] [] v (singleton v).
+Proof.
+  unfold sub_singleton;
+    repeat step || simp_red ||
+           (rewrite open_none in * by t_closer) ||
+           (rewrite shift_nothing2 in * by t_closer).
 Qed.
