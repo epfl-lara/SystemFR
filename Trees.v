@@ -60,8 +60,6 @@ Inductive tree: Set :=
 
   | zero: tree
   | succ: tree -> tree
-  | rec: tree -> tree -> tree -> tree -> tree
-  | notype_rec: tree -> tree -> tree -> tree
   | tmatch: tree -> tree -> tree -> tree
 
   | tfix: tree -> tree -> tree
@@ -122,9 +120,6 @@ Fixpoint is_annotated_term t :=
 
   | zero => True
   | succ t' => is_annotated_term t'
-  | rec T t' t0 ts =>
-      is_annotated_type T /\ is_annotated_term t' /\
-      is_annotated_term t0 /\ is_annotated_term ts
   | tmatch t' t0 ts => is_annotated_term t' /\ is_annotated_term t0 /\ is_annotated_term ts
 
   | tfix T t' => is_annotated_type T /\ is_annotated_term t'
@@ -196,7 +191,6 @@ Fixpoint is_erased_term t :=
 
   | zero => True
   | succ t' => is_erased_term t'
-  | notype_rec t' t0 ts => is_erased_term t' /\ is_erased_term t0 /\ is_erased_term ts
   | tmatch t' t0 ts => is_erased_term t' /\ is_erased_term t0 /\ is_erased_term ts
 
   | notype_tfix t' => is_erased_term t'
@@ -265,12 +259,6 @@ Fixpoint tree_size t :=
 
   | zero => 0
   | succ t' =>  1 + tree_size t'
-  | notype_rec t' t0 ts =>
-      1 + tree_size t' +
-      tree_size t0 + tree_size ts
-  | rec T t' t0 ts =>
-      1 + tree_size T + tree_size t' +
-      tree_size t0 + tree_size ts
   | tmatch t' t0 ts => 1 + tree_size t' + tree_size t0 + tree_size ts
 
   | tfix T t' => 1 + tree_size T + tree_size t'

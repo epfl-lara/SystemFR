@@ -47,15 +47,6 @@ Fixpoint swap_type_holes t i j :=
 
   | zero => t
   | succ t' => succ (swap_type_holes t' i j)
-  | notype_rec t' t1 t2 =>
-      notype_rec (swap_type_holes t' i j)
-                 (swap_type_holes t1 i j)
-                 (swap_type_holes t2 i j)
-  | rec T t' t1 t2 =>
-      rec (swap_type_holes T i j)
-          (swap_type_holes t' i j)
-          (swap_type_holes t1 i j)
-          (swap_type_holes t2 i j)
   | tmatch t' t1 t2 =>
       tmatch
           (swap_type_holes t' i j)

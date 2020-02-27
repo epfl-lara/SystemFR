@@ -12,7 +12,8 @@ Lemma annotated_equivalent_pair_ext:
     [[ tvars; gamma ⊨ t: T_prod A B ]] ->
     [[ tvars; gamma ⊨ t ≡ pp (pi1 t) (pi2 t) ]].
 Proof.
-  unfold annotated_reducible, open_reducible, reducible, reduces_to, annotated_equivalent, equivalent;
+  unfold annotated_reducible, open_reducible, reducible, reduces_to,
+         annotated_equivalent, open_equivalent;
     repeat step || t_instantiate_sat3 || simp_red.
 
   apply equivalent_trans with (pp a b).

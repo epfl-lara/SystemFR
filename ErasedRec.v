@@ -5,7 +5,7 @@ Require Import Coq.Lists.List.
 
 Require Export SystemFR.ReducibilitySubst.
 Require Export SystemFR.SomeTerms.
-Require Export SystemFR.NatCompare.
+Require Export SystemFR.NatLessThan.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -97,7 +97,7 @@ Proof.
            | _ => step || simp_red || step_inversion cbv_value
            end; eauto with values.
 
-  eapply reducibility_subst_head; eauto; repeat step || list_utils;
+  eapply reducible_values_subst_head; eauto; repeat step || list_utils;
     try solve [ rewrite is_erased_term_tfv in *; steps ].
   eapply reducible_rename_one_rc; eauto using reducibility_is_candidate.
   apply equivalent_rc_sym; apply equivalent_rc_rec_step; eauto with erased.
@@ -277,7 +277,7 @@ Proof.
     try finisher; t_closer;
     eauto using reducibility_is_candidate.
 
-  apply reducibility_subst_head2; repeat step || list_utils;
+  apply reducible_values_subst_head2; repeat step || list_utils;
     try finisher;
     t_closer.
 Qed.
@@ -533,7 +533,7 @@ Proof.
     eauto with values;
     eauto using reducibility_is_candidate.
 
-  - apply reducibility_subst_head in H26;
+  - apply reducible_values_subst_head in H26;
       repeat step || list_utils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with erased);
     eauto with wf twf fv;
     eauto with erased;
@@ -631,7 +631,7 @@ Lemma equivalent_zero_contradiction:
     False.
 Proof.
   intros.
-  apply (equivalent_tlt_steps _ _ zero zero) in H;
+  apply (equivalent_tlt_terms_trans _ _ zero zero) in H;
     steps.
   apply equivalent_true in H.
   apply tlt_sound in H; steps; eauto with omega.
@@ -685,7 +685,7 @@ Proof.
    ) in H26;
     eauto with values;
     eauto using reducibility_is_candidate.
-  - apply reducibility_subst_head in H26;
+  - apply reducible_values_subst_head in H26;
       repeat step || list_utils || t_fv_red || rewrite is_erased_term_tfv in * by (steps; eauto with erased);
     eauto with wf twf fv.
 

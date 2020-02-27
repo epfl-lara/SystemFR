@@ -106,19 +106,6 @@ Inductive term_lift (rel: tree -> tree -> Prop): tree -> tree -> Prop :=
     forall t t',
       term_lift rel t t' ->
       term_lift rel (succ t) (succ t')
-| LiNoTypeRec:
-    forall t1 t1' t2 t2' t3 t3',
-      term_lift rel t1 t1' ->
-      term_lift rel t2 t2' ->
-      term_lift rel t3 t3' ->
-      term_lift rel (notype_rec t1 t2 t3) (notype_rec t1' t2' t3')
-| LiRec:
-    forall t1 t1' t2 t2' t3 t3' T T',
-      term_lift rel T T' ->
-      term_lift rel t1 t1' ->
-      term_lift rel t2 t2' ->
-      term_lift rel t3 t3' ->
-      term_lift rel (rec T t1 t2 t3) (rec T' t1' t2' t3')
 | LiMatch:
     forall t1 t1' t2 t2' t3 t3',
       term_lift rel t1 t1' ->

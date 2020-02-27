@@ -34,7 +34,6 @@ Fixpoint erase_term (t: tree): tree :=
 
   | zero => zero
   | succ t' => succ (erase_term t')
-  | rec T t' t0 ts => notype_rec (erase_term t') (erase_term t0) (erase_term ts)
   | tmatch t' t0 ts => tmatch (erase_term t') (erase_term t0) (erase_term ts)
 
   | notype_tlet t1 t2 => app (notype_lambda (erase_term t2)) (erase_term t1)

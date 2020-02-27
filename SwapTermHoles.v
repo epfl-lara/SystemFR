@@ -48,15 +48,6 @@ Fixpoint swap_term_holes t i j :=
 
   | zero => t
   | succ t' => succ (swap_term_holes t' i j)
-  | notype_rec t' t1 t2 =>
-      notype_rec (swap_term_holes t' i j)
-                 (swap_term_holes t1 i j)
-                 (swap_term_holes t2 (S (S i)) (S (S j)))
-  | rec T t' t1 t2 =>
-      rec (swap_term_holes T (S i) (S j))
-          (swap_term_holes t' i j)
-          (swap_term_holes t1 i j)
-          (swap_term_holes t2 (S (S i)) (S (S j)))
   | tmatch t' t1 t2 =>
       tmatch
           (swap_term_holes t' i j)

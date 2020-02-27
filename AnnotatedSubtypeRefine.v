@@ -18,7 +18,7 @@ Lemma annotated_subtype_refine:
     [[ tvars; gamma ⊨ A <: B ]] ->
     [[ tvars; gamma ⊨ T_refine A p <: T_refine B q ]].
 Proof.
-  unfold annotated_equivalent, equivalent, annotated_subtype, subtype;
+  unfold annotated_equivalent, open_equivalent, annotated_subtype, open_subtype, subtype;
     repeat step.
 
   apply subtype_refine with
@@ -32,7 +32,7 @@ Lemma annotated_subtype_refine2:
     [[ tvars; gamma ⊨ A <: B ]] ->
     [[ tvars; gamma ⊨ T_refine A p <: B ]].
 Proof.
-  unfold annotated_equivalent, equivalent, annotated_subtype, subtype;
+  unfold annotated_equivalent, open_equivalent, annotated_subtype, open_subtype, subtype;
     repeat step || simp_red.
 Qed.
 
@@ -40,7 +40,7 @@ Lemma annotated_subtype_refine3:
   forall tvars gamma A,
     [[ tvars; gamma ⊨ A <: T_refine A ttrue ]].
 Proof.
-  unfold annotated_equivalent, equivalent, annotated_subtype, subtype;
+  unfold annotated_equivalent, open_equivalent, annotated_subtype, open_subtype, subtype;
     repeat step || simp_red;
     t_closer.
 Qed.
@@ -58,7 +58,7 @@ Lemma annotated_subtype_refine4:
     [[ tvars; gamma ⊨ T <: A ]] ->
     [[ tvars; gamma ⊨ T <: T_refine A p ]].
 Proof.
-  unfold annotated_equivalent, equivalent, annotated_subtype, subtype;
+  unfold annotated_equivalent, open_equivalent, annotated_subtype, open_subtype, subtype;
     repeat step.
 
   apply subtype_refine4 with (erase_context gamma) (erase_type T) x;
@@ -83,7 +83,9 @@ Lemma annotated_subtype_refine5:
     [[ tvars; (p, T_equiv (open 0 b (fvar x term_var)) ttrue) :: (x, A) :: gamma ⊨ fvar x term_var: T ]] ->
     [[ tvars; gamma ⊨ T_refine A b <: T ]].
 Proof.
-  unfold annotated_equivalent, equivalent, annotated_subtype, subtype, annotated_reducible;
+  unfold annotated_equivalent, open_equivalent,
+         annotated_subtype, open_subtype, subtype,
+         annotated_reducible;
     repeat step.
 
   apply subtype_refine5 with (erase_context gamma) (erase_type A) (erase_term b) x p;

@@ -1,7 +1,6 @@
 Require Export SystemFR.SatisfiesLemmas.
 Require Export SystemFR.ErasedEquivalentIte.
 Require Export SystemFR.ErasedEquivalentMatch.
-Require Export SystemFR.ErasedEquivalentRec.
 
 Opaque reducible_values.
 
@@ -136,50 +135,4 @@ Proof.
       t_closer;
       try solve [ eapply satisfies_insert3; eauto; t_closer ];
       try solve [ eapply satisfies_cons_nat_succ; eauto; t_closer ].
-Qed.
-
-Lemma reducible_equivalent_rec:
-  forall theta gamma tn t0 ts t n p l,
-    ~(p ∈ fv_context gamma) ->
-    ~(p ∈ fv tn) ->
-    ~(p ∈ fv ts) ->
-    ~(p ∈ fv t0) ->
-    ~(p ∈ fv t) ->
-    ~(n ∈ fv_context gamma) ->
-    ~(n ∈ fv ts) ->
-    ~(n ∈ fv tn) ->
-    ~(n ∈ fv t0) ->
-    ~(n ∈ fv t) ->
-    ~(n = p) ->
-    is_erased_term t0 ->
-    is_erased_term ts ->
-    wf t0 0 ->
-    wf ts 2 ->
-    subset (fv t0) (support gamma) ->
-    subset (fv ts) (support gamma) ->
-    [ support theta; gamma ⊨ tn : T_nat ] ->
-    valid_interpretation theta ->
-    (forall l,
-       satisfies (reducible_values theta) ((p, T_equiv tn zero) :: gamma) l ->
-       equivalent_terms (substitute t0 l) (substitute t l)) ->
-    (forall l,
-       satisfies (reducible_values theta)
-                 ((p, T_equiv tn (succ (fvar n term_var))) :: (n, T_nat) :: gamma) l ->
-       equivalent_terms
-         (substitute
-            (open 0
-                  (open 1 ts (fvar n term_var))
-                  (notype_lambda (notype_rec (fvar n term_var) t0 ts))) l)
-         (substitute t l)) ->
-    satisfies (reducible_values theta) gamma l ->
-    equivalent_terms (notype_rec (substitute tn l) (substitute t0 l) (substitute ts l))
-               (substitute t l).
-Proof.
-  unfold open_reducible, reducible, reduces_to; repeat step || t_instantiate_sat3 || simp_red.
-  eapply equivalent_rec; eauto;
-    repeat step || t_sat_add || step_inversion is_nat_value;
-    eauto 2 with b_equiv_subst;
-    t_closer;
-    try solve [ eapply satisfies_insert3; eauto; t_closer ];
-    try solve [ eapply satisfies_cons_nat_succ; eauto; t_closer ].
 Qed.

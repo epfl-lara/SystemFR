@@ -372,7 +372,7 @@ Proof.
            apply equal_with_relation_topen ||
            apply equal_with_idrel ||
            unfold equivalent_with_relation;
-           eauto using equivalent_at_refl, equivalent_rc_refl.
+           eauto using equivalent_with_refl, equivalent_rc_refl.
 Qed.
 
 Ltac reducible_rename_one :=
@@ -397,7 +397,7 @@ Proof.
            apply equal_with_relation_topen ||
            apply equal_with_idrel ||
            unfold equivalent_with_relation;
-           eauto using equivalent_rc_refl, equivalent_at_refl.
+           eauto using equivalent_rc_refl, equivalent_with_refl.
 Qed.
 
 Lemma reducible_rename_rc:
@@ -424,4 +424,29 @@ Proof.
     eauto using equal_with_idrel.
 
   apply equivalent_with_relation_permute2; steps; eauto using equivalent_rc_refl.
+Qed.
+
+Lemma rename_var_arrow:
+  forall X Y RC theta f A,
+    twf A 0 ->
+    ~X ∈ pfv A type_var ->
+    ~Y ∈ pfv A type_var ->
+    reducible_values ((X, RC) :: theta) f (T_arrow A (fvar X type_var)) <->
+    reducible_values ((Y, RC) :: theta) f (T_arrow A (fvar Y type_var)).
+Proof.
+  steps.
+
+  - assert (T_arrow A (fvar Y type_var) = topen 0 (T_arrow A (lvar 0 type_var)) (fvar Y type_var))
+      as R.
+    + repeat step || rewrite topen_none by auto.
+    + rewrite R.
+      apply reducible_rename_one with X;
+        repeat step || list_utils || rewrite topen_none in * by auto.
+
+  - assert (T_arrow A (fvar X type_var) = topen 0 (T_arrow A (lvar 0 type_var)) (fvar X type_var))
+      as R.
+    + repeat step || rewrite topen_none by auto.
+    + rewrite R.
+      apply reducible_rename_one with Y;
+        repeat step || list_utils || rewrite topen_none in * by auto.
 Qed.

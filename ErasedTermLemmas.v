@@ -178,3 +178,23 @@ Lemma is_erased_term_type:
 Proof.
   destruct t; steps.
 Qed.
+
+Lemma is_erased_term_tclose:
+  forall t X k,
+    is_erased_term t ->
+    is_erased_term (tclose k t X).
+Proof.
+  induction t;
+    repeat step;
+    eauto.
+Qed.
+
+Lemma is_erased_type_tclose:
+  forall T X k,
+    is_erased_type T ->
+    is_erased_type (tclose k T X).
+Proof.
+  induction T;
+    repeat step;
+    eauto using is_erased_term_tclose.
+Qed.

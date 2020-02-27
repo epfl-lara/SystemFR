@@ -13,8 +13,7 @@ Lemma open_reducible_add_equality:
     [ tvars; gamma ⊨ e1' ≡ e2' ] ->
     [ tvars; gamma ⊨ e1 ≡ e2 ].
 Proof.
-  unfold equivalent;
-    steps.
+  unfold open_equivalent; steps.
 
   unshelve epose proof (H4 _ ((x, uu) :: l) _ _ eq_refl);
     repeat step || apply SatCons || list_utils || simp_red || t_substitutions;

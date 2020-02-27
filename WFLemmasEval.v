@@ -65,3 +65,14 @@ Proof.
 Qed.
 
 Hint Immediate wf_star_smallstep: wf.
+
+Lemma open_is_nat_value_wf:
+  forall v i j rep,
+    is_nat_value v ->
+    wf rep 0 ->
+    wf (open i v rep) j.
+Proof.
+  induction 1; steps.
+Qed.
+
+Hint Immediate open_is_nat_value_wf: wf.

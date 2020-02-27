@@ -37,7 +37,7 @@ Lemma strictly_positive_pull_forall:
       reducible_values theta v (topen 0 T (open 0 B a)).
 Proof.
   steps.
-  apply reducibility_subst_head with
+  apply reducible_values_subst_head with
     (makeFresh (
        pfv T type_var ::
        pfv A type_var ::
@@ -60,7 +60,7 @@ Proof.
   end;
     repeat step || apply wf_topen || apply twf_topen || unfold non_empty ||
            apply is_erased_type_topen || list_utils || simp_red ||
-           apply reducibility_subst_head2 || t_instantiate_reducible ||
+           apply reducible_values_subst_head2 || t_instantiate_reducible ||
            apply reducibility_is_candidate ||
            (eapply strictly_positive_rename_one; eauto);
     eauto;

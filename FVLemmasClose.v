@@ -81,3 +81,12 @@ Ltac fv_close :=
     poseNew (Mark H "fv_close");
     unshelve epose proof (tfv_tclose _ _ _ _ H)
   end.
+
+Lemma fv_close_nil:
+  forall t k X,
+    pfv t term_var = nil ->
+    pfv (tclose k t X) term_var = nil.
+Proof.
+  induction t;
+    repeat step || list_utils.
+Qed.

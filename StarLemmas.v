@@ -167,17 +167,6 @@ Qed.
 
 Hint Resolve star_smallstep_ite_cond: cbvlemmas.
 
-Lemma star_smallstep_rec:
-  forall t1 t2,
-    star scbv_step t1 t2 ->
-    forall tt te,
-      star scbv_step (notype_rec t1 tt te) (notype_rec t2 tt te).
-Proof.
-  induction 1; steps; eauto with smallstep star.
-Qed.
-
-Hint Resolve star_smallstep_rec: cbvlemmas.
-
 Lemma star_smallstep_match:
   forall t1 t2,
     star scbv_step t1 t2 ->

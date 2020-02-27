@@ -1,6 +1,6 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
-Require Export SystemFR.NatCompareErase.
+Require Export SystemFR.NatLessThanErase.
 Require Export SystemFR.PolarityErase.
 Require Export SystemFR.ErasedRecPos.
 
@@ -13,7 +13,7 @@ Lemma annotated_subtype_rec:
     [[ tvars; gamma ⊨ n1 ≡ n2 ]] ->
     [[ tvars; gamma ⊨ T_rec n1 T0 Ts <: T_rec n2 T0 Ts ]].
 Proof.
-  unfold annotated_subtype, subtype, annotated_equivalent, equivalent;
+  unfold annotated_subtype, open_subtype, subtype, annotated_equivalent, open_equivalent;
     repeat step;
     eauto using reducible_values_rec_equivalent.
 Qed.
@@ -37,7 +37,7 @@ Lemma annotated_subtype_rec_pos:
     [[ tvars; gamma ⊨ topen 0 Ts (T_rec zero T0 Ts) <: T0 ]] ->
     [[ tvars; gamma ⊨ T_rec n2 T0 Ts <: T_rec n1 T0 Ts ]].
 Proof.
-  unfold annotated_subtype, subtype, annotated_equivalent, equivalent;
+  unfold annotated_subtype, open_subtype, subtype, annotated_equivalent, open_equivalent;
     repeat step.
 
   apply reducible_values_rec_pos with (psubstitute (erase_term n2) l term_var) X;

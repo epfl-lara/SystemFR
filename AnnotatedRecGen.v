@@ -100,7 +100,7 @@ Lemma annotated_reducible_fold_gen:
     [[ tvars; gamma ⊨ t : topen 0 Ts (intersect T0 Ts) ]] ->
     [[ tvars; gamma ⊨ tfold (intersect T0 Ts) t : intersect T0 Ts ]].
 Proof.
-  unfold annotated_reducible, annotated_subtype, subtype;
+  unfold annotated_reducible, annotated_subtype, open_subtype, subtype;
     repeat step.
 
   apply open_reducible_fold_gen with X;

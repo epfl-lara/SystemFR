@@ -197,18 +197,6 @@ Proof.
   find_middle_point; try solve [ find_context 0 ]; try solve [ find_context 1 ].
 Qed.
 
-Lemma equivalent_rec:
-  forall e1 e2 e3 e1' e2' e3',
-    equivalent_terms e1 e1' ->
-    equivalent_terms e2 e2' ->
-    equivalent_terms e3 e3' ->
-    equivalent_terms (notype_rec e1 e2 e3) (notype_rec e1' e2' e3').
-Proof.
-  intros.
-  find_middle_point; try solve [ find_context 2 ].
-  find_middle_point; try solve [ find_context 0 ].
-Qed.
-
 Lemma equivalent_value_pair:
   forall v1 v2 v',
     equivalent_terms (pp v1 v2) v' ->
@@ -274,4 +262,26 @@ Proof.
     eauto using scbv_step_same, star_one with smallstep;
     repeat step || t_invert_star || step_inversion cbv_value;
     try solve [ eexists; steps ].
+Qed.
+
+Lemma equivalent_beta:
+  forall f t v,
+    is_erased_term t ->
+    is_erased_term f ->
+    pfv t term_var = nil ->
+    pfv f term_var = nil ->
+    wf t 0 ->
+    wf f 1 ->
+    star scbv_step t v ->
+    cbv_value v ->
+    equivalent_terms (app (notype_lambda f) t) (open 0 f t).
+Proof.
+  intros.
+  eapply equivalent_trans with (app (notype_lambda f) v);
+    try solve [ equivalent_star ].
+  eapply equivalent_trans with (open 0 f v);
+    try solve [ equivalent_star ].
+
+  apply equivalent_context; steps.
+  apply equivalent_sym; equivalent_star.
 Qed.

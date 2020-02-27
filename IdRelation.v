@@ -100,7 +100,7 @@ Proof.
            rewrite range_swap in * ||
            (rewrite idrel_lookup in * by auto) ||
            (rewrite idrel_lookup_swap_fail in * by auto) ||
-           apply equivalent_at_right.
+           apply equivalent_with_right.
 Qed.
 
 Lemma equivalent_with_idrel2:
@@ -117,7 +117,7 @@ Proof.
            rewrite range_swap in * ||
            (rewrite idrel_lookup in * by auto) ||
            (rewrite idrel_lookup_swap_fail in * by auto) ||
-           apply equivalent_at_left.
+           apply equivalent_with_left.
 Qed.
 
 Ltac t_idrel :=
@@ -139,7 +139,7 @@ Lemma equivalent_with_relation_permute:
       equiv
 .
 Proof.
-  unfold equivalent_with_relation, equivalent_at;
+  unfold equivalent_with_relation, equivalent_with;
     repeat match goal with
            | |- exists r, Some ?R = Some r /\ _ => exists R
            | |- exists r, _ /\ equivalent_rc r ?R => exists R
@@ -180,7 +180,7 @@ Lemma equivalent_with_relation_permute2:
       equiv
 .
 Proof.
-  unfold equivalent_with_relation, equivalent_at;
+  unfold equivalent_with_relation, equivalent_with;
     repeat match goal with
            | |- exists r, Some ?R = Some r /\ _ => exists R
            | |- exists r, _ /\ equivalent_rc r ?R => exists R

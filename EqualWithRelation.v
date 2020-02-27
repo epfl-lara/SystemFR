@@ -97,19 +97,6 @@ Inductive equal_with_relation tag rel: tree -> tree -> Prop :=
     forall t t',
       equal_with_relation tag rel t t' ->
       equal_with_relation tag rel (succ t) (succ t')
-| EWRNoTypeRec:
-    forall t1 t1' t2 t2' t3 t3',
-      equal_with_relation tag rel t1 t1' ->
-      equal_with_relation tag rel t2 t2' ->
-      equal_with_relation tag rel t3 t3' ->
-      equal_with_relation tag rel (notype_rec t1 t2 t3) (notype_rec t1' t2' t3')
-| EWRRec:
-    forall t1 t1' t2 t2' t3 t3' T T',
-      equal_with_relation tag rel T T' ->
-      equal_with_relation tag rel t1 t1' ->
-      equal_with_relation tag rel t2 t2' ->
-      equal_with_relation tag rel t3 t3' ->
-      equal_with_relation tag rel (rec T t1 t2 t3) (rec T' t1' t2' t3')
 | EWRMatch:
     forall t1 t1' t2 t2' t3 t3',
       equal_with_relation tag rel t1 t1' ->

@@ -3,6 +3,7 @@ Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
 Require Export SystemFR.ReducibilityEquivalent.
+Require Export SystemFR.NatLessThan.
 Require Export SystemFR.ErasedArrow.
 Require Export SystemFR.ErasedPair.
 Require Export SystemFR.ErasedQuant.
@@ -105,7 +106,7 @@ Proof.
       eauto 2 with wf fv erased step_tactic.
 
     apply IHn with tsv;
-      repeat step || simp_red || rewrite open_tlt in * || t_tlt_sound ||
+      repeat step || simp_red || rewrite open_tlt in * || tlt_sound ||
       rewrite open_none in * by t_closer;
       try solve [ unshelve t_closer; auto ];
       try omega.

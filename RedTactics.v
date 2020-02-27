@@ -215,32 +215,7 @@ Proof.
   repeat step || t_substitutions.
 Qed.
 
-Lemma equivalent_cons2:
-  forall (t0 ts t : tree) (n p : nat) (l : list (nat * tree)) v P gamma,
-    ~(p ∈ fv ts) ->
-    ~(p ∈ fv t0) ->
-    ~(p ∈ fv t) ->
-    ~(n ∈ fv ts) ->
-    ~(n ∈ fv t0) ->
-    ~(n ∈ fv t) ->
-    ~(n = p) ->
-    is_nat_value v ->
-    satisfies P gamma l ->
-    equivalent_terms
-      (psubstitute
-         (open 0 (open 1 ts (fvar n term_var)) (notype_lambda (notype_rec (fvar n term_var) t0 ts)))
-         ((p, uu) :: (n, v) :: l) term_var)
-      (psubstitute t ((p, uu) :: (n, v) :: l) term_var) ->
-    equivalent_terms
-      (open 0 (open 1 (psubstitute ts l term_var) v)
-            (notype_lambda (notype_rec v (psubstitute t0 l term_var) (psubstitute ts l term_var))))
-      (psubstitute t l term_var).
-Proof.
-  repeat step || t_substitutions.
-Qed.
-
 Hint Resolve equivalent_cons: b_equiv_subst.
-Hint Resolve equivalent_cons2: b_equiv_subst.
 Hint Resolve equivalent_cons_succ: b_equiv_subst.
 Hint Resolve equivalent_insert: b_equiv_subst.
 Hint Resolve equivalent_insert2: b_equiv_subst.

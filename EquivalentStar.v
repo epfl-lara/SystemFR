@@ -555,26 +555,6 @@ Proof.
       eauto 6 using star_trans with cbvlemmas smallstep;
       eauto with fv; eauto with wf; eauto with erased.
 
-    exists (open 0 (open 1 t3' v'0) (notype_lambda (notype_rec v'0 t2' t3')));
-      steps;
-      eauto using term_lift_inter_reducible_open with term_lift;
-      eauto 6 using star_trans with cbvlemmas smallstep.
-
-  - repeat term_lift_inter_reducible_value; steps;
-      eauto with values;
-      eauto using term_lift_sym, inter_reducible_sym.
-
-    eapply term_lift_inter_reducible_zero in H19; steps;
-      eauto 6 using star_trans with cbvlemmas smallstep.
-
-  - repeat term_lift_inter_reducible_value; steps;
-      eauto with values;
-      eauto using term_lift_sym, inter_reducible_sym.
-
-    eapply term_lift_inter_reducible_succ in H20; repeat step || step_inversion cbv_value;
-      eauto 6 using star_trans with cbvlemmas smallstep;
-      eauto with fv; eauto with wf; eauto with erased.
-
     exists (open 0 t3' v'0);
       steps;
       eauto using term_lift_inter_reducible_open with term_lift;

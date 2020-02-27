@@ -25,7 +25,7 @@ Lemma annotated_reducible_refine:
     [[ tvars; (p, T_equiv (fvar x term_var) t) :: (x,A) :: gamma ⊨ open 0 b (fvar x term_var) ≡ ttrue ]] ->
     [[ tvars; gamma ⊨ t : T_refine A b ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step.
   apply open_reducible_refine with x p;
     repeat step || t_instantiate_sat3 || erase_open;

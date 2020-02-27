@@ -8,7 +8,8 @@ Lemma annotated_equivalent_proof_irrelevance:
     [[ tvars; gamma ⊨ p : T_equiv t1 t2 ]] ->
     [[ tvars; gamma ⊨ p ≡ trefl t3 t4 ]].
 Proof.
-  unfold annotated_reducible, open_reducible, annotated_equivalent, equivalent, reducible, reduces_to;
+  unfold annotated_reducible, open_reducible, annotated_equivalent, open_equivalent,
+         reducible, reduces_to;
     repeat step || t_instantiate_sat3 || simp_red || apply equivalent_star;
     t_closer.
 Qed.

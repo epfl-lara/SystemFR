@@ -4,7 +4,7 @@ Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 
 Require Export SystemFR.ErasedLet2.
-Require Export SystemFR.NatCompare.
+Require Export SystemFR.NatLessThan.
 
 Opaque reducible_values.
 Opaque makeFresh.

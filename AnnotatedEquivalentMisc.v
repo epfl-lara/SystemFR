@@ -15,8 +15,7 @@ Lemma annotated_equivalent_weaken:
     [[ tvars; gamma ⊨ u ≡ v ]] ->
     [[ tvars; (x,T) :: gamma ⊨ u ≡ v ]].
 Proof.
-  unfold annotated_equivalent, equivalent;
-    steps.
+  unfold annotated_equivalent, open_equivalent; steps.
 
   apply equivalent_weaken with theta (erase_context gamma) x (erase_type T);
     repeat step;
@@ -29,8 +28,8 @@ Lemma annotated_equivalent_type:
     [[ tvars; gamma ⊨ t1 ≡ t2 ]].
 Proof.
   unfold
-    annotated_reducible, open_reducible, reducible, reduces_to, annotated_equivalent,
-    equivalent;
+    annotated_reducible, open_reducible, reducible, reduces_to,
+    annotated_equivalent, open_equivalent;
     repeat step || t_instantiate_sat3 || simp_red.
 Qed.
 
@@ -44,7 +43,7 @@ Lemma annotated_equivalent_weaken_hyp:
     [[ tvars; gamma1 ++ (x, T') :: gamma2 ⊨ u ≡ v ]] ->
     [[ tvars; gamma1 ++ (x, T) :: gamma2 ⊨ u ≡ v ]].
 Proof.
-  unfold annotated_equivalent, equivalent, annotated_subtype, subtype;
+  unfold annotated_equivalent, open_equivalent, annotated_subtype, open_subtype, subtype;
     repeat step || apply_any.
 
   eapply_any; eauto; repeat step || rewrite erase_context_append in *.
@@ -60,7 +59,7 @@ Lemma annotated_equivalent_error:
     [[ tvars; gamma ⊨ err T2 ≡ e ]] ->
     [[ tvars; gamma ⊨ ttrue ≡ tfalse ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step || t_instantiate_sat3;
     eauto using equivalent_error with exfalso.
 Qed.

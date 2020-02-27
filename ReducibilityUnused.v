@@ -55,7 +55,7 @@ Lemma reducible_unused_middle:
 Proof.
   repeat step.
   - apply reducible_rename with T ((X, RC) :: theta1 ++ theta2) (idrel (pfv T type_var));
-      repeat unfold equivalent_with_relation, equivalent_at ||
+      repeat unfold equivalent_with_relation, equivalent_with ||
              step || apply valid_interpretation_append ||
              (progress rewrite swap_idrel in * by steps) ||
              t_idrel_lookup2 || t_lookupor || t_lookup_rewrite || t_lookup ||
@@ -68,7 +68,7 @@ Proof.
   - apply reducible_rename with T ((X, RC) :: theta2) (idrel (pfv T type_var));
       repeat step || apply valid_interpretation_append || (rewrite swap_idrel in * by steps) ||
              t_idrel_lookup2 || t_lookupor || t_lookup_rewrite || t_lookup ||
-             unfold equivalent_with_relation, equivalent_at || unfold no_type_fvar in * ||
+             unfold equivalent_with_relation, equivalent_with || unfold no_type_fvar in * ||
              unshelve eauto with exfalso || exact True;
       eauto using equal_with_idrel;
       eauto using equivalent_rc_refl.

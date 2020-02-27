@@ -92,7 +92,7 @@ Proof.
   exists v; steps; eauto using star_trans with cbvlemmas.
   apply (reducible_rename_one _ _ _ _ _ (makeFresh (pfv U type_var :: pfv V type_var :: nil))) in H12;
     repeat step || finisher; eauto using reducibility_is_candidate.
-  eapply reducibility_subst_head; eauto; repeat step || list_utils || finisher.
+  eapply reducible_values_subst_head; eauto; repeat step || list_utils || finisher.
 Qed.
 
 Lemma open_reducible_inst:

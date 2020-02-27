@@ -1,6 +1,5 @@
-Require Export SystemFR.LoopingTerm.
-
-Opaque loop.
+Require Export SystemFR.StarInversions.
+Require Export SystemFR.WFLemmas.
 
 Fixpoint nat_recognizer (v: tree): tree :=
   match v with
@@ -40,6 +39,23 @@ Proof.
 
   eapply Trans; eauto with smallstep values.
   rewrite (open_none _ 1); eauto using wf_nat_recognizer.
+Qed.
+
+Lemma eval_nat_recognizer2:
+  forall v1 v2,
+    is_nat_value v2 ->
+      star scbv_step (open 0 (nat_recognizer v1) v2) ttrue \/
+      star scbv_step (open 0 (nat_recognizer v1) v2) tfalse.
+Proof.
+  induction v1; inversion 1;
+    repeat
+      step ||
+      rewrite open_none by eauto using wf_nat_recognizer;
+    eauto using star_one, scbv_step_same with smallstep values.
+    try solve [
+      instantiate_any; steps;
+        eauto using star_one, scbv_step_same with smallstep values star
+    ].
 Qed.
 
 Lemma true_nat_recognizer:

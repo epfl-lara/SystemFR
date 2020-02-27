@@ -37,15 +37,6 @@ Fixpoint shift (k: nat) (t: tree) (i: nat) :=
 
   | zero => t
   | succ t' => succ (shift k t' i)
-  | notype_rec t' t1 t2 =>
-      notype_rec (shift k t' i)
-                 (shift k t1 i)
-                 (shift (S (S k)) t2 i)
-  | rec T t' t1 t2 =>
-      rec (shift (S k) T i)
-          (shift k t' i)
-          (shift k t1 i)
-          (shift (S (S k)) t2 i)
   | tmatch t' t1 t2 =>
       tmatch
           (shift k t' i)
@@ -126,15 +117,6 @@ Fixpoint shift_open (k: nat) (t rep: tree) :=
 
   | zero => t
   | succ t' => succ (shift_open k t' rep)
-  | notype_rec t' t1 t2 =>
-      notype_rec (shift_open k t' rep)
-                 (shift_open k t1 rep)
-                 (shift_open (S (S k)) t2 (shift 0 rep 2))
-  | rec T t' t1 t2 =>
-      rec (shift_open (S k) T (shift 0 rep 1))
-          (shift_open k t' rep)
-          (shift_open k t1 rep)
-          (shift_open (S (S k)) t2 (shift 0 rep 2))
   | tmatch t' t1 t2 =>
       tmatch
           (shift_open k t' rep)

@@ -2,7 +2,6 @@ Require Import Coq.Strings.String.
 Require Import Equations.Prop.Subterm.
 Require Import Psatz.
 
-Require Export SystemFR.NatCompare.
 Require Export SystemFR.ReducibilityRenaming.
 Require Export SystemFR.EquivalenceLemmas2.
 Require Export SystemFR.SwapTermHoles.

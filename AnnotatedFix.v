@@ -3,7 +3,7 @@ Require Import Coq.Lists.List.
 Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedFix.
-Require Export SystemFR.NatCompareErase.
+Require Export SystemFR.NatLessThanErase.
 
 Opaque reducible_values.
 

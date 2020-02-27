@@ -17,7 +17,7 @@ Lemma annotated_subtype_arrow:
     [[ tvars; (x,B1) :: gamma ⊨ open 0 A2 (fvar x term_var) <: open 0 B2 (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ T_arrow A1 A2 <: T_arrow B1 B2 ]].
 Proof.
-  unfold annotated_subtype, subtype;
+  unfold annotated_subtype, open_subtype, subtype;
     repeat step.
   apply reducible_arrow_subtype_subst with (erase_type A1) (erase_type A2) (erase_context gamma) x;
     repeat step;
@@ -45,7 +45,7 @@ Lemma annotated_subtype_arrow2:
          app (fvar f term_var) (fvar x term_var) : open 0 B (fvar x term_var) ]] ->
     [[ tvars; gamma ⊨ T <: T_arrow A B ]].
 Proof.
-  unfold annotated_reducible, annotated_subtype, subtype;
+  unfold annotated_reducible, annotated_subtype, open_subtype, subtype;
     repeat step.
 
   apply subtype_arrow2 with (support theta) x f (erase_context gamma) (erase_type T);

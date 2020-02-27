@@ -155,6 +155,9 @@ Fail Next Obligation. (* no more obligations for reducible_values *)
 Definition reducible (theta: interpretation) t T : Prop :=
   reduces_to (fun t => reducible_values theta t T) t.
 
+Definition subtype theta T1 T2 :=
+  forall v, reducible_values theta v T1 -> reducible_values theta v T2.
+
 Definition open_reducible (tvars: tvar_list) (gamma: context) t T : Prop :=
   forall theta lterms,
     valid_interpretation theta ->
@@ -164,16 +167,14 @@ Definition open_reducible (tvars: tvar_list) (gamma: context) t T : Prop :=
               (substitute t lterms)
               (substitute T lterms).
 
-Definition subtype (tvars: tvar_list) (gamma: context) T1 T2 : Prop :=
+Definition open_subtype (tvars: tvar_list) (gamma: context) T1 T2 : Prop :=
   forall theta l,
    valid_interpretation theta ->
    satisfies (reducible_values theta) gamma l ->
    support theta = tvars ->
-   forall v,
-     reducible_values theta v (substitute T1 l) ->
-     reducible_values theta v (substitute T2 l).
+   subtype theta (substitute T1 l) (substitute T2 l).
 
-Definition equivalent (tvars: tvar_list) (gamma: context) t1 t2 : Prop :=
+Definition open_equivalent (tvars: tvar_list) (gamma: context) t1 t2 : Prop :=
   forall theta l,
     valid_interpretation theta ->
     satisfies (reducible_values theta) gamma l ->
@@ -183,10 +184,10 @@ Definition equivalent (tvars: tvar_list) (gamma: context) t1 t2 : Prop :=
 Notation "'[' tvars ';' gamma '⊨' t ':' T ']'" := (open_reducible tvars gamma t T)
   (at level 50, t at level 50).
 
-Notation "'[' tvars ';' gamma '⊨' T1 '<:' T2 ']'" := (subtype tvars gamma T1 T2)
+Notation "'[' tvars ';' gamma '⊨' T1 '<:' T2 ']'" := (open_subtype tvars gamma T1 T2)
   (at level 50, T1 at level 50).
 
-Notation "'[' tvars ';' gamma '⊨' t1 '≡' t2 ']'" := (equivalent tvars gamma t1 t2)
+Notation "'[' tvars ';' gamma '⊨' t1 '≡' t2 ']'" := (open_equivalent tvars gamma t1 t2)
   (at level 50, t1 at level 50).
 
 Lemma reducibility_rewrite:
@@ -252,9 +253,122 @@ Ltac simp_red :=
   rewrite reducible_values_equation_52 in * ||
   rewrite reducible_values_equation_53 in * ||
   rewrite reducible_values_equation_54 in * ||
-  rewrite reducible_values_equation_55 in * ||
-  rewrite reducible_values_equation_56 in * ||
-  rewrite reducible_values_equation_57 in *.
+  rewrite reducible_values_equation_55 in *.
+
+Ltac simp_red_goal :=
+  rewrite reducible_values_equation_1 in |- * ||
+  rewrite reducible_values_equation_2 in |- * ||
+  rewrite reducible_values_equation_3 in |- * ||
+  rewrite reducible_values_equation_4 in |- * ||
+  rewrite reducible_values_equation_5 in |- * ||
+  rewrite reducible_values_equation_6 in |- * ||
+  rewrite reducible_values_equation_7 in |- * ||
+  rewrite reducible_values_equation_8 in |- * ||
+  rewrite reducible_values_equation_9 in |- * ||
+  rewrite reducible_values_equation_10 in |- * ||
+  rewrite reducible_values_equation_11 in |- * ||
+  rewrite reducible_values_equation_12 in |- * ||
+  rewrite reducible_values_equation_13 in |- * ||
+  rewrite reducible_values_equation_14 in |- * ||
+  rewrite reducible_values_equation_15 in |- * ||
+  rewrite reducible_values_equation_16 in |- * ||
+  rewrite reducible_values_equation_17 in |- * ||
+  rewrite reducible_values_equation_18 in |- * ||
+  rewrite reducible_values_equation_19 in |- * ||
+  rewrite reducible_values_equation_20 in |- * ||
+  rewrite reducible_values_equation_21 in |- * ||
+  rewrite reducible_values_equation_22 in |- * ||
+  rewrite reducible_values_equation_23 in |- * ||
+  rewrite reducible_values_equation_24 in |- * ||
+  rewrite reducible_values_equation_25 in |- * ||
+  rewrite reducible_values_equation_26 in |- * ||
+  rewrite reducible_values_equation_27 in |- * ||
+  rewrite reducible_values_equation_28 in |- * ||
+  rewrite reducible_values_equation_29 in |- * ||
+  rewrite reducible_values_equation_30 in |- * ||
+  rewrite reducible_values_equation_31 in |- * ||
+  rewrite reducible_values_equation_32 in |- * ||
+  rewrite reducible_values_equation_33 in |- * ||
+  rewrite reducible_values_equation_34 in |- * ||
+  rewrite reducible_values_equation_35 in |- * ||
+  rewrite reducible_values_equation_36 in |- * ||
+  rewrite reducible_values_equation_37 in |- * ||
+  rewrite reducible_values_equation_38 in |- * ||
+  rewrite reducible_values_equation_39 in |- * ||
+  rewrite reducible_values_equation_40 in |- * ||
+  rewrite reducible_values_equation_41 in |- * ||
+  rewrite reducible_values_equation_42 in |- * ||
+  rewrite reducible_values_equation_43 in |- * ||
+  rewrite reducible_values_equation_44 in |- * ||
+  rewrite reducible_values_equation_45 in |- * ||
+  rewrite reducible_values_equation_46 in |- * ||
+  rewrite reducible_values_equation_47 in |- * ||
+  rewrite reducible_values_equation_48 in |- * ||
+  rewrite reducible_values_equation_49 in |- * ||
+  rewrite reducible_values_equation_50 in |- * ||
+  rewrite reducible_values_equation_51 in |- * ||
+  rewrite reducible_values_equation_52 in |- * ||
+  rewrite reducible_values_equation_53 in |- * ||
+  rewrite reducible_values_equation_54 in |- * ||
+  rewrite reducible_values_equation_55 in |- *.
+
+Ltac simp_red_hyp :=
+  rewrite reducible_values_equation_1 in * |- ||
+  rewrite reducible_values_equation_2 in * |- ||
+  rewrite reducible_values_equation_3 in * |- ||
+  rewrite reducible_values_equation_4 in * |- ||
+  rewrite reducible_values_equation_5 in * |- ||
+  rewrite reducible_values_equation_6 in * |- ||
+  rewrite reducible_values_equation_7 in * |- ||
+  rewrite reducible_values_equation_8 in * |- ||
+  rewrite reducible_values_equation_9 in * |- ||
+  rewrite reducible_values_equation_10 in * |- ||
+  rewrite reducible_values_equation_11 in * |- ||
+  rewrite reducible_values_equation_12 in * |- ||
+  rewrite reducible_values_equation_13 in * |- ||
+  rewrite reducible_values_equation_14 in * |- ||
+  rewrite reducible_values_equation_15 in * |- ||
+  rewrite reducible_values_equation_16 in * |- ||
+  rewrite reducible_values_equation_17 in * |- ||
+  rewrite reducible_values_equation_18 in * |- ||
+  rewrite reducible_values_equation_19 in * |- ||
+  rewrite reducible_values_equation_20 in * |- ||
+  rewrite reducible_values_equation_21 in * |- ||
+  rewrite reducible_values_equation_22 in * |- ||
+  rewrite reducible_values_equation_23 in * |- ||
+  rewrite reducible_values_equation_24 in * |- ||
+  rewrite reducible_values_equation_25 in * |- ||
+  rewrite reducible_values_equation_26 in * |- ||
+  rewrite reducible_values_equation_27 in * |- ||
+  rewrite reducible_values_equation_28 in * |- ||
+  rewrite reducible_values_equation_29 in * |- ||
+  rewrite reducible_values_equation_30 in * |- ||
+  rewrite reducible_values_equation_31 in * |- ||
+  rewrite reducible_values_equation_32 in * |- ||
+  rewrite reducible_values_equation_33 in * |- ||
+  rewrite reducible_values_equation_34 in * |- ||
+  rewrite reducible_values_equation_35 in * |- ||
+  rewrite reducible_values_equation_36 in * |- ||
+  rewrite reducible_values_equation_37 in * |- ||
+  rewrite reducible_values_equation_38 in * |- ||
+  rewrite reducible_values_equation_39 in * |- ||
+  rewrite reducible_values_equation_40 in * |- ||
+  rewrite reducible_values_equation_41 in * |- ||
+  rewrite reducible_values_equation_42 in * |- ||
+  rewrite reducible_values_equation_43 in * |- ||
+  rewrite reducible_values_equation_44 in * |- ||
+  rewrite reducible_values_equation_45 in * |- ||
+  rewrite reducible_values_equation_46 in * |- ||
+  rewrite reducible_values_equation_47 in * |- ||
+  rewrite reducible_values_equation_48 in * |- ||
+  rewrite reducible_values_equation_49 in * |- ||
+  rewrite reducible_values_equation_50 in * |- ||
+  rewrite reducible_values_equation_51 in * |- ||
+  rewrite reducible_values_equation_52 in * |- ||
+  rewrite reducible_values_equation_53 in * |- ||
+  rewrite reducible_values_equation_54 in * |- ||
+  rewrite reducible_values_equation_55 in * |-
+.
 
 Ltac simp_red_nat :=
   match goal with

@@ -52,8 +52,6 @@ Fixpoint pfv t tag: list nat :=
 
   | zero => nil
   | succ t' => pfv t' tag
-  | notype_rec t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
-  | rec T t' t0 ts => pfv T tag ++ pfv t' tag ++ pfv t0 tag ++ pfv ts tag
   | tmatch t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
 
   | tfix T t' => pfv T tag ++ pfv t' tag
@@ -183,11 +181,6 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
 
   | zero => t
   | succ t' => succ (psubstitute t' l tag)
-  | notype_rec t' t1 t2 =>
-      notype_rec (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
-  | rec T t' t1 t2 =>
-      rec (psubstitute T l tag) (psubstitute t' l tag)
-          (psubstitute t1 l tag) (psubstitute t2 l tag)
   | tmatch t' t1 t2 => tmatch (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
 
   | tfix T t' => tfix (psubstitute T l tag) (psubstitute t' l tag)
@@ -278,15 +271,6 @@ Fixpoint wf t k :=
 
   | zero => True
   | succ t' => wf t' k
-  | notype_rec t' t1 t2 =>
-      wf t' k /\
-      wf t1 k /\
-      wf t2 (S (S k))
-  | rec T t' t1 t2 =>
-      wf T (S k) /\
-      wf t' k /\
-      wf t1 k /\
-      wf t2 (S (S k))
   | tmatch t' t1 t2 =>
       wf t' k /\
       wf t1 k /\
@@ -366,15 +350,6 @@ Fixpoint twf t k :=
 
   | zero => True
   | succ t' => twf t' k
-  | notype_rec t' t1 t2 =>
-      twf t' k /\
-      twf t1 k /\
-      twf t2 k
-  | rec T t' t1 t2 =>
-      twf T k /\
-      twf t' k /\
-      twf t1 k /\
-      twf t2 k
   | tmatch t' t1 t2 =>
       twf t' k /\
       twf t1 k /\
@@ -465,15 +440,6 @@ Fixpoint open (k: nat) (t rep: tree) :=
 
   | zero => t
   | succ t' => succ (open k t' rep)
-  | notype_rec t' t1 t2 =>
-      notype_rec (open k t' rep)
-                 (open k t1 rep)
-                 (open (S (S k)) t2 rep)
-  | rec T t' t1 t2 =>
-      rec (open (S k) T rep)
-          (open k t' rep)
-          (open k t1 rep)
-          (open (S (S k)) t2 rep)
   | tmatch t' t1 t2 =>
       tmatch
           (open k t' rep)
@@ -554,15 +520,6 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
 
   | zero => t
   | succ t' => succ (close k t' x)
-  | notype_rec t' t1 t2 =>
-      notype_rec (close k t' x)
-                 (close k t1 x)
-                 (close (S (S k)) t2 x)
-  | rec T t' t1 t2 =>
-      rec (close (S k) T x)
-          (close k t' x)
-          (close k t1 x)
-          (close (S (S k)) t2 x)
   | tmatch t' t1 t2 =>
       tmatch
           (close k t' x)
@@ -644,15 +601,6 @@ Fixpoint topen (k: nat) (t rep: tree) :=
 
   | zero => t
   | succ t' => succ (topen k t' rep)
-  | notype_rec t' t1 t2 =>
-      notype_rec (topen k t' rep)
-                 (topen k t1 rep)
-                 (topen k t2 rep)
-  | rec T t' t1 t2 =>
-      rec (topen k T rep)
-          (topen k t' rep)
-          (topen k t1 rep)
-          (topen k t2 rep)
   | tmatch t' t1 t2 =>
       tmatch
           (topen k t' rep)
@@ -735,15 +683,6 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
 
   | zero => t
   | succ t' => succ (tclose k t' x)
-  | notype_rec t' t1 t2 =>
-      notype_rec (tclose k t' x)
-                 (tclose k t1 x)
-                 (tclose k t2 x)
-  | rec T t' t1 t2 =>
-      rec (tclose k T x)
-          (tclose k t' x)
-          (tclose k t1 x)
-          (tclose k t2 x)
   | tmatch t' t1 t2 =>
       tmatch
           (tclose k t' x)

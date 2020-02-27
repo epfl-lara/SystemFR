@@ -1,3 +1,5 @@
+Require Import String.
+
 Require Export SystemFR.PrimitiveSize.
 Require Export SystemFR.PrimitiveRecognizers.
 
@@ -45,6 +47,29 @@ Ltac t_invert_nat_value :=
   match goal with
   | H: is_nat_value _ |- _ => inversion H
   end.
+
+
+Lemma is_nat_value_buildable:
+  forall v, is_nat_value v ->
+    exists n, v = build_nat n.
+Proof.
+  induction 1; steps.
+  - exists 0; steps.
+  - exists (S n); steps.
+Qed.
+
+Ltac is_nat_value_buildable :=
+  match goal with
+  | H: is_nat_value ?v |- _ =>
+    poseNew (Mark v "is_nat_value_buildable");
+    pose proof (is_nat_value_buildable v H)
+  end.
+
+Lemma tree_size_build_nat:
+  forall n, tree_size (build_nat n) = n.
+Proof.
+  induction n; steps.
+Qed.
 
 Lemma is_nat_value_build_nat:
   forall n, is_nat_value (build_nat n).
@@ -128,16 +153,6 @@ Inductive scbv_step: tree -> tree -> Prop :=
 | SPBetaIte2: forall t1 t2,
     scbv_step (ite tfalse t1 t2) t2
 
-| SPBetaRec0: forall t0 ts,
-    scbv_step
-      (notype_rec zero t0 ts)
-      t0
-| SPBetaRecS: forall v t0 ts,
-    cbv_value v ->
-    scbv_step
-      (notype_rec (succ v) t0 ts)
-      (open 0 (open 1 ts v) (notype_lambda (notype_rec v t0 ts)))
-
 (* `notype_tfix` has a dummy hole which is used for type annotation in the `tfix` tree.
    During evaluation, we fill it with a zero *)
 | SPBetaFix: forall ts,
@@ -207,9 +222,6 @@ Inductive scbv_step: tree -> tree -> Prop :=
 | SPSucc: forall t1 t2,
     scbv_step t1 t2 ->
     scbv_step (succ t1) (succ t2)
-| SPRec: forall t1 t2 t0 ts,
-    scbv_step t1 t2 ->
-    scbv_step (notype_rec t1 t0 ts) (notype_rec t2 t0 ts)
 | SPMatch: forall t1 t2 t0 ts,
     scbv_step t1 t2 ->
     scbv_step (tmatch t1 t0 ts) (tmatch t2 t0 ts)
@@ -256,7 +268,6 @@ Ltac t_invert_step :=
   | H: scbv_step (tunfold _) _ |- _ => inversion H; clear H
   | H: scbv_step (tunfold_in _ _) _ |- _ => inversion H; clear H
   | H: scbv_step (ite _ _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (notype_rec _ _ _) _ |- _ => inversion H; clear H
   | H: scbv_step (tmatch _ _ _) _ |- _ => inversion H; clear H
   | H: scbv_step (pp _ _) _ |- _ => inversion H; clear H
   | H: scbv_step (pi1 _) _ |- _ => inversion H; clear H

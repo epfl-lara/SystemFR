@@ -13,7 +13,7 @@ Lemma annotated_equivalence_context:
     [[ tvars; gamma ⊨ t1 ≡ t2 ]] ->
     [[ tvars; gamma ⊨ open 0 C t1 ≡ open 0 C t2 ]].
 Proof.
-  unfold annotated_equivalent, equivalent;
+  unfold annotated_equivalent, open_equivalent;
     repeat step || erase_open || t_substitutions || apply equivalent_context;
     eauto with erased;
     eauto with wf;

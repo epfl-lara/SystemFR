@@ -35,16 +35,17 @@ Lemma reducible_values_rec_pos_induction:
       has_polarities (topen 0 Ts (fvar X type_var)) ((X, Positive) :: nil) ->
       reducible_values theta t (T_rec v1 T0 Ts).
 Proof.
-  induction 1; destruct 1 as [ | v1' V1Succ ]; repeat step || t_tlt_sound;
+  induction 1; destruct 1 as [ | v1' V1Succ ]; repeat step || tlt_sound;
     eauto 2 using equivalent_true;
     eauto with values;
     eauto with wf;
     try omega.
 
-  - repeat step || simp_red || t_star_smallstep_from_value;
-       eauto 3 using smallstep_succ_zero with exfalso.
+  - repeat step || simp_red || star_smallstep_value;
+       eauto 3 using smallstep_succ_zero with exfalso;
+       eauto with values.
     left; repeat step || find_exists || apply_any.
-    apply reducibility_subst_head with X;
+    apply reducible_values_subst_head with X;
       repeat step || list_utils || rewrite nat_value_fv in * by assumption;
       eauto 2 with twf;
       eauto 2 with wf.
@@ -57,9 +58,10 @@ Proof.
       eauto using INVSucc;
       eauto with omega.
 
-  - repeat step || simp_red || t_star_smallstep_from_value;
+  - repeat step || simp_red || star_smallstep_value;
       eauto 2 with erased;
-      eauto 3 using smallstep_succ_zero with exfalso.
+      eauto 3 using smallstep_succ_zero with exfalso;
+      eauto with values.
     right; repeat step.
     apply (reducible_rename_one _ _ _ _ _ X) in H23; steps; eauto using reducibility_is_candidate.
     exists v1', X; steps.
@@ -118,5 +120,5 @@ Proof.
   apply reducible_values_rec_backstep with v; t_closer.
   eapply reducible_values_rec_pos_induction; eauto 1; steps;
     eauto using reducible_values_rec_step.
-  eapply equivalent_tlt_steps; eauto 1; steps; eauto with cbvlemmas; eauto with is_nat_value.
+  eapply equivalent_tlt_terms_trans; eauto 1; steps; eauto with cbvlemmas; eauto with is_nat_value.
 Qed.

@@ -12,7 +12,7 @@ Lemma annotated_subtype_generic:
     [[ tvars; (x, A) :: gamma ⊨ fvar x term_var : B ]] ->
     [[ tvars; gamma ⊨ A <: B ]].
 Proof.
-  unfold annotated_reducible, open_reducible, annotated_subtype, subtype;
+  unfold annotated_reducible, open_reducible, annotated_subtype, open_subtype, subtype;
     repeat step.
 
   unshelve epose proof (H2 theta ((x, v) :: l) _ _ _);

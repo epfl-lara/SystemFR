@@ -68,7 +68,7 @@ Proof.
       try solve [ t_closing ];
       eauto 3 using smallstep_succ_zero with exfalso.
 
-  apply reducibility_subst_head in H23;
+  apply reducible_values_subst_head in H23;
     repeat step || t_invert_star || list_utils ||
            (rewrite (is_erased_term_tfv v') in * by eauto with erased);
       eauto with twf wf erased fv values.
@@ -317,7 +317,7 @@ Proof.
     repeat step;
     try finisher.
 
-    apply reducibility_subst_head2;
+    apply reducible_values_subst_head2;
       repeat step || list_utils;
       try finisher;
       eauto with wf twf.
@@ -417,7 +417,7 @@ Proof.
     eauto with erased.
 
   rewrite <- substitute_topen2; steps; eauto with twf.
-  apply reducibility_subst_head2;
+  apply reducible_values_subst_head2;
     repeat step || list_utils || apply reducibility_is_candidate ||
            rewrite fv_subst_different_tag in * by (steps; eauto with fv);
     eauto with fv wf twf erased;

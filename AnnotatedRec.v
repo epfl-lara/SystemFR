@@ -3,7 +3,7 @@ Require Import Coq.Lists.List.
 Require Export SystemFR.ErasedRec.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.Judgments.
-Require Export SystemFR.NatCompareErase.
+Require Export SystemFR.NatLessThanErase.
 
 Lemma annotated_reducible_unfold_z:
   forall tvars gamma t n T0 Ts,
@@ -15,7 +15,7 @@ Lemma annotated_reducible_unfold_z:
     [[ tvars; gamma ⊨ t : T_rec n T0 Ts ]] ->
     [[ tvars; gamma ⊨ tunfold t : T0 ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step.
 
   apply open_reducible_unfold_zero with (erase_type Ts);
@@ -44,7 +44,7 @@ Lemma annotated_reducible_unfold_s:
     [[ tvars; gamma ⊨ t : T_rec n T0 Ts ]] ->
     [[ tvars; gamma ⊨ tunfold t : topen 0 Ts (T_rec (tpred n) T0 Ts) ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step || erase_open.
 
   apply open_reducible_unfold2;
@@ -106,7 +106,7 @@ Lemma annotated_reducible_unfold_in:
          open 0 t2 (fvar y term_var) : T ]] ->
     [[ tvars; gamma ⊨ tunfold_in t1 t2 : T ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step || erase_open.
 
   apply open_reducible_unfold_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 p2 y;
@@ -157,7 +157,7 @@ Lemma annnotated_reducible_unfold_pos_in:
          open 0 t2 (fvar y term_var) : T ]] ->
     [[ tvars; gamma ⊨ tunfold_pos_in t1 t2 : T ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step || erase_open.
 
   apply open_reducible_unfold_pos_in with (erase_term n) (erase_type T0) (erase_type Ts) p1 y;
@@ -197,7 +197,7 @@ Lemma annnotated_reducible_fold:
     [[ tvars; (p, T_equiv n (succ (fvar pn term_var))) :: (pn, T_nat) :: gamma ⊨ t : topen 0 Ts (T_rec (fvar pn term_var) T0 Ts) ]] ->
     [[ tvars; gamma ⊨ tfold (T_rec n T0 Ts) t : T_rec n T0 Ts ]].
 Proof.
-  unfold annotated_reducible, annotated_equivalent, equivalent;
+  unfold annotated_reducible, annotated_equivalent, open_equivalent;
     repeat step || erase_open.
 
   apply open_reducible_fold2 with p pn;

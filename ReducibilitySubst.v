@@ -6,6 +6,9 @@ Require Import Coq.Lists.List.
 
 Require Export SystemFR.ReducibilityUnused.
 Require Export SystemFR.ReducibilityIsCandidate.
+Require Export SystemFR.TOpenTClose.
+Require Export SystemFR.FVLemmasClose.
+Require Export SystemFR.WFLemmasClose.
 
 Require Import PeanoNat.
 Require Import Omega.
@@ -446,7 +449,7 @@ Proof.
   intros; eapply reducibility_subst_aux; eauto.
 Qed.
 
-Lemma reducibility_subst_head:
+Lemma reducible_values_subst_head:
   forall (theta : interpretation) U V X v,
     reducible_values ((X, fun v => reducible_values theta v V) :: theta) v
                      (topen 0 U (fvar X type_var)) ->
@@ -480,7 +483,7 @@ Proof.
       eauto 2 with fv wf erased step_tactic.
 Qed.
 
-Lemma reducibility_subst_head2:
+Lemma reducible_values_subst_head2:
   forall (theta : interpretation) U V X v,
     valid_interpretation theta ->
     (X ∈ pfv U type_var -> False) ->
@@ -513,4 +516,72 @@ Proof.
       try solve [ eapply reducible_unused2; steps; eauto using reducibility_is_candidate ];
       try solve [ eapply reducible_unused3 with X _; steps; eauto using reducibility_is_candidate ];
       eauto 2 with wf fv erased step_tactic.
+Qed.
+
+Lemma reducible_subst_head2:
+  forall (theta : interpretation) U V X t,
+    valid_interpretation theta ->
+    (X ∈ pfv U type_var -> False) ->
+    (X ∈ pfv V type_var -> False) ->
+    is_erased_type U ->
+    wf U 0 ->
+    pfv U term_var = nil ->
+    twf V 0 ->
+    is_erased_type V ->
+    wf V 0 ->
+    pfv V term_var = nil ->
+    reducible theta t (topen 0 U V) ->
+    reducible ((X, fun v => reducible_values theta v V) :: theta) t
+              (topen 0 U (fvar X type_var)).
+Proof.
+  repeat unfold reducible, reduces_to;
+    repeat step;
+      t_closer;
+    eauto using reducible_values_subst_head2.
+Qed.
+
+Lemma reducible_values_subst_head3:
+  forall theta U V X v,
+    valid_interpretation theta ->
+    (X ∈ pfv V type_var -> False) ->
+    is_erased_type U ->
+    wf U 0 ->
+    pfv U term_var = nil ->
+    twf U 0 ->
+    twf V 0 ->
+    is_erased_type V ->
+    wf V 0 ->
+    pfv V term_var = nil ->
+    reducible_values theta v (psubstitute U ((X, V) :: nil) type_var) ->
+    reducible_values ((X, fun v => reducible_values theta v V) :: theta) v U.
+Proof.
+  intros.
+  rewrite <- (topen_tclose2 U X 0);
+    repeat step.
+
+  apply reducible_values_subst_head2;
+    repeat step || fv_close || rewrite topen_tclose || apply fv_close_nil;
+    eauto using is_erased_type_tclose;
+    eauto using wf_tclose.
+Qed.
+
+Lemma reducible_subst_head3:
+  forall theta U V X t,
+    valid_interpretation theta ->
+    (X ∈ pfv V type_var -> False) ->
+    is_erased_type U ->
+    wf U 0 ->
+    pfv U term_var = nil ->
+    twf U 0 ->
+    twf V 0 ->
+    is_erased_type V ->
+    wf V 0 ->
+    pfv V term_var = nil ->
+    reducible theta t (psubstitute U ((X, V) :: nil) type_var) ->
+    reducible ((X, fun v => reducible_values theta v V) :: theta) t U.
+Proof.
+  repeat unfold reducible, reduces_to;
+    repeat step;
+      t_closer;
+    eauto using reducible_values_subst_head3.
 Qed.

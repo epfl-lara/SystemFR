@@ -11,7 +11,7 @@ Lemma open_reducible_equivalent_elim:
     [ tvars; gamma ⊨ t1 : T ] ->
     [ tvars; gamma ⊨ t2 : T ].
 Proof.
-  unfold open_reducible, equivalent; steps.
+  unfold open_reducible, open_equivalent; steps.
   eapply reducibility_equivalent2; eauto; steps;
     eauto with erased fv wf.
 Qed.

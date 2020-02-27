@@ -5,6 +5,12 @@ Require Import Coq.Strings.String.
 (** Lemmas about operational semantics and stuck terms.              **)
 (** At the moment, this file is not used in the rest of the proofs . **)
 
+
+Lemma true_is_irred: irred ttrue.
+Proof.
+  unfold irred; repeat step || no_step.
+Qed.
+
 Lemma star_smallstep_app_inv_irred:
   forall t v,
     star scbv_step t v ->
@@ -220,25 +226,6 @@ Proof.
   induction 1; unfold irred; repeat step || t_invert_step; eauto with exfalso smallstep.
 Qed.
 
-Lemma star_smallstep_rec_inv_irred:
-  forall t v,
-    star scbv_step t v ->
-    irred v ->
-    forall t1 t2 t3,
-      t = notype_rec t1 t2 t3 ->
-      exists v1,
-        irred v1 /\
-        star scbv_step t1 v1 /\
-        star scbv_step (notype_rec v1 t2 t3) v.
-Proof.
-  induction 1; unfold irred; repeat step.
-  - exists t1; steps; eauto with smallstep.
-  - inversion H; repeat step.
-    + exists zero; repeat step || no_step; eauto 2 with star smallstep.
-    + exists (succ v); steps; repeat step || t_invert_step || no_step; eauto 3 with star smallstep.
-    + exists v1; steps; repeat step; eauto 2 with star smallstep.
-Qed.
-
 Lemma star_smallstep_match_inv_irred:
   forall t v,
     star scbv_step t v ->
@@ -331,12 +318,6 @@ Ltac t_invert_irred :=
     (t_not_hyp_irred t1);
     poseNew (Mark H2 "inv app");
     pose proof (star_smallstep_app_inv_irred _ v H2 H1 t1 t2 eq_refl)
-
- | H1: irred ?v,
-    H2: star scbv_step (notype_rec ?t1 ?t2 ?t3) ?v |- _ =>
-    (t_not_hyp_irred t1);
-    poseNew (Mark H2 "inv rec");
-    pose proof (star_smallstep_rec_inv_irred _ v H2 H1 t1 t2 t3 eq_refl)
 
  | H1: irred ?v,
     H2: star scbv_step (tmatch ?t1 ?t2 ?t3) ?v |- _ =>
