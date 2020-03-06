@@ -4,18 +4,10 @@ Require Import Coq.Lists.List.
 Require Export SystemFR.ReducibilityOpenEquivalent.
 Require Export SystemFR.ErasedTypeRefine.
 Require Export SystemFR.ErasedArrow.
+Require Export SystemFR.TypeSugar2.
 
 Opaque reducible_values.
 Opaque makeFresh.
-
-Definition type_application T1 T2 : tree :=
-  T_type_refine T_top (
-    T_exists T1 (
-      T_exists T2 (
-        T_equiv (app (lvar 1 term_var) (lvar 0 term_var)) (lvar 2 term_var)
-      )
-    )
-  ).
 
 Definition closed_subtype theta T1 T2 : Prop :=
   forall v,

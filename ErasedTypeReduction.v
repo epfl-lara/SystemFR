@@ -115,13 +115,10 @@ Proof.
       repeat step || apply_any; t_closer.
 Qed.
 
-Definition singleton t :=
-  T_type_refine T_top (T_equiv (lvar 0 term_var) (shift 0 t 1)).
-
 Lemma sub_singleton_value:
   forall v,
     closed_value v ->
-    sub_singleton [] [] v (singleton v).
+    sub_singleton [] [] v (tsingleton v).
 Proof.
   unfold sub_singleton;
     repeat step || simp_red ||
