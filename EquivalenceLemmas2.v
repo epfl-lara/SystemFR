@@ -13,10 +13,10 @@ Proof.
     eauto using is_erased_term_nat_recognizer, wf_nat_recognizer, fv_nat_recognizer.
 
   unshelve epose proof (H5 _);
-    unfold scbv_normalizing; eauto using eval_nat_recognizer with values;
-    eauto using eq_sym, normalizing_nat_recognizer.
+    repeat step;
+    eauto using eval_nat_recognizer;
+    eauto using true_nat_recognizer, eq_sym.
 Qed.
-
 
 Lemma equivalent_nat:
   forall t v,
@@ -25,16 +25,11 @@ Lemma equivalent_nat:
     star scbv_step t v.
 Proof.
   intros.
-  equivalence_instantiate (lvar 0 term_var); steps.
-  unshelve epose proof (H4 _); unfold scbv_normalizing; steps; eauto with star values.
-  unfold scbv_normalizing in *; repeat step || t_invert_star; eauto with values.
-  unshelve epose proof (equivalent_value_nat v1 v0 _ _ _);
-    repeat step;
-    eauto using equivalent_star, equivalent_trans, equivalent_sym.
-
-  eapply equivalent_trans; eauto.
-  top_level_unfold equivalent_terms; repeat step || destruct_and;
-    eauto using equivalent_star, equivalent_sym.
+  apply_anywhere equivalent_sym.
+  eapply_anywhere equivalent_normalizing; eauto with star values;
+    repeat step.
+  apply_anywhere equivalent_sym.
+  apply_anywhere equivalent_value_nat; steps.
 Qed.
 
 Lemma equivalent_star_nat:

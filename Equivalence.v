@@ -16,7 +16,8 @@ Definition equivalent_terms t1 t2 :=
     is_erased_term C ->
     wf C 1 ->
     pfv C term_var = nil ->
-    scbv_normalizing (open 0 C t1) <-> scbv_normalizing (open 0 C t2).
+      star scbv_step (open 0 C t1) ttrue <->
+      star scbv_step (open 0 C t2) ttrue.
 
 Ltac equivalence_instantiate C :=
   match goal with

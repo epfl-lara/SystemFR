@@ -28,9 +28,13 @@ Lemma equivalent_error:
     equivalent_terms notype_err (substitute t l) ->
     False.
 Proof.
-  repeat step || t_instantiate_sat2 || equivalence_instantiate (lvar 0 term_var) || rewrite r_normalizing_err in *.
+  repeat step || t_instantiate_sat2 ||
+         equivalence_instantiate (app (notype_lambda ttrue) (lvar 0 term_var)).
 
-  unfold reducible, reduces_to, scbv_normalizing, closed_term in *;
-    repeat step;
-    eauto using red_is_val.
+  unshelve epose proof (H7 _);
+    repeat step || t_invert_star || step_inversion cbv_value.
+
+  unfold reducible, reduces_to in *; steps.
+  eapply star_trans;
+    eauto using star_one, scbv_step_same with cbvlemmas values smallstep.
 Qed.
