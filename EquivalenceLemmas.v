@@ -1,5 +1,4 @@
 Require Export SystemFR.Equivalence.
-Require Export SystemFR.LoopingTerm.
 Require Export SystemFR.CBVNormalizingLemmas.
 
 Lemma equivalent_refl:
@@ -29,6 +28,16 @@ Proof.
   - apply H13; auto; apply H12; auto.
 Qed.
 
+Lemma equivalent_square:
+  forall t1 t2 t3 t4,
+    equivalent_terms t1 t3 ->
+    equivalent_terms t1 t2 ->
+    equivalent_terms t3 t4 ->
+    equivalent_terms t2 t4.
+Proof.
+  eauto using equivalent_trans, equivalent_sym.
+Qed.
+
 Lemma equivalent_open:
   forall t1 k1 a1 t2 k2 a2,
     equivalent_terms t1 t2 ->
@@ -48,11 +57,10 @@ Lemma equivalent_star_true:
     star scbv_step t2 ttrue.
 Proof.
   intros.
-  equivalence_instantiate (ite (lvar 0 term_var) uu loop);
+  equivalence_instantiate (ite (lvar 0 term_var) ttrue tfalse);
     unfold scbv_normalizing in *; steps.
-  unshelve epose proof (H3 (ex_intro _ uu _)); repeat step || t_invert_star;
-    eauto using star_trans with smallstep cbvlemmas;
-    eauto using not_star_scbv_step_loop with exfalso.
+  unshelve epose proof (H3 _); repeat step || t_invert_star;
+    eauto using star_trans with smallstep cbvlemmas.
 Qed.
 
 Lemma equivalent_true:
@@ -88,11 +96,10 @@ Lemma equivalent_star_false:
     star scbv_step t2 tfalse.
 Proof.
   intros.
-  equivalence_instantiate (ite (lvar 0 term_var) loop uu);
+  equivalence_instantiate (ite (lvar 0 term_var) tfalse ttrue);
     unfold scbv_normalizing in *; steps.
-  unshelve epose proof (H3 (ex_intro _ uu _)); repeat step || t_invert_star;
-    eauto using star_trans with smallstep cbvlemmas;
-    eauto using not_star_scbv_step_loop with exfalso.
+  unshelve epose proof (H3 _); repeat step || t_invert_star;
+    eauto using star_trans with smallstep cbvlemmas.
 Qed.
 
 Lemma equivalent_false:
@@ -131,65 +138,55 @@ Proof.
     repeat step.
 
   - (* zero *)
-    equivalence_instantiate (tmatch (lvar 0 term_var) uu uu); steps.
+    equivalence_instantiate (tmatch (lvar 0 term_var) ttrue ttrue); steps.
     unshelve epose proof (H4 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
+      repeat step || t_invert_star;
+      eauto using star_one, scbv_step_same with smallstep values.
 
   - (* succ *)
-    equivalence_instantiate (tmatch (lvar 0 term_var) uu uu); steps.
+    equivalence_instantiate (tmatch (lvar 0 term_var) ttrue ttrue); steps.
     unshelve epose proof (H5 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
+      repeat step || t_invert_star;
+      eauto using star_one, scbv_step_same with smallstep values.
 
   - (* false *)
-    equivalence_instantiate (ite (lvar 0 term_var) uu uu); steps.
+    equivalence_instantiate (ite (lvar 0 term_var) ttrue ttrue); steps.
     unshelve epose proof (H4 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
+      repeat step || t_invert_star;
+      eauto using star_one, scbv_step_same with smallstep values.
 
   - (* true *)
-    equivalence_instantiate (ite (lvar 0 term_var) uu uu); steps.
+    equivalence_instantiate (ite (lvar 0 term_var) ttrue ttrue); steps.
     unshelve epose proof (H4 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
+      repeat step || t_invert_star;
+      eauto using star_one, scbv_step_same with smallstep values.
 
   - (* pair *)
-    equivalence_instantiate (pi1 (lvar 0 term_var)); steps.
+    equivalence_instantiate (app (notype_lambda ttrue) (pi1 (lvar 0 term_var))); steps.
     unshelve epose proof (H6 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
+      repeat step || t_invert_star.
+
+    eapply star_trans;
+      eauto using scbv_step_same, star_one with smallstep cbvlemmas values.
 
   - (* lambda *)
-    equivalence_instantiate (ite (boolean_recognizer 2 (lvar 0 term_var)) uu loop);
-      repeat step || rewrite open_loop in *; eauto using wf_loop.
+    equivalence_instantiate (ite (boolean_recognizer 2 (lvar 0 term_var)) ttrue tfalse);
+      repeat step.
     unshelve epose proof (H4 _).
-    + eapply scbv_normalizing_back; eauto with smallstep; steps.
-      eapply scbv_normalizing_back; eauto with smallstep; steps.
-      unfold scbv_normalizing; steps; eauto with star values.
-
-    + top_level_unfold scbv_normalizing; steps.
-      force_invert (@star tree); repeat step || step_inversion cbv_value || step_inversion scbv_step.
-      force_invert scbv_step; repeat step || t_invert_star;
-        eauto using not_star_scbv_step_loop with exfalso.
+    + eapply star_trans;
+        eauto using scbv_step_same, star_one with smallstep cbvlemmas values.
+    + repeat step || t_invert_star.
+      inversion H8; repeat step || t_invert_star.
 
   - (* left *)
-    equivalence_instantiate (sum_match (lvar 0 term_var) uu uu); steps.
+    equivalence_instantiate (sum_match (lvar 0 term_var) ttrue ttrue); steps.
     unshelve epose proof (H5 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
+      repeat step || t_invert_star;
+      eauto using star_one, scbv_step_same with smallstep values.
 
   - (* right *)
-    equivalence_instantiate (sum_match (lvar 0 term_var) uu uu); steps.
+    equivalence_instantiate (sum_match (lvar 0 term_var) ttrue ttrue); steps.
     unshelve epose proof (H5 _);
-      try solve [ one_step_normalizing ];
-      try solve [ not_normalizing ].
-Qed.
-
-Lemma value_normalizing:
-  forall v,
-    cbv_value v ->
-    scbv_normalizing v.
-Proof.
-  unfold scbv_normalizing; eauto with star.
+      repeat step || t_invert_star;
+      eauto using star_one, scbv_step_same with smallstep values.
 Qed.

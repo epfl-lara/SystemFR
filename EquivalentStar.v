@@ -669,11 +669,23 @@ Lemma term_lift_inter_reducible_equivalent:
 Proof.
   unfold equivalent_terms;
     steps;
-    eauto with erased wf fv;
-    try solve [ eapply term_lift_inter_reducible_normalizing; eauto with wf fv erased;
-      eauto using term_lift_inter_reducible_open, term_lift_refl,
-                  term_lift_sym, inter_reducible_sym
-    ].
+    eauto with erased wf fv.
+
+  - unshelve epose proof (term_lift_inter_reducible_star _ _ H9 (open 0 C t2) _ _ _ _ _);
+      repeat step;
+      eauto with wf erased;
+      eauto using term_lift_inter_reducible_open, term_lift_refl.
+
+    term_lift_inter_reducible_value; steps; eauto using inter_reducible_sym, term_lift_sym.
+    apply_anywhere term_lift_inter_reducible_true; steps; eauto using star_trans.
+
+  - unshelve epose proof (term_lift_inter_reducible_star _ _ H9 (open 0 C t1) _ _ _ _ _);
+      repeat step;
+      eauto with wf erased;
+      eauto using term_lift_inter_reducible_open, term_lift_refl, term_lift_sym, inter_reducible_sym.
+
+    term_lift_inter_reducible_value; steps; eauto using inter_reducible_sym, term_lift_sym.
+    apply_anywhere term_lift_inter_reducible_true; steps; eauto using star_trans.
 Qed.
 
 Lemma equivalent_star:
@@ -684,13 +696,11 @@ Lemma equivalent_star:
     star scbv_step t1 t2 ->
     equivalent_terms t1 t2.
 Proof.
-  unfold equivalent_terms;
-    steps;
-    eauto with erased wf fv;
-    try solve [ eapply term_lift_inter_reducible_normalizing; eauto with wf fv erased;
-      eauto 6 using term_lift_inter_reducible_open, term_lift_refl, star_lift_inter_reducible,
-                  term_lift_sym, inter_reducible_sym with erased
-    ].
+  intros.
+  apply term_lift_inter_reducible_equivalent; steps; eauto with wf erased fv.
+  constructor.
+  unfold inter_reducible;
+    repeat step; eauto with wf erased.
 Qed.
 
 Ltac equivalent_star :=
@@ -709,3 +719,66 @@ Proof.
   induction 1;
     repeat step || unfold inter_reducible in * || rewrite type_nodes_term in * by auto.
 Qed.
+
+Lemma equivalent_normalizing:
+  forall t1 t2 v1,
+   equivalent_terms t1 t2 ->
+   star scbv_step t1 v1 ->
+   cbv_value v1 ->
+   exists v2,
+     equivalent_terms v1 v2 /\
+     star scbv_step t2 v2 /\
+     cbv_value v2
+.
+Proof.
+  intros.
+  equivalence_instantiate (app (notype_lambda ttrue) (lvar 0 term_var));
+    steps.
+
+  unshelve epose proof (H4 _);
+    eauto 6 using star_one, scbv_step_same, star_trans with values smallstep cbvlemmas;
+    repeat step || t_invert_star.
+
+  eexists; steps; try eassumption.
+
+  eapply equivalent_square; eauto;
+    try solve [ equivalent_star ].
+Qed.
+
+Ltac equivalent_normalizing :=
+  match goal with
+  | H1: equivalent_terms ?t1 ?t2,
+    H2: star scbv_step ?t1 ?v1 |- _ =>
+    poseNew (Mark (H1, H2) "equivalent_normalizing");
+    unshelve epose proof (equivalent_normalizing _ _ _ H1 H2 _)
+  end.
+
+Lemma equivalent_value:
+  forall t v,
+   equivalent_terms t v ->
+   cbv_value v ->
+   exists v',
+     equivalent_terms v' v /\
+     star scbv_step t v' /\
+     cbv_value v'
+.
+Proof.
+  intros.
+  unshelve epose proof (equivalent_normalizing v t v _ _ H0);
+    repeat step;
+    eauto using equivalent_sym.
+Qed.
+
+Ltac equivalent_value :=
+  match goal with
+  | H: equivalent_terms ?t ?v |- _ =>
+    cbv_value v;
+    not_cbv_value t;
+    poseNew (Mark (t, v) "equivalent_value");
+    unshelve epose proof (equivalent_value _ _ H _)
+  | H: equivalent_terms ?v ?t |- _ =>
+    cbv_value v;
+    not_cbv_value t;
+    poseNew (Mark (t, v) "equivalent_value");
+    unshelve epose proof (equivalent_value t v _ _)
+  end.

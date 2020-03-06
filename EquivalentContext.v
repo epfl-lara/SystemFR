@@ -223,23 +223,17 @@ Lemma equivalent_value_pair:
       v' = pp v1' v2'.
 Proof.
   intros.
-  equivalence_instantiate (pi1 (lvar 0 term_var)); steps.
-  unshelve epose proof (H5 _);
-    repeat step.
-  - eapply scbv_normalizing_back; eauto with smallstep;
-      eauto using value_normalizing.
-  - unfold scbv_normalizing in H4; repeat step || t_invert_star.
-    eexists; eexists; steps.
-    + unshelve epose proof (equivalent_context (pi1 (lvar 0 term_var)) _ _ _ _ _ H);
-        steps.
-      apply equivalent_trans with (pi1 (pp v1 v2)).
-      * apply equivalent_sym; equivalent_star.
-      * eapply equivalent_trans; eauto; equivalent_star.
-    + unshelve epose proof (equivalent_context (pi2 (lvar 0 term_var)) _ _ _ _ _ H);
-        steps.
-      apply equivalent_trans with (pi2 (pp v1 v2)).
-      * apply equivalent_sym; equivalent_star.
-      * eapply equivalent_trans; eauto; equivalent_star.
+  unshelve epose proof (equivalent_context (pi1 (lvar 0 term_var)) _ _ _ _ _ H) as HH1;
+    steps.
+  unshelve epose proof (equivalent_context (pi2 (lvar 0 term_var)) _ _ _ _ _ H) as HH2;
+    steps.
+  eapply equivalent_normalizing in HH1;
+    eauto using star_one with smallstep;
+    repeat step || t_invert_star.
+  eapply equivalent_normalizing in HH2;
+    eauto using star_one with smallstep;
+    repeat step || t_invert_star;
+    eauto with step_tactic.
 Qed.
 
 Lemma equivalent_value_left:
@@ -253,24 +247,13 @@ Lemma equivalent_value_left:
       v' = tleft v''.
 Proof.
   intros.
-  equivalence_instantiate (sum_match (lvar 0 term_var) uu loop);
-    repeat step || rewrite open_loop in *;
-    eauto using wf_loop.
-  unshelve epose proof (H4 _); steps;
-    try solve [ one_step_normalizing ].
-  unfold scbv_normalizing in H3;
-    repeat step || t_invert_star || step_inversion cbv_value || rewrite open_loop in *;
-    eauto with values;
-    eauto using not_star_scbv_step_loop with exfalso.
-
-  eexists; steps.
-  equivalent_context (sum_match (lvar 0 term_var) (lvar 0 term_var) uu) (tleft v) (tleft v'0);
+  unshelve epose proof (equivalent_context (sum_match (lvar 0 term_var) (lvar 0 term_var) notype_err)
+    _ _ _ _ _ H) as HH1;
     steps.
-  apply equivalent_trans with (sum_match (tleft v) (lvar 0 term_var) uu).
-  - apply equivalent_sym; equivalent_star;
-      eauto using star_one, scbv_step_same with smallstep.
-  - eapply equivalent_trans; eauto; equivalent_star;
-      eauto using star_one, scbv_step_same with smallstep.
+  unshelve epose proof (equivalent_normalizing _ _ v HH1 _ _);
+    eauto using scbv_step_same, star_one with smallstep;
+    repeat step || t_invert_star || step_inversion cbv_value;
+    try solve [ eexists; steps ].
 Qed.
 
 Lemma equivalent_value_right:
@@ -284,22 +267,11 @@ Lemma equivalent_value_right:
       v' = tright v''.
 Proof.
   intros.
-  equivalence_instantiate (sum_match (lvar 0 term_var) loop uu);
-    repeat step || rewrite open_loop in *;
-    eauto using wf_loop.
-  unshelve epose proof (H4 _); steps;
-    try solve [ one_step_normalizing ].
-  unfold scbv_normalizing in H3;
-    repeat step || t_invert_star || step_inversion cbv_value || rewrite open_loop in *;
-    eauto with values;
-    eauto using not_star_scbv_step_loop with exfalso.
-
-  eexists; steps.
-  equivalent_context (sum_match (lvar 0 term_var) uu (lvar 0 term_var)) (tright v) (tright v'0);
+  unshelve epose proof (equivalent_context (sum_match (lvar 0 term_var) notype_err (lvar 0 term_var))
+    _ _ _ _ _ H) as HH1;
     steps.
-  apply equivalent_trans with (sum_match (tright v) uu (lvar 0 term_var)).
-  - apply equivalent_sym; equivalent_star;
-      eauto using star_one, scbv_step_same with smallstep.
-  - eapply equivalent_trans; eauto; equivalent_star;
-      eauto using star_one, scbv_step_same with smallstep.
+  unshelve epose proof (equivalent_normalizing _ _ v HH1 _ _);
+    eauto using scbv_step_same, star_one with smallstep;
+    repeat step || t_invert_star || step_inversion cbv_value;
+    try solve [ eexists; steps ].
 Qed.

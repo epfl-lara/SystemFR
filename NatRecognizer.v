@@ -4,9 +4,9 @@ Opaque loop.
 
 Fixpoint nat_recognizer (v: tree): tree :=
   match v with
-  | zero => tmatch (lvar 0 term_var) uu loop
-  | succ v' => tmatch (lvar 0 term_var) loop (nat_recognizer v')
-  | _ => uu
+  | zero => tmatch (lvar 0 term_var) ttrue tfalse
+  | succ v' => tmatch (lvar 0 term_var) tfalse (nat_recognizer v')
+  | _ => tfalse
   end.
 
 Lemma is_erased_term_nat_recognizer:
@@ -33,7 +33,7 @@ Qed.
 Lemma eval_nat_recognizer:
   forall v,
     is_nat_value v ->
-    star scbv_step (open 0 (nat_recognizer v) v) uu.
+    star scbv_step (open 0 (nat_recognizer v) v) ttrue.
 Proof.
   induction 1;
     repeat step; eauto using star_one with smallstep.
@@ -42,26 +42,19 @@ Proof.
   rewrite (open_none _ 1); eauto using wf_nat_recognizer.
 Qed.
 
-Lemma normalizing_nat_recognizer:
+Lemma true_nat_recognizer:
   forall v,
     is_nat_value v ->
     forall v',
       cbv_value v' ->
-      scbv_normalizing (open 0 (nat_recognizer v) v') ->
+      star scbv_step (open 0 (nat_recognizer v) v') ttrue ->
       v = v'
 .
 Proof.
   induction 1;
-    repeat step; eauto using star_one with smallstep.
+    repeat step || t_invert_star;
+    eauto using star_one with smallstep.
 
-  - unfold scbv_normalizing in *; repeat step || t_invert_star || rewrite open_loop in *;
-      eauto using not_star_scbv_step_loop with exfalso.
-
-  - unfold scbv_normalizing in *;
-      repeat step || t_invert_star || rewrite open_loop in *;
-      eauto using not_star_scbv_step_loop with exfalso.
-
-    clear_marked.
-    rewrite (open_none _ 1) in H7 by eauto using wf_nat_recognizer.
-    unshelve epose proof (IHis_nat_value v'0 _ _); steps; eauto.
+  rewrite (open_none _ 1) in H6 by eauto using wf_nat_recognizer.
+  eauto using f_equal.
 Qed.

@@ -5,6 +5,14 @@ Require Export SystemFR.ListUtils.
 Definition scbv_normalizing t: Prop :=
   exists v, cbv_value v /\ star scbv_step t v.
 
+Lemma value_normalizing:
+  forall v,
+    cbv_value v ->
+    scbv_normalizing v.
+Proof.
+  unfold scbv_normalizing; eauto with star.
+Qed.
+
 Definition irred t :=
   forall t', ~scbv_step t t'.
 
