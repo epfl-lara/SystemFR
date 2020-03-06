@@ -20,8 +20,26 @@ Definition List : tree :=
 Definition tnil := tleft uu.
 Definition Nil := tsingleton tnil.
 
+Definition Var x := tsingleton (fvar x term_var).
+
 Definition tcons h t := tright (pp h t).
 Definition Cons H T :=
   T_exists H (T_exists T (
     tsingleton (tcons (lvar 1 term_var) (lvar 0 term_var))
   )).
+
+Definition Match T1 T2 T3 :=
+  T_exists T1 (
+    T_union
+      (T_type_refine T2 (T_equiv (lvar 1 term_var) (tleft uu)))
+      (T_exists T_top (
+        (T_exists List (
+          (T_type_refine
+            (shift 0 T3 1)
+            (T_equiv
+               (lvar 3 term_var)
+               (tright (pp (lvar 2 term_var) (lvar 1 term_var))))
+          )
+        ))
+      ))
+  ).
