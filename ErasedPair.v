@@ -137,6 +137,20 @@ Proof.
     eauto using reducible_values_pi2.
 Qed.
 
+Lemma reducible_pi2_nodep:
+  forall theta U V t,
+    valid_interpretation theta ->
+    is_erased_type V ->
+    wf V 0 ->
+    pfv V term_var = nil ->
+    reducible theta t (T_prod U V) ->
+    reducible theta (pi2 t) V.
+Proof.
+  intros.
+  unshelve epose proof (reducible_pi2 theta U V t _ _ _ _ _); repeat step || open_none;
+    eauto with wf.
+Qed.
+
 Lemma open_reducible_pi2:
   forall tvars gamma U V t,
     is_erased_type V ->

@@ -37,6 +37,8 @@ Ltac open_none :=
   match goal with
   | H: _ |- _ => rewrite open_none in H by eauto with wf
   | H: _ |- _ => rewrite (open_none _ 1) in H by eauto with wf
+  | _ => rewrite open_none by eauto with wf
+  | _ => rewrite (open_none _ 1) by eauto with wf
   end.
 
 Lemma wfs_monotone:

@@ -138,6 +138,29 @@ Proof.
   repeat step || is_nat_value_buildable || apply nat_eq_complete.
 Qed.
 
+Lemma nat_eq_bool:
+  forall v1, is_nat_value v1 ->
+    forall v2, is_nat_value v2 ->
+      star scbv_step (nat_eq v1 v2) ttrue \/
+      star scbv_step (nat_eq v1 v2) tfalse.
+Proof.
+  induction 1; inversion 1;
+    repeat step;
+    eauto using nat_eq_complete2.
+
+  - right. unfold nat_eq, nat_eq_fix.
+    repeat one_step.
+
+  - right. unfold nat_eq, nat_eq_fix.
+    repeat one_step.
+
+  - instantiate_any; steps.
+    + left. unfold nat_eq, nat_eq_fix.
+      repeat one_step.
+    + right. unfold nat_eq, nat_eq_fix.
+      repeat one_step.
+Qed.
+
 Lemma equivalent_nat_eq_terms:
   forall t1 t2 v1 v2,
     is_erased_term t1 ->
