@@ -41,7 +41,7 @@ Proof.
     eauto with wf;
     try omega.
 
-  - repeat step || simp_red || star_smallstep_value;
+  - repeat step || simp_red_goal ||  simp_red_top_level_hyp || star_smallstep_value;
        eauto 3 using smallstep_succ_zero with exfalso;
        eauto with values.
     left; repeat step || find_exists || apply_any.
@@ -56,9 +56,10 @@ Proof.
     apply IHis_nat_value with X; repeat step || apply equivalent_star || apply tlt_complete2;
       eauto with wf fv;
       eauto using INVSucc;
-      eauto with omega.
+      eauto with omega;
+      t_closer.
 
-  - repeat step || simp_red || star_smallstep_value;
+  - repeat step || simp_red_goal ||  simp_red_top_level_hyp || star_smallstep_value;
       eauto 2 with erased;
       eauto 3 using smallstep_succ_zero with exfalso;
       eauto with values.
