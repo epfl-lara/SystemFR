@@ -40,8 +40,8 @@ Proof.
     eauto with wf.
 
   apply reducibility_equivalent2 with (open 0 (open 1 ts zero) v);
-    repeat step || apply equivalent_context || apply_any || simp_red ||
-           rewrite open_tlt in * ||
+    repeat step || apply equivalent_context || simp_red_goal || simp_red_top_level_hyp ||
+           rewrite open_tlt in * || apply_any ||
            rewrite (open_none ts) by (steps; unshelve eauto with wf; auto);
     try solve [ apply equivalent_sym; equivalent_star ];
     eauto 2 with wf fv erased step_tactic;
@@ -84,14 +84,14 @@ Lemma reducible_fix_strong_induction_aux:
          (open 0 T n)) ->
     reducible theta (notype_tfix ts) (open 0 T v).
 Proof.
-  induction n; repeat step || simp_red; try omega;
+  induction n; repeat step || simp_red_goal || simp_red_top_level_hyp; try omega;
     eapply backstep_reducible;
       repeat step || list_utils;
       eauto using scbv_step_fix_open;
       eauto with wf.
 
   apply reducibility_equivalent2 with (open 0 (open 1 ts zero) tsv);
-    repeat step || apply equivalent_context || apply_any || simp_red ||
+    repeat step || apply equivalent_context || apply_any || simp_red_goal || simp_red_top_level_hyp ||
            rewrite open_tlt in * ||
            rewrite (open_none ts) by (steps; unshelve eauto with wf; auto);
     try solve [ apply equivalent_sym; equivalent_star ];
@@ -106,7 +106,7 @@ Proof.
       eauto 2 with wf fv erased step_tactic.
 
     apply IHn with tsv;
-      repeat step || simp_red || rewrite open_tlt in * || tlt_sound ||
+      repeat step || simp_red_goal || simp_red_top_level_hyp || rewrite open_tlt in * || tlt_sound ||
       rewrite open_none in * by t_closer;
       try solve [ unshelve t_closer; auto ];
       try omega.
@@ -163,7 +163,7 @@ Proof.
   apply reducible_forall with (open 0 T zero); steps;
     eauto using reducible_fix_zero.
 
-  eapply reducible_fix_strong_induction; repeat step || simp_red;
+  eapply reducible_fix_strong_induction; repeat step || simp_red_goal || simp_red_top_level_hyp;
    eauto with fv wf.
 Qed.
 
@@ -234,7 +234,7 @@ Proof.
     eauto 2 with wf;
     eauto 2 with twf.
 
-  - repeat step || simp_red || t_substitutions.
+  - repeat step || t_substitutions || simp_red_goal.
   - repeat step || rewrite psubstitute_tlt in * || (rewrite substitute_shift in * by eauto 2 with wf step_tactic) || t_substitutions.
   - repeat step || t_substitutions || nodup.
 Qed.

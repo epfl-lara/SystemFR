@@ -260,8 +260,7 @@ Proof.
            | _ => step || simp_red
            end; eauto with values.
 
-  eexists; steps; eauto with cbvlemmas.
-  repeat step || simp_red; t_closer.
+  eexists; steps; eauto with cbvlemmas; t_closer.
 
   right.
   unshelve eexists v0, (makeFresh (pfv n type_var :: pfv v0 type_var :: pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _;
@@ -392,7 +391,7 @@ Proof.
            | _ => step || simp_red
            end; eauto with values.
 
-  eexists; steps; eauto with cbvlemmas.
+  eexists; steps; eauto with cbvlemmas; t_closer.
   repeat step || simp_red; t_closer; eauto with star.
 Qed.
 

@@ -45,7 +45,7 @@ Proof.
 
   repeat unfold reduces_to in *; steps; t_closer.
 
-  unshelve epose proof (H18 a _ _ _ _); repeat step || open_none.
+  unshelve epose proof (H13 a _ _ _ _); repeat step || open_none.
   exists v; repeat step || simp_red.
 Qed.
 

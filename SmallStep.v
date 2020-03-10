@@ -388,3 +388,23 @@ Definition closed_term t :=
 Definition closed_value v :=
   closed_term v /\
   cbv_value v.
+
+Lemma cbv_value_open:
+  forall v k rep,
+    cbv_value v ->
+    cbv_value (open k v rep).
+Proof.
+  induction 1;
+    repeat step;
+    eauto with values.
+Qed.
+
+Lemma cbv_value_subst:
+  forall v l tag,
+    cbv_value v ->
+    cbv_value (psubstitute v l tag).
+Proof.
+  induction 1;
+    repeat step;
+    eauto with values.
+Qed.

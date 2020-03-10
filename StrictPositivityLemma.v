@@ -139,18 +139,23 @@ Lemma sp_push_forall_arrow:
     prop_at sp_push_forall_prop m (T_arrow T1 T2).
 Proof.
   unfold prop_at; intros; unfold sp_push_forall_prop; intros; instantiate_non_empty;
-    repeat step || simp_red || simp_spos || list_utils || t_instantiate_reducible || t_instantiate_reducible2 ||
+    repeat step || simp_red || simp_spos || list_utils ||
+           t_instantiate_reducible || t_instantiate_reducible2 ||
            unfold reduces_to in *;
     eauto 2 using reducible_unused_many_push_one.
 
   eexists; steps; try eassumption.
 
   apply sp_push_forall_prop_inst with pre_theta A;
-    repeat step || apply strictly_positive_open || t_instantiate_reducible || t_instantiate_reducible2 || simp_red;
+    repeat step || apply strictly_positive_open ||
+           t_instantiate_reducible || t_instantiate_reducible2 || simp_red;
     eauto with prop_until;
     eauto with wf twf erased fv;
-    eauto 2 using reducible_unused_many_push_one;
-    try solve [ eapply reduces_to_value; eauto using red_is_val with b_valid_interp ].
+    eauto 2 using reducible_unused_many_push_one.
+
+  eapply reduces_to_value; eauto using red_is_val with b_valid_interp.
+  unfold reduces_to; steps.
+  exists v1; steps.
 Qed.
 
 Hint Immediate sp_push_forall_arrow: b_push.
