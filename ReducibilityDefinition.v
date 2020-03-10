@@ -199,6 +199,7 @@ Proof.
 Qed.
 
 Ltac simp_red :=
+  repeat (
   rewrite reducible_values_equation_1 in * ||
   rewrite reducible_values_equation_2 in * ||
   rewrite reducible_values_equation_3 in * ||
@@ -253,7 +254,8 @@ Ltac simp_red :=
   rewrite reducible_values_equation_52 in * ||
   rewrite reducible_values_equation_53 in * ||
   rewrite reducible_values_equation_54 in * ||
-  rewrite reducible_values_equation_55 in *.
+  rewrite reducible_values_equation_55 in *
+  ).
 
 Ltac simp_red_goal :=
   rewrite reducible_values_equation_1 in |- * ||

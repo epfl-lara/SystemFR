@@ -49,6 +49,7 @@ Solve All Obligations with (repeat step || autorewrite with bsize in *; try omeg
 Fail Next Obligation.
 
 Ltac simp_spos :=
+  repeat (
   rewrite strictly_positive_equation_1 in * ||
   rewrite strictly_positive_equation_2 in * ||
   rewrite strictly_positive_equation_3 in * ||
@@ -103,4 +104,5 @@ Ltac simp_spos :=
   rewrite strictly_positive_equation_52 in * ||
   rewrite strictly_positive_equation_53 in * ||
   rewrite strictly_positive_equation_54 in * ||
-  rewrite strictly_positive_equation_55 in *.
+  rewrite strictly_positive_equation_55 in *
+  ).
