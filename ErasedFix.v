@@ -167,26 +167,6 @@ Proof.
    eauto with fv wf.
 Qed.
 
-Lemma cbv_value_open:
-  forall v k rep,
-    cbv_value v ->
-    cbv_value (open k v rep).
-Proof.
-  induction 1;
-    repeat step;
-    eauto with values.
-Qed.
-
-Lemma cbv_value_subst:
-  forall v l tag,
-    cbv_value v ->
-    cbv_value (psubstitute v l tag).
-Proof.
-  induction 1;
-    repeat step;
-    eauto with values.
-Qed.
-
 Lemma open_reducible_fix_strong_induction:
   forall tvars ts gamma T n y p,
     wf T 1 ->

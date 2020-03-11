@@ -4,7 +4,6 @@ Require Import Equations.Equations.
 
 Require Export SystemFR.TermList.
 Require Export SystemFR.SizeLemmas.
-Require Export SystemFR.SmallStepSubstitutions.
 Require Export SystemFR.StarLemmas.
 Require Export SystemFR.StarInversions.
 Require Export SystemFR.ErasedTermLemmas.
@@ -305,6 +304,12 @@ Ltac guess_red :=
     exists t2
   end.
 
+Fixpoint are_values (l: list (nat * tree)) :=
+  match l with
+  | nil => True
+  | (x,v) :: l' => cbv_value v /\ are_values l'
+  end.
+
 Lemma reducible_values_list:
   forall theta l gamma,
     valid_interpretation theta ->
@@ -363,14 +368,6 @@ Proof.
     eauto with star;
     eauto with erased.
 Qed.
-
-Ltac t_values_info3 :=
-  match goal with
-  | H: cbv_value ?v, H2: satisfies _ _ ?l |- _ =>
-    is_var v;
-    poseNew (Mark (v,l) "cbv_value_subst");
-    unshelve epose proof (cbv_value_subst _ H l _); eauto 2 using reducible_values_list
-  end.
 
 Lemma reduces_to_value:
   forall theta T t v,

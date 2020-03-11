@@ -1,7 +1,6 @@
 Require Export SystemFR.CBVNormalizingLemmas.
 Require Export SystemFR.FVLemmasEval.
 Require Export SystemFR.WFLemmasEval.
-Require Export SystemFR.SmallStepSubstitutions.
 Require Export SystemFR.RewriteTactics.
 Require Export SystemFR.EqualWithRelation.
 Require Export SystemFR.TermLift.
