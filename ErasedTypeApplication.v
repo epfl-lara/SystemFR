@@ -77,7 +77,7 @@ Proof.
   - repeat rewrite open_none by t_closer.
 
     apply reducible_value_expr;
-      repeat step || simp_red;
+      repeat step || simp_red_top_level_goal;
       t_closer.
 
     unfold reducible, reduces_to in *; steps.
@@ -113,7 +113,7 @@ Lemma open_reducible_type_application:
     [ tvars; gamma ⊨ C <: A ] ->
     [ tvars; gamma ⊨ app f t : type_application (T_arrow A B) C ].
 Proof.
-  unfold open_reducible, subtype.
+  unfold open_reducible, open_subtype, subtype.
   intros.
   unfold substitute; steps.
   apply reducible_type_application;
