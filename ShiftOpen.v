@@ -236,6 +236,17 @@ Qed.
 
 Hint Resolve wf_shift_open: wf.
 
+Lemma wf_shift_open2:
+  forall t k i rep,
+    i >= k ->
+    wf t (S k) ->
+    wf rep i ->
+    wf (shift_open k t rep) i.
+Proof.
+  induction t;
+    try solve [ repeat step; eauto with wf lia ].
+Qed.
+
 Lemma pfv_shift:
   forall t k i tag,
     pfv t tag = nil ->

@@ -91,7 +91,7 @@ Lemma open_subtype_type_application:
     [ tvars; gamma ⊨ C <: A ] ->
     [ tvars; gamma ⊨ type_application (T_arrow A B) C <: open 0 B c ].
 Proof.
-  unfold subtype;
+  unfold open_subtype, subtype;
     repeat step || simp_red ||
            (rewrite open_none in * by eauto with wf) ||
            (rewrite (open_none v) in * by t_closer) ||

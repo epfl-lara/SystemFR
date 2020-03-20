@@ -43,3 +43,46 @@ Definition Match T1 T2 T3 :=
         ))
       ))
   ).
+
+
+(*
+default: T
+def f: T = t[f]
+
+
+def f'(fuel): T =
+  if fuel == 0
+  then default
+  else t[f -> f'(fuel - 1)]
+
+val f = f'(globalFuel)
+
+*)
+
+Parameter globalFuel: tree.
+
+Definition fix_default t default : tree :=
+  app
+    (notype_lambda (app (lvar 0 term_var) globalFuel))
+    (notype_tfix (
+      notype_lambda (              (* fuel *)
+        tmatch (lvar 0 term_var)   (* fuel *)
+          default
+          (shift_open 0 t
+            (app (lvar 2 term_var) (lvar 0 term_var))
+          )
+        )
+      )
+    ).
+
+Lemma wf_fix_default:
+  forall default t,
+    wf globalFuel 0 ->
+    wf t 1 ->
+    wf default 0 ->
+    wf (fix_default t default) 0.
+Proof.
+  unfold fix_default;
+    repeat step;
+    eauto using wf_shift_open2 with wf step_tactic.
+Qed.
