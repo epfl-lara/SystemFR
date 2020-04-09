@@ -230,16 +230,19 @@ Notation "'size' ( t )" := (fun fv_id => (tsize (t fv_id))) (in custom expr,
 
 Notation "t '._1'" := (fun fv_id => (pi1 (t fv_id))) (in custom expr at level 200,
                                   t custom expr).
+
+
 Notation "t '._2'" := (fun fv_id => (pi2 (t fv_id))) (in custom expr at level 200,
                                   t custom expr).
 
 (* Booleans *)
-Notation "'true'" := (⤳ttrue) (in custom expr).
-Notation "'false'" := (⤳tfalse) (in custom expr).
+Notation "'t_true'" := (⤳ttrue) (in custom expr).
+Notation "'t_false'" := (⤳tfalse) (in custom expr).
 Notation "'if' c 'then' t 'else' f" := (fun fv_id => (ite (c fv_id) (t fv_id) (f fv_id))) (in custom expr at level 1,
                                                        c custom expr,
                                                        t custom expr,
                                                        f custom expr).
+
 
 (* Naturals *)
 Notation "'1'" := (⤳ (succ zero)) (in custom expr).
@@ -339,6 +342,7 @@ Notation "'match' t 'with' '|' 'left' l => t1 '|' 'right' r => t2 'end'" :=
 Eval compute in [| fun f x => x |].
 
 Eval compute in [| fun f x => fun g y => x |].
+
 
 
 
