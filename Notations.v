@@ -13,9 +13,9 @@ Notation "'⤳' t" := (fun (fv_id:nat) => t) (at level 100).
 Notation "[| x |]" := (x 0) (x custom expr).
 Notation "[|| x ||]" := (x 0) (x custom type).
 Notation "( x )" := (fun (fv_id:nat) => (x fv_id)) (in custom expr, x custom expr).
-Notation "x" := (fun fv_id => x) (in custom expr at level 0, x ident). 
+Notation "x" := (⤳ x) (in custom expr at level 0, x ident). 
 Notation "( x )" := (fun (fv_id:nat) => (x fv_id)) (in custom type, x custom type).
-Notation "x" := (fun fv_id => x) (in custom type at level 0, x ident). 
+Notation "x" := (⤳ x) (in custom type at level 0, x ident). 
 
 (* Variables (nameless) *)
 Notation "'ft{' v '}'" := (⤳ (fvar v term_var)) (in custom expr, v constr).
@@ -210,7 +210,7 @@ Notation "'def_rec' f x y => t":=
 
 Notation " t1 t2 " :=
   (fun fv_id => (app (t1 fv_id) (t2 fv_id)))
-    (in custom expr at level 200, right associativity,
+    (in custom expr at level 200, left associativity,
         t1 custom expr,
         t2 custom expr).
 

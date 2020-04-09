@@ -2,6 +2,7 @@ Require Export SystemFR.Trees.
 Require Export SystemFR.Syntax.
 Require Export SystemFR.Freshness.
 Require Import SystemFR.Notations.
+Require Export SystemFR.PrimitiveSize.
 
 Fixpoint isValue (t: tree) : bool :=
   match t with
@@ -43,20 +44,28 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
     | pi2 (pp _ e2) => Some e2
     | pi2 t => option_map pi2 (ss_eval t)
 
-    | app (lambda x t_body) t2 => match (isValue t2) with
+    | lambda x t_body => Some (notype_lambda t_body) (* remove type annotation *)
+    | app (notype_lambda t_body) t2 => match (isValue t2) with
                                   | true => Some (open 0 t_body t2)
-                                  | false => option_map (app (lambda x t_body)) (ss_eval t2) end
-    | app t1 t2 => match (isValue t1) with
-                    | true => option_map (app t1) (ss_eval t2)
-                    | false => option_map (fun e => app e t2) (ss_eval t1) end
-    (* Fix ? *)
-                    
+                                  | false => option_map (app (notype_lambda t_body)) (ss_eval t2) end
+    | app t1 t2 => match (isValue t2) with
+                    | false => option_map (app t1) (ss_eval t2)
+                    | true => option_map (fun e => app e t2) (ss_eval t1) end
+
+    | notype_tfix t_body => Some (open 0 t_body (notype_tfix t_body))
+
+    | notype_tlet t1 t_body => match isValue t1 with
+                               | true => Some (open 0 t_body t1)
+                               | false => option_map (fun e => notype_tlet e t_body) (ss_eval t1) end
+
+    | succ t => option_map succ (ss_eval t)
     | tmatch zero t0 _ => Some t0
-    | tmatch (succ ts) t0 t1 => match (isValue ts) with
-                                | true => match (isNat ts) with
-                                           | true => Some (open 0 t1 ts)
-                                           | false => None end
+    | tmatch (succ ts) t0 t1 => match (isNat ts) with
+                                | true => Some (open 0 t1 ts)
                                 | false => option_map (fun e => tmatch (succ e) t0 t1) (ss_eval ts) end
+    | tmatch ts t0 t1 => match (isValue ts) with
+                          | true => None
+                          | false => option_map (fun e => tmatch e t0 t1) (ss_eval ts) end
 
     | sum_match (tleft v) tl tr => match (isValue v) with
                                     | true => Some (open 0 tl v)
@@ -67,13 +76,77 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
 
     | tleft t => option_map tleft (ss_eval t)
     | tright t => option_map tright (ss_eval t)
-                           
+
+    | tsize t => Some (build_nat (tsize_semantics t))
     | _ => None
   end.
-           
 
-Fixpoint bs_eval (t: tree): (option tree) :=
+Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
+  match k with
+    | 0 => Some t
+    | S k' => match ss_eval t with
+               | Some t' => ss_eval_n t' k'
+               | None => Some t end
+               end.
+
+
+Definition example2 :=
+[|
+   match ((fun x => s x) ((fun y => s (s y)) 0)) with
+     | 0 => 0
+     | s n => (fun n => s (s n)) n end
+
+|].
+
+Definition example3 :=
+[|
+ ((def_rec f x => (
+     match x with
+      | 0 => 0
+      | s x' => s (s (f x'))
+     end)
+ ) (s 1))
+|].
+
+
+Definition example1 :=
+[|
+ let plus := (def_rec f x y => (
+     match x with
+      | 0 => y
+      | s x' => (f x' (s y))
+     end))
+ in let fibo := (def_rec f n => (
+        match n with
+         | 0 => 1
+         | s n' => (
+             match n' with
+              | 0 => 1
+              | s n'' => plus (f n') (f n'')
+             end)
+        end))
+    in
+    fibo (s (s (s (s (s 1)))))
+ |].
+
+Fixpoint printNatTree (t: tree) : nat :=
   match t with
-    | _ => None end.
+    | succ t => 1 + (printNatTree t)
+    | _ => 0 end.
+    
 
-Search (_ -> option _).
+Eval compute in example1.
+Eval compute in option_map printNatTree (ss_eval_n example1 1000).
+Eval compute in ss_eval_n example1 1.
+Eval compute in ss_eval_n example1 2.
+Eval compute in ss_eval_n example1 3.
+Eval compute in ss_eval_n example1 4.
+Eval compute in ss_eval_n example1 5.
+Eval compute in ss_eval_n example1 6.
+Eval compute in ss_eval_n example1 7.
+Eval compute in ss_eval_n example1 8.
+Eval compute in ss_eval_n example1 9.
+
+
+
+
