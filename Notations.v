@@ -9,7 +9,7 @@ Declare Custom Entry expr.
 Declare Custom Entry type.
 
 (* Entry point *)
-Notation "'|' t" := (fun (fv_id:nat) => t) (at level 100).
+Notation "'⤳' t" := (fun (fv_id:nat) => t) (at level 100).
 Notation "[| x |]" := (x 0) (x custom expr).
 Notation "[|| x ||]" := (x 0) (x custom type).
 Notation "( x )" := (fun (fv_id:nat) => (x fv_id)) (in custom expr, x custom expr).
@@ -18,18 +18,18 @@ Notation "( x )" := (fun (fv_id:nat) => (x fv_id)) (in custom type, x custom typ
 Notation "x" := (fun fv_id => x) (in custom type at level 0, x ident). 
 
 (* Variables (nameless) *)
-Notation "'ft{' v '}'" := (| (fvar v term_var)) (in custom expr, v constr).
-Notation "'lt{' v '}'" := (| (lvar v term_var)) (in custom expr, v constr).
-Notation "'fT{' v '}'" := (| (fvar v type_var)) (in custom expr, v constr).
-Notation "'lT{' v '}'" := (| (lvar v type_var)) (in custom expr, v constr).
+Notation "'ft{' v '}'" := (⤳ (fvar v term_var)) (in custom expr, v constr).
+Notation "'lt{' v '}'" := (⤳ (lvar v term_var)) (in custom expr, v constr).
+Notation "'fT{' v '}'" := (⤳ (fvar v type_var)) (in custom expr, v constr).
+Notation "'lT{' v '}'" := (⤳ (lvar v type_var)) (in custom expr, v constr).
 
 
 (* Types *) (* constr and custom entries share the same lexer --' ) (WTF?)*)
-Notation "'Nat'" := (| T_nat) (in custom type).
-Notation "'Unit'" := (| T_unit) (in custom type).
-Notation "'Bool'" := (| T_bool) (in custom type).
-Notation "'⊤'" := (| T_top) (in custom type).
-Notation "'⊥'" := (| T_bot) (in custom type).
+Notation "'Nat'" := (⤳ T_nat) (in custom type).
+Notation "'Unit'" := (⤳ T_unit) (in custom type).
+Notation "'Bool'" := (⤳ T_bool) (in custom type).
+Notation "'⊤'" := (⤳ T_top) (in custom type).
+Notation "'⊥'" := (⤳ T_bot) (in custom type).
 
 Example base_types : ([|| Nat ||], [|| Unit ||], [|| Bool ||], [|| ⊤ ||], [|| ⊥ ||]) = (T_nat, T_unit, T_bool, T_top, T_bot). Proof. reflexivity. Qed.
 
@@ -128,8 +128,8 @@ Eval compute in
 (* Terms *)
 
 (* Base terms *)
-Notation "'0'" := (| zero) (in custom expr).
-Notation "'()'" := (| uu) (in custom expr).
+Notation "'0'" := (⤳ zero) (in custom expr).
+Notation "'()'" := (⤳ uu) (in custom expr).
 
 Notation "'error'" := (notype_err) (in custom expr).
 Notation "'error' [ T ] " := (fun fv_id => err (T fv_id)) (in custom expr, T custom type).
@@ -219,7 +219,7 @@ Notation " t1 t2 " :=
 (* Untyped language *)
 (* --------------------------------------------------------------------- *)
 
-Notation "'()'" := (|uu) (in custom expr).
+Notation "'()'" := (⤳uu) (in custom expr).
 
 Eval compute in [| () |].
 
@@ -234,15 +234,15 @@ Notation "t '._2'" := (fun fv_id => (pi2 (t fv_id))) (in custom expr at level 20
                                   t custom expr).
 
 (* Booleans *)
-Notation "'true'" := (|ttrue) (in custom expr).
-Notation "'false'" := (|tfalse) (in custom expr).
+Notation "'true'" := (⤳ttrue) (in custom expr).
+Notation "'false'" := (⤳tfalse) (in custom expr).
 Notation "'if' c 'then' t 'else' f" := (fun fv_id => (ite (c fv_id) (t fv_id) (f fv_id))) (in custom expr at level 1,
                                                        c custom expr,
                                                        t custom expr,
                                                        f custom expr).
 
 (* Naturals *)
-Notation "'1'" := (| (succ zero)) (in custom expr).
+Notation "'1'" := (⤳ (succ zero)) (in custom expr).
 Notation "'s' t" := (fun fv_id => (succ (t fv_id))) (in custom expr at level 2,
                                  t custom expr).
 
