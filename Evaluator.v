@@ -14,10 +14,14 @@ Fixpoint isValue (t: tree) : bool :=
     | tleft e1 => (isValue e1)
     | tright e1 => (isValue e1)
     | zero => true
-    | succ e1 => (isValue e1)
-    | _ => false (* Lacks a looooot of terms *) end.
-
-Fixpoint isNat (t : tree) : bool :=
+    | succ e1 => (isNat e1)
+    | lambda _ _ => true
+    | notype_lambda _ => true
+    | err _ => true
+    | notype_err => true
+    | tfix _ _  => true
+    | _ => false end
+with isNat (t : tree) : bool :=
   match t with
     | zero => true
     | succ t1 => (isNat t1)
@@ -64,8 +68,9 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
     | tleft t => option_map tleft (ss_eval t)
     | tright t => option_map tright (ss_eval t)
                            
-    | _ => None end.
-
+    | _ => None
+  end.
+           
 
 Fixpoint bs_eval (t: tree): (option tree) :=
   match t with
