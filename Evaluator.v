@@ -1,9 +1,16 @@
 Require Export SystemFR.Trees.
 Require Export SystemFR.Syntax.
 Require Export SystemFR.Freshness.
-Require Import SystemFR.Notations.
+Require Export SystemFR.Notations.
+Import Notations.UnTyped.
 Require Export SystemFR.PrimitiveSize.
 
+Fixpoint isNat (t : tree) : bool :=
+  match t with
+    | zero => true
+    | succ t1 => (isNat t1)
+    | _ => false
+end.
 Fixpoint isValue (t: tree) : bool :=
   match t with
     | lvar _ _ => true
@@ -21,13 +28,7 @@ Fixpoint isValue (t: tree) : bool :=
     | err _ => true
     | notype_err => true
     | tfix _ _  => true
-    | _ => false end
-with isNat (t : tree) : bool :=
-  match t with
-    | zero => true
-    | succ t1 => (isNat t1)
-    | _ => false
-end.
+    | _ => false end.
  
 Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
   match t with
@@ -86,27 +87,8 @@ Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
     | 0 => Some t
     | S k' => match ss_eval t with
                | Some t' => ss_eval_n t' k'
-               | None => Some t end
+               | None => None end
                end.
-
-
-Definition example2 :=
-[|
-   match ((fun x => s x) ((fun y => s (s y)) 0)) with
-     | 0 => 0
-     | s n => (fun n => s (s n)) n end
-
-|].
-
-Definition example3 :=
-[|
- ((def_rec f x => (
-     match x with
-      | 0 => 0
-      | s x' => s (s (f x'))
-     end)
- ) (s 1))
-|].
 
 
 Definition example1 :=
@@ -114,7 +96,7 @@ Definition example1 :=
  let plus := (def_rec f x y => (
      match x with
       | 0 => y
-      | s x' => (f x' (s y))
+      | s x' => s ((f x') y)
      end))
  in let fibo := (def_rec f n => (
         match n with
@@ -122,31 +104,37 @@ Definition example1 :=
          | s n' => (
              match n' with
               | 0 => 1
-              | s n'' => plus (f n') (f n'')
+              | s n'' => (plus (f n')) (f n'')
              end)
         end))
     in
-    fibo (s (s (s (s (s 1)))))
+    (fibo (s (s (s (s 1)))))
  |].
 
-Fixpoint printNatTree (t: tree) : nat :=
-  match t with
-    | succ t => 1 + (printNatTree t)
-    | _ => 0 end.
-    
+Example fibo4 : (ss_eval_n example1 141) =  Some (succ (succ (succ (succ (succ (succ (succ (succ zero)))))))).
+Proof. compute. reflexivity. Qed.
 
-Eval compute in example1.
-Eval compute in option_map printNatTree (ss_eval_n example1 1000).
-Eval compute in ss_eval_n example1 1.
-Eval compute in ss_eval_n example1 2.
-Eval compute in ss_eval_n example1 3.
-Eval compute in ss_eval_n example1 4.
-Eval compute in ss_eval_n example1 5.
-Eval compute in ss_eval_n example1 6.
-Eval compute in ss_eval_n example1 7.
-Eval compute in ss_eval_n example1 8.
-Eval compute in ss_eval_n example1 9.
+Definition example2 :=
+[|
+ let plus := (def_rec f x y => (
+     match x with
+      | 0 => y
+      | s x' => s ((f x') y)
+     end))
+ in let fibo := (def_rec f n => (
+        match n with
+         | 0 => 1
+         | s n' => (
+             match n' with
+              | 0 => 1
+              | s n'' => (plus (f n')) (f n'')
+             end)
+        end))
+    in
+    (fibo (s (s (s (s (s 1))))))
+ |].
 
 
-
-
+Eval compute in ss_eval_n example2 254.
+Example fibo5 : (ss_eval_n example2 254) =  Some (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ zero))))))))))))).
+Proof. compute. reflexivity. Qed.
