@@ -28,5 +28,33 @@ All trees (for terms and for types) are defined in [Trees.v](https://github.com/
 
 The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/dependencies.pdf) has an overview of the dependencies between all files.
 
+
+### Proofs for Scala Dependent Types project
+
+
+#### Normalization Rules
+
+* NBase: NormalizationBase.v (OK)
+* NSing: NormalizationSing.v (WIP)
+* NPi: NormalizationPi.v (WIP)
+* NExists1: NormalizationExists.v (WIP)
+* NExists2: NormalizationExists.v (WIP)
+* NCons: NormalizationCons.v (WIP)
+* NMatch1: NormalizationMatch.v (WIP)
+* NMatch2: NormalizationMatch.v (WIP)
+* NMatch3: NormalizationMatch.v (WIP)
+
+
+#### Inference Rules
+
+* TCons: ErasedList.v (OK)
+* TMatch: ErasedList.v (WIP)
+
+
+#### Subtyping Rules
+
+
+
+
 [larabot-img]: http://laraquad4.epfl.ch:9000/epfl-lara/SystemFR/status/master
 [larabot-ref]: http://laraquad4.epfl.ch:9000/epfl-lara/SystemFR/builds

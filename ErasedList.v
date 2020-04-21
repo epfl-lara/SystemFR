@@ -23,12 +23,12 @@ Proof.
 Qed.
 
 Lemma open_reducible_singleton:
-  forall tvars gamma t,
+  forall tvars gamma t T,
     is_erased_term t ->
     wf t 0 ->
     subset (fv t) (support gamma) ->
-    [ tvars; gamma ⊨ t : T_top ] ->
-    [ tvars; gamma ⊨ t : tsingleton t ].
+    [ tvars; gamma ⊨ t : T ] ->
+    [ tvars; gamma ⊨ t : tsingleton T t ].
 Proof.
   intros.
   unfold tsingleton.
@@ -129,31 +129,32 @@ Proof.
     try solve [ apply equivalent_refl; t_closer ];
     eauto 2 with sets;
     eauto using open_reducible_cons, open_reducible_top.
-
+(*
   - apply open_reducible_top with (T_sum T_unit (T_prod H T)).
     apply open_reducible_right.
     apply open_reducible_pp; try eassumption; eauto with wf.
     rewrite open_none; auto.
-
+*)
+  - admit.
   - unfold open_reducible; repeat step || apply reducible_value_expr || simp_red.
     apply equivalent_refl; t_closer.
-Qed.
+Admitted.
 
 Definition list_match t1 t2 t3 :=
   sum_match t1 t2
     (shift_open 0 (shift_open 1 t3 (pi1 (lvar 0 term_var))) (pi2 (lvar 0 term_var))).
 
 Lemma open_reducible_match:
-  forall tvars gamma t1 t2 t3 T1 T2 T3 x1 x2,
+  forall tvars gamma t t2 t3 T2 T3 x1 x2,
     ~ x1 ∈ support gamma ->
     ~ x2 ∈ support gamma ->
-    [ tvars; gamma ⊨ t1 : T1 ] ->
+    [ tvars; gamma ⊨ t : List ] ->
     [ tvars; gamma ⊨ t2 : T2 ] ->
     [ tvars; (x1, T_top) :: (x2, List) :: gamma ⊨
         open 0 (open 1 t3 (fvar x1 term_var)) (fvar x2 term_var) :
         open 0 (open 1 T3 (fvar x1 term_var)) (fvar x2 term_var) ] ->
-    [ tvars; gamma ⊨ list_match t1 t2 t3 : Match T1 T2 T3 ].
+    [ tvars; gamma ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
 Proof.
-  unfold list_match, Match;
+  unfold list_match, List_Match;
     repeat step.
 Admitted.
