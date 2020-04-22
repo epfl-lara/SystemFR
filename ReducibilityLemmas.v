@@ -277,7 +277,6 @@ Qed.
 
 Lemma reducible_values_exprs:
   forall ρ t T T',
-    valid_interpretation ρ ->
     (forall v, [ ρ ⊨ v : T ]v -> [ ρ ⊨ v : T' ]v) ->
     [ ρ ⊨ t : T ] ->
     [ ρ ⊨ t : T' ].

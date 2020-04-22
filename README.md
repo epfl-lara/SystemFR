@@ -35,10 +35,11 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 #### Normalization Rules
 
 * NBase: NormalizationBase.v (OK)
+* NExists2: `open_nexists_2` in NormalizationExists.v (OK)
+* NPi: `open_npi` in NormalizationPi.v (OK)
+
 * NSing: NormalizationSing.v (WIP)
-* NPi: NormalizationPi.v (WIP)
-* NExists1: NormalizationExists.v (WIP)
-* NExists2: NormalizationExists.v (WIP)
+* NExists1: `open_exists_1` in NormalizationExists.v (WIP)
 * NCons: NormalizationCons.v (WIP)
 * NMatch1: NormalizationMatch.v (WIP)
 * NMatch2: NormalizationMatch.v (WIP)
@@ -47,7 +48,7 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 
 #### Inference Rules
 
-* TCons: ErasedList.v (OK)
+* TCons: ErasedList.v (WIP)
 * TMatch: ErasedList.v (WIP)
 
 
