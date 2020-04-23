@@ -112,3 +112,28 @@ Proof.
   eapply reducibility_values_rtl; try eassumption; steps;
     eauto with wf fv erased.
 Qed.
+
+Lemma open_reducible_exists:
+  forall Θ Γ A B t a,
+    is_erased_type B ->
+    wf B 1 ->
+    subset (fv B) (support Γ) ->
+    [ Θ; Γ ⊨ a: A ] ->
+    [ Θ; Γ ⊨ t: open 0 B a ] ->
+    [ Θ; Γ ⊨ t: T_exists A B ].
+Proof.
+  unfold open_reducible;
+    repeat step || t_instantiate_sat3.
+
+  unfold reducible, reduces_to; steps; t_closer.
+
+  unfold reducible, reduces_to in H7; steps.
+
+  exists v; repeat step || simp_red; t_closer.
+
+  unfold reducible, reduces_to in H6; steps.
+
+  exists v0; repeat step || t_substitutions; t_closer.
+
+  eapply reducibility_values_ltr; eauto; steps; t_closer.
+Qed.

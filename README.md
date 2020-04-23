@@ -32,9 +32,11 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 ### Proofs for Scala Dependent Types project
 
 
-#### Normalization Rules
+Total: 5/26
 
-* NBase: NormalizationBase.v (OK)
+#### Normalization Rules (3/9)
+
+* NBase: `open_nbase1` and `open_nbase2` in NormalizationBase.v (OK)
 * NExists2: `open_nexists_2` in NormalizationExists.v (OK)
 * NPi: `open_npi` in NormalizationPi.v (OK)
 
@@ -46,14 +48,29 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 * NMatch3: NormalizationMatch.v (WIP)
 
 
-#### Inference Rules
+#### Inference Rules (2/7)
 
-* TCons: ErasedList.v (WIP)
+* TNil: `open_tnil` in ErasedList.v (OK)
+* TCons: `open_tcons` in ErasedList.v (OK)
+
 * TMatch: ErasedList.v (WIP)
+* TAbs: (WIP)
+* TFix: (WIP)
+* TMatch: (WIP)
+* TCheck: (WIP)
 
 
-#### Subtyping Rules
+#### Subtyping Rules (0/9)
 
+* SubTop: (WIP)
+* SubRefl: (WIP)
+* SubPi: (WIP)
+* SubSing: (WIP)
+* SubCons: (WIP)
+* SubMatch: (WIP)
+* SubExistsLeft: (WIP)
+* SubExistsRight: (WIP)
+* SubNorm: (WIP)
 
 
 

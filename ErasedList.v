@@ -4,13 +4,15 @@ Require Export SystemFR.ErasedSum.
 Require Export SystemFR.ErasedPair.
 Require Export SystemFR.ErasedTop.
 Require Export SystemFR.ErasedTypeRefine.
+Require Export SystemFR.ErasedQuant.
+Require Export SystemFR.ReducibilitySubtype.
 
 Opaque strictly_positive.
 Opaque reducible_values.
 
 Lemma open_reducible_nil:
-  forall tvars gamma,
-    [ tvars; gamma ⊨ tnil : List ].
+  forall Θ Γ,
+    [ Θ; Γ ⊨ tnil : List ].
 Proof.
   intros.
 
@@ -23,12 +25,12 @@ Proof.
 Qed.
 
 Lemma open_reducible_singleton:
-  forall tvars gamma t T,
+  forall Θ Γ t T,
     is_erased_term t ->
     wf t 0 ->
-    subset (fv t) (support gamma) ->
-    [ tvars; gamma ⊨ t : T ] ->
-    [ tvars; gamma ⊨ t : tsingleton T t ].
+    subset (fv t) (support Γ) ->
+    [ Θ; Γ ⊨ t : T ] ->
+    [ Θ; Γ ⊨ t : tsingleton T t ].
 Proof.
   intros.
   unfold tsingleton.
@@ -43,20 +45,26 @@ Proof.
     try solve [ apply equivalent_refl; t_closer ].
 Qed.
 
-Lemma open_reducible_nil2:
-  forall tvars gamma,
-    [ tvars; gamma ⊨ tnil : Nil ].
+Lemma open_tnil_helper:
+  forall Θ Γ,
+    [ Θ; Γ ⊨ tnil : tsingleton List tnil ].
 Proof.
   intros.
   apply open_reducible_singleton; steps; eauto with sets;
     eauto using open_reducible_nil, open_reducible_top.
 Qed.
 
+Lemma open_tnil:
+  forall Γ, [ Γ ⊨ tnil : tsingleton List tnil ].
+Proof.
+  eauto using open_tnil_helper.
+Qed.
+
 Lemma open_reducible_cons:
-  forall tvars gamma h t H,
-    [ tvars; gamma ⊨ h : H ] ->
-    [ tvars; gamma ⊨ t : List ] ->
-    [ tvars; gamma ⊨ tcons h t : List ].
+  forall Θ Γ h t H,
+    [ Θ; Γ ⊨ h : H ] ->
+    [ Θ; Γ ⊨ t : List ] ->
+    [ Θ; Γ ⊨ tcons h t : List ].
 Proof.
   intros.
 
@@ -70,55 +78,44 @@ Proof.
     eauto using open_reducible_top.
 Qed.
 
-Lemma open_reducible_exists:
-  forall tvars gamma A B t a,
-    is_erased_type B ->
-    wf B 1 ->
-    subset (fv B) (support gamma) ->
-    [ tvars; gamma ⊨ a: A ] ->
-    [ tvars; gamma ⊨ t: open 0 B a ] ->
-    [ tvars; gamma ⊨ t: T_exists A B ].
-Proof.
-  unfold open_reducible;
-    repeat step || t_instantiate_sat3.
+Lemma is_erased_list: is_erased_type List.
+Proof. steps. Qed.
 
-  unfold reducible, reduces_to; steps; t_closer.
+Lemma wf_list: forall k, wf List k.
+Proof. steps; eauto with lia. Qed.
 
-  unfold reducible, reduces_to in H7; steps.
+Lemma open_list: forall k rep, open k List rep = List.
+Proof. steps. Qed.
 
-  exists v; repeat step || simp_red; t_closer.
+Opaque List.
 
-  unfold reducible, reduces_to in H6; steps.
-
-  exists v0; repeat step || t_substitutions; t_closer.
-
-  eapply reducibility_values_ltr; eauto; steps; t_closer.
-Qed.
-
-Lemma open_reducible_cons2:
-  forall tvars gamma h t H T,
+Lemma open_tcons_helper:
+  forall Θ Γ h t H T,
     is_erased_type T ->
     wf T 0 ->
-    subset (fv T) (support gamma) ->
+    subset (fv T) (support Γ) ->
     is_erased_term h ->
     wf h 0 ->
-    subset (fv h) (support gamma) ->
+    subset (fv h) (support Γ) ->
     is_erased_term t ->
     wf t 0 ->
-    subset (fv t) (support gamma) ->
-    [ tvars; gamma ⊨ h : H ] ->
-    [ tvars; gamma ⊨ t : T ] ->
-    [ tvars; gamma ⊨ tcons h t : Cons H T ].
+    subset (fv t) (support Γ) ->
+    [ Θ; Γ ⊨ h : H ] ->
+    [ Θ; Γ ⊨ t : T ] ->
+    [ Θ; Γ ⊨ T <: List ] ->
+    [ Θ; Γ ⊨ tcons h t : Cons H T ].
 Proof.
   unfold Cons; repeat step.
 
   apply open_reducible_exists with h;
-    repeat step || rewrite open_none in * by auto; t_closer.
+    repeat step || rewrite open_none in * by auto; t_closer;
+      eauto using is_erased_list, wf_list.
 
   apply open_reducible_exists with t;
-    repeat step ||
+    repeat step || (rewrite open_list in *) ||
            (rewrite open_none in * by eauto with wf);
-    t_closer.
+    t_closer;
+    eauto using is_erased_list, wf_list.
 
   apply open_reducible_type_refine with uu;
     repeat step || rewrite pfv_shift2 ||
@@ -127,33 +124,46 @@ Proof.
            (rewrite open_none by auto);
     eauto with erased wf fv;
     try solve [ apply equivalent_refl; t_closer ];
-    eauto 2 with sets;
-    eauto using open_reducible_cons, open_reducible_top.
-(*
-  - apply open_reducible_top with (T_sum T_unit (T_prod H T)).
-    apply open_reducible_right.
-    apply open_reducible_pp; try eassumption; eauto with wf.
-    rewrite open_none; auto.
-*)
-  - admit.
+    eauto 2 with sets.
+
+  - eauto using open_reducible_cons, open_subtype_reducible.
   - unfold open_reducible; repeat step || apply reducible_value_expr || simp_red.
     apply equivalent_refl; t_closer.
-Admitted.
+Qed.
+
+Lemma open_tcons:
+  forall Γ h t H T,
+    is_erased_type T ->
+    wf T 0 ->
+    subset (fv T) (support Γ) ->
+    is_erased_term h ->
+    wf h 0 ->
+    subset (fv h) (support Γ) ->
+    is_erased_term t ->
+    wf t 0 ->
+    subset (fv t) (support Γ) ->
+    [ Γ ⊨ h : H ] ->
+    [ Γ ⊨ t : T ] ->
+    [ Γ ⊨ T <: List ] ->
+    [ Γ ⊨ tcons h t : Cons H T ].
+Proof.
+  eauto using open_tcons_helper.
+Qed.
 
 Definition list_match t1 t2 t3 :=
   sum_match t1 t2
     (shift_open 0 (shift_open 1 t3 (pi1 (lvar 0 term_var))) (pi2 (lvar 0 term_var))).
 
-Lemma open_reducible_match:
-  forall tvars gamma t t2 t3 T2 T3 x1 x2,
-    ~ x1 ∈ support gamma ->
-    ~ x2 ∈ support gamma ->
-    [ tvars; gamma ⊨ t : List ] ->
-    [ tvars; gamma ⊨ t2 : T2 ] ->
-    [ tvars; (x1, T_top) :: (x2, List) :: gamma ⊨
+Lemma open_tmatch:
+  forall Θ Γ t t2 t3 T2 T3 x1 x2,
+    ~ x1 ∈ support Γ ->
+    ~ x2 ∈ support Γ ->
+    [ Θ; Γ ⊨ t : List ] ->
+    [ Θ; Γ ⊨ t2 : T2 ] ->
+    [ Θ; (x1, T_top) :: (x2, List) :: Γ ⊨
         open 0 (open 1 t3 (fvar x1 term_var)) (fvar x2 term_var) :
         open 0 (open 1 T3 (fvar x1 term_var)) (fvar x2 term_var) ] ->
-    [ tvars; gamma ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
+    [ Θ; Γ ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
 Proof.
   unfold list_match, List_Match;
     repeat step.

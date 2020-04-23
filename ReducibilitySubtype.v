@@ -89,3 +89,30 @@ Lemma equivalent_types_reducible_back:
 Proof.
   eauto using subtype_reducible, subtype_equivalent_types_back.
 Qed.
+
+Lemma open_subtype_reducible:
+  forall Θ Γ t T1 T2,
+    [ Θ; Γ ⊨ t : T1 ] ->
+    [ Θ; Γ ⊨ T1 <: T2 ] ->
+    [ Θ; Γ ⊨ t : T2 ].
+Proof.
+  unfold open_subtype, open_reducible; steps; eauto using subtype_reducible.
+Qed.
+
+Lemma open_equivalent_types_reducible:
+  forall Θ Γ t T1 T2,
+    [ Θ; Γ ⊨ t : T1 ] ->
+    [ Θ; Γ ⊨ T1 = T2 ] ->
+    [ Θ; Γ ⊨ t : T2 ].
+Proof.
+  unfold open_equivalent_types, open_reducible; steps; eauto using equivalent_types_reducible.
+Qed.
+
+Lemma open_equivalent_types_reducible_back:
+  forall Θ Γ t T1 T2,
+    [ Θ; Γ ⊨ t : T1 ] ->
+    [ Θ; Γ ⊨ T2 = T1 ] ->
+    [ Θ; Γ ⊨ t : T2 ].
+Proof.
+  unfold open_equivalent_types, open_reducible; steps; eauto using equivalent_types_reducible_back.
+Qed.

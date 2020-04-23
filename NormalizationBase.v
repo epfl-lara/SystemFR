@@ -1,12 +1,12 @@
 Require Export SystemFR.ReducibilityDefinition.
 Require Export SystemFR.TypeSugar2.
 
-Lemma nbase1: forall theta, [ theta ⊨ T_top = T_top ].
+Lemma nbase1: forall ρ, [ ρ | T_top = T_top ].
 Proof.
-  unfold equivalent_types; steps.
+  unfold equivalent_types. steps.
 Qed.
 
-Lemma nbase2: forall theta, [ theta ⊨ List = List ].
+Lemma nbase2: forall ρ, [ ρ | List = List ].
 Proof.
   unfold equivalent_types; steps.
 Qed.
