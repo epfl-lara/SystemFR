@@ -36,10 +36,10 @@ Total: 14/26
 
 #### Normalization Rules (4/9)
 
-* NBase: `open_nbase1` and `open_nbase2` in [NormalizationBase.v](NormalizationBase.v) (OK)
-* NExists2: `open_nexists_2` in [NormalizationExists.v](NormalizationExists.v) (OK)
-* NPi: `open_npi` in [NormalizationPi.v](NormalizationPi.v) (OK)
-* NCons: `open_ncons` in [NormalizationList.v](NormalizationList.v) (OK)
+* NBase: `open_nbase1` and `open_nbase2` in [NormalizationBase.v](NormalizationBase.v)
+* NExists2: `open_nexists_2` in [NormalizationExists.v](NormalizationExists.v)
+* NPi: `open_npi` in [NormalizationPi.v](NormalizationPi.v)
+* NCons: `open_ncons` in [NormalizationList.v](NormalizationList.v)
 
 * NSing: NormalizationSing.v (WIP)
 * NExists1: `open_exists_1` in NormalizationExists.v (WIP)
@@ -50,11 +50,11 @@ Total: 14/26
 
 #### Inference Rules (5/8)
 
-* TVar: `open_tvar` in [InferMisc.v](InferMisc.v) (OK)
-* TNil: `open_tnil` in [ErasedList.v](ErasedList.v) (OK)
-* TCons: `open_tcons` in [ErasedList.v](ErasedList.v) (OK)
-* TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v) (OK)
-* TAbs: `open_tabs` in [InferMisc.v](InferMisc.v) (OK)
+* TVar: `open_tvar` in [InferMisc.v](InferMisc.v)
+* TNil: `open_tnil` in [ErasedList.v](ErasedList.v)
+* TCons: `open_tcons` in [ErasedList.v](ErasedList.v)
+* TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v)
+* TAbs: `open_tabs` in [InferMisc.v](InferMisc.v)
 
 
 * TMatch: ErasedList.v (WIP)
@@ -64,17 +64,16 @@ Total: 14/26
 
 #### Subtyping Rules (5/9)
 
-* SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v) (OK)
-* SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v) (OK)
-* SubSing: `open_subsing` in [SubtypeMisc.v](SubtypeMisc.v) (OK)
-* SubCons: `open_subcons` in [SubtypeList.v](SubtypeList.v) (OK)
-* SubPi: `open_subpi` in [SubtypePi.v](SubtypePi.v) (OK)
+* SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v)
+* SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v)
+* SubSing: `open_subsing` in [SubtypeMisc.v](SubtypeMisc.v)
+* SubCons: `open_subcons` in [SubtypeList.v](SubtypeList.v)
+* SubPi: `open_subpi` in [SubtypePi.v](SubtypePi.v)
 
 * SubMatch: (WIP)
 * SubExistsLeft: (WIP)
 * SubExistsRight: (WIP)
 * SubNorm: (WIP)
-
 
 
 [larabot-img]: http://laraquad4.epfl.ch:9000/epfl-lara/SystemFR/status/master
