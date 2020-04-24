@@ -9,6 +9,8 @@ Require Export SystemFR.RedTactics.
 Opaque reducible_values.
 Opaque makeFresh.
 
+
+
 Lemma reducible_intersection:
   forall ρ e T1 T2,
     valid_interpretation ρ ->

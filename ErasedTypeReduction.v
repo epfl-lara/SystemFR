@@ -116,9 +116,9 @@ Proof.
 Qed.
 
 Lemma sub_singleton_value:
-  forall v,
+  forall v T,
     closed_value v ->
-    sub_singleton [] [] v (tsingleton v).
+    sub_singleton [] [] v (tsingleton T v).
 Proof.
   unfold sub_singleton;
     repeat step || simp_red ||

@@ -32,7 +32,7 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 ### Proofs for Scala Dependent Types project
 
 
-Total: 5/26
+Total: 9/26
 
 #### Normalization Rules (3/9)
 
@@ -60,13 +60,14 @@ Total: 5/26
 * TCheck: (WIP)
 
 
-#### Subtyping Rules (0/9)
+#### Subtyping Rules (4/9)
 
-* SubTop: (WIP)
-* SubRefl: (WIP)
+* SubTop: `open_subtype` in `SubtypeMisc.v` (OK)
+* SubRefl: `open_subrefl` in `SubtypeMisc.v` (OK)
+* SubSing: `open_subsing` in `SubtypeMisc.v` (OK)
+* SubCons: `open_subcons` in `SubtypeList.v`(WIP)
+
 * SubPi: (WIP)
-* SubSing: (WIP)
-* SubCons: (WIP)
 * SubMatch: (WIP)
 * SubExistsLeft: (WIP)
 * SubExistsRight: (WIP)

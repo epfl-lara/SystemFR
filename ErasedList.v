@@ -78,15 +78,6 @@ Proof.
     eauto using open_reducible_top.
 Qed.
 
-Lemma is_erased_list: is_erased_type List.
-Proof. steps. Qed.
-
-Lemma wf_list: forall k, wf List k.
-Proof. steps; eauto with lia. Qed.
-
-Lemma open_list: forall k rep, open k List rep = List.
-Proof. steps. Qed.
-
 Opaque List.
 
 Lemma open_tcons_helper:

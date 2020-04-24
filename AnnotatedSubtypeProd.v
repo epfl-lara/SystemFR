@@ -2,6 +2,8 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedSubtype.
 
+Opaque reducible_values.
+
 Lemma annotated_subtype_prod:
   forall Θ Γ A1 A2 B1 B2 x,
     ~(x ∈ fv_context Γ) ->

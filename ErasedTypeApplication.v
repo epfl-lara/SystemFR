@@ -5,35 +5,11 @@ Require Export SystemFR.ReducibilityOpenEquivalent.
 Require Export SystemFR.ErasedTypeRefine.
 Require Export SystemFR.ErasedArrow.
 Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ReducibilitySubtype.
+Require Export SystemFR.SubtypeMisc.
 
 Opaque reducible_values.
 Opaque makeFresh.
-
-Definition closed_subtype theta T1 T2 : Prop :=
-  forall v,
-    reducible_values theta v T1 ->
-    reducible_values theta v T2.
-
-Lemma reducible_subtype:
-  forall theta t T1 T2,
-    reducible theta t T1 ->
-    valid_interpretation theta ->
-    closed_subtype theta T1 T2 ->
-    reducible theta t T2.
-Proof.
-  unfold closed_subtype; intros;
-    eauto using reducible_values_exprs.
-Qed.
-
-Lemma closed_subtype_top:
-  forall theta T,
-    valid_interpretation theta ->
-    closed_subtype theta T T_top.
-Proof.
-  unfold closed_subtype;
-    repeat step || simp_red;
-    eauto using reducible_values_closed.
-Qed.
 
 Lemma substitute_type_application:
   forall T1 T2 l tag,
@@ -44,8 +20,8 @@ Proof.
 Qed.
 
 Lemma reducible_type_application:
-  forall theta f t A B C,
-    valid_interpretation theta ->
+  forall ρ f t A B C,
+    valid_interpretation ρ ->
     wf A 0 ->
     wf B 1 ->
     wf C 0 ->
@@ -55,24 +31,24 @@ Lemma reducible_type_application:
     pfv A term_var = nil ->
     pfv B term_var = nil ->
     pfv C term_var = nil ->
-    reducible theta f (T_arrow A B) ->
-    reducible theta t C ->
-    closed_subtype theta C A ->
-    reducible theta (app f t) (type_application (T_arrow A B) C).
+    reducible ρ f (T_arrow A B) ->
+    reducible ρ t C ->
+    [ ρ | C <: A ] ->
+    reducible ρ (app f t) (type_application (T_arrow A B) C).
 Proof.
-  unfold closed_subtype, type_application; intros.
+  unfold subtype, type_application; intros.
   apply reducible_type_refine with uu;
     repeat step || list_utils;
     eauto with wf.
 
   - unshelve epose proof (
-      reducible_app theta A B f t _ _ _ _ _ _
+      reducible_app ρ A B f t _ _ _ _ _ _
     ) as R;
       repeat step;
       eauto using reducible_values_exprs.
 
-    eapply reducible_subtype; try eassumption;
-      eauto using closed_subtype_top.
+    eapply subtype_reducible; try eassumption;
+      eauto using subtype_top.
 
   - repeat rewrite open_none by t_closer.
 
@@ -117,7 +93,7 @@ Proof.
   intros.
   unfold substitute; steps.
   apply reducible_type_application;
-    repeat step || unfold closed_subtype;
+    repeat step || unfold subtype;
     eauto with wf;
     eauto with erased;
     eauto with fv.

@@ -79,3 +79,19 @@ Proof.
     repeat step;
     eauto using wf_shift_open2 with wf step_tactic.
 Qed.
+
+Lemma is_erased_list: is_erased_type List.
+Proof. steps. Qed.
+
+Hint Resolve is_erased_list: erased.
+
+Lemma wf_list: forall k, wf List k.
+Proof. steps; eauto with lia. Qed.
+
+Hint Resolve wf_list: wf.
+
+Lemma open_list: forall k rep, open k List rep = List.
+Proof. steps. Qed.
+
+Lemma subst_list: forall l tag, psubstitute List l tag = List.
+Proof. steps. Qed.
