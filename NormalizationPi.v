@@ -1,7 +1,5 @@
-Require Export SystemFR.ReducibilitySubtype.
-Require Export SystemFR.ErasedArrow.
-Require Export SystemFR.RedTactics.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.SubtypePi.
+Require Export SystemFR.SubtypeMisc.
 
 Opaque reducible_values.
 
@@ -58,6 +56,7 @@ Lemma open_npi: forall Γ S S' T T' x,
   wf T' 1 ->
   subset (fv T) (support Γ) ->
   subset (fv T') (support Γ) ->
+  ~ x ∈ pfv S term_var ->
   ~ x ∈ pfv S' term_var ->
   ~ x ∈ pfv_context Γ term_var ->
   [ Γ ⊨ S = S' ] ->

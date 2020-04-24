@@ -32,42 +32,44 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 ### Proofs for Scala Dependent Types project
 
 
-Total: 9/26
+Total: 14/26
 
-#### Normalization Rules (3/9)
+#### Normalization Rules (4/9)
 
-* NBase: `open_nbase1` and `open_nbase2` in NormalizationBase.v (OK)
-* NExists2: `open_nexists_2` in NormalizationExists.v (OK)
-* NPi: `open_npi` in NormalizationPi.v (OK)
+* NBase: `open_nbase1` and `open_nbase2` in [NormalizationBase.v](NormalizationBase.v) (OK)
+* NExists2: `open_nexists_2` in [NormalizationExists.v](NormalizationExists.v) (OK)
+* NPi: `open_npi` in [NormalizationPi.v](NormalizationPi.v) (OK)
+* NCons: `open_ncons` in [NormalizationList.v](NormalizationList.v) (OK)
 
 * NSing: NormalizationSing.v (WIP)
 * NExists1: `open_exists_1` in NormalizationExists.v (WIP)
-* NCons: NormalizationCons.v (WIP)
 * NMatch1: NormalizationMatch.v (WIP)
 * NMatch2: NormalizationMatch.v (WIP)
 * NMatch3: NormalizationMatch.v (WIP)
 
 
-#### Inference Rules (2/7)
+#### Inference Rules (5/8)
 
-* TNil: `open_tnil` in ErasedList.v (OK)
-* TCons: `open_tcons` in ErasedList.v (OK)
+* TVar: `open_tvar` in [InferMisc.v](InferMisc.v) (OK)
+* TNil: `open_tnil` in [ErasedList.v](ErasedList.v) (OK)
+* TCons: `open_tcons` in [ErasedList.v](ErasedList.v) (OK)
+* TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v) (OK)
+* TAbs: `open_tabs` in [InferMisc.v](InferMisc.v) (OK)
+
 
 * TMatch: ErasedList.v (WIP)
-* TAbs: (WIP)
 * TFix: (WIP)
-* TMatch: (WIP)
-* TCheck: (WIP)
+* TApp: (WIP)
 
 
-#### Subtyping Rules (4/9)
+#### Subtyping Rules (5/9)
 
-* SubTop: `open_subtype` in `SubtypeMisc.v` (OK)
-* SubRefl: `open_subrefl` in `SubtypeMisc.v` (OK)
-* SubSing: `open_subsing` in `SubtypeMisc.v` (OK)
-* SubCons: `open_subcons` in `SubtypeList.v`(WIP)
+* SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v) (OK)
+* SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v) (OK)
+* SubSing: `open_subsing` in [SubtypeMisc.v](SubtypeMisc.v) (OK)
+* SubCons: `open_subcons` in [SubtypeList.v](SubtypeList.v) (OK)
+* SubPi: `open_subpi` in [SubtypePi.v](SubtypePi.v) (OK)
 
-* SubPi: (WIP)
 * SubMatch: (WIP)
 * SubExistsLeft: (WIP)
 * SubExistsRight: (WIP)

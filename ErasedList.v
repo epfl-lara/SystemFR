@@ -3,7 +3,7 @@ Require Export SystemFR.ErasedRecGen.
 Require Export SystemFR.ErasedSum.
 Require Export SystemFR.ErasedPair.
 Require Export SystemFR.ErasedTop.
-Require Export SystemFR.ErasedTypeRefine.
+Require Export SystemFR.ErasedSingleton.
 Require Export SystemFR.ErasedQuant.
 Require Export SystemFR.ReducibilitySubtype.
 
@@ -22,27 +22,6 @@ Proof.
 
   apply open_reducible_left.
   apply open_reducible_unit.
-Qed.
-
-Lemma open_reducible_singleton:
-  forall Θ Γ t T,
-    is_erased_term t ->
-    wf t 0 ->
-    subset (fv t) (support Γ) ->
-    [ Θ; Γ ⊨ t : T ] ->
-    [ Θ; Γ ⊨ t : tsingleton T t ].
-Proof.
-  intros.
-  unfold tsingleton.
-  apply open_reducible_type_refine with uu;
-    repeat step || rewrite pfv_shift2 ||
-           unfold open_reducible ||
-           simp_red ||
-           apply reducible_value_expr ||
-           (rewrite shift_nothing2 by auto) ||
-           (rewrite open_none by auto);
-    eauto with erased wf fv;
-    try solve [ apply equivalent_refl; t_closer ].
 Qed.
 
 Lemma open_tnil_helper:
