@@ -247,6 +247,8 @@ Proof.
     try solve [ repeat step; eauto with wf lia ].
 Qed.
 
+Hint Resolve wf_shift_open2: wf.
+
 Lemma pfv_shift:
   forall t k i tag,
     pfv t tag = nil ->
@@ -337,6 +339,19 @@ Proof.
     eauto using open_shift_open.
 Qed.
 
+Lemma open_shift_open2:
+  forall t k rep1 rep2,
+    wf t k ->
+    open k (shift_open 0 t rep1) rep2 = shift_open 0 t (open k rep1 rep2).
+Proof.
+  induction t;
+    repeat step || t_equality; eauto with lia.
+  - intros.
+    repeat step.
+  
+
+
+
 Lemma shift_nothing2:
   forall t k i,
     wf t k ->
@@ -351,6 +366,26 @@ Lemma substitute_shift:
     psubstitute (shift k t i) l tag = shift k (psubstitute t l tag) i.
 Proof.
   induction t; repeat step || t_equality || rewrite shift_nothing2 by eauto with wf.
+Qed.
+
+Lemma shift_open_nothing:
+  forall t k i,
+    wf t k ->
+    shift_open k t i = t.
+Proof.
+  induction t; repeat step || t_equality; eauto with omega.
+Qed.
+
+Lemma substitute_shift_open:
+  forall t k rep l tag,
+    wfs l 0 ->
+    pfv rep tag = nil ->
+    psubstitute (shift_open k t rep) l tag = shift_open k (psubstitute t l tag) rep.
+Proof.
+  induction t;
+    repeat step || t_equality || apply pfv_shift ||
+           (rewrite substitute_nothing5 by auto) ||
+           (rewrite shift_open_nothing by eauto with wf) || apply_any.
 Qed.
 
 Lemma erase_term_shift:

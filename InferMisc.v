@@ -12,7 +12,9 @@ Lemma open_tvar:
     lookup Nat.eq_dec Γ x = Some T ->
     [ Θ; Γ ⊨ fvar x term_var : tsingleton T (fvar x term_var) ].
 Proof.
-  eauto using open_reducible_var, open_reducible_singleton.
+  intros.
+  eapply open_reducible_singleton; repeat step || t_lookup || unfold subset;
+    eauto using open_reducible_var.
 Qed.
 
 Lemma open_tabs:

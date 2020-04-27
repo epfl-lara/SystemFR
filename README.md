@@ -56,7 +56,6 @@ Total: 14/26
 * TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v)
 * TAbs: `open_tabs` in [InferMisc.v](InferMisc.v)
 
-
 * TMatch: ErasedList.v (WIP)
 * TFix: (WIP)
 * TApp: (WIP)

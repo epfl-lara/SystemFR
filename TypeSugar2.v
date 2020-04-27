@@ -55,17 +55,18 @@ Parameter globalFuel: tree.
 
 Definition fix_default t default fuel: tree :=
   app
-    (notype_lambda (app (lvar 0 term_var) fuel))
-    (notype_tfix (
-      notype_lambda (              (* fuel *)
-        tmatch (lvar 0 term_var)   (* fuel *)
+    (notype_tfix ( (* unused and f *)
+      notype_lambda (           (* fuel *)
+        tmatch (lvar 0 term_var (* fuel *))
           default
           (shift_open 0 t
-            (app (lvar 2 term_var) (lvar 0 term_var))
+            (app (lvar 2 term_var (* f *)) (lvar 0 term_var (* new fuel *)))
           )
         )
       )
-    ).
+    )
+    fuel
+.
 
 Lemma wf_fix_default:
   forall default t fuel,

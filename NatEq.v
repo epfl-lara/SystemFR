@@ -1,6 +1,7 @@
 Require Import Coq.Strings.String.
 
 Require Export SystemFR.EquivalentContext.
+Require Export SystemFR.StepTactics.
 
 Definition nat_eq_fix: tree :=
   notype_tfix (
