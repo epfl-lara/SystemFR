@@ -51,8 +51,6 @@ val f = f'(globalFuel)
 
 *)
 
-Parameter globalFuel: tree.
-
 Definition fix_default t default fuel: tree :=
   app
     (notype_tfix ( (* unused and f *)
@@ -68,9 +66,13 @@ Definition fix_default t default fuel: tree :=
     fuel
 .
 
+Parameter global_fuel: tree.
+Parameter is_nat_global_fuel: is_nat_value global_fuel.
+
+Definition fix_default' t default := fix_default t default global_fuel.
+
 Lemma wf_fix_default:
   forall default t fuel,
-    wf globalFuel 0 ->
     wf t 1 ->
     wf default 0 ->
     wf fuel 0 ->

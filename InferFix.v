@@ -190,7 +190,7 @@ Proof.
     eauto with fv wf twf erased.
 Qed.
 
-Lemma open_tfix:
+Lemma open_tfix_helper2:
   forall Γ t default fuel x T,
     is_erased_term t ->
     wf t 1 ->
@@ -206,4 +206,31 @@ Lemma open_tfix:
     [ Γ ⊨ fix_default t default fuel : T ].
 Proof.
   eauto using open_tfix_helper.
+Qed.
+
+Lemma open_global_fuel_nat:
+  forall Θ Γ,
+    [ Θ; Γ ⊨ global_fuel: T_nat ].
+Proof.
+  unfold open_reducible; steps.
+  apply reducible_value_expr; repeat step || simp_red.
+  rewrite substitute_nothing5; eauto using is_nat_global_fuel with fv.
+Qed.
+
+Lemma open_tfix:
+  forall Γ t default x T,
+    is_erased_term t ->
+    wf t 1 ->
+    subset (fv t) (support Γ) ->
+    is_erased_type T ->
+    wf T 0 ->
+    subset (fv T) (support Γ) ->
+    ~ x ∈ fv T ->
+    ~ x ∈ pfv_context Γ term_var ->
+    [ Γ ⊨ default : T ] ->
+    [ (x, T) :: Γ ⊨ open 0 t (fvar x term_var) : T ] ->
+    [ Γ ⊨ fix_default' t default : T ].
+Proof.
+  unfold fix_default'; repeat step.
+  eapply open_tfix_helper2; eauto using open_global_fuel_nat.
 Qed.

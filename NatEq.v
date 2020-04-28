@@ -3,6 +3,8 @@ Require Import Coq.Strings.String.
 Require Export SystemFR.EquivalentContext.
 Require Export SystemFR.StepTactics.
 
+Open Scope list_scope.
+
 Definition nat_eq_fix: tree :=
   notype_tfix (
     notype_lambda (notype_lambda (
