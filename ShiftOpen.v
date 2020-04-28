@@ -1,6 +1,11 @@
+Require Import PeanoNat.
+
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.ErasedTermLemmas.
 Require Export SystemFR.TypeErasure.
+
+Opaque Compare_dec.ge_dec.
+Opaque Nat.eq_dec.
 
 Fixpoint shift (k: nat) (t: tree) (i: nat) :=
   match t with
@@ -339,25 +344,48 @@ Proof.
     eauto using open_shift_open.
 Qed.
 
-Lemma open_shift_open2:
-  forall t k rep1 rep2,
-    wf t k ->
-    open k (shift_open 0 t rep1) rep2 = shift_open 0 t (open k rep1 rep2).
-Proof.
-  induction t;
-    repeat step || t_equality; eauto with lia.
-  - intros.
-    repeat step.
-  
-
-
-
 Lemma shift_nothing2:
   forall t k i,
     wf t k ->
     shift k t i = t.
 Proof.
   induction t; repeat step || t_equality; eauto with lia.
+Qed.
+
+Lemma no_shift_open:
+  forall t k rep,
+    wf rep 0 ->
+    shift_open k t rep = open k t rep.
+Proof.
+  induction t; repeat step || t_equality || rewrite shift_nothing2 by eauto with wf.
+Qed.
+
+Lemma open_and_shift:
+  forall t k i j rep,
+    wf rep 0 ->
+    k >= i ->
+    j > 0 ->
+    shift i (open k t rep) j = open (j + k) (shift i t j) rep.
+Proof.
+  intros.
+  rewrite Nat.add_comm.
+  generalize dependent k.
+  generalize dependent i.
+  generalize dependent j.
+  induction t; repeat step || t_equality || rewrite shift_nothing2 by eauto with wf;
+    eauto with lia apply_any.
+Qed.
+
+Lemma open_shift_open2:
+  forall t k i rep1 rep2,
+    wf rep2 0 ->
+    wf t (S i) ->
+    k >= i ->
+    open k (shift_open i t rep1) rep2 = shift_open i t (open k rep1 rep2).
+Proof.
+  induction t;
+    repeat step || t_equality || rewrite open_and_shift by eauto with lia;
+    eauto 6 with lia.
 Qed.
 
 Lemma substitute_shift:

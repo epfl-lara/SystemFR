@@ -32,7 +32,7 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 ### Proofs for Scala Dependent Types project
 
 
-Total: 14/26
+Total: 15/26
 
 #### Normalization Rules (4/9)
 
@@ -48,16 +48,16 @@ Total: 14/26
 * NMatch3: NormalizationMatch.v (WIP)
 
 
-#### Inference Rules (5/8)
+#### Inference Rules (6/8)
 
 * TVar: `open_tvar` in [InferMisc.v](InferMisc.v)
 * TNil: `open_tnil` in [ErasedList.v](ErasedList.v)
 * TCons: `open_tcons` in [ErasedList.v](ErasedList.v)
 * TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v)
 * TAbs: `open_tabs` in [InferMisc.v](InferMisc.v)
+* TFix: `open_tfix` in [InferFix.v](InferFix.v)
 
 * TMatch: ErasedList.v (WIP)
-* TFix: (WIP)
 * TApp: (WIP)
 
 
