@@ -1,4 +1,4 @@
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 Require Export SystemFR.ErasedRecGen.
 Require Export SystemFR.ErasedSum.
 Require Export SystemFR.ErasedPair.
@@ -26,7 +26,7 @@ Qed.
 
 Lemma open_tnil_helper:
   forall Θ Γ,
-    [ Θ; Γ ⊨ tnil : tsingleton List tnil ].
+    [ Θ; Γ ⊨ tnil : T_singleton List tnil ].
 Proof.
   intros.
   apply open_reducible_singleton; steps; eauto with sets;
@@ -34,7 +34,7 @@ Proof.
 Qed.
 
 Lemma open_tnil:
-  forall Γ, [ Γ ⊨ tnil : tsingleton List tnil ].
+  forall Γ, [ Γ ⊨ tnil : T_singleton List tnil ].
 Proof.
   eauto using open_tnil_helper.
 Qed.

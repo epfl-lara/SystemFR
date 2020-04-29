@@ -4,7 +4,7 @@ Require Import Coq.Lists.List.
 Require Export SystemFR.ReducibilityOpenEquivalent.
 Require Export SystemFR.ErasedTypeRefine.
 Require Export SystemFR.ErasedArrow.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 Require Export SystemFR.ReducibilitySubtype.
 Require Export SystemFR.SubtypeMisc.
 

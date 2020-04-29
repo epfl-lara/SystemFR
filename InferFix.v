@@ -1,49 +1,10 @@
 Require Import Coq.Strings.String.
 
-Require Export SystemFR.TypeSugar2.
 Require Export SystemFR.StepTactics.
 Require Export SystemFR.ReducibilityEquivalent.
+Require Export SystemFR.ErasedSingleton.
 
 Opaque reducible_values.
-
-Lemma subst_fix_default:
-  forall t default fuel l tag,
-    wfs l 0 ->
-    psubstitute (fix_default t default fuel) l tag =
-    fix_default (psubstitute t l tag) (psubstitute default l tag) (psubstitute fuel l tag).
-Proof.
-  unfold fix_default; repeat step || t_equality || rewrite substitute_shift_open in *.
-Qed.
-
-Lemma pfv_fix_default:
-  forall t default fuel tag,
-    pfv t tag = nil ->
-    pfv default tag = nil ->
-    pfv fuel tag = nil ->
-    pfv (fix_default t default fuel) tag = nil.
-Proof.
-  repeat step || list_utils || rewrite pfv_shift_open.
-Qed.
-
-Lemma wf_fix_default:
-  forall t default fuel,
-    wf t 1 ->
-    wf default 0 ->
-    wf fuel 0 ->
-    wf (fix_default t default fuel) 0.
-Proof.
-  repeat step; eauto with wf step_tactic.
-Qed.
-
-Lemma is_erased_term_fix_default:
-  forall t default fuel,
-    is_erased_term t ->
-    is_erased_term default ->
-    is_erased_term fuel ->
-    is_erased_term (fix_default t default fuel).
-Proof.
-  repeat step || apply is_erased_term_shift_open.
-Qed.
 
 Lemma fix_default_equivalent_fuel_fuel:
   forall t default fuel fuel',
@@ -57,7 +18,7 @@ Lemma fix_default_equivalent_fuel_fuel:
     pfv default term_var = nil ->
     pfv t term_var = nil ->
     equivalent_terms fuel fuel' ->
-    equivalent_terms (fix_default t default fuel) (fix_default t default fuel').
+    equivalent_terms (fix_default' t default fuel) (fix_default' t default fuel').
 Proof.
   unfold fix_default;
     repeat step.
@@ -78,11 +39,11 @@ Lemma evaluate_fix_default:
     is_nat_value fuel ->
     wf default 0 ->
     wf t 1 ->
-    (fuel = zero /\ star scbv_step (fix_default t default fuel) default) \/
+    (fuel = zero /\ star scbv_step (fix_default' t default fuel) default) \/
     (exists fuel', fuel = succ fuel' /\
-              star scbv_step (fix_default t default fuel) (open 0 t (fix_default t default fuel'))).
+              star scbv_step (fix_default' t default fuel) (open 0 t (fix_default' t default fuel'))).
 Proof.
-  unfold fix_default; inversion 1; steps.
+  unfold fix_default'; inversion 1; steps.
   - left; steps.
     one_step; repeat open_none.
     repeat one_step.
@@ -94,14 +55,14 @@ Proof.
     rewrite no_shift_open; steps; eauto with wf step_tactic.
 Qed.
 
-Opaque fix_default.
-
 Ltac evaluate_fix_default :=
   match goal with
-  | |- context[fix_default ?t ?default ?fuel] =>
+  | |- context[fix_default' ?t ?default ?fuel] =>
     poseNew (Mark (t, default, fuel) "evaluate_fix_default");
     unshelve epose proof (evaluate_fix_default t default fuel _ _ _)
   end.
+
+Opaque fix_default'.
 
 Lemma tfix_fuel_induction:
   forall fuel, is_nat_value fuel ->
@@ -118,7 +79,7 @@ Lemma tfix_fuel_induction:
       pfv T term_var = nil ->
       [ ρ | default : T ] ->
       (forall v, [ ρ | v : T ]v -> [ ρ | open 0 t v : T ]) ->
-      [ ρ | fix_default t default fuel : T ].
+      [ ρ | fix_default' t default fuel : T ].
 Proof.
   induction 1; intros; evaluate_fix_default; steps; eauto with is_nat_value.
   - eapply star_backstep_reducible;
@@ -154,11 +115,11 @@ Lemma tfix_fuel:
     [ ρ | fuel : T_nat ] ->
     [ ρ | default : T ] ->
     (forall v, [ ρ | v : T ]v -> [ ρ | open 0 t v : T ]) ->
-    [ ρ | fix_default t default fuel : T ].
+    [ ρ | fix_default' t default fuel : T ].
 Proof.
   intros.
   unfold reducible, reduces_to in H9; steps.
-  apply reducibility_equivalent2 with (fix_default t default v);
+  apply reducibility_equivalent2 with (fix_default' t default v);
     repeat step || apply tfix_fuel_induction ||
            apply fix_default_equivalent_fuel_fuel ||
            simp_red_top_level_hyp;
@@ -179,7 +140,7 @@ Lemma open_tfix_helper:
     [ Θ; Γ ⊨ fuel : T_nat ] ->
     [ Θ; Γ ⊨ default : T ] ->
     [ Θ; (x, T) :: Γ ⊨ open 0 t (fvar x term_var) : T ] ->
-    [ Θ; Γ ⊨ fix_default t default fuel : T ].
+    [ Θ; Γ ⊨ fix_default' t default fuel : T ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3;
@@ -203,7 +164,7 @@ Lemma open_tfix_helper2:
     [ Γ ⊨ fuel : T_nat ] ->
     [ Γ ⊨ default : T ] ->
     [ (x, T) :: Γ ⊨ open 0 t (fvar x term_var) : T ] ->
-    [ Γ ⊨ fix_default t default fuel : T ].
+    [ Γ ⊨ fix_default' t default fuel : T ].
 Proof.
   eauto using open_tfix_helper.
 Qed.
@@ -219,18 +180,30 @@ Qed.
 
 Lemma open_tfix:
   forall Γ t default x T,
+    is_erased_term global_fuel ->
+    is_erased_term default ->
     is_erased_term t ->
     wf t 1 ->
+    wf default 0 ->
     subset (fv t) (support Γ) ->
     is_erased_type T ->
     wf T 0 ->
     subset (fv T) (support Γ) ->
+    subset (fv default) (support Γ) ->
     ~ x ∈ fv T ->
     ~ x ∈ pfv_context Γ term_var ->
     [ Γ ⊨ default : T ] ->
     [ (x, T) :: Γ ⊨ open 0 t (fvar x term_var) : T ] ->
-    [ Γ ⊨ fix_default' t default : T ].
+    [ Γ ⊨ fix_default t default : T_singleton T (fix_default t default) ].
 Proof.
-  unfold fix_default'; repeat step.
-  eapply open_tfix_helper2; eauto using open_global_fuel_nat.
+  unfold fix_default; intros.
+  apply open_reducible_singleton;
+    repeat step || apply is_erased_term_fix_default || apply wf_fix_default;
+    eauto using is_nat_global_fuel with wf;
+    eauto using open_tfix_helper2, open_global_fuel_nat.
+
+  eapply subset_transitive; eauto using pfv_fix_default2;
+    repeat step || sets || rewrite nat_value_fv;
+    eauto using is_nat_global_fuel;
+    eauto with sets.
 Qed.

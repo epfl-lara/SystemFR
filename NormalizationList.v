@@ -1,10 +1,10 @@
 Require Export SystemFR.ReducibilitySubtype.
 Require Export SystemFR.TermListReducible.
 Require Export SystemFR.SubstitutionErase.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 
 Opaque reducible_values.
-Opaque tsingleton.
+Opaque T_singleton.
 
 Lemma ncons: forall ρ T1 T2 T1' T2',
   valid_interpretation ρ ->

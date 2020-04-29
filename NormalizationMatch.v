@@ -28,14 +28,14 @@ Admitted.
 (*
 Lemma open_normalization:
   forall Θ Γ x T t S S',
-    lookup Nat.eq_dec Γ x = Some (tsingleton T t) ->
+    lookup Nat.eq_dec Γ x = Some (T_singleton T t) ->
     [ Θ; Γ ⊨ S = S' ] ->
     ~ x ∈ fv S'.
 *)
 
 Lemma open_nmatch_2: forall Θ Γ T2 T3 T3' t t1 t2 x y,
   [ t ⤳* tcons t1 t2 ] ->
-  [ Θ; (x, tsingleton T_top t1) :: (y, tsingleton List t2) :: Γ ⊨
+  [ Θ; (x, T_singleton T_top t1) :: (y, T_singleton List t2) :: Γ ⊨
     open 0 (open 1 T3 (fvar x term_var)) (fvar y term_var) = T3' ] -> (* FIXME *)
   ~ x ∈ fv T3' ->
   ~ y ∈ fv T3' ->

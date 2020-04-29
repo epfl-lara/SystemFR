@@ -3,6 +3,12 @@ Require Import Coq.Lists.List.
 
 Require Export SystemFR.ListUtils.
 
+Lemma subset_refl:
+  forall A (s: list A), subset s s.
+Proof.
+  unfold subset; steps.
+Qed.
+
 Lemma in_subset:
   forall {T} (l1 l2: list T) (x: T),
     subset l1 l2 -> x ∈ l1 -> x ∈ l2.

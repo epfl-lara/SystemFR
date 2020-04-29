@@ -1,5 +1,5 @@
 Require Export SystemFR.ErasedTypeRefine.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 
 Opaque reducible_values.
 
@@ -9,10 +9,10 @@ Lemma open_reducible_singleton:
     wf t 0 ->
     subset (fv t) (support Γ) ->
     [ Θ; Γ ⊨ t : T ] ->
-    [ Θ; Γ ⊨ t : tsingleton T t ].
+    [ Θ; Γ ⊨ t : T_singleton T t ].
 Proof.
   intros.
-  unfold tsingleton.
+  unfold T_singleton.
   apply open_reducible_type_refine with uu;
     repeat step || rewrite pfv_shift2 ||
            unfold open_reducible ||

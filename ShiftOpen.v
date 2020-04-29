@@ -265,6 +265,14 @@ Qed.
 
 Hint Resolve pfv_shift: fv.
 
+Lemma pfv_shift2:
+  forall t k i tag,
+    pfv (shift k t i) tag = pfv t tag.
+Proof.
+  induction t;
+    repeat step || list_utils.
+Qed.
+
 Lemma pfv_shift_open:
   forall t k rep tag,
     pfv t tag = nil ->
@@ -278,12 +286,21 @@ Qed.
 
 Hint Resolve pfv_shift_open: fv.
 
-Lemma pfv_shift2:
-  forall t k i tag,
-    pfv (shift k t i) tag = pfv t tag.
+Lemma pfv_shift_open2:
+  forall t k rep tag,
+    subset
+      (pfv (shift_open k t rep) tag)
+      (pfv t tag ++ pfv rep tag).
 Proof.
   induction t;
-    repeat step || list_utils.
+    repeat step || list_utils || sets;
+    eauto with sets;
+    try solve [
+      eapply subset_transitive; eauto; try rewrite pfv_shift2;
+      repeat step || sets;
+      eauto with sets;
+      eauto using subset_left, subset_right, subset_refl
+    ].
 Qed.
 
 Lemma open_shift:

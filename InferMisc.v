@@ -5,12 +5,12 @@ Require Export SystemFR.ErasedArrow.
 Require Export SystemFR.ErasedSingleton.
 
 Opaque reducible_values.
-Opaque tsingleton.
+Opaque T_singleton.
 
 Lemma open_tvar:
   forall Θ Γ x T,
     lookup Nat.eq_dec Γ x = Some T ->
-    [ Θ; Γ ⊨ fvar x term_var : tsingleton T (fvar x term_var) ].
+    [ Θ; Γ ⊨ fvar x term_var : T_singleton T (fvar x term_var) ].
 Proof.
   intros.
   eapply open_reducible_singleton; repeat step || t_lookup || unfold subset;
@@ -30,7 +30,7 @@ Lemma open_tabs:
     is_erased_term t ->
     is_erased_type V ->
     [ (x, U) :: Γ ⊨ open 0 t (fvar x term_var) : open 0 V (fvar x term_var) ] ->
-    [ Γ ⊨ notype_lambda t : tsingleton (T_arrow U V) (notype_lambda t) ].
+    [ Γ ⊨ notype_lambda t : T_singleton (T_arrow U V) (notype_lambda t) ].
 Proof.
   eauto using open_reducible_singleton, open_reducible_lambda.
 Qed.

@@ -1,7 +1,7 @@
 Require Export SystemFR.ReducibilitySubtype.
 Require Export SystemFR.ErasedArrow.
 Require Export SystemFR.RedTactics.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 
 Opaque reducible_values.
 

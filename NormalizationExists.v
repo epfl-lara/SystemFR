@@ -2,20 +2,20 @@ Require Export SystemFR.ReducibilitySubtype.
 Require Export SystemFR.ReducibilityLemmas.
 Require Export SystemFR.TermListReducible.
 Require Export SystemFR.SubstitutionErase.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 
 Opaque reducible_values.
 
 (*
 Lemma open_equivalent_types_trans: forall Θ Γ T1 T2 T3,
   [ Θ; Γ ⊨ open 0 S t = S' ] ->
-  [ Θ; Γ ⊨ T_exists (tsingleton T t) S = S' ].
+  [ Θ; Γ ⊨ T_exists (T_singleton T t) S = S' ].
 Proof.
 *)
 
 Lemma open_nexists: forall Θ Γ S T t,
   [ Θ; Γ ⊨ t : T ] ->
-  [ Θ; Γ ⊨ T_exists (tsingleton T t) S = open 0 S t ].
+  [ Θ; Γ ⊨ T_exists (T_singleton T t) S = open 0 S t ].
 Proof.
 Admitted.
 
@@ -28,9 +28,9 @@ Admitted.
 
 Lemma open_nexists_1: forall Θ Γ S S' T t x,
 (*  [ Θ; Γ ⊨ t : T ] -> ?? *)
-  [ Θ; (x, tsingleton T t) :: Γ ⊨ open 0 S (fvar x term_var) = S' ] ->
+  [ Θ; (x, T_singleton T t) :: Γ ⊨ open 0 S (fvar x term_var) = S' ] ->
   ~ x ∈ fv S' ->
-  [ Θ; Γ ⊨ T_exists (tsingleton T t) S = S' ].
+  [ Θ; Γ ⊨ T_exists (T_singleton T t) S = S' ].
 Proof.
 Admitted.
 

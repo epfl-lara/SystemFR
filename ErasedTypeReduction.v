@@ -7,7 +7,6 @@ Require Export SystemFR.ErasedArrow.
 Require Export SystemFR.ErasedTypeApplication.
 
 Require Export SystemFR.ReducibilityEquivalent.
-Require Export SystemFR.Divergence.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -15,6 +14,7 @@ Opaque makeFresh.
 Definition type_open T1 T2 : tree :=
   T_exists T2 (shift_open 0 T1 (lvar 0 term_var)).
 
+(*
 Definition equivalent_terms_at (theta: interpretation) T t1 t2 :=
   is_erased_term t1 /\
   is_erased_term t2 /\
@@ -29,7 +29,7 @@ Definition equivalent_terms_at (theta: interpretation) T t1 t2 :=
     wf C 1 ->
     pfv C term_var = nil ->
     scbv_normalizing (open 0 C t1) <-> scbv_normalizing (open 0 C t2).
-
+*)
 (*
 Lemma singleton_identity:
   is_singleton [] []
@@ -118,7 +118,7 @@ Qed.
 Lemma sub_singleton_value:
   forall v T,
     closed_value v ->
-    sub_singleton [] [] v (tsingleton T v).
+    sub_singleton [] [] v (T_singleton T v).
 Proof.
   unfold sub_singleton;
     repeat step || simp_red ||

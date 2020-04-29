@@ -1,5 +1,5 @@
 Require Export SystemFR.ReducibilitySubtype.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 
 Opaque reducible_values.
 
@@ -49,17 +49,17 @@ Qed.
 
 Lemma subsing1:
   forall ρ T t,
-    [ ρ | tsingleton T t <: T ].
+    [ ρ | T_singleton T t <: T ].
 Proof.
-  unfold subtype, tsingleton; repeat step || simp_red.
+  unfold subtype, T_singleton; repeat step || simp_red.
 Qed.
 
 Lemma substitute_singleton:
   forall T t l tag,
     wfs l 0 ->
-    psubstitute (tsingleton T t) l tag = tsingleton (psubstitute T l tag) (psubstitute t l tag).
+    psubstitute (T_singleton T t) l tag = T_singleton (psubstitute T l tag) (psubstitute t l tag).
 Proof.
-  unfold tsingleton; repeat step || t_equality || rewrite substitute_shift.
+  unfold T_singleton; repeat step || t_equality || rewrite substitute_shift.
 Qed.
 
 Lemma subtype_trans:
@@ -80,11 +80,11 @@ Proof.
   unfold open_subtype; steps; eauto using subtype_trans.
 Qed.
 
-Opaque tsingleton. (* for open_subsing1 *)
+Opaque T_singleton. (* for open_subsing1 *)
 
 Lemma open_subsing1:
   forall Θ Γ T t,
-    [ Θ; Γ ⊨ tsingleton T t <: T ].
+    [ Θ; Γ ⊨ T_singleton T t <: T ].
 Proof.
   unfold open_subtype; repeat step || rewrite substitute_singleton || apply subsing1;
     eauto with wf.
@@ -93,7 +93,7 @@ Qed.
 Lemma open_subsing_helper:
   forall Θ Γ T1 T2 t,
     [ Θ; Γ ⊨ T1 <: T2 ] ->
-    [ Θ; Γ ⊨ tsingleton T1 t <: T2 ].
+    [ Θ; Γ ⊨ T_singleton T1 t <: T2 ].
 Proof.
   eauto using open_subsing1, open_subtype_trans.
 Qed.
@@ -101,7 +101,7 @@ Qed.
 Lemma open_subsing:
   forall Γ T1 T2 t,
     [ Γ ⊨ T1 <: T2 ] ->
-    [ Γ ⊨ tsingleton T1 t <: T2 ].
+    [ Γ ⊨ T_singleton T1 t <: T2 ].
 Proof.
   eauto using open_subsing_helper.
 Qed.

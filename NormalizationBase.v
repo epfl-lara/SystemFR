@@ -1,5 +1,5 @@
 Require Export SystemFR.ReducibilityDefinition.
-Require Export SystemFR.TypeSugar2.
+Require Export SystemFR.ScalaDepSugar.
 
 Lemma nbase1: forall ρ, [ ρ | T_top = T_top ].
 Proof.
