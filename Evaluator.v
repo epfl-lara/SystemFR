@@ -84,17 +84,25 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
 
     | pi1 t => match getPair t with
               | exist _ None _  => option_map pi1 (ss_eval t)
-              | exist _ (Some (e1, e2)) _ => if (isValue e1) && (isValue e2) then Some e1 else option_map pi1 (ss_eval t) end
+              | exist _ (Some (e1, e2)) _ =>
+                if (isValue e1) && (isValue e2)
+                then Some e1
+                else option_map pi1 (ss_eval t) end
 
     | pi2 t => match getPair t with
               | exist _ None _ => option_map pi2 (ss_eval t)
-              | exist _ (Some (e1, e2)) _ => if (isValue e1) && (isValue e2) then Some e2 else option_map pi2 (ss_eval t) end
+              | exist _ (Some (e1, e2)) _ =>
+                if (isValue e1) && (isValue e2)
+                then Some e2
+                else option_map pi2 (ss_eval t) end
                                                                                                        
     | app t1 t2 => match (isValue t1) with
                     | true => match getApp t1 with
                              | exist _ None _ => option_map (app t1) (ss_eval t2) 
-                             | exist _ (Some ts) _ => if (isValue t2) then Some (open 0 ts t2)
-                                                     else option_map (app t1) (ss_eval t2) end
+                             | exist _ (Some ts) _ =>
+                               if (isValue t2)
+                               then Some (open 0 ts t2)
+                               else option_map (app t1) (ss_eval t2) end
                     | false => option_map (fun e => app e t2) (ss_eval t1) end
                     
     | notype_tfix ts => Some (open 0 (open 1 ts zero) (notype_tfix ts))
@@ -103,7 +111,10 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
                           
     | tmatch t1 t0 ts => match t1 with
                        | zero => Some t0
-                       | succ t2 => if (isValue t2) then Some (open 0 ts t2) else option_map (fun e => tmatch e t0 ts) (ss_eval t1)
+                       | succ t2 =>
+                         if (isValue t2)
+                         then Some (open 0 ts t2)
+                         else option_map (fun e => tmatch e t0 ts) (ss_eval t1)
                        | _ => option_map (fun e => tmatch e t0 ts) (ss_eval t1) end
 
     | sum_match t tl tr => if (isValue t) then match t with
@@ -112,15 +123,6 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
                                    | _ => None end
                           else option_map (fun e => sum_match e tl tr) (ss_eval t)
                             
-                          
-                                           (*
-    | sum_match (tleft v) tl tr => match (isValue v) with
-                                    | true => Some (open 0 tl v)
-                                    | false => option_map (fun e => sum_match (tleft e) tl tr) (ss_eval v) end
-    | sum_match (tright v) tl tr => match (isValue v) with
-                                    | true => Some (open 0 tr v)
-                                    | false => option_map (fun e => sum_match (tright e) tl tr) (ss_eval v) end
-*)
     | tleft t => option_map tleft (ss_eval t)
     | tright t => option_map tright (ss_eval t)
 
@@ -216,89 +218,62 @@ Lemma ss_eval_step : forall t t', ss_eval t = Some t' -> isValue t = true -> Fal
 Proof.
   induction t; repeat step || options.
 Qed.
-
+Ltac finish := repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || congruence || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
 
 
 Lemma ss_eval_correct2: forall t t',(pfv t term_var = nil) -> scbv_step t t' ->  ss_eval t = Some t'.
   intros.
-  induction H0 ; repeat light || list_utils || bools || options || invert_constructor_equalities || instantiate_eq_refl || rewrite <- isValueCorrect in *.
-  - (* pi1 *)
-     repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - (* pi2 *)
-    repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - (* notype_lambda *)
-    repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - (* ite *)
-     repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-  - (* ite2 *)
-     repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.   
-  - (* tfix *)
-     repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.     
-  - (* tmatch *)
-    repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - (* notype_lambda *)
-    repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-    -     pose proof (ss_eval_step _ _ H). destruct (isValue t1). congruence. rewrite H. reflexivity.
-  - (* sum_match2 *)
-    pose proof (ss_eval_step _ _ H). destruct (isValue t1). congruence. rewrite H. rewrite H0. destruct (getApp v) eqn:A . destruct x. reflexivity. reflexivity.
-  - repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto using ss_eval_step with smallstep values.
-    pose proof (ss_eval_step _ _ H matched). inversion H3.
-    pose proof (ss_eval_step _ _ H matched). inversion H3.
-- repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-- repeat light || options || bools || list_utils || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-    pose proof (ss_eval_step _ _  matched0 H4). inversion H1.
--  repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-    pose proof (ss_eval_step _ _  matched0 H3). inversion H1.
-- repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-
-- repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-      pose proof (ss_eval_step _ _  matched0 matched). inversion H.
-
-
-- repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-
-- repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-
-- repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.    
-
-- destruct (isValue t1) eqn:V .  pose proof (ss_eval_step _ _   H V). inversion H2.
-  destruct t1 eqn: T ; repeat light || options || list_utils || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-      
-- pose proof ss_eval_step. repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || destruct_match ; eauto using ss_eval_step with smallstep values.    pose proof (H2 t1 t2 H1 matched). inversion H3.
-  
-
-- rewrite H1. destruct (isValue t1) eqn:V .  pose proof (ss_eval_step _ _   H1 V). inversion H2. reflexivity.
-
-
-Qed.
-
+  induction H0 ; repeat light || list_utils || bools || options || invert_constructor_equalities || destruct_sig || instantiate_eq_refl || rewrite <- isValueCorrect in *.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - finish.
+  - pose proof (ss_eval_step _ _ H). finish.  
+  - pose proof (ss_eval_step _ _ H). finish. 
+  - pose proof (ss_eval_step _ _ H). finish. 
+  - finish.
+  - finish. pose proof (ss_eval_step _ _ matched0). finish. 
+  - finish. pose proof (ss_eval_step _ _ matched0). finish.
+  - finish.
+  - pose proof (ss_eval_step _ _ H). finish.
+  - finish.
+  - finish.
+  - finish.
+  - pose proof (ss_eval_step _ _ H). finish.
+  - pose proof (ss_eval_step _ _ H1). finish.
+  - pose proof (ss_eval_step _ _ H1). finish.
+    Qed.
      
+Ltac finish2 := repeat light || options || bools || list_utils || instantiate_eq_refl || invert_constructor_equalities || rewrite isValueCorrect in * || destruct_sig || congruence || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
+
 Lemma ss_eval_correct1: forall t t', ss_eval t = Some t' -> (pfv t term_var = nil) -> scbv_step t t'.
 Proof.
   induction t; intros ; repeat light.
-  - (* size *)
-    repeat light || options || destruct_match || invert_constructor_equalities || rewrite isValueCorrect in * ; eauto using fv_nil_top_level_var with smallstep.
-  - repeat light || invert_constructor_equalities || instantiate_eq_refl || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-    rewrite (proj1 (i t) eq_refl) ; eauto with smallstep values.
-  - repeat light || invert_constructor_equalities || instantiate_eq_refl || options || bools || list_utils || rewrite isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - repeat light || invert_constructor_equalities || instantiate_eq_refl || options || bools || list_utils || rewrite isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - repeat light || invert_constructor_equalities || instantiate_eq_refl || options || bools || list_utils || rewrite isValueCorrect in * || destruct_sig || destruct_match ; eauto with smallstep values.
-  - destruct (ss_eval t1) ; repeat light || invert_constructor_equalities || destruct_match || list_utils || options || rewrite isValueCorrect in *; eauto with smallstep values.
-  - destruct (isValue t) eqn:V;  repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in * || eauto using isValueCorrect, fv_nil_top_level_var with smallstep values || unfold option_map in H.
-  - (* tleft *) repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-
-  - (* Tmatch *) destruct (ss_eval t1); repeat light || invert_constructor_equalities || list_utils || options || destruct_match || rewrite isValueCorrect in *; eauto with smallstep values.
-  - (* notype_tfix *) repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-  - (* tright *) repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-  - (* tleft *) repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-  - (* sum_match *) repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-Qed.  
+  - finish2.
+  - finish2.
+  - finish2.
+  - finish2.
+  - finish2.
+  - destruct (ss_eval t1); finish2.
+  - finish2.
+  - finish2.
+  - destruct (ss_eval t1); finish2.
+  - finish2.
+  - finish2.
+  - finish2.
+  - repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
+Qed.
 
 
 
-    
+Definition eval (t: tree) (k: nat): (option tree) :=
+  ss_eval_n (
 
 Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
   match k with
@@ -308,6 +283,7 @@ Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
                | None => Some t end
                end.
 Require Extraction.
+
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 
