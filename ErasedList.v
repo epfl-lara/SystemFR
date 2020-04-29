@@ -119,22 +119,3 @@ Lemma open_tcons:
 Proof.
   eauto using open_tcons_helper.
 Qed.
-
-Definition list_match t1 t2 t3 :=
-  sum_match t1 t2
-    (shift_open 0 (shift_open 1 t3 (pi1 (lvar 0 term_var))) (pi2 (lvar 0 term_var))).
-
-Lemma open_tmatch:
-  forall Θ Γ t t2 t3 T2 T3 x1 x2,
-    ~ x1 ∈ support Γ ->
-    ~ x2 ∈ support Γ ->
-    [ Θ; Γ ⊨ t : List ] ->
-    [ Θ; Γ ⊨ t2 : T2 ] ->
-    [ Θ; (x1, T_top) :: (x2, List) :: Γ ⊨
-        open 0 (open 1 t3 (fvar x1 term_var)) (fvar x2 term_var) :
-        open 0 (open 1 T3 (fvar x1 term_var)) (fvar x2 term_var) ] ->
-    [ Θ; Γ ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
-Proof.
-  unfold list_match, List_Match;
-    repeat step.
-Admitted.
