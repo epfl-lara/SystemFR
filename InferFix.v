@@ -180,7 +180,6 @@ Qed.
 
 Lemma open_tfix:
   forall Γ t default x T,
-    is_erased_term global_fuel ->
     is_erased_term default ->
     is_erased_term t ->
     wf t 1 ->
@@ -200,6 +199,7 @@ Proof.
   apply open_reducible_singleton;
     repeat step || apply is_erased_term_fix_default || apply wf_fix_default;
     eauto using is_nat_global_fuel with wf;
+    eauto using is_nat_global_fuel with erased;
     eauto using open_tfix_helper2, open_global_fuel_nat.
 
   eapply subset_transitive; eauto using pfv_fix_default2;
