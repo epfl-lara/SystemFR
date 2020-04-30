@@ -30,7 +30,7 @@ Definition Cons H T :=
 
 Definition list_match t1 t2 t3 :=
   sum_match t1 t2
-    (shift_open 0 (shift_open 1 t3 (pi1 (lvar 0 term_var))) (pi2 (lvar 0 term_var))).
+    (shift_open 1 (shift_open 0 t3 (pi2 (lvar 0 term_var))) (pi1 (lvar 0 term_var))).
 
 Definition List_Match t T2 T3 :=
   T_union
@@ -41,6 +41,36 @@ Definition List_Match t T2 T3 :=
       ))
     )).
 
+Lemma wf_list_match:
+  forall t1 t2 t3,
+    wf t1 0 ->
+    wf t2 0 ->
+    wf t3 2 ->
+    wf (list_match t1 t2 t3) 0.
+Proof.
+  repeat step; eauto 3 with wf step_tactic.
+Qed.
+
+Lemma pfv_list_match:
+  forall t1 t2 t3 tag,
+    pfv t1 tag = nil ->
+    pfv t2 tag = nil ->
+    pfv t3 tag = nil ->
+    pfv (list_match t1 t2 t3) tag = nil.
+Proof.
+  repeat step || list_utils; eauto with fv.
+Qed.
+
+Lemma is_erased_term_list_match:
+  forall t1 t2 t3,
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    is_erased_term t3 ->
+    is_erased_term (list_match t1 t2 t3).
+Proof.
+  repeat step || apply is_erased_term_shift_open.
+Qed.
+
 Lemma substitute_list_match:
   forall t1 t2 t3 l tag,
     wfs l 0 ->
@@ -48,6 +78,36 @@ Lemma substitute_list_match:
     list_match (psubstitute t1 l tag) (psubstitute t2 l tag) (psubstitute t3 l tag).
 Proof.
   unfold list_match; repeat step || t_equality || rewrite substitute_shift_open.
+Qed.
+
+Lemma wf_List_Match:
+  forall t1 T2 T3,
+    wf t1 0 ->
+    wf T2 0 ->
+    wf T3 2 ->
+    wf (List_Match t1 T2 T3) 0.
+Proof.
+  repeat step; eauto 3 with wf step_tactic.
+Qed.
+
+Lemma pfv_List_Match:
+  forall t1 T2 T3 tag,
+    pfv t1 tag = nil ->
+    pfv T2 tag = nil ->
+    pfv T3 tag = nil ->
+    pfv (List_Match t1 T2 T3) tag = nil.
+Proof.
+  repeat step || list_utils; eauto with fv.
+Qed.
+
+Lemma is_erased_type_List_Match:
+  forall t1 T2 T3,
+    is_erased_term t1 ->
+    is_erased_type T2 ->
+    is_erased_type T3 ->
+    is_erased_type (List_Match t1 T2 T3).
+Proof.
+  steps.
 Qed.
 
 Lemma substitute_List_Match:

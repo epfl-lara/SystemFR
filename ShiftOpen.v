@@ -254,6 +254,18 @@ Qed.
 
 Hint Resolve wf_shift_open2: wf.
 
+Lemma wf_shift_open3:
+  forall t k i rep,
+    wf t i ->
+    wf rep i ->
+    wf (shift_open k t rep) i.
+Proof.
+  induction t;
+    try solve [ repeat step; eauto with wf lia ].
+Qed.
+
+Hint Resolve wf_shift_open3: wf.
+
 Lemma pfv_shift:
   forall t k i tag,
     pfv t tag = nil ->
@@ -419,6 +431,31 @@ Lemma shift_open_nothing:
     shift_open k t i = t.
 Proof.
   induction t; repeat step || t_equality; eauto with omega.
+Qed.
+
+Lemma open_shift_open3:
+  forall t k i rep1 rep2,
+    wf rep2 0 ->
+    k < i ->
+    open k (shift_open i t rep1) rep2 = shift_open i (open k t rep2) (open k rep1 rep2).
+Proof.
+  induction t;
+    repeat step || t_equality ||
+           (rewrite shift_open_nothing by eauto with wf) ||
+           (rewrite open_and_shift by eauto with lia);
+    eauto 6 with lia.
+Qed.
+
+Lemma open_shift_open4:
+  forall t k rep1 rep2,
+    wf rep2 0 ->
+    open k (shift_open k t rep1) rep2 = shift_open k t (open k rep1 rep2).
+Proof.
+  induction t;
+    repeat step || t_equality ||
+           (rewrite shift_open_nothing by eauto with wf) ||
+           (rewrite open_and_shift by eauto with lia);
+    eauto 6 with lia.
 Qed.
 
 Lemma substitute_shift_open:

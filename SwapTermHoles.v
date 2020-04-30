@@ -102,16 +102,28 @@ Fixpoint swap_term_holes t i j :=
   end.
 
 Lemma swap_term_holes_open:
-  (forall t j1 j2 rep1 rep2,
+  forall t j1 j2 rep1 rep2,
     j1 <> j2 ->
     wf rep1 0 ->
     wf rep2 0 ->
     open j1 (open j2 t rep2) rep1 =
-    open j1 (open j2 (swap_term_holes t j1 j2) rep1) rep2).
+    open j1 (open j2 (swap_term_holes t j1 j2) rep1) rep2.
 Proof.
   induction t;
     repeat step || t_equality || (rewrite open_none by eauto with wf lia);
     eauto with wf lia.
+Qed.
+
+Lemma open_twice:
+  forall t j1 j2 rep1 rep2,
+    j1 <> j2 ->
+    wf rep1 0 ->
+    wf rep2 0 ->
+    open j1 (open j2 t rep2) rep1 =
+    open j2 (open j1 t rep1) rep2.
+Proof.
+  induction t;
+    repeat step || open_none || t_equality || apply_any.
 Qed.
 
 Lemma swap_term_holes_nothing:
@@ -166,6 +178,18 @@ Proof.
 Qed.
 
 Hint Resolve wf_swap_term_holes_2: wf.
+
+Lemma wf_swap_term_holes_3:
+  forall t k i j,
+    i < k ->
+    j < k ->
+    wf t k ->
+    wf (swap_term_holes t i j) k.
+Proof.
+  induction t; repeat step || unshelve eauto with wf omega.
+Qed.
+
+Hint Resolve wf_swap_term_holes_3: wf.
 
 Lemma twf_swap_term_holes:
   forall t k i j,
