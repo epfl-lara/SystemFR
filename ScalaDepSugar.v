@@ -3,6 +3,15 @@ Require Export SystemFR.ShiftOpen.
 Definition T_singleton T t :=
   T_type_refine T (T_equiv (lvar 0 term_var) (shift 0 t 1)).
 
+Lemma substitute_singleton:
+  forall T t l tag,
+    wfs l 0 ->
+    psubstitute (T_singleton T t) l tag =
+    T_singleton (psubstitute T l tag) (psubstitute t l tag).
+Proof.
+  unfold T_singleton; repeat step || rewrite substitute_shift.
+Qed.
+
 Definition type_application T1 T2 : tree :=
   T_type_refine T_top (
     T_exists T1 (
@@ -59,6 +68,15 @@ Lemma pfv_list_match:
     pfv (list_match t1 t2 t3) tag = nil.
 Proof.
   repeat step || list_utils; eauto with fv.
+Qed.
+
+Lemma pfv_list_match2:
+  forall t1 t2 t3 tag,
+    subset (pfv (list_match t1 t2 t3) tag) (pfv t1 tag ++ pfv t2 tag ++ pfv t3 tag).
+Proof.
+  repeat step || list_utils || sets; eauto with sets.
+  eapply subset_transitive; eauto using pfv_shift_open2; repeat step || sets; eauto with sets.
+  eapply subset_transitive; eauto using pfv_shift_open2; repeat step || sets; eauto with sets.
 Qed.
 
 Lemma is_erased_term_list_match:

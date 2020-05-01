@@ -29,6 +29,15 @@ Proof.
     t_closer.
 Qed.
 
+Lemma reducible_type_refine2:
+  forall ρ t A B,
+    valid_interpretation ρ ->
+    [ ρ | t : T_type_refine A B ] ->
+    [ ρ | t : A ].
+Proof.
+  unfold reducible, reduces_to; repeat step || simp_red; eauto.
+Qed.
+
 Lemma open_reducible_type_refine:
   forall Θ Γ t1 t2 A B,
     is_erased_type B ->

@@ -12,27 +12,35 @@ Lemma open_equivalent_types_trans: forall Θ Γ T1 T2 T3,
   [ Θ; Γ ⊨ T_exists (T_singleton T t) S = S' ].
 Proof.
 *)
-
+(*
 Lemma open_nexists: forall Θ Γ S T t,
   [ Θ; Γ ⊨ t : T ] ->
   [ Θ; Γ ⊨ T_exists (T_singleton T t) S = open 0 S t ].
 Proof.
 Admitted.
+*)
 
-Lemma open_nexists_1_helper: forall Θ Γ S S' T x,
-  [ Θ; (x, T) :: Γ ⊨ open 0 S (fvar x term_var) = S' ] ->
-  ~ x ∈ fv S' ->
-  [ Θ; Γ ⊨ T_exists T S = S' ].
+Lemma nexists_1: forall ρ T t U T',
+  (forall v, [ ρ | v : T_singleton U t ]v -> [ ρ | open 0 T v = T' ]) ->
+  [ ρ | T_exists (T_singleton U t) T = T' ].
 Proof.
+  repeat step || simp_red.
 Admitted.
 
-Lemma open_nexists_1: forall Θ Γ S S' T t x,
+Lemma open_nexists_1_helper: forall Θ Γ T t U T' x,
 (*  [ Θ; Γ ⊨ t : T ] -> ?? *)
-  [ Θ; (x, T_singleton T t) :: Γ ⊨ open 0 S (fvar x term_var) = S' ] ->
-  ~ x ∈ fv S' ->
-  [ Θ; Γ ⊨ T_exists (T_singleton T t) S = S' ].
+  [ Θ; (x, T_singleton U t) :: Γ ⊨ T = T' ] ->
+  [ Θ; Γ ⊨ T_exists (T_singleton U t) T = T' ].
 Proof.
 Admitted.
+
+Lemma open_nexists_1: forall Γ T t U T' x,
+(*  [ Θ; Γ ⊨ t : T ] -> ?? *)
+  [ (x, T_singleton U t) :: Γ ⊨ T = T' ] ->
+  [ Γ ⊨ T_exists (T_singleton U t) T = T' ].
+Proof.
+  intros; eauto using open_nexists_1_helper.
+Qed.
 
 Lemma nexists_2: forall ρ S S' T T',
   valid_interpretation ρ ->

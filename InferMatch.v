@@ -264,13 +264,17 @@ Lemma open_tmatch:
     ~ x1 ∈ pfv_context Γ term_var ->
     ~ x2 ∈ pfv_context Γ term_var ->
     x1 <> x2 ->
+    wf t 0 ->
+    wf t2 0 ->
     wf t3 2 ->
     wf T2 0 ->
     wf T3 2 ->
+    is_erased_term t ->
     is_erased_term t2 ->
     is_erased_term t3 ->
     is_erased_type T2 ->
     is_erased_type T3 ->
+    subset (fv t) (support Γ) ->
     subset (fv t2) (support Γ) ->
     subset (fv t3) (support Γ) ->
     subset (fv T2) (support Γ) ->
@@ -280,7 +284,11 @@ Lemma open_tmatch:
     [ (x1, T_top) :: (x2, List) :: Γ ⊨
         open 0 (open 1 t3 (fvar x1 term_var)) (fvar x2 term_var) :
         open 0 (open 1 T3 (fvar x1 term_var)) (fvar x2 term_var) ] ->
-    [ Γ ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
+    [ Γ ⊨ list_match t t2 t3 : T_singleton (List_Match t T2 T3) (list_match t t2 t3) ].
 Proof.
-  eauto using open_tmatch_helper.
+  repeat step || apply open_reducible_singleton ||
+         apply is_erased_term_list_match || apply wf_list_match;
+    t_closer;
+    eauto using open_tmatch_helper.
+  eapply subset_transitive; eauto using pfv_list_match2; repeat step || sets.
 Qed.

@@ -85,6 +85,24 @@ Qed.
 
 Opaque List_Match.
 
+Lemma open_sub_list_match_scrut_helper:
+  forall Θ Γ t t' T2 T3,
+    is_erased_type T2 ->
+    is_erased_type T3 ->
+    wf T2 0 ->
+    wf T3 2 ->
+    pfv T2 term_var = nil ->
+    pfv T3 term_var = nil ->
+    [ Θ; Γ ⊨ t ≡ t' ] ->
+    [ Θ; Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
+Proof.
+  unfold open_equivalent_types, equivalent_types, open_equivalent;
+    repeat step || rewrite substitute_List_Match in * by eauto with wf.
+  - eapply subtype_list_match_scrut; steps; eauto with erased wf fv.
+  - eapply subtype_list_match_scrut; steps; eauto with erased wf fv;
+      eauto using equivalent_sym.
+Qed.
+
 Lemma open_sub_list_match_scrut:
   forall Γ t t' T2 T3,
     is_erased_type T2 ->
@@ -96,9 +114,5 @@ Lemma open_sub_list_match_scrut:
     [ Γ ⊨ t ≡ t' ] ->
     [ Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
 Proof.
-  unfold open_equivalent_types, equivalent_types, open_equivalent;
-    repeat step || rewrite substitute_List_Match in * by eauto with wf.
-  - eapply subtype_list_match_scrut; steps; eauto with erased wf fv.
-  - eapply subtype_list_match_scrut; steps; eauto with erased wf fv;
-      eauto using equivalent_sym.
+  eauto using open_sub_list_match_scrut_helper.
 Qed.

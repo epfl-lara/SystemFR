@@ -115,7 +115,8 @@ Lemma open_tcons:
     [ Γ ⊨ h : H ] ->
     [ Γ ⊨ t : T ] ->
     [ Γ ⊨ T <: List ] ->
-    [ Γ ⊨ tcons h t : Cons H T ].
+    [ Γ ⊨ tcons h t : T_singleton (Cons H T) (tcons h t) ].
 Proof.
-  eauto using open_tcons_helper.
+  intros; apply open_reducible_singleton; repeat step || sets;
+    eauto using open_tcons_helper.
 Qed.

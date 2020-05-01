@@ -1,9 +1,10 @@
 Require Import PeanoNat.
 
 Require Export SystemFR.NormalizationSing.
+Require Export SystemFR.SubtypeList.
 
 Lemma open_nmatch_3: forall Θ Γ T2 T3 t t',
-  [ t ⤳* t' ] ->
+  [ Γ ⊨ t ⤳* t' ] ->
   [ Θ; Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
 Proof.
 Admitted.
@@ -14,7 +15,7 @@ Proof.
 Admitted.
 
 Lemma open_nmatch_1: forall Θ Γ T2 T2' T3 t,
-  [ t ⤳* tnil ] ->
+  [ Γ ⊨ t ⤳* tnil ] ->
   [ Θ; Γ ⊨ T2 = T2' ] ->
   [ Θ; Γ ⊨ List_Match t T2 T3 = T2' ].
 Proof.
@@ -34,7 +35,7 @@ Lemma open_normalization:
 *)
 
 Lemma open_nmatch_2: forall Θ Γ T2 T3 T3' t t1 t2 x y,
-  [ t ⤳* tcons t1 t2 ] ->
+  [ Γ ⊨ t ⤳* tcons t1 t2 ] ->
   [ Θ; (x, T_singleton T_top t1) :: (y, T_singleton List t2) :: Γ ⊨
     open 0 (open 1 T3 (fvar x term_var)) (fvar y term_var) = T3' ] -> (* FIXME *)
   ~ x ∈ fv T3' ->
