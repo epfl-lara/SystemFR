@@ -27,6 +27,13 @@ Proof.
   unfold subtype, equivalent_types; steps; eauto with eapply_any.
 Qed.
 
+Lemma equivalent_types_refl:
+  forall ρ T,
+    [ ρ | T = T ].
+Proof.
+  unfold equivalent_types; steps; eauto with eapply_any.
+Qed.
+
 Lemma equivalent_types_sym:
   forall ρ T1 T2,
     [ ρ | T1 = T2 ] ->
@@ -43,6 +50,22 @@ Lemma equivalent_types_trans:
 Proof.
   unfold equivalent_types; steps; eauto with eapply_any.
   eapply H0; eapply H; auto.
+Qed.
+
+Lemma subtype_refl:
+  forall ρ T,
+    [ ρ | T <: T ].
+Proof.
+  unfold subtype; steps; eauto with eapply_any.
+Qed.
+
+Lemma subtype_trans:
+  forall ρ T1 T2 T3,
+    [ ρ | T1 <: T2 ] ->
+    [ ρ | T2 <: T3 ] ->
+    [ ρ | T1 <: T3 ].
+Proof.
+  unfold subtype; steps; eauto with eapply_any.
 Qed.
 
 Lemma equivalent_types_reducible_values:
@@ -131,4 +154,44 @@ Lemma open_equivalent_subtype_back:
     [ Θ; Γ ⊨ T2 <: T1 ].
 Proof.
   unfold open_equivalent_types, open_subtype; steps; eauto using subtype_equivalent_types_back.
+Qed.
+
+Lemma open_equivalent_types_refl:
+  forall Θ Γ T,
+    [ Θ; Γ ⊨ T = T ].
+Proof.
+  unfold open_equivalent_types; intros; eauto using equivalent_types_refl.
+Qed.
+
+Lemma open_equivalent_types_sym:
+  forall Θ Γ T1 T2,
+    [ Θ; Γ ⊨ T1 = T2 ] ->
+    [ Θ; Γ ⊨ T2 = T1 ].
+Proof.
+  unfold open_equivalent_types; intros; eauto using equivalent_types_sym.
+Qed.
+
+Lemma open_equivalent_types_trans:
+  forall Θ Γ T1 T2 T3,
+    [ Θ; Γ ⊨ T1 = T2 ] ->
+    [ Θ; Γ ⊨ T2 = T3 ] ->
+    [ Θ; Γ ⊨ T1 = T3 ].
+Proof.
+  unfold open_equivalent_types; intros; eauto using equivalent_types_trans.
+Qed.
+
+Lemma open_subtype_refl:
+  forall Θ Γ T,
+    [ Θ; Γ ⊨ T <: T ].
+Proof.
+  unfold open_subtype; intros; eauto using subtype_refl.
+Qed.
+
+Lemma open_subtype_trans:
+  forall Θ Γ T1 T2 T3,
+    [ Θ; Γ ⊨ T1 <: T2 ] ->
+    [ Θ; Γ ⊨ T2 <: T3 ] ->
+    [ Θ; Γ ⊨ T1 <: T3 ].
+Proof.
+  unfold open_subtype; intros; eauto using subtype_trans.
 Qed.

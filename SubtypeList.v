@@ -91,8 +91,8 @@ Lemma open_sub_list_match_scrut_helper:
     is_erased_type T3 ->
     wf T2 0 ->
     wf T3 2 ->
-    pfv T2 term_var = nil ->
-    pfv T3 term_var = nil ->
+    subset (fv T2) (support Γ) ->
+    subset (fv T3) (support Γ) ->
     [ Θ; Γ ⊨ t ≡ t' ] ->
     [ Θ; Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
 Proof.
@@ -109,8 +109,8 @@ Lemma open_sub_list_match_scrut:
     is_erased_type T3 ->
     wf T2 0 ->
     wf T3 2 ->
-    pfv T2 term_var = nil ->
-    pfv T3 term_var = nil ->
+    subset (fv T2) (support Γ) ->
+    subset (fv T3) (support Γ) ->
     [ Γ ⊨ t ≡ t' ] ->
     [ Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
 Proof.

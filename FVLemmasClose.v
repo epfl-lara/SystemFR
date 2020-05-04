@@ -5,8 +5,6 @@ Require Import Coq.Arith.PeanoNat.
 
 Require Export SystemFR.FVLemmas.
 
-(** Lemmas about closing locally nameless terms, unused at the moment **)
-
 Lemma fv_close:
   forall t k x y,
     y ∈ pfv (close k t x) term_var ->
@@ -89,4 +87,12 @@ Lemma fv_close_nil:
 Proof.
   induction t;
     repeat step || list_utils.
+Qed.
+
+Lemma fv_close_nil2:
+  forall t k x,
+    subset (pfv t term_var) (x :: nil) ->
+    pfv (close k t x) term_var = nil.
+Proof.
+  induction t; repeat step || list_utils || sets.
 Qed.

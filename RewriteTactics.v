@@ -36,3 +36,5 @@ Ltac t_closing :=
     eauto 2 using is_erased_term_twf.
 
 Ltac t_closer := try solve [ t_closing ].
+
+Hint Extern 1 => t_closing: closing.

@@ -41,28 +41,26 @@ The typing algorithm maintains the following invariants, which are not proven in
 We prove the following properties and the soundness of the rules used in our algorithm.
 
 Properties: 0/3
-Rules: 21/26
-Total: 21/29
+Rules: 27/27
 
 #### Required properties (0/3)
 
 * `widen` gives a larger type `widen_open_subtype` in [InferApp.v](InferApp.v) (WIP)
 * `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [NormalizationSing.v](NormalizationSing.v) (WIP)
-* `\mathcal{N}` returns an equivalent type (WIP)
+* `untangle` returns an equivalent type `untangle_equivalent_types` in [Untangle.v](Untangle.v) (WIP)
 
 
-#### Normalization Rules (5/9)
+#### Normalization Rules (9/9)
 
 * NBase: `open_nbase1` and `open_nbase2` in [NormalizationBase.v](NormalizationBase.v)
+* NExists1: `open_nexists_1` in [NormalizationExists.v](NormalizationExists.v)
 * NExists2: `open_nexists_2` in [NormalizationExists.v](NormalizationExists.v)
 * NPi: `open_npi` in [NormalizationPi.v](NormalizationPi.v)
 * NCons: `open_ncons` in [NormalizationList.v](NormalizationList.v)
 * NSing: `open_nsing` in [NormalizationSing.v](NormalizationSing.v)
-
-* NMatch1: NormalizationMatch.v (WIP)
-* NMatch2: NormalizationMatch.v (WIP)
-* NMatch3: NormalizationMatch.v (WIP)
-* NExists1: `open_exists_1` in NormalizationExists.v (WIP)
+* NMatch1: `open_nmatch_1` in [NormalizationMatch.v](NormalizationMatch.v)
+* NMatch2: `open_nmatch_2` in [NormalizationMatch.v](NormalizationMatch.v)
+* NMatch3: `open_nmatch_3` in [NormalizationMatch.v](NormalizationMatch.v)
 
 
 #### Inference Rules (8/8)
@@ -77,7 +75,7 @@ Total: 21/29
 * TApp: `open_tapp` in [InferApp.v](InferApp.v)
 
 
-#### Subtyping Rules (8/9)
+#### Subtyping Rules (10/10)
 
 * SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v)
 * SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v)
@@ -87,8 +85,8 @@ Total: 21/29
 * SubExistsLeft: `open_sub_exists_left` in [SubtypeExists](SubtypeExists.v)
 * SubExistsRight: `open_sub_exists_right` in [SubtypeExists](SubtypeExists.v)
 * SubMatch: `open_submatch` in [SubtypeMatch.v](SubtypeMatch.v)
-
-* SubNorm: (WIP)
+* SubNormWiden: `open_subnormwiden` in [SubtypeNorm.v](SubtypeNorm.v)
+* SubNorm: `open_subnorm` in [SubtypeNorm.v](SubtypeNorm.v)
 
 
 

@@ -6,6 +6,8 @@ Require Export SystemFR.ScalaDepSugar.
 Opaque reducible_values.
 
 Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
+| DBTrue: forall Γ, delta_beta_reduction Γ ttrue ttrue
+| DBFalse: forall Γ, delta_beta_reduction Γ tfalse tfalse
 .
 
 (*Notation "'[' Γ ⊨ t1 '⤳' t2 ']'" := (delta_beta_step Γ t1 t2)

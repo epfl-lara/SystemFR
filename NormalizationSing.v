@@ -93,26 +93,3 @@ Lemma open_nsing:
 Proof.
   eauto using open_nsing_helper, delta_beta_obs_equiv.
 Qed.
-
-(*
-Lemma open_ndelta2:
-  forall Θ Γ T t x S S',
-    lookup Nat.eq_dec Γ x = Some (T_singleton T t) ->
-    [ Θ; remove Γ x ⊨ substitute S ((x, t) :: nil) = S' ] ->
-    [ Θ; Γ ⊨ S = S' ].
-Proof.
-Admitted.
-*)
-
-(*
-Lemma open_ndelta:
-  forall Θ Γ T t x S,
-    lookup Nat.eq_dec Γ x = Some (T_singleton T t) ->
-    [ Θ; Γ ⊨ S = substitute S ((x, t) :: nil) ].
-Proof.
-  unfold open_equivalent_types; steps.
-Admitted.
-
-Definition remove (Γ: context) (x: nat) : context.
-Admitted.
-*)
