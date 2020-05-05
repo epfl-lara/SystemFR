@@ -27,24 +27,11 @@ Proof.
   eauto using open_subtop_helper.
 Qed.
 
-Lemma subtype_refl:
-  forall ρ T, [ ρ | T <: T ].
-Proof.
-  unfold subtype; steps.
-Qed.
-
-Lemma open_subrefl_helper:
-  forall Θ Γ T,
-    [ Θ; Γ ⊨ T <: T ].
-Proof.
-  unfold open_subtype; intros; eauto using subtype_refl.
-Qed.
-
 Lemma open_subrefl:
   forall Γ T,
     [ Γ ⊨ T <: T ].
 Proof.
-  eauto using open_subrefl_helper.
+  eauto using open_subtype_refl.
 Qed.
 
 Lemma subsing1:
@@ -52,32 +39,6 @@ Lemma subsing1:
     [ ρ | T_singleton T t <: T ].
 Proof.
   unfold subtype, T_singleton; repeat step || simp_red.
-Qed.
-
-Lemma substitute_singleton:
-  forall T t l tag,
-    wfs l 0 ->
-    psubstitute (T_singleton T t) l tag = T_singleton (psubstitute T l tag) (psubstitute t l tag).
-Proof.
-  unfold T_singleton; repeat step || t_equality || rewrite substitute_shift.
-Qed.
-
-Lemma subtype_trans:
-  forall ρ T1 T2 T3,
-    [ ρ | T1 <: T2 ] ->
-    [ ρ | T2 <: T3 ] ->
-    [ ρ | T1 <: T3 ].
-Proof.
-  unfold subtype; steps.
-Qed.
-
-Lemma open_subtype_trans:
-  forall Θ Γ T1 T2 T3,
-    [ Θ; Γ ⊨ T1 <: T2 ] ->
-    [ Θ; Γ ⊨ T2 <: T3 ] ->
-    [ Θ; Γ ⊨ T1 <: T3 ].
-Proof.
-  unfold open_subtype; steps; eauto using subtype_trans.
 Qed.
 
 Opaque T_singleton. (* for open_subsing1 *)
@@ -104,23 +65,4 @@ Lemma open_subsing:
     [ Γ ⊨ T_singleton T1 t <: T2 ].
 Proof.
   eauto using open_subsing_helper.
-Qed.
-
-Lemma subtype_antisym:
-  forall ρ T1 T2 ,
-    [ ρ | T1 <: T2 ] ->
-    [ ρ | T2 <: T1 ] ->
-    [ ρ | T1 = T2 ].
-Proof.
-  unfold subtype, equivalent_types; steps.
-Qed.
-
-Lemma open_subtype_antisym:
-  forall Θ Γ T1 T2 ,
-    [ Θ; Γ ⊨ T1 <: T2 ] ->
-    [ Θ; Γ ⊨ T2 <: T1 ] ->
-    [ Θ; Γ ⊨ T1 = T2 ].
-Proof.
-  unfold open_subtype, open_equivalent_types; steps;
-    eauto using subtype_antisym.
 Qed.

@@ -195,3 +195,22 @@ Lemma open_subtype_trans:
 Proof.
   unfold open_subtype; intros; eauto using subtype_trans.
 Qed.
+
+Lemma subtype_antisym:
+  forall ρ T1 T2 ,
+    [ ρ | T1 <: T2 ] ->
+    [ ρ | T2 <: T1 ] ->
+    [ ρ | T1 = T2 ].
+Proof.
+  unfold subtype, equivalent_types; steps.
+Qed.
+
+Lemma open_subtype_antisym:
+  forall Θ Γ T1 T2 ,
+    [ Θ; Γ ⊨ T1 <: T2 ] ->
+    [ Θ; Γ ⊨ T2 <: T1 ] ->
+    [ Θ; Γ ⊨ T1 = T2 ].
+Proof.
+  unfold open_subtype, open_equivalent_types; steps;
+    eauto using subtype_antisym.
+Qed.

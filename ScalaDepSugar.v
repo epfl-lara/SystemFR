@@ -12,6 +12,48 @@ Proof.
   unfold T_singleton; repeat step || rewrite substitute_shift.
 Qed.
 
+Lemma open_singleton:
+  forall rep ty t,
+    wf t 1 ->
+    wf rep 0 ->
+    open 0 (T_singleton ty t) rep =
+    T_singleton (open 0 ty rep) (open 0 t rep).
+Proof.
+  unfold T_singleton; repeat step || t_equality.
+  change 1 with (0 + 1) at 1.
+  rewrite <- open_shift by auto.
+  rewrite shift_nothing2; eauto with wf.
+Qed.
+
+Lemma is_erased_type_singleton:
+  forall ty t,
+    is_erased_type ty ->
+    is_erased_term t ->
+    is_erased_type (T_singleton ty t).
+Proof.
+  steps; eauto with erased.
+Qed.
+
+Hint Resolve is_erased_type_singleton: erased.
+
+Lemma wf_singleton:
+  forall ty t,
+    wf ty 0 ->
+    wf t 0 ->
+    wf (T_singleton ty t) 0.
+Proof.
+  steps; eauto with wf.
+Qed.
+
+Hint Resolve wf_singleton: wf.
+
+Lemma fv_singleton:
+  forall ty t tag,
+    pfv (T_singleton ty t) tag = pfv ty tag ++ pfv t tag.
+Proof.
+  repeat step || rewrite pfv_shift2.
+Qed.
+
 Definition type_application T1 T2 : tree :=
   T_type_refine T_top (
     T_exists T1 (

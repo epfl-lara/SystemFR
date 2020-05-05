@@ -40,12 +40,13 @@ The typing algorithm maintains the following invariants, which are not proven in
 
 We prove the following properties and the soundness of the rules used in our algorithm.
 
-Properties: 0/3
+Properties: 1/3
 Rules: 27/27
 
-#### Required properties (0/3)
+#### Required properties (1/3)
 
-* `widen` gives a larger type `widen_open_subtype` in [InferApp.v](InferApp.v) (WIP)
+* `widen` gives a larger type `widen_open_subtype` in [InferApp.v](InferApp.v)
+
 * `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [NormalizationSing.v](NormalizationSing.v) (WIP)
 * `untangle` returns an equivalent type `untangle_equivalent_types` in [Untangle.v](Untangle.v) (WIP)
 
