@@ -47,7 +47,7 @@ Rules: 27/27
 
 * `widen` gives a larger type `widen_open_subtype` in [InferApp.v](InferApp.v)
 
-* `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [NormalizationSing.v](NormalizationSing.v) (WIP)
+* `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [DeltaBetaReduction.v](DeltaBetaReduction.v) (WIP)
 * `untangle` returns an equivalent type `untangle_equivalent_types` in [Untangle.v](Untangle.v) (WIP)
 
 
