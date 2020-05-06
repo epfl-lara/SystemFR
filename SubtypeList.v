@@ -1,4 +1,5 @@
-Require Export SystemFR.ErasedList.
+Require Export SystemFR.ReducibilityOpenEquivalent.
+Require Export SystemFR.ScalaDepSugar.
 
 Opaque reducible_values.
 

@@ -24,6 +24,17 @@ Proof.
   apply open_reducible_unit.
 Qed.
 
+Lemma no_type_fvar_List:
+  forall vars, no_type_fvar List vars.
+Proof.
+  unfold no_type_fvar; steps.
+Qed.
+
+Lemma cbv_value_nil: cbv_value tnil.
+Proof.
+  unfold tnil; eauto with values.
+Qed.
+
 Lemma open_tnil_helper:
   forall Θ Γ,
     [ Θ; Γ ⊨ tnil : T_singleton List tnil ].
@@ -119,4 +130,21 @@ Lemma open_tcons:
 Proof.
   intros; apply open_reducible_singleton; repeat step || sets;
     eauto using open_tcons_helper.
+Qed.
+
+Opaque tnil.
+Opaque List.
+
+Lemma reducible_nil:
+  forall ρ,
+    valid_interpretation ρ ->
+    [ ρ | tnil : List ]v.
+Proof.
+  unshelve epose proof (open_reducible_nil nil nil); steps.
+  rewrite (List.app_nil_end ρ).
+  apply reducible_unused_many2; repeat step || apply reducible_expr_value;
+    eauto using no_type_fvar_List;
+    eauto using cbv_value_nil.
+  unfold open_reducible in *; repeat step.
+  unshelve epose proof (H nil nil _ _ _); steps.
 Qed.

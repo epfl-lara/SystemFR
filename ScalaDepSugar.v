@@ -102,6 +102,8 @@ Proof.
   repeat step; eauto 3 with wf step_tactic.
 Qed.
 
+Hint Resolve wf_list_match: wf.
+
 Lemma pfv_list_match:
   forall t1 t2 t3 tag,
     pfv t1 tag = nil ->
@@ -111,6 +113,8 @@ Lemma pfv_list_match:
 Proof.
   repeat step || list_utils; eauto with fv.
 Qed.
+
+Hint Resolve pfv_list_match: fv.
 
 Lemma pfv_list_match2:
   forall t1 t2 t3 tag,
@@ -131,6 +135,8 @@ Proof.
   repeat step || apply is_erased_term_shift_open.
 Qed.
 
+Hint Resolve is_erased_term_list_match: erased.
+
 Lemma substitute_list_match:
   forall t1 t2 t3 l tag,
     wfs l 0 ->
@@ -150,6 +156,8 @@ Proof.
   repeat step; eauto 3 with wf step_tactic.
 Qed.
 
+Hint Resolve wf_List_Match: wf.
+
 Lemma pfv_List_Match:
   forall t1 T2 T3 tag,
     pfv t1 tag = nil ->
@@ -160,6 +168,8 @@ Proof.
   repeat step || list_utils; eauto with fv.
 Qed.
 
+Hint Resolve pfv_List_Match: fv.
+
 Lemma is_erased_type_List_Match:
   forall t1 T2 T3,
     is_erased_term t1 ->
@@ -169,6 +179,8 @@ Lemma is_erased_type_List_Match:
 Proof.
   steps.
 Qed.
+
+Hint Resolve is_erased_type_List_Match: erased.
 
 Lemma substitute_List_Match:
   forall t1 t2 t3 l tag,
