@@ -1,5 +1,6 @@
 Require Export SystemFR.Trees.
 Require Export SystemFR.Syntax.
+Require Export SystemFR.TypeErasure.
 Require Export SystemFR.Freshness.
 Require Export SystemFR.Notations.
 Import Notations.UnTyped.
@@ -45,7 +46,7 @@ Proof.
   - induction v; repeat step || bools; eauto with values.
   - induction 1; repeat step || bools.
 Qed.
-
+       
 Definition getPair t : {t': option (tree*tree) | forall t1 t2, t' = Some (t1, t2) <-> t = pp t1 t2}.
   Proof.
     exists ( match t with
@@ -137,6 +138,26 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
   end.
 
 
+
+Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
+  match k with
+    | 0 => Some t
+    | S k' => match ss_eval t with
+               | Some t' => ss_eval_n t' k'
+               | None => Some t end
+  end.
+
+Definition eval (t: tree) (k: nat): (option tree) :=
+  ss_eval_n (erase_term t) k.
+
+
+Require Extraction.
+
+Extraction Language Ocaml.
+Set Extraction AccessOpaque.
+
+
+Extraction "evaluator.ml" eval. 
     
 
 
@@ -211,84 +232,41 @@ end. (* match on type of t = sig *)
 
 
 
-
-
+Require Import Coq.Strings.String.
 
 Lemma ss_eval_step : forall t t', ss_eval t = Some t' -> isValue t = true -> False.
 Proof.
   induction t; repeat step || options.
 Qed.
+Ltac ss_eval_step :=
+  match goal with
+  |H: ss_eval ?t1 = Some ?t2 |- _ => poseNew (Mark (t1, t2) "ss_eval_step_h");
+                                   pose proof  (ss_eval_step _ _ H) end.
+
+
+
+
 Ltac finish := repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || congruence || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
 
 
 Lemma ss_eval_correct2: forall t t',(pfv t term_var = nil) -> scbv_step t t' ->  ss_eval t = Some t'.
   intros.
-  induction H0 ; repeat light || list_utils || bools || options || invert_constructor_equalities || destruct_sig || instantiate_eq_refl || rewrite <- isValueCorrect in *.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - finish.
-  - pose proof (ss_eval_step _ _ H). finish.  
-  - pose proof (ss_eval_step _ _ H). finish. 
-  - pose proof (ss_eval_step _ _ H). finish. 
-  - finish.
-  - finish. pose proof (ss_eval_step _ _ matched0). finish. 
-  - finish. pose proof (ss_eval_step _ _ matched0). finish.
-  - finish.
-  - pose proof (ss_eval_step _ _ H). finish.
-  - finish.
-  - finish.
-  - finish.
-  - pose proof (ss_eval_step _ _ H). finish.
-  - pose proof (ss_eval_step _ _ H1). finish.
-  - pose proof (ss_eval_step _ _ H1). finish.
-    Qed.
-     
-Ltac finish2 := repeat light || options || bools || list_utils || instantiate_eq_refl || invert_constructor_equalities || rewrite isValueCorrect in * || destruct_sig || congruence || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
+  induction H0 ; repeat light || list_utils || bools || options || invert_constructor_equalities || destruct_sig || instantiate_eq_refl || rewrite <- isValueCorrect in * || ss_eval_step || finish.
+Qed.
+
+Ltac finish2 := repeat light || options || bools || list_utils || instantiate_eq_refl || invert_constructor_equalities || rewrite isValueCorrect in * || destruct_sig || congruence ||  step_inversion cbv_value || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
+
+Ltac destruct_ss_eval :=
+  match goal with
+    | H: context[ss_eval ?t] |- _ => destruct (ss_eval t) end.
+
 
 Lemma ss_eval_correct1: forall t t', ss_eval t = Some t' -> (pfv t term_var = nil) -> scbv_step t t'.
 Proof.
-  induction t; intros ; repeat light.
-  - finish2.
-  - finish2.
-  - finish2.
-  - finish2.
-  - finish2.
-  - destruct (ss_eval t1); finish2.
-  - finish2.
-  - finish2.
-  - destruct (ss_eval t1); finish2.
-  - finish2.
-  - finish2.
-  - finish2.
-  - repeat light || invert_constructor_equalities || list_utils || destruct_match || options || rewrite isValueCorrect in *; eauto with smallstep values.
-Qed.
+  induction t; intros ; repeat light ; destruct_ss_eval ; finish2. Qed.
 
 
 
-Definition eval (t: tree) (k: nat): (option tree) :=
-  ss_eval_n (
-
-Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
-  match k with
-    | 0 => Some t
-    | S k' => match ss_eval t with
-               | Some t' => ss_eval_n t' k'
-               | None => Some t end
-               end.
-Require Extraction.
-
-Extraction Language Ocaml.
-Set Extraction AccessOpaque.
-
-
-Extraction "evaluator.ml" ss_eval_n.
 
 Definition example1 :=
 [|
