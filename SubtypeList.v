@@ -26,6 +26,37 @@ Proof.
   eauto using open_subcons_helper.
 Qed.
 
+Opaque List.
+
+Lemma open_subcons2_helper:
+  forall Θ Γ H H' T T',
+    is_erased_type T' ->
+    wf T 0 ->
+    wf T' 0 ->
+    [ Θ; Γ ⊨ H <: H' ] ->
+    [ Θ; Γ ⊨ T <: T' ] ->
+    [ Θ; Γ ⊨ Cons H T <: Cons H' T' ].
+Proof.
+  unfold open_subtype, subtype;
+    repeat step || simp_red_top_level_hyp || simp_red_top_level_goal || open_none;
+    eauto 2 with erased.
+
+  exists a; repeat step || simp_red.
+  exists a0; repeat step || simp_red || open_none; eauto.
+Qed.
+
+Lemma open_subcons2:
+  forall Γ H H' T T',
+    is_erased_type T' ->
+    wf T 0 ->
+    wf T' 0 ->
+    [ Γ ⊨ H <: H' ] ->
+    [ Γ ⊨ T <: T' ] ->
+    [ Γ ⊨ Cons H T <: Cons H' T' ].
+Proof.
+  eauto using open_subcons2_helper.
+Qed.
+
 Lemma subtype_list_match_scrut:
   forall ρ t t' T2 T3,
     valid_interpretation ρ ->

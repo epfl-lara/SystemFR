@@ -297,3 +297,5 @@ Proof. steps. Qed.
 
 Lemma subst_list: forall l tag, psubstitute List l tag = List.
 Proof. steps. Qed.
+
+Definition let' t1 t2 := app (notype_lambda t2) t1.
