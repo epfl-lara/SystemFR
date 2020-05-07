@@ -124,18 +124,23 @@ Qed.
 Lemma open_tlet:
   forall Γ t1 t2 T1 T2 x,
     is_erased_type T2 ->
+    is_erased_term t1 ->
     is_erased_term t2 ->
     wf T1 0 ->
     wf T2 1 ->
+    wf t1 0 ->
     wf t2 1 ->
     subset (fv T1) (support Γ) ->
     subset (fv T2) (support Γ) ->
+    subset (fv t1) (support Γ) ->
     subset (fv t2) (support Γ) ->
     subset (pfv_context Γ term_var) (support Γ) ->
     ~ x ∈ support Γ ->
     [ Γ ⊨ t1 : T1 ] ->
     [ (x, T1) :: Γ ⊨ open 0 t2 (fvar x term_var) : open 0 T2 (fvar x term_var) ] ->
-    [ Γ ⊨ let' t1 t2 : open 0 T2 t1 ].
+    [ Γ ⊨ let' t1 t2 : T_singleton (open 0 T2 t1) (let' t1 t2) ].
 Proof.
-  eauto using open_tlet_helper.
+  intros.
+  apply open_reducible_singleton; repeat step || sets || simp_red;
+    eauto using open_tlet_helper.
 Qed.
