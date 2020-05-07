@@ -237,6 +237,8 @@ Proof.
     eauto using wf_shift_open2 with wf step_tactic.
 Qed.
 
+Hint Resolve wf_fix_default: wf.
+
 Lemma subst_fix_default:
   forall t default fuel l tag,
     wfs l 0 ->
@@ -255,6 +257,8 @@ Lemma pfv_fix_default:
 Proof.
   repeat step || list_utils || rewrite pfv_shift_open.
 Qed.
+
+Hint Resolve pfv_fix_default: fv.
 
 Lemma pfv_fix_default2:
   forall t default fuel tag,
@@ -275,6 +279,8 @@ Lemma is_erased_term_fix_default:
 Proof.
   repeat step || apply is_erased_term_shift_open.
 Qed.
+
+Hint Resolve is_erased_term_fix_default: erased.
 
 Lemma is_erased_list: is_erased_type List.
 Proof. steps. Qed.

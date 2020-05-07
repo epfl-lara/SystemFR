@@ -40,14 +40,14 @@ The typing algorithm maintains the following invariants, which are not proven in
 
 We prove the following properties and the soundness of the rules used in our algorithm.
 
-Properties: 1/3
-Rules: 27/27
+* Properties: 2/3
+* Rules: 27/29
 
-#### Required properties (1/3)
+#### Required properties (2/3)
 
 * `widen` gives a larger type `widen_open_subtype` in [InferApp.v](InferApp.v)
+* `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [DeltaBetaReduction.v](DeltaBetaReduction.v)
 
-* `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [DeltaBetaReduction.v](DeltaBetaReduction.v) (WIP)
 * `untangle` returns an equivalent type `untangle_equivalent_types` in [Untangle.v](Untangle.v) (WIP)
 
 
@@ -64,7 +64,7 @@ Rules: 27/27
 * NMatch3: `open_nmatch_3` in [NormalizationMatch.v](NormalizationMatch.v)
 
 
-#### Inference Rules (8/8)
+#### Inference Rules (8/9)
 
 * TVar: `open_tvar` in [InferMisc.v](InferMisc.v)
 * TNil: `open_tnil` in [ErasedList.v](ErasedList.v)
@@ -75,13 +75,14 @@ Rules: 27/27
 * TMatch: `open_tmatch` in [InferMatch.v](InferMatch.v)
 * TApp: `open_tapp` in [InferApp.v](InferApp.v)
 
+* TLet (WIP)
 
-#### Subtyping Rules (10/10)
+#### Subtyping Rules (10/11)
 
 * SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v)
 * SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v)
 * SubSing: `open_subsing` in [SubtypeMisc.v](SubtypeMisc.v)
-* SubCons: `open_subcons` in [SubtypeList.v](SubtypeList.v)
+* SubCons1: `open_subcons1` in [SubtypeList.v](SubtypeList.v)
 * SubPi: `open_subpi` in [SubtypePi.v](SubtypePi.v)
 * SubExistsLeft: `open_sub_exists_left` in [SubtypeExists](SubtypeExists.v)
 * SubExistsRight: `open_sub_exists_right` in [SubtypeExists](SubtypeExists.v)
@@ -89,6 +90,7 @@ Rules: 27/27
 * SubNormWiden: `open_subnormwiden` in [SubtypeNorm.v](SubtypeNorm.v)
 * SubNorm: `open_subnorm` in [SubtypeNorm.v](SubtypeNorm.v)
 
+* SubCons2 (WIP)
 
 
 [larabot-img]: http://laraquad4.epfl.ch:9000/epfl-lara/SystemFR/status/master

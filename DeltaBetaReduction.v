@@ -3,12 +3,12 @@ Require Import Equations.Equations.
 Require Import PeanoNat.
 
 Require Export SystemFR.EquivalentContext.
-Require Export SystemFR.EvalListMatch.
 Require Export SystemFR.ErasedList.
 Require Export SystemFR.EquivalenceLemmas3.
+Require Export SystemFR.EvalListMatch.
+Require Export SystemFR.EvalFixDefault.
 
 Opaque reducible_values.
-
 
 (*
 Inductive cbv_open_value: tree -> Prop :=
@@ -148,6 +148,12 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
 
 | DBListMatch3:
     forall Γ t t' t1 t2,
+      is_erased_term t1 ->
+      is_erased_term t2 ->
+      wf t1 0 ->
+      wf t2 2 ->
+      subset (fv t1) (support Γ) ->
+      subset (fv t2) (support Γ) ->
       [ Γ ⊨ t ⤳* t' ] ->
       [ Γ ⊨ list_match t t1 t2 ⤳* list_match t' t1 t2 ]
 
@@ -163,11 +169,24 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
 
 | DBFix0:
     forall Γ t default v,
+      wf default 0 ->
+      wf t 1 ->
+      is_erased_term default ->
+      is_erased_term t ->
+      subset (fv default) (support Γ) ->
+      subset (fv t) (support Γ) ->
       [ Γ ⊨ default ⤳* v ] ->
       [ Γ ⊨ fix_default' t default zero  ⤳* v ]
 
 | DBFix:
     forall Γ t default fuel v,
+      is_nat_value fuel ->
+      wf default 0 ->
+      wf t 1 ->
+      is_erased_term default ->
+      is_erased_term t ->
+      subset (fv default) (support Γ) ->
+      subset (fv t) (support Γ) ->
       [ Γ ⊨ open 0 t (fix_default' t default fuel) ⤳* v ] ->
       [ Γ ⊨ fix_default' t default (succ fuel) ⤳* v ]
 
@@ -606,6 +625,96 @@ Proof.
   - apply equivalent_sym; equivalent_star; eauto using pp_pp_star_2.
 Qed.
 
+Lemma delta_beta_list_match_scrut:
+  forall Θ Γ t t' t1 t2,
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    wf t1 0 ->
+    wf t2 2 ->
+    subset (fv t1) (support Γ) ->
+    subset (fv t2) (support Γ) ->
+    [ Θ; Γ ⊨ t ≡ t' ] ->
+    [ Θ; Γ ⊨ list_match t t1 t2 ≡ list_match t' t1 t2 ].
+Proof.
+  unfold open_equivalent; repeat step || rewrite substitute_list_match;
+    try apply equivalent_list_match_scrut;
+    eauto with erased wf fv.
+Qed.
+
+Lemma open_equivalent_context:
+  forall Θ Γ t1 t2 C,
+    is_erased_term C ->
+    wf C 1 ->
+    subset (fv C) (support Γ) ->
+    [ Θ; Γ ⊨ t1 ≡ t2 ] ->
+    [ Θ; Γ ⊨ open 0 C t1 ≡ open 0 C t2 ].
+Proof.
+  unfold open_equivalent;
+    repeat step || t_instantiate_sat3 || t_substitutions || apply equivalent_context;
+    eauto with fv wf erased.
+Qed.
+
+Lemma delta_beta_left:
+  forall Θ Γ t t',
+    [ Θ; Γ ⊨ t ≡ t' ] ->
+    [ Θ; Γ ⊨ tleft t ≡ tleft t' ].
+Proof.
+  intros.
+  unshelve epose proof (open_equivalent_context _ _ _ _ (tleft (lvar 0 term_var)) _ _ _ H);
+    steps; eauto with sets.
+Qed.
+
+Lemma delta_beta_right:
+  forall Θ Γ t t',
+    [ Θ; Γ ⊨ t ≡ t' ] ->
+    [ Θ; Γ ⊨ tright t ≡ tright t' ].
+Proof.
+  intros.
+  unshelve epose proof (open_equivalent_context _ _ _ _ (tright (lvar 0 term_var)) _ _ _ H);
+    steps; eauto with sets.
+Qed.
+
+Opaque fix_default'.
+
+Lemma delta_beta_fix_zero:
+  forall Γ t default v,
+    wf default 0 ->
+    wf t 1 ->
+    is_erased_term default ->
+    is_erased_term t ->
+    subset (fv default) (support Γ) ->
+    subset (fv t) (support Γ) ->
+    [ Γ ⊨ default ≡ v ] ->
+    [ Γ ⊨ fix_default' t default zero ≡ v ].
+Proof.
+  unfold open_equivalent; repeat step || rewrite subst_fix_default; eauto with wf.
+
+  evaluate_fix_default; steps; eauto with wf.
+  eapply equivalent_trans; eauto.
+
+  equivalent_star; eauto 4 with fv erased wf step_tactic.
+Qed.
+
+Lemma delta_beta_fix_succ:
+  forall Γ t default fuel v,
+    is_nat_value fuel ->
+    wf default 0 ->
+    wf t 1 ->
+    is_erased_term default ->
+    is_erased_term t ->
+    subset (fv default) (support Γ) ->
+    subset (fv t) (support Γ) ->
+    [ Γ ⊨ open 0 t (fix_default' t default fuel) ≡ v ] ->
+    [ Γ ⊨ fix_default' t default (succ fuel) ≡ v ].
+Proof.
+  unfold open_equivalent; repeat step || t_instantiate_sat3_nil || t_substitutions ||
+                                 rewrite subst_fix_default in * by eauto with wf.
+  evaluate_fix_default; repeat step || rewrite (substitute_nothing5 fuel) in * by eauto with fv;
+    eauto with wf; eauto with is_nat_value.
+  eapply equivalent_trans; eauto.
+  equivalent_star; eauto with erased wf fv step_tactic.
+Qed.
+
 Lemma delta_beta_obs_equiv:
   forall Γ t1 t2,
     [ Γ ⊨ t1 ⤳* t2 ] ->
@@ -623,5 +732,10 @@ Proof.
     eauto using delta_beta_match_scrut;
     eauto using delta_beta_list_match_nil;
     eauto using delta_beta_list_match_cons;
+    eauto using delta_beta_list_match_scrut;
+    eauto using delta_beta_left;
+    eauto using delta_beta_right;
+    eauto using delta_beta_fix_zero;
+    eauto using delta_beta_fix_succ;
     eauto using open_equivalent_refl.
-Admitted.
+Qed.
