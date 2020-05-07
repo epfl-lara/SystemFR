@@ -74,7 +74,7 @@ Notation "( t1 , .. , t2 , tn )" :=
       (in custom expr at level 100, f ident, x ident, y ident, t custom expr).
   Notation " t1 t2 " :=
     (fun fv_id => (app (t1 fv_id) (t2 fv_id)))
-      (in custom expr at level 50, right associativity,
+      (in custom expr at level 50, left associativity,
           t1 custom expr,
           t2 custom expr).
 

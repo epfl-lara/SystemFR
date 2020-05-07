@@ -6,9 +6,11 @@ Require Export SystemFR.Notations.
 Import Notations.UnTyped.
 Require Export SystemFR.PrimitiveSize.
 Require Export SystemFR.SmallStep.
-
+Require Import Coq.Strings.String.
 Open Scope bool_scope.
 
+
+(* Helpers *)
 Fixpoint isNat (t : tree) : bool :=
   match t with
     | zero => true
@@ -29,31 +31,13 @@ Fixpoint isValue (t: tree) : bool :=
     | succ e1 => (isValue e1)
     | notype_lambda _ => true
     | _ => false end.
-
-Hint Rewrite Bool.andb_true_iff: bools.
-Hint Rewrite Bool.andb_false_iff: bools.
-Hint Rewrite Bool.orb_true_iff: bools.
-Hint Rewrite Bool.orb_false_iff: bools.
-Hint Rewrite Bool.negb_true_iff: bools.
-Hint Rewrite Bool.negb_false_iff: bools.
-
-Ltac bools :=
-  autorewrite with bools in *.
-
-Lemma isValueCorrect : forall v, isValue v = true <-> cbv_value v.
-Proof.
-  split.
-  - induction v; repeat step || bools; eauto with values.
-  - induction 1; repeat step || bools.
-Qed.
-       
 Definition getPair t : {t': option (tree*tree) | forall t1 t2, t' = Some (t1, t2) <-> t = pp t1 t2}.
   Proof.
     exists ( match t with
     | pp e1 e2 => Some (e1,e2)
     | _ => None end).
     destruct t; steps.
-  Qed.
+  Defined.
 
   Definition getApp t : {t': option tree | forall t1, t' = Some t1 <-> t = notype_lambda t1}.
   Proof.
@@ -61,7 +45,7 @@ Definition getPair t : {t': option (tree*tree) | forall t1 t2, t' = Some (t1, t2
        | notype_lambda body => Some body
        | _ => None end).
     destruct t; steps.
-Qed.  
+  Defined.  
 
   Definition getLR t : {t': option tree | forall t1, t' = Some t1 <-> (t = tleft t1 \/ t = tright t1)}.
   Proof.
@@ -70,9 +54,10 @@ Qed.
        | tright t' => Some t'
        | _ => None end).
     destruct t; steps.
-Qed.      
+  Defined.    
 
-(* Idea: erase at top level *)
+
+(* Evaluator *)
 Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
   match t with
     | ite ttrue t1 t2 => Some t1
@@ -137,8 +122,6 @@ Fixpoint ss_eval (t: tree) {struct t}: (option tree) :=
     | _ => None
   end.
 
-
-
 Fixpoint ss_eval_n (t : tree) (k: nat) : (option tree) :=
   match k with
     | 0 => Some t
@@ -151,16 +134,16 @@ Definition eval (t: tree) (k: nat): (option tree) :=
   ss_eval_n (erase_term t) k.
 
 
-Require Extraction.
-
-Extraction Language Ocaml.
-Set Extraction AccessOpaque.
-
-
-Extraction "evaluator.ml" eval. 
-    
-
-
+(* Tactics *)
+Hint Rewrite Bool.andb_true_iff: bools.
+Hint Rewrite Bool.andb_false_iff: bools.
+Hint Rewrite Bool.orb_true_iff: bools.
+Hint Rewrite Bool.orb_false_iff: bools.
+Hint Rewrite Bool.negb_true_iff: bools.
+Hint Rewrite Bool.negb_false_iff: bools.
+Ltac bools :=
+  autorewrite with bools in *.
+       
 Ltac options :=
 unfold option_map in *.
 
@@ -188,24 +171,7 @@ let matched := fresh "matched" in
 destruct t eqn:matched
 end. 
 
-Lemma matchApp : forall T t b1 (b2: T) ,
-   ( exists t_body, t = notype_lambda t_body /\ 
-    match t with
-      | notype_lambda t_body => b1 t_body
-      | _ => b2 end = b1 t_body ) \/
-   ( match t with
-      | notype_lambda t_body => b1 t_body
-      | _ => b2 end = b2 ).
-  Proof.
-  destruct t; repeat steps; eauto.
-Qed.
 
-Ltac destruct_exists :=
-match goal with
-| H: exists x, _ |- _ => let freshX := fresh x in
-                  let matched := fresh "matched_exists" in
-                  destruct H as [ freshX ] eqn:matched
-end.
 
 Ltac instantiate_eq_refl :=
 match goal with
@@ -230,10 +196,18 @@ match goal with
   | H: context[_ = getApp ?t ] |- _ => let fresh := fresh "getApp" in destruct (getApp t) (* eqn:fresh *)
 end. (* match on type of t = sig *)
 
+Ltac destruct_ss_eval :=
+  match goal with
+    | H: context[ss_eval ?t] |- _ => destruct (ss_eval t) end.
 
 
-Require Import Coq.Strings.String.
-
+(* Results *)
+Lemma isValueCorrect : forall v, isValue v = true <-> cbv_value v.
+Proof.
+  split.
+  - induction v; repeat step || bools; eauto with values.
+  - induction 1; repeat step || bools.
+Defined.
 Lemma ss_eval_step : forall t t', ss_eval t = Some t' -> isValue t = true -> False.
 Proof.
   induction t; repeat step || options.
@@ -245,85 +219,23 @@ Ltac ss_eval_step :=
 
 
 
-
-Ltac finish := repeat light || options || bools || instantiate_eq_refl || invert_constructor_equalities || rewrite <- isValueCorrect in * || destruct_sig || congruence || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
-
-
 Lemma ss_eval_correct2: forall t t',(pfv t term_var = nil) -> scbv_step t t' ->  ss_eval t = Some t'.
   intros.
-  induction H0 ; repeat light || list_utils || bools || options || invert_constructor_equalities || destruct_sig || instantiate_eq_refl || rewrite <- isValueCorrect in * || ss_eval_step || finish.
+  induction H0 ;
+    repeat light || options || invert_constructor_equalities || ss_eval_step || destruct_sig || instantiate_eq_refl || list_utils || bools || rewrite <- isValueCorrect in * ||  eauto using ss_eval_step, fv_nil_top_level_var with smallstep values || destruct_match.
 Qed.
-
-Ltac finish2 := repeat light || options || bools || list_utils || instantiate_eq_refl || invert_constructor_equalities || rewrite isValueCorrect in * || destruct_sig || congruence ||  step_inversion cbv_value || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values .
-
-Ltac destruct_ss_eval :=
-  match goal with
-    | H: context[ss_eval ?t] |- _ => destruct (ss_eval t) end.
-
 
 Lemma ss_eval_correct1: forall t t', ss_eval t = Some t' -> (pfv t term_var = nil) -> scbv_step t t'.
 Proof.
-  induction t; intros ; repeat light ; destruct_ss_eval ; finish2. Qed.
+  induction t; intros ; repeat light ; destruct_ss_eval ; repeat light || options || bools || list_utils || instantiate_eq_refl || invert_constructor_equalities || rewrite isValueCorrect in * || destruct_sig || congruence ||  step_inversion cbv_value || destruct_match ; eauto using ss_eval_step, fv_nil_top_level_var with smallstep values . Qed.
 
 
+(* Extraction *)
+Require Extraction.
+
+Extraction Language Ocaml.
+Set Extraction AccessOpaque.
 
 
-Definition example1 :=
-[|
- let plus := (def_rec f x y => (
-     match x with
-      | 0 => y
-      | s x' => s ((f x') y)
-     end))
- in let fibo := (def_rec f n => (
-        match n with
-         | 0 => 1
-         | s n' => (
-             match n' with
-              | 0 => 1
-              | s n'' => (plus (f n')) (f n'')
-             end)
-        end))
-    in
-    (fibo (s (s (s (s (s (s (s (s (s (s (s (s 1)))))))))))))
- |].
-
-Fixpoint treeToNat (t: tree) :=
-  match t with
-    | zero => 0
-    | succ t' => S (treeToNat t')
-    |_ => 0 end.
-
-Eval compute in option_map treeToNat (ss_eval_n example1 50000).
-Example fibo377 : option_map treeToNat (ss_eval_n example1 50000) = Some 377.
-Proof. reflexivity. Qed.
-Example fibo4 : (ss_eval_n example1 141) =  Some (succ (succ (succ (succ (succ (succ (succ (succ zero)))))))).
-Proof. compute. reflexivity. Qed.
-
-Definition example2 :=
-[|
- let plus := (def_rec f x y => (
-     match x with
-      | 0 => y
-      | s x' => s ((f x') y)
-     end))
- in let fibo := (def_rec f n => (
-        match n with
-         | 0 => 1
-         | s n' => (
-             match n' with
-              | 0 => 1
-              | s n'' => (plus (f n')) (f n'')
-             end)
-        end))
-    in
-    (fibo (s (s (s (s (s 1))))))
- |].
-
-Check example2.
-
-Eval compute in ss_eval_n example2 254.
-
-Eval compute in ss_eval_n example2 254.
-Example fibo5 : (ss_eval_n example2 254) =  Some (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ zero))))))))))))).
-Proof. reflexivity. Qed.
+Extraction "evaluator.ml" eval. 
+    
