@@ -10,3 +10,5 @@ Makefile.conf
 *.vok
 *.vos
 .lia.cache
+*.mli
+*.vio
