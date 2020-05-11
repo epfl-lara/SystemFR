@@ -195,7 +195,6 @@ match goal with
   | H: context[getApp ?t = _ ] |- _ => let fresh := fresh "getApp" in destruct (getApp t) (* eqn:fresh *)
   | H: context[_ = getApp ?t ] |- _ => let fresh := fresh "getApp" in destruct (getApp t) (* eqn:fresh *)
 end. (* match on type of t = sig *)
-
 Ltac destruct_ss_eval :=
   match goal with
     | H: context[ss_eval ?t] |- _ => destruct (ss_eval t) end.
@@ -222,7 +221,7 @@ Ltac ss_eval_step :=
 Lemma ss_eval_correct2: forall t t',(pfv t term_var = nil) -> scbv_step t t' ->  ss_eval t = Some t'.
   intros.
   induction H0 ;
-    repeat light || options || invert_constructor_equalities || ss_eval_step || destruct_sig || instantiate_eq_refl || list_utils || bools || rewrite <- isValueCorrect in * ||  eauto using ss_eval_step, fv_nil_top_level_var with smallstep values || destruct_match.
+    repeat light || options || invert_constructor_equalities || ss_eval_step || destruct_sig || instantiate_eq_refl || list_utils || bools || rewrite <- isValueCorrect in * ||  eauto using fv_nil_top_level_var with smallstep values || destruct_match.
 Qed.
 
 Lemma ss_eval_correct1: forall t t', ss_eval t = Some t' -> (pfv t term_var = nil) -> scbv_step t t'.

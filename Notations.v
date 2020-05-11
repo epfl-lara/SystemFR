@@ -25,6 +25,15 @@ Module UnTyped.
   (* Base terms *)
   Notation "'0'" := (⤳ zero) (in custom expr).
   Notation "'1'" := (⤳ (succ zero)) (in custom expr).
+  Notation "'2'" := (⤳ (succ (succ zero))) (in custom expr).
+  Notation "'3'" := (⤳ (succ (succ (succ zero)))) (in custom expr).
+  Notation "'4'" := (⤳ (succ (succ (succ (succ zero))))) (in custom expr).
+  Notation "'5'" := (⤳ (succ (succ (succ (succ (succ zero)))))) (in custom expr).
+  Notation "'6'" := (⤳ (succ (succ (succ (succ (succ (succ zero))))))) (in custom expr).
+  Notation "'7'" := (⤳ (succ (succ (succ (succ (succ (succ (succ zero)))))))) (in custom expr).
+  Notation "'8'" := (⤳ (succ (succ (succ (succ (succ (succ (succ (succ zero))))))))) (in custom expr).
+  Notation "'9'" := (⤳ (succ (succ (succ (succ (succ (succ (succ (succ (succ zero)))))))))) (in custom expr).
+  
   Notation "'()'" := (⤳ uu) (in custom expr).
   Notation "'t_true'" := (⤳ttrue) (in custom expr).
   Notation "'t_false'" := (⤳tfalse) (in custom expr).
