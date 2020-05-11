@@ -112,7 +112,7 @@ Notation "( t1 , .. , t2 , tn )" :=
       (in custom expr at level 180, right associativity, t custom expr).
   Notation "'match' t 'with' '|' 'left' l => t1 '|' 'right' r => t2 'end'" :=
     (fun (fv_id:nat) => (
-         tmatch (t fv_id)
+         sum_match (t fv_id)
                 (let l  := (fvar fv_id term_var) in (close 0 (t1 (S fv_id)) fv_id))
                 (let r := (fvar fv_id term_var) in (close 0 (t2 (S fv_id)) fv_id))))
       (in custom expr at level 190, t custom expr, t1 custom expr, t2 custom expr, l ident, r ident).
