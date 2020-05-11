@@ -55,6 +55,5 @@ Print natEq_example.
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 
-Definition result := (eval natEq_example 1000).
-Eval compute in result.
-Extraction "isEven.ml" result eval. 
+Definition isEven := natEq_example.
+Extraction "isEven.ml" isEven eval. 
