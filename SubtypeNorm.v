@@ -40,8 +40,8 @@ Lemma open_subnorm:
   forall Γ T1 T1' T1'' T2 T2' T2'',
     [ Γ ⊨ T1 = T1' ] ->
     [ Γ ⊨ T2 = T2' ] ->
-    untangle T1' T1'' ->
-    untangle T2' T2'' ->
+    untangle Γ T1' T1'' ->
+    untangle Γ T2' T2'' ->
     [ Γ ⊨ T1'' <: T2'' ] ->
     [ Γ ⊨ T1 <: T2 ].
 Proof.

@@ -159,6 +159,12 @@ Fail Next Obligation. (* no more obligations for reducible_values *)
 Notation "'[' ρ '⊨' T1 '<:' T2 ']'" := (forall v, [ ρ ⊨ v : T1 ]v -> [ ρ ⊨ v : T2 ]v)
   (at level 60, ρ at level 60, T1 at level 60).
 
+Notation "'[' t ':' T ']v'" := (reducible_values nil t T)
+  (t at level 60).
+
+Notation "'[' t ':' T ']'" := (reducible nil t T)
+  (t at level 60).
+
 Definition equivalent_types ρ T1 T2 :=
   forall v, [ ρ ⊨ v : T1 ]v <-> [ ρ ⊨ v : T2 ]v.
 

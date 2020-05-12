@@ -41,7 +41,7 @@ The typing algorithm maintains the following invariants, which are not proven in
 We prove the following properties and the soundness of the rules used in our algorithm.
 
 * Properties: 2/3
-* Rules: 29/29
+* Rules: 28/28
 
 #### Required properties (2/3)
 
@@ -77,7 +77,7 @@ We prove the following properties and the soundness of the rules used in our alg
 * TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v)
 
 
-#### Subtyping Rules (11/11)
+#### Subtyping Rules (10/10)
 
 * SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v)
 * SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v)
@@ -88,7 +88,6 @@ We prove the following properties and the soundness of the rules used in our alg
 * SubExistsLeft: `open_sub_exists_left` in [SubtypeExists](SubtypeExists.v)
 * SubExistsRight: `open_sub_exists_right` in [SubtypeExists](SubtypeExists.v)
 * SubMatch: `open_submatch` in [SubtypeMatch.v](SubtypeMatch.v)
-* SubNormWiden: `open_subnormwiden` in [SubtypeNorm.v](SubtypeNorm.v)
 * SubNorm: `open_subnorm` in [SubtypeNorm.v](SubtypeNorm.v)
 
 
