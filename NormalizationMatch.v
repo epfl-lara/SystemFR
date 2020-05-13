@@ -3,6 +3,7 @@ Require Import PeanoNat.
 Require Export SystemFR.NormalizationSing.
 Require Export SystemFR.SubtypeList.
 Require Export SystemFR.InferMatch.
+Require Export SystemFR.CloseLemmas.
 
 Opaque reducible_values.
 
@@ -136,25 +137,6 @@ Proof.
            t_instantiate_sat3 || apply nmatch_cons;
     eauto with wf erased fv.
 Qed.
-
-Lemma is_erased_term_close:
-  forall t k x,
-    is_erased_term t ->
-    is_erased_term (close k t x).
-Proof.
-  induction t; steps.
-Qed.
-
-Lemma is_erased_type_close:
-  forall T k x,
-    is_erased_type T ->
-    is_erased_type (close k T x).
-Proof.
-  induction T; steps; eauto using is_erased_term_close.
-Qed.
-
-Hint Resolve is_erased_term_close: erased.
-Hint Resolve is_erased_type_close: erased.
 
 Lemma reducibility_subst_equiv:
   forall ρ v T x t1 t2,

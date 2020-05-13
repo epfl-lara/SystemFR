@@ -60,3 +60,38 @@ Proof.
   induction t;
     repeat step || t_equality || t_lookup || rewrite tclose_nothing2 by (steps; eauto with fv).
 Qed.
+
+Fixpoint closes k T xs :=
+  match xs with
+  | nil => T
+  | x :: xs => close k (closes (S k) T xs) x
+  end.
+
+Lemma is_erased_term_close:
+  forall t k x,
+    is_erased_term t ->
+    is_erased_term (close k t x).
+Proof.
+  induction t; steps.
+Qed.
+
+Lemma is_erased_type_close:
+  forall T k x,
+    is_erased_type T ->
+    is_erased_type (close k T x).
+Proof.
+  induction T; steps; eauto using is_erased_term_close.
+Qed.
+
+Hint Resolve is_erased_term_close: erased.
+Hint Resolve is_erased_type_close: erased.
+
+Lemma is_erased_type_closes:
+  forall xs k T,
+    is_erased_type T ->
+    is_erased_type (closes k T xs).
+Proof.
+  induction xs; steps; eauto with erased.
+Qed.
+
+Hint Resolve is_erased_type_closes: erased.
