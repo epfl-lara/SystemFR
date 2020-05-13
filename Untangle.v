@@ -94,7 +94,14 @@ Hypothesis psubstitute_append_key:
 Hypothesis pfv_append_key:
   forall t1 t2 tag, pfv (append_key t1 t2) tag = pfv t1 tag ++ pfv t2 tag.
 
+Hypothesis is_erased_term_append_key:
+  forall t1 t2,
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    is_erased_term (append_key t1 t2).
+
 Hint Resolve wf_append_key: wf.
+Hint Resolve is_erased_term_append_key: erased.
 
 (* prefix: T_key -> T_key -> T_bool *)
 Parameter prefix: tree -> tree -> tree.
@@ -102,14 +109,44 @@ Parameter prefix: tree -> tree -> tree.
 Parameter empty_map: tree (* T_map *).
 Hypothesis empty_map_type: [ empty_map : T_map ].
 
-(* update: T_key -> T_key -> T_map -> T_map -> T_map *)
-Parameter update: tree -> tree -> tree -> tree -> tree.
+(* update: T_trail -> T_key -> T_trail -> T_trail *)
+(* `update old_trail key trail` returns `old_trail` where `trail` is now rooted at `key` *)
+Parameter update: tree -> tree -> tree -> tree.
 
-(* `update` returns a map such that the submap rooted at `old_key` is now rooted at `new_key` *)
-(*  forall key fresh_key fresh_map map δ,
-    [ tlookup fresh_map (concat fresh_key δ) ≡
-      tlookup (update key fresh_key fresh_map map) (concat key δ) ] *)
+Hypothesis update_type:
+  forall old_trail key trail,
+    [ old_trail : T_trail ]v ->
+    [ key : T_key ]v ->
+    [ trail : T_trail ]v ->
+    [ update old_trail key trail : T_trail ]v.
 
+Hypothesis wf_update:
+  forall k t1 t2 t3,
+    wf t1 k ->
+    wf t2 k ->
+    wf t3 k ->
+    wf (update t1 t2 t3) k.
+
+Hypothesis psubstitute_update:
+  forall t1 t2 t3 l tag,
+    psubstitute (update t1 t2 t3) l tag =
+    update (psubstitute t1 l tag) (psubstitute t2 l tag) (psubstitute t3 l tag).
+
+Hypothesis pfv_update:
+  forall t1 t2 t3 tag,
+    pfv (update t1 t2 t3) tag = pfv t1 tag ++ pfv t2 tag ++ pfv t3 tag.
+
+Hypothesis is_erased_term_update:
+  forall t1 t2 t3,
+    is_erased_term t1 ->
+    is_erased_term t2 ->
+    is_erased_term t3 ->
+    is_erased_term (update t1 t2 t3).
+
+Hint Resolve wf_update: wf.
+Hint Resolve is_erased_term_update: erased.
+
+(*
 (* `update`'s are commutative when keys are not prefixes of one another *)
 Hypothesis update_spec:
   forall key1 fresh_key1 fresh_map1 key2 fresh_key2 fresh_map2 map,
@@ -124,6 +161,7 @@ Hypothesis update_spec:
     [ prefix fresh_key2 fresh_key1 ≡ tfalse ] ->
     [ update key1 fresh_key1 fresh_map1 (update key2 fresh_key2 fresh_map2 map) ≡
       update key2 fresh_key2 fresh_map2 (update key1 fresh_key1 fresh_map1 map) ].
+*)
 
 (*
 Hypothesis update_spec3:
@@ -136,9 +174,12 @@ Hypothesis update_spec3:
    equal than `k` satisfy the following property, described by the type `T_tau` *)
 Parameter T_tau: tree.
 Lemma tau_property:
-  forall f key fresh_key fresh_map map,
+  forall f map key trail,
     [ f : T_tau ] ->
-    [ app2 f fresh_map fresh_key ≡ app2 f (update key fresh_key fresh_map map) key ].
+    [ map : T_map ]v ->
+    [ trail : T_trail ]v ->
+    [ key : T_key ]v ->
+    [ app f trail ≡ app f (update map key trail) ].
 Admitted.
 
 Ltac equivalent_refl :=
@@ -146,6 +187,7 @@ Ltac equivalent_refl :=
   | |- [ _ ≡ _ ] => apply equivalent_refl
   end.
 
+(*
 Lemma tau2_example:
   forall f1 f2 fresh_key1 fresh_key2 fresh_map1 fresh_map2 key1 key2,
     [ f1 : T_tau ] ->
@@ -175,6 +217,7 @@ Proof.
       eauto 2 using reducible_fv with step_tactic;
       eauto using empty_map_type.
 Qed.
+*)
 
 Fixpoint T_existss n T1 T2 :=
   match n with
@@ -433,6 +476,33 @@ Proof.
   rewrite open_closes; steps; eauto with wf fv.
 Qed.
 
+Lemma reducible_exists_vars2:
+  forall xs ρ v T1 T2,
+    wf T1 0 ->
+    wf T2 0 ->
+    is_erased_type T1 ->
+    is_erased_type T2 ->
+    valid_interpretation ρ ->
+    [ ρ | v : T_exists_vars xs T1 T2 ]v ->
+    (exists vs,
+      List.Forall (fun v => [ ρ | v : T1 ]v) vs /\
+      length vs = length xs /\
+      [ ρ | v : psubstitute T2 (List.combine xs vs) term_var ]v).
+Proof.
+  induction xs; repeat step || t_substitutions || simp_red_top_level_hyp; eauto.
+  rewrite open_existss in *; eauto with wf.
+  rewrite <- rev_length in * at 2.
+  rewrite open_closes in *; eauto with wf fv.
+  rewrite rev_length in *.
+
+  unshelve epose proof (IHxs _ _ _ _ _ _ _ _ _ H9); steps;
+    eauto 2 with wf step_tactic;
+    eauto 2 with erased step_tactic.
+
+  exists (a0 :: vs); steps.
+  rewrite substitute_cons2; repeat step || (erewrite reducible_val_fv in * by eauto).
+Qed.
+
 Definition apps fs ts := List.map (fun p => app (fst p) (snd p)) (combine fs ts).
 
 (* Using the tau property, we can untangle *)
@@ -561,10 +631,23 @@ Lemma erased_terms_combine2:
     length fs = length xs ->
     length ys = length xs ->
     Forall is_erased_term fs ->
-    erased_terms (combine xs (apps fs (List.map (fun y : nat => fvar y term_var) ys))).
+    erased_terms (combine xs (apps fs (List.map (fun y => fvar y term_var) ys))).
 Proof.
   induction xs; destruct fs; destruct ys; intros;
     repeat rewrite apps_cons in * || step.
+Qed.
+
+Lemma erased_terms_combine3:
+  forall xs keys fs m,
+    length fs = length xs ->
+    length keys = length xs ->
+    Forall is_erased_term fs ->
+    Forall (fun key => [ key : T_key ]v) keys ->
+    erased_terms (combine xs (apps fs (List.map (fun key => append_key key (fvar m term_var)) keys))).
+Proof.
+  induction xs; destruct keys; destruct fs; intros;
+    repeat rewrite apps_cons in * || step || apply is_erased_term_append_key;
+    try solve [ eapply reducible_values_erased; eauto; steps ].
 Qed.
 
 Lemma forall_append_key_trails:
@@ -666,7 +749,7 @@ Proof.
     eauto using in_combine_l with exfalso.
 Qed.
 
- Lemma list_map_subst7:
+Lemma list_map_subst7:
   forall ys keys a,
     length ys = length keys ->
     NoDup ys ->
@@ -681,11 +764,45 @@ Qed.
          end) ys =
     List.map (fun key => append_key key a) keys.
 Proof.
-  induction ys; destruct keys; repeat step || apply f_equal; eauto.
-  apply list_map_change_list; repeat step || step_inversion NoDup;
+  intros; apply list_map_change_list; repeat step || step_inversion NoDup;
     eauto using in_combine_l with exfalso;
-    try solve [ erewrite lookup_combine in matched; eauto; steps ].
+    try solve [ erewrite_anywhere lookup_combine; eauto; steps ].
 Qed.
+
+Lemma lookup_combine2:
+  forall A B (l1: list nat) (l2: list A) x a (f: A -> B),
+    length l1 = length l2 ->
+    NoDup l1 ->
+    (x, a) ∈ combine l1 l2 ->
+    lookup Nat.eq_dec (combine l1 l2) x = Some a.
+Proof.
+  induction l1; destruct l2; repeat step || step_inversion NoDup;
+    eauto using in_combine_l with exfalso.
+Qed.
+
+Lemma list_map_subst8:
+  forall ys vs l,
+    length vs = length ys ->
+    NoDup ys ->
+    (forall y, y ∈ ys -> y ∈ support l -> False) ->
+    List.map
+      (fun x =>
+       psubstitute
+         match lookup Nat.eq_dec l x with
+         | Some e => e
+         | None => fvar x term_var
+         end (combine ys vs) term_var) ys = vs.
+Proof.
+  intros.
+  rewrite <- map_id.
+  apply list_map_change_list;
+    repeat step || step_inversion NoDup || t_lookup || list_utils2;
+    eauto using in_combine_l with exfalso;
+    try solve [ erewrite_anywhere lookup_combine2; eauto; steps ].
+Qed.
+
+(* empty_trail: T_trail *)
+Parameter empty_trail: tree.
 
 Lemma untangle_freshen:
   forall Γ fs template xs ys keys m,
@@ -771,7 +888,59 @@ Proof.
     rewrite list_map_subst7; repeat step || erewrite satisfies_same_support in * by eauto;
       eauto with fv.
 
-  - admit.
+  - rewrite psubstitute_texists_vars in *;
+      repeat step || rewrite substitute_trail in * || rewrite <- satisfies_same_support in *;
+      eauto with fv;
+      eauto using var_in_support.
+
+    apply_anywhere reducible_exists_vars2;
+      repeat step || apply subst_erased_type || apply wf_subst;
+      eauto using wfs_combine8, erased_terms_combine2 with wf fv erased;
+      try solve [ eapply satisfies_erased_terms; eauto; steps ].
+
+    rewrite (subst_subst2 template) in *;
+      repeat step || t_substitutions || list_utils2 ||
+             (rewrite length_apps by (repeat step || list_utils2)) ||
+             (rewrite substitute_nothing6 in * by auto) ||
+             (rewrite list_map_apps in * by repeat step || list_utils2) ||
+             (rewrite list_map_subst5 by (steps; eauto using var_in_support));
+      eauto using var_in_support;
+      eauto with fv.
+
+    rewrite (subst_subst (psubstitute template l term_var)) in *;
+      repeat step || t_substitutions || list_utils2 ||
+             (rewrite length_apps by (repeat step || list_utils2)) ||
+             (rewrite substitute_nothing6 in * by auto) ||
+             (rewrite list_map_apps in * by repeat step || list_utils2);
+      eauto using var_in_support;
+      eauto with fv;
+      try solve [ t_pfv_in_subst; eauto with fv ].
+
+    rewrite list_map_subst6 in *; repeat step || erewrite satisfies_same_support in * by eauto;
+      eauto with fv.
+    rewrite list_map_subst8 in *; repeat step || erewrite satisfies_same_support in * by eauto;
+      eauto with fv.
+
+    simp_red_goal; repeat step || apply subst_erased_type || apply is_erased_type_close;
+      eauto 3 with erased step_tactic;
+      eauto 3 using wfs_combine8, erased_terms_combine3 with wf fv erased;
+      try solve [ eapply satisfies_erased_terms; eauto; steps ];
+      try solve [ eapply reducible_values_closed; eauto; steps ].
+
+
+Definition global_trail keys vs :=
+  fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_trail.
+
+    exists (global_trail keys vs); steps.
+
+    global_trail keys vs.
+    apply reducible_exists.
+    define global_trail
+      (fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_trail).
+
+
+
+    admit.
 Admitted.
 
 Lemma untangle_open_equivalent_types:
