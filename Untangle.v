@@ -18,12 +18,12 @@ Opaque reducible_values.
 
 Parameter T_key: tree.
 Parameter T_map: tree.
-Hypothesis key_fv: forall tag, pfv T_key tag = nil.
-Hypothesis map_fv: forall tag, pfv T_map tag = nil.
-Hypothesis wf_key: wf T_key 0.
-Hypothesis wf_map: wf T_map 0.
-Hypothesis is_erased_type_key: is_erased_type T_key.
-Hypothesis is_erased_type_map: is_erased_type T_map.
+Axiom key_fv: forall tag, pfv T_key tag = nil.
+Axiom map_fv: forall tag, pfv T_map tag = nil.
+Axiom wf_key: wf T_key 0.
+Axiom wf_map: wf T_map 0.
+Axiom is_erased_type_key: is_erased_type T_key.
+Axiom is_erased_type_map: is_erased_type T_map.
 
 Definition T_trail: tree := T_prod T_key T_map.
 
@@ -75,27 +75,27 @@ Parameter concat: tree -> tree -> tree.
 (* append_key: T_key -> T_trail -> T_trail *)
 Parameter append_key: tree -> tree -> tree.
 
-Hypothesis append_key_trail:
+Axiom append_key_trail:
   forall key trail,
     [ key : T_key ]v ->
     [ trail : T_trail ]v ->
     [ append_key key trail : T_trail ]v.
 
-Hypothesis wf_append_key:
+Axiom wf_append_key:
   forall k t1 t2,
     wf t1 k ->
     wf t2 k ->
     wf (append_key t1 t2) k.
 
-Hypothesis psubstitute_append_key:
+Axiom psubstitute_append_key:
   forall t1 t2 l tag,
     psubstitute (append_key t1 t2) l tag =
     append_key (psubstitute t1 l tag) (psubstitute t2 l tag).
 
-Hypothesis pfv_append_key:
+Axiom pfv_append_key:
   forall t1 t2 tag, pfv (append_key t1 t2) tag = pfv t1 tag ++ pfv t2 tag.
 
-Hypothesis is_erased_term_append_key:
+Axiom is_erased_term_append_key:
   forall t1 t2,
     is_erased_term t1 ->
     is_erased_term t2 ->
@@ -104,40 +104,40 @@ Hypothesis is_erased_term_append_key:
 Hint Resolve wf_append_key: wf.
 Hint Resolve is_erased_term_append_key: erased.
 
-(* prefix: T_key -> T_key -> T_bool *)
-Parameter prefix: tree -> tree -> tree.
+(* prefix: T_key -> T_key -> Prop *)
+Parameter prefix: tree -> tree -> Prop.
 
 Parameter empty_map: tree (* T_map *).
-Hypothesis empty_map_type: [ empty_map : T_map ].
+Axiom empty_map_type: [ empty_map : T_map ].
 
 (* update: T_trail -> T_key -> T_trail -> T_trail *)
 (* `update old_trail key trail` returns `old_trail` where `trail` is now rooted at `key` *)
 Parameter update: tree -> tree -> tree -> tree.
 
-Hypothesis update_type:
+Axiom update_type:
   forall old_trail key trail,
     [ old_trail : T_trail ]v ->
     [ key : T_key ]v ->
     [ trail : T_trail ]v ->
     [ update old_trail key trail : T_trail ]v.
 
-Hypothesis wf_update:
+Axiom wf_update:
   forall k t1 t2 t3,
     wf t1 k ->
     wf t2 k ->
     wf t3 k ->
     wf (update t1 t2 t3) k.
 
-Hypothesis psubstitute_update:
+Axiom psubstitute_update:
   forall t1 t2 t3 l tag,
     psubstitute (update t1 t2 t3) l tag =
     update (psubstitute t1 l tag) (psubstitute t2 l tag) (psubstitute t3 l tag).
 
-Hypothesis pfv_update:
+Axiom pfv_update:
   forall t1 t2 t3 tag,
     pfv (update t1 t2 t3) tag = pfv t1 tag ++ pfv t2 tag ++ pfv t3 tag.
 
-Hypothesis is_erased_term_update:
+Axiom is_erased_term_update:
   forall t1 t2 t3,
     is_erased_term t1 ->
     is_erased_term t2 ->
@@ -147,37 +147,13 @@ Hypothesis is_erased_term_update:
 Hint Resolve wf_update: wf.
 Hint Resolve is_erased_term_update: erased.
 
-(*
-(* `update`'s are commutative when keys are not prefixes of one another *)
-Hypothesis update_spec:
-  forall key1 fresh_key1 fresh_map1 key2 fresh_key2 fresh_map2 map,
-    [ key1 : T_key ] ->
-    [ key2 : T_key ] ->
-    [ fresh_key1 : T_key ] ->
-    [ fresh_key2 : T_key ] ->
-    [ fresh_map1 : T_map ] ->
-    [ fresh_map2 : T_map ] ->
-    [ map : T_map ] ->
-    [ prefix fresh_key1 fresh_key2 ≡ tfalse ] ->
-    [ prefix fresh_key2 fresh_key1 ≡ tfalse ] ->
-    [ update key1 fresh_key1 fresh_map1 (update key2 fresh_key2 fresh_map2 map) ≡
-      update key2 fresh_key2 fresh_map2 (update key1 fresh_key1 fresh_map1 map) ].
-*)
-
-(*
-Hypothesis update_spec3:
-  forall key fresh_key fresh_map map key',
-    [ prefix key key' ≡ tfalse ] ->
-    [ tlookup map key' ≡ tlookup (update key fresh_key fresh_map map) key' ].
-*)
-
 (* Terms that take a map and a key `k`, and only lookup the map on keys greater or
    equal than `k` satisfy the following property, described by the type `T_tau` *)
 Parameter T_tau: tree.
 
-Hypothesis tau_fv: forall tag, pfv T_tau tag = nil.
-Hypothesis wf_tau: wf T_tau 0.
-Hypothesis is_erased_type_tau: is_erased_type T_tau.
+Axiom tau_fv: forall tag, pfv T_tau tag = nil.
+Axiom wf_tau: wf T_tau 0.
+Axiom is_erased_type_tau: is_erased_type T_tau.
 
 Hint Resolve wf_tau: wf.
 Hint Resolve is_erased_type_tau: erased.
@@ -187,15 +163,6 @@ Lemma substitute_tau:
 Proof.
   intros; apply substitute_nothing5; eauto using tau_fv.
 Qed.
-
-Lemma tau_property:
-  forall f map key trail,
-    [ f : T_tau ] ->
-    [ map : T_map ]v ->
-    [ trail : T_trail ]v ->
-    [ key : T_key ]v ->
-    [ app f trail ≡ app f (update map key trail) ].
-Admitted.
 
 Ltac equivalent_refl :=
   match goal with
@@ -1199,10 +1166,7 @@ Qed.
 
 (* empty_trail: T_trail *)
 Parameter empty_trail: tree.
-Hypothesis empty_trail_type: [ empty_trail : T_trail ]v.
-
-Definition global_trail keys vs :=
-  fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_trail.
+Axiom empty_trail_type: [ empty_trail : T_trail ]v.
 
 Lemma is_erased_term_global_trail':
   forall keys vs acc0,
@@ -1242,6 +1206,48 @@ Lemma global_trail_is_trail':
     [ fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) acc0 : T_trail ]v.
 Proof.
   induction keys; repeat step || apply_any; eauto using update_type.
+Qed.
+
+Definition global_trail keys vs :=
+  fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_trail.
+
+Lemma is_erased_term_global_trail:
+  forall keys vs,
+    Forall is_erased_term keys ->
+    Forall is_erased_term vs ->
+    is_erased_term (global_trail keys vs).
+Proof.
+  intros; apply is_erased_term_global_trail'; steps;
+    try solve [ eapply reducible_values_erased; eauto using empty_trail_type; steps ].
+Qed.
+
+Lemma wfs_global_trail:
+  forall keys vs,
+    Forall (fun v => wf v 0) keys ->
+    Forall (fun v => wf v 0) vs ->
+    wf (global_trail keys vs) 0.
+Proof.
+  intros; apply wfs_global_trail'; steps;
+    try solve [ eapply reducible_val_wf; eauto using empty_trail_type; steps ].
+Qed.
+
+Lemma fvs_global_trail:
+  forall keys vs tag,
+    Forall (fun v => pfv v tag = nil) keys ->
+    Forall (fun v => pfv v tag = nil) vs ->
+    pfv (global_trail keys vs) tag = nil.
+Proof.
+  intros; apply fvs_global_trail'; steps;
+    try solve [ eapply reducible_val_fv; eauto using empty_trail_type; steps ].
+Qed.
+
+Lemma global_trail_is_trail:
+  forall keys vs,
+    Forall (fun key => [ key : T_key ]v) keys ->
+    Forall (fun trail => [ trail : T_trail ]v) vs ->
+    [ global_trail keys vs : T_trail ]v.
+Proof.
+  intros; apply global_trail_is_trail'; steps; eauto using empty_trail_type.
 Qed.
 
 Lemma typed_erased_terms:
@@ -1298,36 +1304,6 @@ Proof.
   intros; eapply typed_fv; eauto; steps.
 Qed.
 
-Lemma is_erased_term_global_trail:
-  forall keys vs,
-    Forall is_erased_term keys ->
-    Forall is_erased_term vs ->
-    is_erased_term (global_trail keys vs).
-Proof.
-  intros; apply is_erased_term_global_trail'; steps;
-    try solve [ eapply reducible_values_erased; eauto using empty_trail_type; steps ].
-Qed.
-
-Lemma wfs_global_trail:
-  forall keys vs,
-    Forall (fun v => wf v 0) keys ->
-    Forall (fun v => wf v 0) vs ->
-    wf (global_trail keys vs) 0.
-Proof.
-  intros; apply wfs_global_trail'; steps;
-    try solve [ eapply reducible_val_wf; eauto using empty_trail_type; steps ].
-Qed.
-
-Lemma fvs_global_trail:
-  forall keys vs tag,
-    Forall (fun v => pfv v tag = nil) keys ->
-    Forall (fun v => pfv v tag = nil) vs ->
-    pfv (global_trail keys vs) tag = nil.
-Proof.
-  intros; apply fvs_global_trail'; steps;
-    try solve [ eapply reducible_val_fv; eauto using empty_trail_type; steps ].
-Qed.
-
 Lemma fvs_global_trail2:
   forall keys vs tag x,
     Forall (fun key => [ key : T_key ]v) keys ->
@@ -1337,16 +1313,6 @@ Lemma fvs_global_trail2:
 Proof.
   intros; rewrite fvs_global_trail in *; steps; eauto using typed_fv'.
 Qed.
-
-Lemma global_trail_is_trail:
-  forall keys vs,
-    Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun trail => [ trail : T_trail ]v) vs ->
-    [ global_trail keys vs : T_trail ]v.
-Proof.
-  intros; apply global_trail_is_trail'; steps; eauto using empty_trail_type.
-Qed.
-
 
 Definition good_trail (trail: tree) (key: tree) (trail': tree) : Prop :=
   forall f,
@@ -1362,42 +1328,124 @@ Proof.
   unfold good_trail; steps.
 Qed.
 
-Lemma global_trail_good_trail':
-  forall keys vs key v acc,
-    length keys = length vs ->
-    (key, v) ∈ combine keys vs ->
-    good_trail (fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) acc) key v.
+(*
+(* `update`'s are commutative when keys are not prefixes of one another *)
+Axiom update_spec:
+  forall key1 fresh_key1 fresh_map1 key2 fresh_key2 fresh_map2 map,
+    [ key1 : T_key ] ->
+    [ key2 : T_key ] ->
+    [ fresh_key1 : T_key ] ->
+    [ fresh_key2 : T_key ] ->
+    [ fresh_map1 : T_map ] ->
+    [ fresh_map2 : T_map ] ->
+    [ map : T_map ] ->
+    [ prefix fresh_key1 fresh_key2 ≡ tfalse ] ->
+    [ prefix fresh_key2 fresh_key1 ≡ tfalse ] ->
+    [ update key1 fresh_key1 fresh_map1 (update key2 fresh_key2 fresh_map2 map) ≡
+      update key2 fresh_key2 fresh_map2 (update key1 fresh_key1 fresh_map1 map) ].
+*)
+
+Axiom update_commutative:
+  forall key1 key2 old_trail trail1 trail2,
+    [ key1 : T_key ]v ->
+    [ key2 : T_key ]v ->
+    [ trail1 : T_trail ]v ->
+    [ trail2 : T_trail ]v ->
+    [ old_trail : T_trail ]v ->
+    ~ prefix key1 key2 ->
+    ~ prefix key2 key1 ->
+      update (update old_trail key2 trail2) key1 trail1 =
+      update (update old_trail key1 trail1) key2 trail2.
+
+(*
+Axiom update_spec3:
+  forall key fresh_key fresh_map map key',
+    [ prefix key key' ≡ tfalse ] ->
+    [ tlookup map key' ≡ tlookup (update key fresh_key fresh_map map) key' ].
+*)
+
+(*
+Definition global_trail keys vs :=
+  fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_trail.
+*)
+
+(*
+(* update: T_trail -> T_key -> T_trail -> T_trail *)
+(* `update old_trail key trail` returns `old_trail` where `trail` is now rooted at `key` *)
+Parameter update: tree -> tree -> tree -> tree.
+
+Axiom update_type:
+  forall old_trail key trail,
+    [ old_trail : T_trail ]v ->
+    [ key : T_key ]v ->
+    [ trail : T_trail ]v ->
+    [ update old_trail key trail : T_trail ]v.
+*)
+
+(*
+  lookup (snd trail) δ = lookup (snd (update map key trail)) (concat key δ)
+*)
+
+Lemma tau_property:
+  forall f trail key old_trail,
+    [ f : T_tau ] ->
+    [ old_trail : T_trail ]v ->
+    [ trail : T_trail ]v ->
+    [ key : T_key ]v ->
+    [ app f trail ≡ app f (append_key key (update old_trail key trail)) ].
 Proof.
-  induction keys; destruct vs; repeat step.
-  
 Admitted.
 
-Lemma global_trail_good_trail:
-  forall keys vs key v,
-    length keys = length vs ->
-    (key, v) ∈ combine keys vs ->
-    good_trail (global_trail keys vs) key v.
+Lemma fold_left_update_move:
+  forall keys vs old_trail key trail,
+    [ old_trail : T_trail ]v ->
+    [ trail : T_trail ]v ->
+    [ key : T_key ]v ->
+    Forall (fun v => [ v : T_trail ]v) vs ->
+    Forall (fun k => [ k : T_key ]v) keys ->
+    fold_left
+        (fun acc p => update acc (fst p) (snd p))
+        (combine keys vs) (update old_trail key trail)
+      =
+      update
+        (fold_left
+          (fun acc p => update acc (fst p) (snd p))
+          (combine keys vs) old_trail)
+        key trail.
 Proof.
-  intros; apply global_trail_good_trail'; steps.
+  induction keys; destruct vs; repeat step.
+  rewrite_any; steps; eauto using update_type.
+
+Admitted.
+
+Lemma global_trail_good_trail':
+  forall keys vs key acc tr,
+    length keys = length vs ->
+    Forall (fun v => [ v : T_trail ]v) vs ->
+    Forall (fun k => [ k : T_key ]v) keys ->
+    [ acc : T_trail ]v ->
+    (key, tr) ∈ combine keys vs ->
+    good_trail (fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) acc) key tr.
+Proof.
+  unfold good_trail; induction keys; destruct vs; repeat step;
+    try solve [ apply_any; steps; eauto using update_type ].
+  rewrite fold_left_update_move; steps.
+  apply tau_property; steps;
+    eauto using global_trail_is_trail'.
+Qed.
+
+Lemma global_trail_good_trail:
+  forall keys vs key tr,
+    length keys = length vs ->
+    Forall (fun v => [ v : T_trail ]v) vs ->
+    Forall (fun k => [ k : T_key ]v) keys ->
+    (key, tr) ∈ combine keys vs ->
+    good_trail (global_trail keys vs) key tr.
+Proof.
+  intros; apply global_trail_good_trail'; steps; eauto using empty_trail_type.
 Qed.
 
 Opaque global_trail.
-
-(* Using the tau property, we can untangle *)
-Inductive untangle: context -> tree -> tree -> Prop :=
-| UntangleFreshen:
-    forall Γ T T' template xs ys fs keys m,
-      List.NoDup (xs ++ ys) ->
-      T  = substitute template
-        (List.combine xs (apps fs (List.map (fun key => pp key (fvar m term_var)) keys))) ->
-      T' = substitute template
-        (List.combine xs (apps fs (List.map (fun y => fvar y term_var) ys))) ->
-      untangle Γ
-               (T_exists T_trail (close 0 T m))
-               (T_exists_vars ys T_trail T')
-
-| UntangleRefl: forall Γ T, untangle Γ T T
-.
 
 Lemma in_combine_equivalent:
   forall fs keys vs t1 l t2 trail,
@@ -1425,6 +1473,8 @@ Lemma in_combine_equivalent':
   forall fs keys vs t1 l t2,
     length fs = length vs ->
     length fs = length keys ->
+    Forall (fun v => [ v : T_trail ]v) vs ->
+    Forall (fun k => [ k : T_key ]v) keys ->
     (forall f, f ∈ fs -> [ psubstitute f l term_var : T_tau ]) ->
     (t1, t2) ∈
       combine
@@ -1433,13 +1483,12 @@ Lemma in_combine_equivalent':
           (List.map (fun x => append_key x (global_trail keys vs)) keys)) ->
     [t1 ≡ t2].
 Proof.
-  intros; apply in_combine_equivalent with fs keys vs l (global_trail keys vs); steps;
-    eauto using global_trail_good_trail.
+  intros; apply in_combine_equivalent with fs keys vs l (global_trail keys vs);
+    repeat step || apply global_trail_good_trail.
 Qed.
 
 Lemma untangle_freshen:
   forall Γ fs template xs ys keys m,
-    List.NoDup (xs ++ ys) ->
     is_erased_type template ->
     wf template 0 ->
     Forall (fun key => [ key : T_key ]v) keys ->
@@ -1595,306 +1644,51 @@ Proof.
 
     + apply in_combine_equivalent' with fs keys vs l; steps.
       unfold open_reducible in *; repeat step.
-      unshelve epose proof (H15 f _ nil l _ _ _);
+      unshelve epose proof (H14 f _ nil l _ _ _);
         repeat step || rewrite substitute_tau in *.
 
     + instantiate_any; steps.
       clear_marked; apply_anywhere pfv_in_subst2; steps; eauto with fv.
 Qed.
 
+(* Using the tau property, we can untangle *)
+Inductive untangle: context -> tree -> tree -> Prop :=
+| UntangleFreshen:
+    forall Γ T T' template xs ys fs keys m,
+      is_erased_type template ->
+      wf template 0 ->
+      Forall (fun key => [ key : T_key ]v) keys ->
+      Forall (fun f => wf f 0) fs ->
+      Forall is_erased_term fs ->
+      functional (combine ys keys) ->
+      ~ m ∈ fv template ->
+      length keys = length xs ->
+      length fs = length xs ->
+      length ys = length xs ->
+      (forall f, f ∈ fs -> m ∈ fv f -> False) ->
+      (forall y, y ∈ ys -> y ∈ support Γ -> False) ->
+      (forall y, y ∈ ys -> y ∈ fv template -> False) ->
+      (forall x, x ∈ xs -> x ∈ support Γ -> False) ->
+      (forall f, f ∈ fs -> subset (fv f) (support Γ)) ->
+      (forall f, f ∈ fs -> [ Γ ⊨ f : T_tau ]) ->
+      (forall x, x ∈ fv template -> x ∈ xs \/ x ∈ support Γ) ->
+      T  = substitute template
+        (List.combine xs (apps fs (List.map (fun key => append_key key (fvar m term_var)) keys))) ->
+      T' = substitute template
+        (List.combine xs (apps fs (List.map (fun y => fvar y term_var) ys))) ->
+      untangle Γ
+               (T_exists T_trail (close 0 T m))
+               (T_exists_vars ys T_trail T')
+
+| UntangleRefl: forall Γ T, untangle Γ T T
+.
+
 Lemma untangle_open_equivalent_types:
   forall Γ T1 T2,
     untangle Γ T1 T2 ->
     [ Γ ⊨ T1 = T2 ].
 Proof.
-  induction 1; eauto using open_equivalent_types_refl; steps.
-Admitted.
-
-(*
-| UntangleFreshen:
-    forall Γ f T T' template xs ys keys m,
-      incomparable (List.map fst keys)
-      (forall k1, k
-      List.NoDup (xs ++ ys) ->
-      T  = substitute template
-        (List.combine xs (List.map (fun key => app f (pp key (fvar m term_var))) keys)) ->
-      T' = substitute template
-        (List.combine xs (List.map (fun y => app f (fvar y term_var)) ys)) ->
-      untangle Γ
-               (T_exists T_trail (close 0 T m))
-               (T_exists_vars ys T_trail T')
-*)
-
-  (*
-| UntangleFreshen:
-    forall Γ T key,
-      untangle Γ
-        (T_exists T_trail (shift_open 1 T (pp key (lvar 0 term_var))))
-        (T_exists T_trail (T_exists T_trail T))
-*)
-  
-
-  (*
-| UntangleFreshen:
-    forall Γ f T T' template xs ys keys m,
-      List.NoDup (xs ++ ys) ->
-      T  = substitute template
-        (List.combine xs (List.map (fun key => app f (pp key (fvar m term_var))) keys)) ->
-      T' = substitute template
-        (List.combine xs (List.map (fun y => app f (fvar y term_var)) ys)) ->
-      untangle Γ
-               (T_exists T_trail (close 0 T m))
-               (T_exists_vars ys T_trail T')
-*)
-
-(*
-
-
-
-(*
-| UntangleTauSingleton:
-    forall Γ f T T' T'' x y z ps,
-(*      List.NoDup (xs ++ ys ++ zs) ->
-      ~ y ∈ fv T'' ->
-      ~ z ∈ fv T'' -> *)
-(*      [ (f: List -> Nat) :: Γ ⊨ f : T_tau ] -> *)
-(*      T = substitute T'' (List.map (fun x => app f (trailOf ps (fvar y term_var))) xs -> *)
-      T  = substitute T'' ((x, app f (trailOf ps (fvar y term_var))) :: nil) ->
-      T' = substitute T'' ((x, app f (fvar z term_var)) :: nil) ->
-      untangle Γ
-               (T_exists List (close 0 T y))
-               (T_exists List (T_exists List (close 1 T' z)))
-*)
-
-
-Fixpoint trailOf (ps: list tree) (t: tree) :=
-  match ps with
-  | nil => t
-  | x :: xs => tcons x (trailOf xs t)
-  end.
-
-Fixpoint trailOf' (ps: list nat) (t: tree) : tree :=
-  match ps with
-  | nil => t
-  | x :: xs => tcons (build_nat x) (trailOf' xs t)
-  end.
-
-Definition append : tree. Admitted.
-Definition apply_append t1 t2 := app (app append t1) t2.
-
-Definition tau_star (f: tree) : Prop :=
-  forall (vs: list nat) (prefixes: list (list nat)),
-    List.NoDup prefixes ->
-    exists suffix, forall v prefix,
-      [ suffix : List ]v ->
-      (v, prefix) ∈ List.combine vs prefixes ->
-      [ app f (trailOf' prefix suffix) ≡ build_nat v ].
-
-Definition tau_star' (f: tree) : Prop :=
-  forall (trails: list tree) (prefixes: list (list nat)),
-    List.NoDup prefixes ->
-    (forall trail, trail ∈ trails -> [ trail : List ]v) ->
-    exists suffix, [ suffix : List ]v /\ forall trail prefix,
-      (trail, prefix) ∈ List.combine trails prefixes ->
-      [ app f (trailOf' prefix suffix) ≡ app f trail ].
-
-Definition T_same_type T1 T2 : tree :=
-  T_intersection
-    (T_forall T1 (T_exists T2 (T_equiv (lvar 0 term_var) (lvar 1 term_var))))
-    (T_forall T2 (T_exists T1 (T_equiv (lvar 0 term_var) (lvar 1 term_var)))).
-
-Definition T_tau': tree :=
-  T_type_refine T_top ( (* f *)
-    T_forall List ( (* prefix *)
-      T_forall List ( (* trail *)
-        T_exists List ( (* suffix *)
-          T_equiv
-            (app (lvar 3 term_var) (lvar 1 term_var))
-            (app (lvar 3 term_var) (apply_append (lvar 2 term_var) (lvar 1 term_var)))
-        )
-      )
-    )
-  ).
-
-
-
-Definition tau_star'' (f: tree) : Prop :=
-  forall (trails: list tree) (prefixes: list (list nat)),
-    List.NoDup prefixes ->
-    (forall trail, trail ∈ trails -> [ trail : List ]v) ->
-    exists suffix, [ suffix : List ]v /\ forall trail prefix,
-      (trail, prefix) ∈ List.combine trails prefixes ->
-      [ app f (trailOf' prefix suffix) ≡ app f trail ].
-
-*)
-
-
-(*
-exists p, { f (1 :: p) } <: exists p, { f p }  OK
-exists p, { f p } <: exists p, { f (1 :: p) }  from Tau
-
-exists p, { (f p, 0) }_Top <: exists p' { (f (1 :: p'), 0) }_Top
-
-let
-  t ≡ (f p, 0) for some p
-  we know there exists p', such that f p ≡ f (1 :: p')
-  t ≡ (f p, 0) ≡ (f (1 :: p'), 0)
-*)
-
-(* WRONG
-exists p p', { (f p, f (1 :: p')) }_Top <: exists p' { (f (1 :: p'), f (1 :: p')) }_Top
-
-let
-  t ≡ (f p, f (1 :: p')) for some p and p'
-
-  we know there exists p'', such that f p ≡ f (1 :: p'')
-  t ≡ (f p, f (1 :: p')) ≡ (f (1 :: p''), (1 :: p'))
-*)
-
-(*
-exists p p', { (f p, g (2 :: p')) }_Top <: exists p' { (f (1 :: p'), g (2 :: p')) }_Top
-
-
-exists p1 p2, { (f nil p1, g nil p2 }_Top <: exists p' { (f [1] p', g [2] p') }_Top
-
-let
-  t ≡ (f p, f (2 :: p')) for some p and p'
-
-  define prefix1 = 1 and prefix2 = 2
-  define trail1 = p, and trail2 = 2 :: p'
-
-by the property, there exists p'' such that
-f (1 :: p'') ≡ f p
-f (2 :: p'') ≡ f (2 :: p')
-
-so t ≡ (f (1 :: p''), f (2 :: p'')) and so
-
-t :  exists p'' { (f (1 :: p''), f (2 :: p'')) }_Top
-
-
-  we know there exists p'', such that f p ≡ f (1 :: p'')
-
-  t ≡ (f p        , f (2 :: p'))
-    ≡ (f (1 :: p''), f (2 :: p'))
-*)
-
-(*
-
-Property for f1, ..., fn:
-
-forall trail1, ..., trailn
-  forall distinct prefix1, ..., prefix_n,
-  exists suffix,
-    f1 (prefix1 ++ suffix)  ≡ f trail1 and
-    ...
-    fn (prefix_n ++ suffix) ≡ f trailn
-*)
-
-(*
-forall v1, ..., vn: Nat
-  forall distinct prefix1, ..., prefix_n,
-  exists suffix,
-    choose (prefix1 ++ suffix)  ≡ v1 and
-    ...
-    choose (prefix_n ++ suffix) ≡ vn
-*)
-
-
-(* def h(p: List)(f: List -> Nat) :=
-     [ ...
-       f [1] p
-*)
-
-(*
-
-[[ t: A ]] = exists x: A, x = t
-
-[[ A <-> B ]] = {{ uu | (A -> B) * (B -> A) }}
-[[ A <-> B ]] = forall x: A, [ x : B ] intersect ...
-
-About choose_nat, we know:
-
-P(choose_nat) =
-  forall v1, ..., vn,
-  forall distinct prefix1, ..., prefix_n,
-  exists suffix,
-    choose_nat (prefix1 ++ suffix) -> v1 and
-    ...
-    choose_nat (prefix_n ++ suffix) -> vn
-
-We want to prove: choose[Nat]: Tau(z, Nat)
-Consider a prefix
-
-( -> ) consider a suffix, and consider choose_nat (prefix ++ suffix) ->* v1
-       for prefix1 = <>
-       there exists suffix1, choose_nat suffix1 ->* v1
-
-( <- ) consider a suffix, and consider choose_nat suffix ->* v1
-       for prefix1 = prefix
-       there exists suffix1, choose_nat (prefix1 ++ suffix1) ->* v1
-
--------------------------------------------------
-
-The tau property:
-  forall prefix,
-    (exists suffix, { f suffix }) <:
-    (exists suffix, { f (prefix ++ sufix) })
-
-  forall prefix, suffix, exists suffix', f suffix = f (prefix ++ suffix')
-
-  forall prefix, Nat <: exists suffix, { choose (prefix ++ sufix) }
-
-
-tau' property:
-  exists suffix, forall prefix,
-    exists mid, f suffix = f (prefix ++ mid ++ suffix)
-
-
-tau2 property:
-  forall v1, v2
-  forall distinct prefix1, prefix2,
-  exists suffix,
-    choose (prefix1 ++ suffix) -> v1 and
-    choose (prefix2 ++ suffix) -> v2
-
-  forall distinct prefix1, prefix2,
-    Nat * Nat <:
-    exists suffix, { choose (prefix1 ++ sufix), choose (prefix2 ++ suffix)  }
-
-
-taun property:
-  forall v1, ..., vn,
-  forall distinct prefix1, ..., prefix_n,
-  exists suffix,
-    choose_nat (prefix1 ++ suffix) -> v1 and
-    ...
-    choose_nat (prefix_n ++ suffix) -> vn
-
-  forall distinct prefix1, ..., prefix_n,
-    Nat * Nat * ... * Nat <:
-    exists suffix, { choose (prefix1 ++ sufix), ..., choose (prefix_n ++ suffix)  }
-*)
-
-(*
-[ f :
-T_type_refine T_top ( (* f *)
-  T_forall ListListNat ( (* trails *)
-    T_forall ListListNat ( (* prefixes *)
-      T_intersection
-        (no_duplicate prefixes ≡ true)
-        (T_exists ListNat ( (* suffix *)
-          prefixes.map(prefix => app f (apply_append prefix suffix)) ≡
-          trails.map(f)
-*)
-
-(*
-(* forall prefix, trail, exists suffix, f trail = f (prefix ++ suffix) *)
-Definition T_tau: tree :=
-  T_type_refine T_top (
-    T_forall List (T_same_type
-      (T_exists List (T_singleton T_top (app (lvar 2 term_var)
-        (apply_append (lvar 1 term_var) (lvar 0 term_var) ))))
-      (T_exists List (T_singleton T_top (app (lvar 2 term_var) (lvar 0 term_var))))
-    )
-  ).
-*)
+  induction 1; steps;
+    eauto using open_equivalent_types_refl;
+    eauto using untangle_freshen.
+Qed.
