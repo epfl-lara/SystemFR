@@ -13,6 +13,8 @@ Require Export SystemFR.TermListReducible.
 Require Export SystemFR.ReducibilityOpenEquivalent.
 Require Export SystemFR.FVLemmasClose.
 Require Export SystemFR.WFLemmasClose.
+Require Export SystemFR.InferMatch.
+Require Export SystemFR.ErasedQuant.
 
 Opaque reducible_values.
 
@@ -66,7 +68,7 @@ Opaque T_trail.
 Definition app2 f a b := app (app f a) b.
 Definition app3 f a b c := app (app (app f a) b) c.
 
-(* tlookup: T_map -> T_key -> T_top *)
+(* tlookup: type -> T_trail -> T_top *)
 Parameter tlookup: tree -> tree -> tree.
 
 (* concat: T_key -> T_key -> T_key *)
@@ -150,6 +152,16 @@ Hint Resolve is_erased_term_update: erased.
 (* Terms that take a map and a key `k`, and only lookup the map on keys greater or
    equal than `k` satisfy the following property, described by the type `T_tau` *)
 Parameter T_tau: tree.
+
+Lemma tau_property:
+  forall f trail key old_trail,
+    [ f : T_tau ] ->
+    [ old_trail : T_trail ]v ->
+    [ trail : T_trail ]v ->
+    [ key : T_key ]v ->
+    [ app f trail ≡ app f (append_key key (update old_trail key trail)) ].
+Proof.
+Admitted.
 
 Axiom tau_fv: forall tag, pfv T_tau tag = nil.
 Axiom wf_tau: wf T_tau 0.
@@ -388,7 +400,7 @@ Proof.
   induction n; repeat step || apply_any.
 Qed.
 
-Hint Resolve is_erased_type_existss.
+Hint Resolve is_erased_type_existss: erased.
 
 Lemma open_existss:
   forall n T1 T2 k rep,
@@ -481,12 +493,20 @@ Proof.
   unfold functional; steps; eauto.
 Qed.
 
-Lemma functional_trail:
+Lemma functional_tail:
   forall A B a b (m: map A B),
     functional ((a, b) :: m) ->
     functional m.
 Proof.
   unfold functional; steps; eauto.
+Qed.
+
+Lemma functional_tail2:
+  forall A B a1 a2 b1 b2 (m: map A B),
+    functional ((a1, b1) :: (a2, b2) :: m) ->
+    functional ((a1, b1) :: m).
+Proof.
+  unfold functional; steps; eauto 6.
 Qed.
 
 Ltac destruct_refinement :=
@@ -867,7 +887,7 @@ Ltac find_snd :=
   match goal with
   | H1: context[combine ?l1 ?l2],
     H2: ?x ∈ ?l1 |- _ =>
-    poseNew (Mark (x, l1, l2) "first_snd");
+    poseNew (Mark (l1, l2) "first_snd");
     unshelve epose proof (find_snd _ _ _ l1 l2 H2 _)
   end.
 
@@ -885,7 +905,7 @@ Ltac find_fst :=
   match goal with
   | H1: context[combine ?l1 ?l2],
     H2: ?x ∈ ?l2 |- _ =>
-    poseNew (Mark (x, l1, l2) "first_fst");
+    poseNew (Mark (l1, l2) "first_fst");
     unshelve epose proof (find_fst _ _ _ l1 l2 H2 _)
   end.
 
@@ -1107,7 +1127,7 @@ Proof.
   induction l1; destruct l2; repeat step || step_inversion NoDup;
     eauto using in_combine_l with exfalso;
     try solve [ eapply_anywhere functional_head; eauto; steps ];
-    eauto using functional_trail.
+    eauto using functional_tail.
 Qed.
 
 Lemma list_map_subst7:
@@ -1140,7 +1160,7 @@ Proof.
   induction l1; destruct l2; repeat step || step_inversion NoDup;
     eauto using in_combine_l with exfalso;
     try solve [ eapply_anywhere functional_head; eauto; steps ];
-    eauto using functional_trail.
+    eauto using functional_tail.
 Qed.
 
 Lemma list_map_subst8:
@@ -1314,25 +1334,13 @@ Proof.
   intros; rewrite fvs_global_trail in *; steps; eauto using typed_fv'.
 Qed.
 
-Definition good_trail (trail: tree) (key: tree) (trail': tree) : Prop :=
-  forall f,
-    [ f: T_tau ] ->
-    [ app f trail' ≡ app f (append_key key trail) ].
-
-Lemma good_trail_equivalent:
-  forall key trail trail' f,
-    good_trail trail key trail' ->
-    [ f : T_tau ] ->
-    [ app f trail' ≡ app f (append_key key trail) ].
-Proof.
-  unfold good_trail; steps.
-Qed.
+(* update: T_trail -> T_key -> T_trail -> T_trail *)
+(* `update old_trail key trail` returns `old_trail` with `trail` rooted at position `key` *)
 
 (*
 (* `update`'s are commutative when keys are not prefixes of one another *)
 Axiom update_spec:
-  forall key1 fresh_key1 fresh_map1 key2 fresh_key2 fresh_map2 map,
-    [ key1 : T_key ] ->
+  forall key1 fresh_key1 fresh_map1 key2 fresh_key2 fresh_map2 map,    [ key1 : T_key ] ->
     [ key2 : T_key ] ->
     [ fresh_key1 : T_key ] ->
     [ fresh_key2 : T_key ] ->
@@ -1370,10 +1378,10 @@ Definition global_trail keys vs :=
 *)
 
 (*
-(* update: T_trail -> T_key -> T_trail -> T_trail *)
-(* `update old_trail key trail` returns `old_trail` where `trail` is now rooted at `key` *)
-Parameter update: tree -> tree -> tree -> tree.
+  lookup (snd trail) δ = lookup (snd (update map key trail)) (concat key δ)
+*)
 
+(*
 Axiom update_type:
   forall old_trail key trail,
     [ old_trail : T_trail ]v ->
@@ -1382,65 +1390,76 @@ Axiom update_type:
     [ update old_trail key trail : T_trail ]v.
 *)
 
-(*
-  lookup (snd trail) δ = lookup (snd (update map key trail)) (concat key δ)
-*)
+Notation "'υ'" := (fun (acc : tree) (p : tree * tree) => update acc (fst p) (snd p))
+  (at level 0).
 
-Lemma tau_property:
-  forall f trail key old_trail,
-    [ f : T_tau ] ->
-    [ old_trail : T_trail ]v ->
-    [ trail : T_trail ]v ->
-    [ key : T_key ]v ->
-    [ app f trail ≡ app f (append_key key (update old_trail key trail)) ].
-Proof.
-Admitted.
+Definition incomparable_keys keys : Prop :=
+  forall key1 key2, key1 ∈ keys -> key2 ∈ keys ->
+    key1 = key2 \/ (~ prefix key1 key2 /\ ~ prefix key2 key1).
 
 Lemma fold_left_update_move:
-  forall keys vs old_trail key trail,
+  forall keys trails old_trail key0 trail0,
     [ old_trail : T_trail ]v ->
-    [ trail : T_trail ]v ->
-    [ key : T_key ]v ->
-    Forall (fun v => [ v : T_trail ]v) vs ->
+    [ trail0 : T_trail ]v ->
+    [ key0 : T_key ]v ->
+    Forall (fun trail => [ trail : T_trail ]v) trails ->
     Forall (fun k => [ k : T_key ]v) keys ->
-    fold_left
-        (fun acc p => update acc (fst p) (snd p))
-        (combine keys vs) (update old_trail key trail)
-      =
-      update
-        (fold_left
-          (fun acc p => update acc (fst p) (snd p))
-          (combine keys vs) old_trail)
-        key trail.
+    functional (combine (key0 :: keys) (trail0 :: trails)) ->
+    incomparable_keys (key0 :: keys) ->
+    fold_left υ (combine keys trails) (update old_trail key0 trail0) =
+    update (fold_left υ (combine keys trails) old_trail) key0 trail0.
 Proof.
-  induction keys; destruct vs; repeat step.
-  rewrite_any; steps; eauto using update_type.
+  unfold incomparable_keys; induction keys; destruct trails; repeat step.
+  repeat rewrite IHkeys by (steps; eauto using update_type, functional_tail, functional_tail2).
+  unshelve epose proof (H5 a key0 _ _); steps; eauto.
 
-Admitted.
+  - unfold functional in *; steps.
+    unshelve epose proof (H4 key0 trail0 t _ _); steps.
+
+  - apply update_commutative; repeat step || apply global_trail_is_trail'.
+Qed.
+
+Definition good_trail (trail: tree) (key: tree) (trail': tree) : Prop :=
+  forall f,
+    [ f: T_tau ] ->
+    [ app f trail' ≡ app f (append_key key trail) ].
+
+Lemma good_trail_equivalent:
+  forall key trail trail' f,
+    good_trail trail key trail' ->
+    [ f : T_tau ] ->
+    [ app f trail' ≡ app f (append_key key trail) ].
+Proof.
+  unfold good_trail; steps.
+Qed.
 
 Lemma global_trail_good_trail':
-  forall keys vs key acc tr,
-    length keys = length vs ->
-    Forall (fun v => [ v : T_trail ]v) vs ->
+  forall keys trails key0 acc trail0,
+    length keys = length trails ->
+    Forall (fun trail => [ trail : T_trail ]v) trails ->
     Forall (fun k => [ k : T_key ]v) keys ->
     [ acc : T_trail ]v ->
-    (key, tr) ∈ combine keys vs ->
-    good_trail (fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) acc) key tr.
+    (key0, trail0) ∈ combine keys trails ->
+    functional (combine keys trails) ->
+    incomparable_keys keys ->
+    good_trail (fold_left υ (combine keys trails) acc) key0 trail0.
 Proof.
-  unfold good_trail; induction keys; destruct vs; repeat step;
-    try solve [ apply_any; steps; eauto using update_type ].
-  rewrite fold_left_update_move; steps.
+  unfold incomparable_keys; unfold good_trail; induction keys; destruct trails; repeat step;
+    try solve [ apply_any; steps; eauto using update_type, functional_tail ].
+  rewrite fold_left_update_move; steps; eauto using functional_tail.
   apply tau_property; steps;
     eauto using global_trail_is_trail'.
 Qed.
 
 Lemma global_trail_good_trail:
-  forall keys vs key tr,
-    length keys = length vs ->
-    Forall (fun v => [ v : T_trail ]v) vs ->
+  forall keys trails key0 trail0,
+    length keys = length trails ->
+    Forall (fun trail => [ trail : T_trail ]v) trails ->
     Forall (fun k => [ k : T_key ]v) keys ->
-    (key, tr) ∈ combine keys vs ->
-    good_trail (global_trail keys vs) key tr.
+    functional (combine keys trails) ->
+    incomparable_keys keys ->
+    (key0, trail0) ∈ combine keys trails ->
+    good_trail (global_trail keys trails) key0 trail0.
 Proof.
   intros; apply global_trail_good_trail'; steps; eauto using empty_trail_type.
 Qed.
@@ -1476,6 +1495,8 @@ Lemma in_combine_equivalent':
     Forall (fun v => [ v : T_trail ]v) vs ->
     Forall (fun k => [ k : T_key ]v) keys ->
     (forall f, f ∈ fs -> [ psubstitute f l term_var : T_tau ]) ->
+    functional (combine keys vs) ->
+    incomparable_keys keys ->
     (t1, t2) ∈
       combine
         (apps (List.map (fun f => psubstitute f l term_var) fs) vs)
@@ -1487,6 +1508,30 @@ Proof.
     repeat step || apply global_trail_good_trail.
 Qed.
 
+Lemma functional_trans:
+  forall A B C (l1: list A) (l2: list B) (l3: list C),
+    length l1 = length l2 ->
+    length l2 = length l3 ->
+    functional (combine l1 l2) ->
+    functional (combine l2 l3) ->
+    functional (combine l1 l3).
+Proof.
+  unfold functional; repeat step.
+  - pose proof (in_combine_l _ _ _ _ H3).
+    pose proof (in_combine_r _ _ _ _ H3).
+    pose proof (in_combine_r _ _ _ _ H4).
+    repeat find_fst || step.
+    repeat step || find_fst || find_snd.
+    
+    instantiate_any.
+
+    apply_anywhere in_combine_l; repeat step || find_snd.
+
+    find_snd.
+    apply_anywhere in_combine_l; repeat step || find_snd.
+    find_snd.
+  - 
+
 Lemma untangle_freshen:
   forall Γ fs template xs ys keys m,
     is_erased_type template ->
@@ -1495,6 +1540,7 @@ Lemma untangle_freshen:
     Forall (fun f => wf f 0) fs ->
     Forall is_erased_term fs ->
     functional (combine ys keys) ->
+    incomparable_keys keys ->
     ~ m ∈ fv template ->
     length keys = length xs ->
     length fs = length xs ->
@@ -1651,6 +1697,103 @@ Proof.
       clear_marked; apply_anywhere pfv_in_subst2; steps; eauto with fv.
 Qed.
 
+Axiom open_lookup:
+  forall k A t rep,
+    open k (tlookup A t) rep = tlookup (open k A rep) (open k t rep).
+
+Axiom substitute_lookup:
+  forall A t l tag,
+    psubstitute (tlookup A t) l tag =
+    tlookup (psubstitute A l tag) (psubstitute t l tag).
+
+Axiom wf_lookup:
+  forall k A t,
+    wf A k ->
+    wf t k ->
+    wf (tlookup A t) k.
+
+Hint Resolve wf_lookup: wf.
+
+Axiom is_erased_term_lookup:
+  forall A t,
+    is_erased_type A ->
+    is_erased_term t ->
+    is_erased_term (tlookup A t).
+
+Hint Resolve is_erased_term_lookup.
+
+Axiom lookup_type:
+  forall A trail,
+    [ trail : T_trail ]v ->
+    [ tlookup A trail : A ].
+
+Axiom lookup_onto:
+  forall a A,
+    [ a : A ]v ->
+    exists trail,
+      [ trail : T_trail ]v /\
+      [ tlookup A trail ≡ a ].
+
+Axiom lookup_fv:
+  forall A trail tag,
+    pfv (tlookup A trail) tag = pfv A tag ++ pfv trail tag.
+
+Lemma untangle_abstract:
+  forall Γ T A,
+    is_erased_type A ->
+    is_erased_type T ->
+    wf T 1 ->
+    wf A 0 ->
+    subset (fv A) (support Γ) ->
+    subset (fv T) (support Γ) ->
+    [ Γ ⊨ T_exists T_trail (shift_open 0 T (tlookup A (lvar 0 term_var))) = T_exists A T ].
+Proof.
+  unfold open_equivalent_types, equivalent_types; intros;
+    repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_trail in *.
+
+  - rewrite substitute_open2 in *; repeat step || list_utils; eauto with wf.
+    rewrite open_shift_open4 in *; repeat step || rewrite open_lookup in * || open_none.
+    rewrite no_shift_open in H12;
+      repeat step || apply subst_erased_type;
+      eauto with wf;
+      try solve [ eapply satisfies_erased_terms; eauto; steps ].
+
+    apply reducible_expr_value;
+      try solve [ eapply reducible_values_closed; eauto; steps ].
+    apply reducible_exists with (tlookup (psubstitute A l term_var) a); steps;
+      repeat step || rewrite lookup_fv || list_utils ||
+             apply subst_erased_type || t_substitutions ||
+             (rewrite (substitute_nothing5 a) in * by auto) ||
+             rewrite substitute_lookup in * ||
+             apply is_erased_term_lookup;
+      eauto with erased wf fv;
+      try solve [ eapply satisfies_erased_terms; eauto; steps ];
+      eauto using lookup_type;
+      try solve [ apply reducible_value_expr; steps ].
+
+  - unshelve epose proof (lookup_onto _ _ H10);
+      repeat step || simp_red_goal || apply subst_erased_type;
+      try solve [ eapply satisfies_erased_terms; eauto; steps ];
+      eauto 3 with erased.
+
+    exists trail; steps; eauto with erased fv wf.
+    rewrite substitute_open2;
+      repeat step || list_utils ||
+             (unshelve erewrite reducible_val_fv in * by (eauto; steps));
+      eauto with wf.
+    rewrite open_shift_open4; repeat step || rewrite open_lookup in * || open_none; eauto with wf.
+    rewrite no_shift_open;
+      repeat step || apply subst_erased_type || t_substitutions;
+      eauto with wf;
+      try solve [ eapply satisfies_erased_terms; eauto; steps ].
+
+    eapply reducibility_open_equivalent; eauto;
+      repeat step || rewrite substitute_lookup in *;
+      eauto using equivalent_sym with wf fv.
+
+    rewrite (substitute_nothing5 trail); eauto with fv; eauto using equivalent_sym.
+Qed.
+
 (* Using the tau property, we can untangle *)
 Inductive untangle: context -> tree -> tree -> Prop :=
 | UntangleFreshen:
@@ -1680,6 +1823,16 @@ Inductive untangle: context -> tree -> tree -> Prop :=
                (T_exists T_trail (close 0 T m))
                (T_exists_vars ys T_trail T')
 
+| UntangleAbstract:
+    forall Γ T A,
+      is_erased_type A ->
+      is_erased_type T ->
+      wf T 1 ->
+      wf A 0 ->
+      subset (fv A) (support Γ) ->
+      subset (fv T) (support Γ) ->
+      untangle Γ (T_exists T_trail (shift_open 0 T (tlookup A (lvar 0 term_var)))) (T_exists A T)
+
 | UntangleRefl: forall Γ T, untangle Γ T T
 .
 
@@ -1690,5 +1843,6 @@ Lemma untangle_open_equivalent_types:
 Proof.
   induction 1; steps;
     eauto using open_equivalent_types_refl;
-    eauto using untangle_freshen.
+    eauto using untangle_freshen;
+    eauto using untangle_abstract.
 Qed.

@@ -4,6 +4,7 @@ Require Export SystemFR.ErasedSingleton.
 Require Export SystemFR.SubtypeList.
 Require Export SystemFR.EvalListMatch.
 Require Export SystemFR.ReducibilitySubtype.
+Require Export SystemFR.ErasedQuant.
 
 Opaque reducible_values.
 
@@ -27,23 +28,6 @@ Lemma reducible_union_right:
 Proof.
   unfold reducible, reduces_to; steps.
   eexists; repeat step || simp_red; eauto using reducible_values_closed.
-Qed.
-
-Lemma reducible_exists:
-  forall ρ t t' T1 T2,
-    valid_interpretation ρ ->
-    is_erased_type T2 ->
-    wf T2 1 ->
-    pfv T2 term_var = nil ->
-    [ ρ | t' : T1 ] ->
-    [ ρ | t : open 0 T2 t' ] ->
-    [ ρ | t : T_exists T1 T2 ].
-Proof.
-  unfold reducible, reduces_to;
-    repeat step.
-  exists v; repeat step || simp_red; eauto using reducible_values_closed.
-  exists v0; repeat step; t_closer.
-  eapply reducibility_values_ltr; eauto; steps; t_closer.
 Qed.
 
 Lemma tmatch_value:
