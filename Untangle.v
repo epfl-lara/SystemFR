@@ -14,7 +14,7 @@ Require Export SystemFR.Existss.
 Require Export SystemFR.NormalizationPi.
 Require Export SystemFR.NormalizationExists.
 Require Export SystemFR.NormalizationList.
-Require Export SystemFR.TauProperty.
+Require Export SystemFR.Trail.
 
 Opaque reducible_values.
 
@@ -22,37 +22,29 @@ Definition incomparable_keys keys : Prop :=
   forall key1 key2, key1 ∈ keys -> key2 ∈ keys ->
     key1 = key2 \/ (~ prefix key1 key2 /\ ~ prefix key2 key1).
 
-Definition apps fs ts := List.map (fun p => app (fst p) (snd p)) (combine fs ts).
-
 Inductive untangle: context -> tree -> tree -> Prop :=
 | UntangleFreshen:
-    forall Γ T T' template xs ys fs keys m,
+    forall Γ T T' template xs ys keys m,
       is_erased_type template ->
       wf template 0 ->
       Forall (fun key => [ key : T_key ]v) keys ->
-      Forall (fun f => wf f 0) fs ->
-      Forall is_erased_term fs ->
       functional (combine ys keys) ->
       functional (combine keys ys) ->
       incomparable_keys keys ->
       ~ m ∈ fv template ->
       length keys = length xs ->
-      length fs = length xs ->
       length ys = length xs ->
-      (forall f, f ∈ fs -> m ∈ fv f -> False) ->
       (forall y, y ∈ ys -> y ∈ support Γ -> False) ->
       (forall y, y ∈ ys -> y ∈ fv template -> False) ->
       (forall x, x ∈ xs -> x ∈ support Γ -> False) ->
-      (forall f, f ∈ fs -> subset (fv f) (support Γ)) ->
-      (forall f, f ∈ fs -> [ Γ ⊨ f : T_tau ]) ->
       (forall x, x ∈ fv template -> x ∈ xs \/ x ∈ support Γ) ->
       T  = substitute template
-        (List.combine xs (apps fs (List.map (fun key => append_key key (fvar m term_var)) keys))) ->
+        (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
       T' = substitute template
-        (List.combine xs (apps fs (List.map (fun y => fvar y term_var) ys))) ->
+        (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
       untangle Γ
-               (T_exists T_trail (close 0 T m))
-               (T_exists_vars ys T_trail T')
+               (T_exists T_tree (close 0 T m))
+               (T_exists_vars ys T_tree T')
 
 | UntangleAbstract:
     forall Γ T A,
@@ -63,7 +55,7 @@ Inductive untangle: context -> tree -> tree -> Prop :=
       subset (fv A) (support Γ) ->
       subset (fv T) (support Γ) ->
       [ Γ ⊨ tnil : A ] ->
-      untangle Γ (T_exists T_trail (shift_open 0 T (tlookup A (lvar 0 term_var)))) (T_exists A T)
+      untangle Γ (T_exists T_tree (shift_open 0 T (tlookup A (lvar 0 term_var)))) (T_exists A T)
 
 | UntanglePi:
     forall Γ S S' T T' x,
@@ -146,11 +138,11 @@ Qed.
 Lemma list_map_subst2:
   forall l f m v,
     (forall e, e ∈ l -> m ∈ fv e -> False) ->
-    List.map (fun key => app f (psubstitute (append_key key (fvar m term_var))
+    List.map (fun key => app f (psubstitute (select key (fvar m term_var))
                                                      ((m, v) :: nil) term_var)) l =
-    List.map (fun key => app f (append_key key v)) l.
+    List.map (fun key => app f (select key v)) l.
 Proof.
-  induction l; repeat step || t_substitutions || rewrite psubstitute_append_key || t_equality; eauto.
+  induction l; repeat step || t_substitutions || rewrite psubstitute_select || t_equality; eauto.
 Qed.
 
 Lemma combine_equivalent_wfs1:
@@ -294,144 +286,76 @@ Proof.
   induction xs; destruct ys; steps.
 Qed.
 
-Lemma wfs_combine6:
-  forall xs fs keys m,
-    Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun t => wf t 0) fs ->
-    length keys = length xs ->
-    length fs = length xs ->
-    wfs
-      (combine xs
-         (List.map (fun p => app (fst p) (snd p))
-            (combine fs (List.map (fun key => append_key key (fvar m term_var)) keys)))) 0.
-Proof.
-  induction xs; destruct fs; destruct keys;
-    repeat step || apply wf_append_key;
-    eauto using reducible_val_wf with step_tactic.
-Qed.
-
 Lemma wfs_combine7:
-  forall xs fs keys m,
+  forall xs keys m,
     Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun t => wf t 0) fs ->
     length keys = length xs ->
-    length fs = length xs ->
-    wfs (combine xs (apps fs (List.map (fun key : tree => append_key key (fvar m term_var)) keys))) 0.
+    wfs (combine xs (List.map (fun key : tree => select key (fvar m term_var)) keys)) 0.
 Proof.
-  induction xs; destruct fs; destruct keys;
-    repeat step || apply wf_append_key;
+  induction xs; destruct keys;
+    repeat step || apply wf_select;
     eauto using reducible_val_wf with step_tactic.
-Qed.
-
-Lemma list_map_apps:
-  forall fs ts l tag,
-    length fs = length ts ->
-    List.map (fun t => psubstitute t l tag) (apps fs ts) =
-    apps (List.map (fun t => psubstitute t l tag) fs) (List.map (fun t => psubstitute t l tag) ts).
-Proof.
-  induction fs; destruct ts; repeat step || t_equality; eauto.
-Qed.
-
-Lemma apps_cons:
-  forall f fs t ts,
-    apps (f :: fs) (t :: ts) = app f t :: apps fs ts.
-Proof.
-  steps.
-Qed.
-
-Lemma length_apps_cons:
-  forall f fs t ts,
-    length (apps (f :: fs) (t :: ts)) = 1 + length (apps fs ts).
-Proof.
-  repeat step.
-Qed.
-
-Opaque apps.
-
-Lemma length_apps:
-  forall fs ts,
-    length fs = length ts ->
-    length (apps fs ts) = length fs.
-Proof.
-  induction fs; destruct ts; try solve [
-    repeat step || rewrite length_apps_cons; try lia
-  ].
-  intros.
-  rewrite length_apps_cons; cbn; apply f_equal; apply_any; steps.
-Qed.
-
-Lemma substitute_nothing6:
-  forall fs m v,
-    (forall f, f ∈ fs -> m ∈ fv f -> False) ->
-    List.map (fun t => psubstitute t ((m, v) :: nil) term_var) fs = fs.
-Proof.
-  induction fs; repeat step || t_substitutions || apply f_equal; eauto.
 Qed.
 
 Lemma list_map_subst3:
   forall keys m v,
     Forall (fun key => [ key : T_key ]v) keys ->
-    List.map (fun x => psubstitute (append_key x (fvar m term_var)) ((m, v) :: nil) term_var) keys =
-    List.map (fun x => append_key x v) keys.
+    List.map (fun x => psubstitute (select x (fvar m term_var)) ((m, v) :: nil) term_var) keys =
+    List.map (fun x => select x v) keys.
 Proof.
   induction keys;
-    repeat step || rewrite psubstitute_append_key || t_substitutions.
+    repeat step || rewrite psubstitute_select || t_substitutions.
   rewrite substitute_nothing5; eauto using reducible_val_fv with step_tactic.
   apply f_equal; eauto.
 Qed.
 
 Lemma wfs_combine8:
-  forall xs fs ys,
-    length fs = length xs ->
+  forall xs ys,
     length ys = length xs ->
-    Forall (fun f => wf f 0) fs ->
-    wfs (combine xs (apps fs (List.map (fun y : nat => fvar y term_var) ys))) 0.
+    wfs (combine xs (List.map (fun y : nat => fvar y term_var) ys)) 0.
 Proof.
-  induction xs; destruct fs; destruct ys; intros;
-    repeat rewrite apps_cons in * || step.
+  induction xs; destruct ys; intros;
+    repeat step; eauto.
 Qed.
 
 Lemma erased_terms_combine2:
-  forall xs fs ys,
-    length fs = length xs ->
+  forall xs ys,
     length ys = length xs ->
-    Forall is_erased_term fs ->
-    erased_terms (combine xs (apps fs (List.map (fun y => fvar y term_var) ys))).
+    erased_terms (combine xs (List.map (fun y => fvar y term_var) ys)).
 Proof.
-  induction xs; destruct fs; destruct ys; intros;
-    repeat rewrite apps_cons in * || step.
+  induction xs; destruct ys; intros;
+    repeat step; eauto.
 Qed.
 
 Lemma erased_terms_combine3:
-  forall xs keys fs m,
-    length fs = length xs ->
+  forall xs keys m,
     length keys = length xs ->
-    Forall is_erased_term fs ->
     Forall (fun key => [ key : T_key ]v) keys ->
-    erased_terms (combine xs (apps fs (List.map (fun key => append_key key (fvar m term_var)) keys))).
+    erased_terms (combine xs (List.map (fun key => select key (fvar m term_var)) keys)).
 Proof.
-  induction xs; destruct keys; destruct fs; intros;
-    repeat rewrite apps_cons in * || step || apply is_erased_term_append_key;
-    try solve [ eapply reducible_values_erased; eauto; steps ].
+  induction xs; destruct keys; intros;
+    repeat step || apply is_erased_term_select;
+    try solve [ eapply reducible_values_erased; eauto; steps ];
+    eauto.
 Qed.
 
-Lemma forall_append_key_trails:
-  forall keys trail,
+Lemma forall_select_type:
+  forall keys tr,
     Forall (fun key => [ key : T_key ]v) keys ->
-    [ trail : T_trail ]v ->
-    Forall (fun t => [ t : T_trail ]v) (List.map (fun key : tree => append_key key trail) keys).
+    [ tr : T_tree ]v ->
+    Forall (fun t => [ t : T_tree ]v) (List.map (fun key => select key tr) keys).
 Proof.
-  induction keys; repeat step || constructor; eauto using append_key_trail.
+  induction keys; repeat step || constructor; eauto using select_type.
 Qed.
 
 Lemma list_map_subst4:
-  forall keys a l,
-    Forall (fun key : tree => [key : T_key ]v) keys ->
-    [ a : T_trail ]v ->
-    List.map (fun x => psubstitute (append_key x a) l term_var) keys =
-    List.map (fun x => append_key x a) keys.
+  forall keys tr l,
+    Forall (fun key => [ key : T_key ]v) keys ->
+    [ tr : T_tree ]v ->
+    List.map (fun key => psubstitute (select key tr) l term_var) keys =
+    List.map (fun key => select key tr) keys.
 Proof.
-  induction keys; repeat step || t_substitutions || rewrite psubstitute_append_key.
+  induction keys; repeat step || t_substitutions || rewrite psubstitute_select.
   repeat rewrite substitute_nothing5 by eauto using reducible_val_fv with step_tactic.
   apply f_equal; eauto.
 Qed.
@@ -447,24 +371,6 @@ Lemma list_map_subst5:
     List.map (fun x => fvar x term_var) ys.
 Proof.
   induction ys; repeat step || t_lookup || apply f_equal; eauto with exfalso.
-Qed.
-
-Lemma list_map_subst6:
-  forall fs l ys zs,
-    (forall f, f ∈ fs -> subset (fv f) (support l)) ->
-    pclosed_mapping l term_var ->
-    List.map
-      (fun f =>
-         psubstitute (psubstitute f l term_var)
-         (combine ys zs) term_var)
-      fs =
-    List.map
-      (fun f => psubstitute f l term_var)
-      fs.
-Proof.
-  induction fs; repeat step; eauto.
-  rewrite substitute_nothing5; eauto with fv.
-  apply f_equal; eauto.
 Qed.
 
 Lemma list_map_change_list:
@@ -497,12 +403,12 @@ Lemma list_map_subst7:
       (fun y =>
          match
            lookup PeanoNat.Nat.eq_dec
-             (combine ys (List.map (fun key => append_key key a) keys)) y
+             (combine ys (List.map (fun key => select key a) keys)) y
          with
          | Some e1 => e1
          | None => fvar y term_var
          end) ys =
-    List.map (fun key => append_key key a) keys.
+    List.map (fun key => select key a) keys.
 Proof.
   intros; apply list_map_change_list; repeat step || step_inversion NoDup;
     eauto using in_combine_l with exfalso;
@@ -543,7 +449,7 @@ Proof.
     try solve [ erewrite_anywhere lookup_combine2; eauto; steps ].
 Qed.
 
-Lemma is_erased_term_global_trail':
+Lemma is_erased_term_global_tree':
   forall keys vs acc0,
     is_erased_term acc0 ->
     Forall is_erased_term keys ->
@@ -553,7 +459,7 @@ Proof.
   induction keys; repeat step || apply_any; eauto with erased.
 Qed.
 
-Lemma wfs_global_trail':
+Lemma wfs_global_tree':
   forall keys vs acc0,
     wf acc0 0 ->
     Forall (fun v => wf v 0) keys ->
@@ -563,7 +469,7 @@ Proof.
   induction keys; repeat step || apply_any; eauto with wf.
 Qed.
 
-Lemma fvs_global_trail':
+Lemma fvs_global_tree':
   forall keys vs acc0 tag,
     pfv acc0 tag = nil ->
     Forall (fun v => pfv v tag = nil) keys ->
@@ -573,56 +479,56 @@ Proof.
   induction keys; repeat step || apply_any || rewrite pfv_update || list_utils.
 Qed.
 
-Lemma global_trail_is_trail':
+Lemma global_tree_is_tree':
   forall keys vs acc0,
-    [ acc0 : T_trail ]v  ->
+    [ acc0 : T_tree ]v  ->
     Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun trail => [ trail : T_trail ]v) vs ->
-    [ fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) acc0 : T_trail ]v.
+    Forall (fun tree => [ tree : T_tree ]v) vs ->
+    [ fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) acc0 : T_tree ]v.
 Proof.
   induction keys; repeat step || apply_any; eauto using update_type.
 Qed.
 
-Definition global_trail keys vs :=
-  fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_trail.
+Definition global_tree keys vs :=
+  fold_left (fun acc p => update acc (fst p) (snd p)) (combine keys vs) empty_tree.
 
-Lemma is_erased_term_global_trail:
+Lemma is_erased_term_global_tree:
   forall keys vs,
     Forall is_erased_term keys ->
     Forall is_erased_term vs ->
-    is_erased_term (global_trail keys vs).
+    is_erased_term (global_tree keys vs).
 Proof.
-  intros; apply is_erased_term_global_trail'; steps;
-    try solve [ eapply reducible_values_erased; eauto using empty_trail_type; steps ].
+  intros; apply is_erased_term_global_tree'; steps;
+    try solve [ eapply reducible_values_erased; eauto using empty_tree_type; steps ].
 Qed.
 
-Lemma wfs_global_trail:
+Lemma wfs_global_tree:
   forall keys vs,
     Forall (fun v => wf v 0) keys ->
     Forall (fun v => wf v 0) vs ->
-    wf (global_trail keys vs) 0.
+    wf (global_tree keys vs) 0.
 Proof.
-  intros; apply wfs_global_trail'; steps;
-    try solve [ eapply reducible_val_wf; eauto using empty_trail_type; steps ].
+  intros; apply wfs_global_tree'; steps;
+    try solve [ eapply reducible_val_wf; eauto using empty_tree_type; steps ].
 Qed.
 
-Lemma fvs_global_trail:
+Lemma fvs_global_tree:
   forall keys vs tag,
     Forall (fun v => pfv v tag = nil) keys ->
     Forall (fun v => pfv v tag = nil) vs ->
-    pfv (global_trail keys vs) tag = nil.
+    pfv (global_tree keys vs) tag = nil.
 Proof.
-  intros; apply fvs_global_trail'; steps;
-    try solve [ eapply reducible_val_fv; eauto using empty_trail_type; steps ].
+  intros; apply fvs_global_tree'; steps;
+    try solve [ eapply reducible_val_fv; eauto using empty_tree_type; steps ].
 Qed.
 
-Lemma global_trail_is_trail:
+Lemma global_tree_is_tree:
   forall keys vs,
     Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun trail => [ trail : T_trail ]v) vs ->
-    [ global_trail keys vs : T_trail ]v.
+    Forall (fun tr => [ tr : T_tree ]v) vs ->
+    [ global_tree keys vs : T_tree ]v.
 Proof.
-  intros; apply global_trail_is_trail'; steps; eauto using empty_trail_type.
+  intros; apply global_tree_is_tree'; steps; eauto using empty_tree_type.
 Qed.
 
 Lemma typed_erased_terms:
@@ -632,7 +538,7 @@ Lemma typed_erased_terms:
     Forall is_erased_term l.
 Proof.
   induction l; repeat step || constructor;
-    try solve [ eapply reducible_values_erased; eauto using empty_trail_type; steps ].
+    try solve [ eapply reducible_values_erased; eauto using empty_tree_type; steps ].
 Qed.
 
 Lemma typed_erased_terms':
@@ -650,7 +556,7 @@ Lemma typed_wfs:
     Forall (fun v => wf v 0) l.
 Proof.
   induction l; repeat step || constructor;
-    try solve [ eapply reducible_val_wf; eauto using empty_trail_type; steps ].
+    try solve [ eapply reducible_val_wf; eauto using empty_tree_type; steps ].
 Qed.
 
 Lemma typed_wfs':
@@ -668,7 +574,7 @@ Lemma typed_fv:
     Forall (fun v => pfv v tag = nil) l.
 Proof.
   induction l; repeat step || constructor;
-    try solve [ eapply reducible_val_fv; eauto using empty_trail_type; steps ].
+    try solve [ eapply reducible_val_fv; eauto using empty_tree_type; steps ].
 Qed.
 
 Lemma typed_fv':
@@ -679,171 +585,132 @@ Proof.
   intros; eapply typed_fv; eauto; steps.
 Qed.
 
-Lemma fvs_global_trail2:
+Lemma fvs_global_tree2:
   forall keys vs tag x,
     Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun trail => [ trail : T_trail ]v) vs ->
-    x ∈ pfv (global_trail keys vs) tag ->
+    Forall (fun tr => [ tr : T_tree ]v) vs ->
+    x ∈ pfv (global_tree keys vs) tag ->
     False.
 Proof.
-  intros; rewrite fvs_global_trail in *; steps; eauto using typed_fv'.
+  intros; rewrite fvs_global_tree in *; steps; eauto using typed_fv'.
 Qed.
 
 Notation "'υ'" := (fun (acc : tree) (p : tree * tree) => update acc (fst p) (snd p))
   (at level 0).
 
 Lemma fold_left_update_move:
-  forall keys trails old_trail key0 trail0,
-    [ old_trail : T_trail ]v ->
-    [ trail0 : T_trail ]v ->
+  forall keys trees old_tree key0 tree0,
+    [ old_tree : T_tree ]v ->
+    [ tree0 : T_tree ]v ->
     [ key0 : T_key ]v ->
-    Forall (fun trail => [ trail : T_trail ]v) trails ->
+    Forall (fun tr => [ tr : T_tree ]v) trees ->
     Forall (fun k => [ k : T_key ]v) keys ->
-    functional (combine (key0 :: keys) (trail0 :: trails)) ->
+    functional (combine (key0 :: keys) (tree0 :: trees)) ->
     incomparable_keys (key0 :: keys) ->
-    fold_left υ (combine keys trails) (update old_trail key0 trail0) =
-    update (fold_left υ (combine keys trails) old_trail) key0 trail0.
+    fold_left υ (combine keys trees) (update old_tree key0 tree0) =
+    update (fold_left υ (combine keys trees) old_tree) key0 tree0.
 Proof.
-  unfold incomparable_keys; induction keys; destruct trails; repeat step.
+  unfold incomparable_keys; induction keys; destruct trees; repeat step.
   repeat rewrite IHkeys by (steps; eauto using update_type, functional_tail, functional_tail2).
   unshelve epose proof (H5 a key0 _ _); steps; eauto.
 
   - unfold functional in *; steps.
-    unshelve epose proof (H4 key0 trail0 t _ _); steps.
+    unshelve epose proof (H4 key0 tree0 t _ _); steps.
 
-  - apply update_commutative; repeat step || apply global_trail_is_trail'.
+  - apply update_commutative; repeat step || apply global_tree_is_tree'.
 Qed.
 
-Definition good_trail (trail: tree) (key: tree) (trail': tree) : Prop :=
-  forall f,
-    [ f: T_tau ] ->
-    [ app f trail' ≡ app f (append_key key trail) ].
-
-Lemma good_trail_equivalent:
-  forall key trail trail' f,
-    good_trail trail key trail' ->
-    [ f : T_tau ] ->
-    [ app f trail' ≡ app f (append_key key trail) ].
-Proof.
-  unfold good_trail; steps.
-Qed.
-
-Lemma global_trail_good_trail':
-  forall keys trails key0 acc trail0,
-    length keys = length trails ->
-    Forall (fun trail => [ trail : T_trail ]v) trails ->
+Lemma global_tree_good_tree':
+  forall keys trees key0 acc tree0,
+    length keys = length trees ->
+    Forall (fun tr => [ tr : T_tree ]v) trees ->
     Forall (fun k => [ k : T_key ]v) keys ->
-    [ acc : T_trail ]v ->
-    (key0, trail0) ∈ combine keys trails ->
-    functional (combine keys trails) ->
+    [ acc : T_tree ]v ->
+    (key0, tree0) ∈ combine keys trees ->
+    functional (combine keys trees) ->
     incomparable_keys keys ->
-    good_trail (fold_left υ (combine keys trails) acc) key0 trail0.
+    tree0 = select key0 (fold_left υ (combine keys trees) acc).
 Proof.
-  unfold incomparable_keys; unfold good_trail; induction keys; destruct trails; repeat step;
+  unfold incomparable_keys; induction keys; destruct trees; repeat step;
     try solve [ apply_any; steps; eauto using update_type, functional_tail ].
   rewrite fold_left_update_move; steps; eauto using functional_tail.
-  apply tau_property; steps;
-    eauto using global_trail_is_trail'.
+  rewrite select_update; steps; eauto using global_tree_is_tree'.
 Qed.
 
-Lemma global_trail_good_trail:
-  forall keys trails key0 trail0,
-    length keys = length trails ->
-    Forall (fun trail => [ trail : T_trail ]v) trails ->
+Lemma global_tree_good_tree:
+  forall keys trees key0 tree0,
+    length keys = length trees ->
+    Forall (fun tr => [ tr : T_tree ]v) trees ->
     Forall (fun k => [ k : T_key ]v) keys ->
-    functional (combine keys trails) ->
+    functional (combine keys trees) ->
     incomparable_keys keys ->
-    (key0, trail0) ∈ combine keys trails ->
-    good_trail (global_trail keys trails) key0 trail0.
+    (key0, tree0) ∈ combine keys trees ->
+    tree0 = select key0 (global_tree keys trees).
 Proof.
-  intros; apply global_trail_good_trail'; steps; eauto using empty_trail_type.
+  intros; apply global_tree_good_tree'; steps; eauto using empty_tree_type.
 Qed.
 
-Opaque global_trail.
+Opaque global_tree.
 
 Lemma in_combine_equivalent:
-  forall fs keys vs t1 l t2 trail,
-    length fs = length vs ->
-    length fs = length keys ->
-    (forall f, f ∈ fs -> [ psubstitute f l term_var : T_tau ]) ->
-    (forall key v, (key, v) ∈ combine keys vs -> good_trail trail key v) ->
-    (t1, t2) ∈
-      combine
-        (apps (List.map (fun f => psubstitute f l term_var) fs) vs)
-        (apps (List.map (fun f => psubstitute f l term_var) fs)
-          (List.map (fun x => append_key x trail) keys)) ->
-    [t1 ≡ t2].
+  forall keys trees tr0,
+    length keys = length trees ->
+    (forall key tr, (key, tr) ∈ combine keys trees -> tr = select key tr0) ->
+    List.map (fun key => select key tr0) keys = trees.
 Proof.
-  induction fs; destruct keys; destruct vs;
-    repeat rewrite apps_cons in * || step;
-    try solve [ apply IHfs with keys vs l trail; steps ].
-
-  unshelve epose proof (H1 a _); steps.
-  unshelve epose proof (H2 t t0 _); steps;
-    eauto using good_trail_equivalent.
+  induction keys; destruct trees; steps; eauto.
+  rewrite (IHkeys trees); steps.
+  rewrite (H0 a t); steps.
 Qed.
 
 Lemma in_combine_equivalent':
-  forall fs keys vs t1 l t2,
-    length fs = length vs ->
-    length fs = length keys ->
-    Forall (fun v => [ v : T_trail ]v) vs ->
+  forall keys trees,
+    length keys = length trees ->
+    Forall (fun tr => [ tr : T_tree ]v) trees ->
     Forall (fun k => [ k : T_key ]v) keys ->
-    (forall f, f ∈ fs -> [ psubstitute f l term_var : T_tau ]) ->
-    functional (combine keys vs) ->
+    functional (combine keys trees) ->
     incomparable_keys keys ->
-    (t1, t2) ∈
-      combine
-        (apps (List.map (fun f => psubstitute f l term_var) fs) vs)
-        (apps (List.map (fun f => psubstitute f l term_var) fs)
-          (List.map (fun x => append_key x (global_trail keys vs)) keys)) ->
-    [t1 ≡ t2].
+    List.map (fun key => select key (global_tree keys trees)) keys = trees.
 Proof.
-  intros; apply in_combine_equivalent with fs keys vs l (global_trail keys vs);
-    repeat step || apply global_trail_good_trail.
+  intros; apply in_combine_equivalent;
+    repeat step || apply global_tree_good_tree.
 Qed.
 
-Opaque T_trail.
-Opaque T_tau.
+Opaque T_tree.
+
+Lemma equal_equivalent:
+  forall t1 t2,
+    closed_term t1 ->
+    t1 = t2 ->
+    [ t1 ≡ t2 ].
+Proof. repeat step || equivalent_refl; t_closer. Qed.
 
 Lemma untangle_freshen:
-  forall Γ fs template xs ys keys m,
+  forall Γ T T' template xs ys keys m,
     is_erased_type template ->
     wf template 0 ->
     Forall (fun key => [ key : T_key ]v) keys ->
-    Forall (fun f => wf f 0) fs ->
-    Forall is_erased_term fs ->
     functional (combine ys keys) ->
     functional (combine keys ys) ->
     incomparable_keys keys ->
     ~ m ∈ fv template ->
     length keys = length xs ->
-    length fs = length xs ->
     length ys = length xs ->
-    (forall f, f ∈ fs -> m ∈ fv f -> False) ->
     (forall y, y ∈ ys -> y ∈ support Γ -> False) ->
     (forall y, y ∈ ys -> y ∈ fv template -> False) ->
     (forall x, x ∈ xs -> x ∈ support Γ -> False) ->
-    (forall f, f ∈ fs -> subset (fv f) (support Γ)) ->
-    (forall f, f ∈ fs -> [ Γ ⊨ f : T_tau ]) ->
     (forall x, x ∈ fv template -> x ∈ xs \/ x ∈ support Γ) ->
-    [Γ
-    ⊨ T_exists T_trail
-        (close 0
-           (psubstitute template
-              (List.combine xs
-                (apps fs (List.map (fun key => append_key key (fvar m term_var)) keys))) term_var)
-            m) =
-    T_exists_vars ys T_trail
-      (psubstitute template
-                   (List.combine xs (apps fs (List.map (fun y => fvar y term_var) ys)))
-                   term_var) ].
+    T  = substitute template
+      (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
+    T' = substitute template
+      (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
+    [ Γ ⊨ T_exists T_tree (close 0 T m) = T_exists_vars ys T_tree T' ].
 Proof.
   unfold open_equivalent_types, equivalent_types; intros;
-    repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_trail in *.
+    repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_tree in *.
 
   - rewrite substitute_open2 in *; repeat step || list_utils; eauto with wf.
-    rewrite open_close in *; steps; eauto using wfs_combine7 with wf.
+    rewrite open_close in *; repeat step || apply wf_subst || apply wfs_combine7.
     rewrite (subst_subst template) in * |-;
       repeat step || t_substitutions ||
              (rewrite substitute_nothing6 in * by auto) ||
@@ -851,17 +718,17 @@ Proof.
              rewrite List.map_map in *.
     rewrite list_map_subst3 in *; steps; eauto.
     rewrite psubstitute_texists_vars;
-      repeat step || rewrite substitute_trail || rewrite <- satisfies_same_support in *;
+      repeat step || rewrite substitute_tree || rewrite <- satisfies_same_support in *;
       eauto with fv;
       eauto using var_in_support.
-    apply reducible_exists_vars with (List.map (fun key => append_key key a) keys);
+    apply reducible_exists_vars with (List.map (fun key => select key a) keys);
       repeat step || apply wf_subst || apply subst_erased_type || list_utils || list_utils2 ||
              Forall_inst || (erewrite reducible_val_fv in * by eauto) ||
-             apply wfs_combine8 || apply erased_terms_combine2 || rewrite pfv_append_key in *;
+             apply wfs_combine8 || apply erased_terms_combine2 || rewrite pfv_select in *;
       eauto 3 with wf step_tactic;
       eauto with erased;
       try solve [ eapply satisfies_erased_terms; eauto; steps ];
-      eauto 2 using forall_append_key_trails.
+      eauto 2 using forall_select_type.
 
     rewrite (subst_subst2 template) in * |-;
       repeat step || list_utils2 || rewrite list_map_subst4 in * ||
@@ -888,13 +755,11 @@ Proof.
       eauto with fv;
       try solve [ t_pfv_in_subst; eauto with fv ].
 
-    rewrite list_map_subst6; repeat step || erewrite satisfies_same_support in * by eauto;
-      eauto with fv.
     rewrite list_map_subst7; repeat step || erewrite satisfies_same_support in * by eauto;
       eauto with fv.
 
   - rewrite psubstitute_texists_vars in *;
-      repeat step || rewrite substitute_trail in * || rewrite <- satisfies_same_support in *;
+      repeat step || rewrite substitute_tree in * || rewrite <- satisfies_same_support in *;
       eauto with fv;
       eauto using var_in_support.
 
@@ -921,8 +786,6 @@ Proof.
       eauto with fv;
       try solve [ t_pfv_in_subst; eauto with fv ].
 
-    rewrite list_map_subst6 in *; repeat step || erewrite satisfies_same_support in * by eauto;
-      eauto with fv.
     rewrite list_map_subst8 in *; repeat step || erewrite satisfies_same_support in * by eauto;
       eauto with fv.
 
@@ -932,14 +795,14 @@ Proof.
       try solve [ eapply satisfies_erased_terms; eauto; steps ];
       try solve [ eapply reducible_values_closed; eauto; steps ].
 
-     exists (global_trail keys vs); repeat step;
-       eauto using typed_erased_terms', is_erased_term_global_trail;
-       eauto using typed_fv', fvs_global_trail;
-       eauto using typed_wfs', wfs_global_trail;
-       eauto using global_trail_is_trail.
+    exists (global_tree keys vs); repeat step;
+      eauto using typed_erased_terms', is_erased_term_global_tree;
+      eauto using typed_fv', fvs_global_tree;
+      eauto using typed_wfs', wfs_global_tree;
+      eauto using global_tree_is_tree.
 
     rewrite substitute_open2 in *; repeat step || list_utils; eauto with wf;
-      eauto using fvs_global_trail2.
+      eauto using fvs_global_tree2.
     rewrite open_close in *; steps; eauto using wfs_combine7 with wf.
     rewrite (subst_subst template);
       repeat step || t_substitutions ||
@@ -954,23 +817,10 @@ Proof.
              (rewrite list_map_apps in * by repeat step || list_utils2);
       eauto using var_in_support;
       eauto with fv;
-      eauto using global_trail_is_trail.
+      eauto using global_tree_is_tree.
 
-    eapply reducibility_equivalent_substititions; try eassumption;
-      repeat step || list_utils || list_utils2 || apply subst_erased_type ||
-             t_pfv_in_subst ||
-             rewrite length_apps by (repeat step || list_utils2);
-      eauto with erased wf fv;
-      try solve [ eapply satisfies_erased_terms; eauto; steps ].
-
-    + apply in_combine_equivalent' with fs keys vs l; steps.
-      * unfold open_reducible in *; repeat step.
-        unshelve epose proof (H16 f _ nil l _ _ _);
-          repeat step || rewrite substitute_tau in *.
-      * apply functional_trans with _ ys; steps.
-
-    + instantiate_any; steps.
-      clear_marked; apply_anywhere pfv_in_subst2; steps; eauto with fv.
+    rewrite in_combine_equivalent'; steps.
+    apply functional_trans with _ ys; steps.
 Qed.
 
 Lemma untangle_abstract:
@@ -982,10 +832,10 @@ Lemma untangle_abstract:
     subset (fv A) (support Γ) ->
     subset (fv T) (support Γ) ->
     [ Γ ⊨ tnil : A ] ->
-    [ Γ ⊨ T_exists T_trail (shift_open 0 T (tlookup A (lvar 0 term_var))) = T_exists A T ].
+    [ Γ ⊨ T_exists T_tree (shift_open 0 T (tlookup A (lvar 0 term_var))) = T_exists A T ].
 Proof.
   unfold open_equivalent_types, equivalent_types; intros;
-    repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_trail in *.
+    repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_tree in *.
 
   - rewrite substitute_open2 in *; repeat step || list_utils; eauto with wf.
     rewrite open_shift_open4 in *; repeat step || rewrite open_lookup in * || open_none.
@@ -1015,7 +865,7 @@ Proof.
       try solve [ eapply satisfies_erased_terms; eauto; steps ];
       eauto 3 with erased.
 
-    exists trail; steps; eauto with erased fv wf.
+    exists tree; steps; eauto with erased fv wf.
     rewrite substitute_open2;
       repeat step || list_utils ||
              (unshelve erewrite reducible_val_fv in * by (eauto; steps));
@@ -1030,7 +880,7 @@ Proof.
       repeat step || rewrite substitute_lookup in *;
       eauto using equivalent_sym with wf fv.
 
-    rewrite (substitute_nothing5 trail); eauto with fv; eauto using equivalent_sym.
+    rewrite (substitute_nothing5 tree); eauto with fv; eauto using equivalent_sym.
 Qed.
 
 Lemma untangle_singleton:
