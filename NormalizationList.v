@@ -48,14 +48,14 @@ Proof.
     t_closer.
 Qed.
 
-Lemma open_ncons: forall Θ Γ T1 T2 T1' T2',
+Lemma open_ncons: forall Γ T1 T2 T1' T2',
   is_erased_type T2 ->
   is_erased_type T2' ->
   wf T2 0 ->
   wf T2' 0 ->
-  [ Θ; Γ ⊨ T1 = T1' ] ->
-  [ Θ; Γ ⊨ T2 = T2' ] ->
-  [ Θ; Γ ⊨ Cons T1 T2 = Cons T1' T2' ].
+  [ Γ ⊨ T1 = T1' ] ->
+  [ Γ ⊨ T2 = T2' ] ->
+  [ Γ ⊨ Cons T1 T2 = Cons T1' T2' ].
 Proof.
   eauto using open_ncons_helper.
 Qed.

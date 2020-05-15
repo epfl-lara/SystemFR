@@ -13,6 +13,7 @@ Require Export SystemFR.WFLemmasClose.
 Require Export SystemFR.Existss.
 Require Export SystemFR.NormalizationPi.
 Require Export SystemFR.NormalizationExists.
+Require Export SystemFR.NormalizationList.
 Require Export SystemFR.TauProperty.
 
 Opaque reducible_values.
@@ -92,6 +93,16 @@ Inductive untangle: context -> tree -> tree -> Prop :=
       untangle Γ S S' ->
       untangle ((x, S') :: Γ) (open 0 T (fvar x term_var)) (open 0 T' (fvar x term_var)) ->
       untangle Γ (T_exists S T) (T_exists S' T')
+
+| UntangleCons:
+    forall Γ H H' T T',
+      is_erased_type T ->
+      is_erased_type T' ->
+      wf T 0 ->
+      wf T' 0 ->
+      untangle Γ H H' ->
+      untangle Γ T T' ->
+      untangle Γ (Cons H T) (Cons H' T')
 
 | UntangleSingleton:
     forall Γ T T' t,
@@ -1021,5 +1032,6 @@ Proof.
     eauto using open_npi;
     eauto using open_nexists_2;
     eauto using untangle_singleton;
-    eauto using untangle_abstract.
+    eauto using untangle_abstract;
+    eauto using open_ncons.
 Qed.
