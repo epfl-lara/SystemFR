@@ -84,7 +84,7 @@ Ltac t_instantiate_sat3 :=
       pose proof (H0 ρ0 lterms0 H1 H2 eq_refl)
   end.
 
-Ltac t_instantiate_sat4 :=
+Ltac t_instantiate_sat3_nil :=
   match goal with
   | H0: forall ρ lterms,
       valid_interpretation ρ ->
@@ -98,7 +98,7 @@ Ltac t_instantiate_sat4 :=
       unshelve epose proof (H0 _ _ H1 H2 _)
   end.
 
-Ltac t_instantiate_sat5 :=
+Ltac t_instantiate_sat4 :=
   match goal with
   | H0: forall lterms ρ,
       valid_interpretation ρ ->

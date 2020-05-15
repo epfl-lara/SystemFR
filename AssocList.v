@@ -392,3 +392,164 @@ Lemma support_map_values:
 Proof.
   induction l; steps.
 Qed.
+
+Lemma lookup_combine_map:
+  forall A B eq_dec (xs: list A) f l (t1 t2: B) x,
+    lookup eq_dec (combine xs l) x = Some t1 ->
+    lookup eq_dec (combine xs (List.map f l)) x = Some t2 ->
+    t2 = f t1.
+Proof.
+  induction xs; repeat step; eauto.
+Qed.
+
+Lemma lookup_combine_some_none:
+  forall A B eq_dec (xs: list A) (l1 l2: list B) t x,
+    List.length l1 = List.length l2 ->
+    lookup eq_dec (combine xs l1) x = Some t ->
+    lookup eq_dec (combine xs l2) x = None ->
+    False.
+Proof.
+  induction xs; steps; eauto.
+Qed.
+
+Lemma support_combine:
+  forall A B (l1: list A) (l2: list B),
+    length l1 = length l2 ->
+    support (combine l1 l2) = l1.
+Proof.
+  induction l1; destruct l2; repeat step || apply f_equal.
+Qed.
+
+Lemma range_combine:
+  forall A B (l1: list A) (l2: list B),
+    length l1 = length l2 ->
+    range (combine l1 l2) = l2.
+Proof.
+  induction l1; destruct l2; repeat step || apply f_equal.
+Qed.
+
+Lemma lookup_some_in:
+  forall A (l: map nat A) x a,
+    lookup Nat.eq_dec l x = Some a ->
+    (x, a) ∈ l.
+Proof.
+  induction l; steps.
+Qed.
+
+Lemma in_map_in_support:
+  forall A B (l: map A B) p,
+    p ∈ l ->
+    (fst p) ∈ support l.
+Proof.
+  induction l; steps.
+Qed.
+
+Lemma lookup_support:
+  forall A (l: map nat A) x,
+   x ∈ support l ->
+   exists a, lookup Nat.eq_dec l x = Some a.
+Proof.
+  induction l; repeat step; eauto.
+Qed.
+
+Lemma lookup_support2:
+  forall A (l1 l2: map nat A) x,
+   (forall s t, lookup Nat.eq_dec l1 s = Some t <-> lookup Nat.eq_dec l2 s = Some t) ->
+   x ∈ support l1 ->
+   x ∈ support l2.
+Proof.
+  intros.
+  apply_anywhere lookup_support; repeat step.
+  pose proof (H x a); repeat step || t_lookup.
+Qed.
+
+Lemma range_append:
+  forall A B (l1 l2: map A B),
+    range (l1 ++ l2) = range l1 ++ range l2.
+Proof.
+  induction l1; repeat step.
+Qed.
+
+Lemma recombine:
+  forall A B (m: map A B),
+    combine (support m) (range m) = m.
+Proof.
+  induction m; steps.
+Qed.
+
+Lemma length_support:
+  forall A B (l: map A B), length (support l) = length l.
+Proof.
+  induction l; steps.
+Qed.
+
+Lemma length_range:
+  forall A B (l: map A B), length (range l) = length l.
+Proof.
+  induction l; steps.
+Qed.
+
+Lemma support_nil:
+  forall A B (l: map A B), support l = nil <-> l = nil.
+Proof.
+  destruct l; steps.
+Qed.
+
+Ltac list_utils2 :=
+  rewrite map_length in * || rewrite support_nil in * || rewrite in_map_iff in * ||
+  rewrite range_append in * || rewrite range_combine in * ||
+  rewrite List.map_map in * || rewrite support_combine in * ||
+  rewrite length_support in * || rewrite length_range in * ||
+  rewrite length_zero_iff_nil in * ||
+  rewrite recombine in * ||
+  Forall_inst.
+
+Lemma find_snd:
+  forall A B a (l1: list A) (l2: list B),
+    a ∈ l1 ->
+    length l1 = length l2 ->
+    exists b, (a, b) ∈ combine l1 l2.
+Proof.
+  induction l1; repeat step || instantiate_any; eauto.
+  pose proof (IHl1 _ H1 H); steps; eauto.
+Qed.
+
+Ltac find_snd :=
+  match goal with
+  | H1: context[combine ?l1 ?l2],
+    H2: ?x ∈ ?l1 |- _ =>
+    poseNew (Mark (l1, l2) "first_snd");
+    unshelve epose proof (find_snd _ _ _ l1 l2 H2 _)
+  end.
+
+Lemma find_fst:
+  forall A B b (l1: list A) (l2: list B),
+    b ∈ l2 ->
+    length l1 = length l2 ->
+    exists a, (a, b) ∈ combine l1 l2.
+Proof.
+  induction l1; repeat step || instantiate_any; eauto.
+  apply_anywhere eq_sym; list_utils2; steps.
+Qed.
+
+Ltac find_fst :=
+  match goal with
+  | H1: context[combine ?l1 ?l2],
+    H2: ?x ∈ ?l2 |- _ =>
+    poseNew (Mark (l1, l2) "first_fst");
+    unshelve epose proof (find_fst _ _ _ l1 l2 H2 _)
+  end.
+
+Lemma combine_middle_point:
+  forall A B C (l1: list A) (l2: list B) (l3: list C) a c,
+    length l1 = length l2 ->
+    length l2 = length l3 ->
+    (a, c) ∈ combine l1 l3 ->
+    exists b,
+      (a, b) ∈ combine l1 l2 /\
+      (b, c) ∈ combine l2 l3.
+Proof.
+  induction l1; destruct l2; destruct l3;
+    repeat step; eauto.
+  pose proof (IHl1 _ _ _ _ H H0 H2); steps; eauto.
+Qed.

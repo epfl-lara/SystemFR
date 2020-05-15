@@ -8,6 +8,12 @@ Hint Extern 50 => lia: lia.
 Hint Extern 50 => cbn: cbn.
 Hint Extern 50 => intuition auto: intuition.
 
+Ltac destruct_refinement :=
+  match goal with
+  | H: { _: _ | _ } |- _ => destruct H
+  | H: { _: _ & _ } |- _ => destruct H
+  end.
+
 Ltac destruct_and :=
   match goal with
   | H: _ /\ _ |- _ => destruct H

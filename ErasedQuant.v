@@ -106,6 +106,21 @@ Proof.
     eauto with twf.
 Qed.
 
+Lemma reducible_forall_inst:
+  forall ρ (t1 t2 U V : tree),
+    wf V 1 ->
+    pfv V term_var = nil ->
+    valid_interpretation ρ ->
+    [ ρ | t1 : T_forall U V ] ->
+    [ ρ | t2 : U ] ->
+    [ ρ | t1 : open 0 V t2 ].
+Proof.
+  unfold reducible, reduces_to;
+    repeat step || simp_red || find_smallstep_value.
+  eapply reducibility_values_rtl; eauto; steps; t_closer.
+  apply_any; steps; t_closer.
+Qed.
+
 Lemma open_reducible_forall_inst:
   forall (Θ : list nat) (Γ : context) (t1 t2 U V : tree),
     is_erased_term t1 ->

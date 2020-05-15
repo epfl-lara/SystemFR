@@ -1,15 +1,9 @@
 Require Import Coq.Strings.String.
 Require Import Psatz.
 
-Require Export SystemFR.Syntax.
-Require Export SystemFR.Tactics.
-Require Export SystemFR.AssocList.
-
-Require Export SystemFR.ListUtils.
 Require Export SystemFR.TWFLemmas.
 Require Export SystemFR.SubstitutionLemmas.
 Require Export SystemFR.FVLemmas.
-
 
 Open Scope string_scope.
 Open Scope list_scope.

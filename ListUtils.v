@@ -181,3 +181,25 @@ Ltac nodup :=
   apply_anywhere NoDup_false ||
   apply_anywhere NoDup_false2 ||
   apply_anywhere NoDup_false3.
+
+Lemma Forall_inst:
+  forall A (P: A -> Prop) l x,
+    x ∈ l ->
+    Forall P l ->
+    P x.
+Proof.
+  repeat step || rewrite Forall_forall in *.
+Qed.
+
+Ltac Forall_inst :=
+  match goal with
+  | H1: ?x ∈ ?l, H2: Forall ?P ?l |- _ =>
+    poseNew (Mark (x, H2) "Forall_inst");
+    pose proof (Forall_inst _ _ _ _ H1 H2)
+  end.
+
+Lemma decide_empty:
+  forall T (l: list T), l = nil \/ ~ l = nil.
+Proof.
+  destruct l; steps; right; steps.
+Qed.

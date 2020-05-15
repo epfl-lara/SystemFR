@@ -129,3 +129,46 @@ Ltac t_pfv_in_subst :=
       poseNew (Mark H "pfv_in_subst");
       unshelve epose proof (pfv_in_subst _ _ _ _ _ _ H)
   end.
+
+Lemma subst_subst:
+  forall t l ts xs tag,
+    (forall x, x ∈ pfv t tag -> x ∈ support l -> False) ->
+    psubstitute (psubstitute t (combine xs ts) tag) l tag =
+    psubstitute t (combine xs (List.map (fun t' => psubstitute t' l tag) ts)) tag.
+Proof.
+  induction t; repeat step || t_equality;
+    eauto 4 using lookup_combine_some_none, List.map_length with exfalso;
+    try solve [ rewrite_any; steps; eapply_any; repeat step || list_utils; eauto ];
+    try solve [ eapply_anywhere lookup_combine_map; eauto ];
+    try solve [ t_lookup; eauto with exfalso ].
+Qed.
+
+Lemma subst_subst2:
+  forall t l ts xs tag,
+    length ts = length xs ->
+    (forall x, x ∈ xs -> x ∈ support l -> False) ->
+    pclosed_mapping l tag ->
+    psubstitute (psubstitute t (combine xs ts) tag) l tag =
+    psubstitute (psubstitute t l tag)
+                (combine xs (List.map (fun t' => psubstitute t' l tag) ts)) tag.
+Proof.
+  induction t; repeat step || t_equality;
+    eauto 4 using lookup_combine_some_none, List.map_length with exfalso;
+    try solve [ eapply_anywhere lookup_combine_map; eauto ];
+    try solve [ rewrite substitute_nothing5; eauto with fv ].
+
+  repeat step || t_lookup || rewrite support_combine in * by auto;
+    eauto with exfalso.
+Qed.
+
+Lemma pfv_in_subst2:
+  forall T (l : list (nat * tree)) tag x,
+    pclosed_mapping l tag ->
+    x ∈ pfv (psubstitute T l tag) tag ->
+    ~x ∈ support l.
+Proof.
+  intros.
+  epose proof (fv_subst2 _ _ _ x H0);
+    repeat step || list_utils;
+    eauto using closed_mapping_fv.
+Qed.

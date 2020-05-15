@@ -11,6 +11,11 @@ Proof.
   unfold equivalent_terms; steps.
 Qed.
 
+Ltac equivalent_refl :=
+  match goal with
+  | |- [ ?a ≡ ?a ] => apply equivalent_refl
+  end.
+
 Lemma equivalent_sym:
   forall t1 t2, [ t1 ≡ t2 ] -> [ t2 ≡ t1 ].
 Proof.

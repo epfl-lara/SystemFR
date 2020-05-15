@@ -7,6 +7,12 @@ Require Export SystemFR.Syntax.
 Open Scope string_scope.
 Open Scope list_scope.
 
+Lemma wf_var:
+  forall n k, wf (fvar n term_var) k.
+Proof. steps. Qed.
+
+Hint Resolve wf_var: wf.
+
 Lemma wf_monotone:
   forall t, forall k k', wf t k -> k <= k' -> wf t k'.
 Proof.
@@ -17,12 +23,19 @@ Qed.
 
 Hint Extern 1 => solve [ eapply wf_monotone; try eassumption; try lia ]: wf.
 
-Lemma wf_monotone2: forall t, forall k, wf t k -> wf t (S k).
+Lemma wf_monotone2: forall t k, wf t k -> wf t (S k).
 Proof.
   intros; eauto 1 with wf.
 Qed.
 
 Hint Immediate wf_monotone2: wf.
+
+Lemma wf_monotone3: forall t k, wf t 0 -> wf t k.
+Proof.
+  eauto with wf.
+Qed.
+
+Hint Resolve wf_monotone3: wf.
 
 Lemma open_none:
   forall t k rep, wf t k -> open k t rep = t.

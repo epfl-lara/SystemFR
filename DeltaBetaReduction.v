@@ -10,23 +10,6 @@ Require Export SystemFR.EvalFixDefault.
 
 Opaque reducible_values.
 
-(*
-Inductive cbv_open_value: tree -> Prop :=
-| OVVar: forall x, cbv_open_value (fvar x term_var)
-| OVUnit: cbv_open_value uu
-| OVZero: cbv_open_value zero
-| OVSucc: forall v, cbv_open_value v -> cbv_open_value (succ v)
-| OVFalse: cbv_open_value tfalse
-| OVTrue: cbv_open_value ttrue
-| OVPair: forall v1 v2, cbv_open_value v1 -> cbv_open_value v2 -> cbv_open_value (pp v1 v2)
-| OVLambda: forall t, cbv_open_value (notype_lambda t)
-| OVLeft : forall v, cbv_open_value v -> cbv_open_value (tleft v)
-| OVRight: forall v, cbv_open_value v -> cbv_open_value (tright v)
-.
-
-Hint Constructors cbv_open_value: open_values.
-*)
-
 Reserved Notation "'[' Γ ⊨ t1 '⤳*' t2 ']'" (Γ at level 60, t1 at level 60).
 
 Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
@@ -284,21 +267,6 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-(*
-Lemma close_open_value:
-  forall v l,
-    cbv_open_value v ->
-    are_values l ->
-    subset (fv v) (support l) ->
-    cbv_value (substitute v l).
-Proof.
-  induction 1; repeat step || sets;
-    eauto using lookup_value;
-    try solve [ unfold subset in *; repeat step || t_lookup; eauto with exfalso ];
-    eauto with values.
-Qed.
-*)
-
 Lemma satisfies_are_values:
   forall l ρ Γ,
     valid_interpretation ρ ->
@@ -307,22 +275,6 @@ Lemma satisfies_are_values:
 Proof.
   induction l; repeat step || step_inversion satisfies; eauto with values.
 Qed.
-
-(*
-Lemma close_open_value2:
-  forall v Γ ρ l,
-    cbv_open_value v ->
-    valid_interpretation ρ ->
-    satisfies (reducible_values ρ) Γ l ->
-    subset (fv v) (support Γ) ->
-    cbv_value (psubstitute v l term_var).
-Proof.
-  intros; eapply close_open_value;
-    repeat step || erewrite satisfies_same_support in * by eauto;
-    eauto with values;
-    eauto using satisfies_are_values.
-Qed.
-*)
 
 Lemma typable_normalizing:
   forall Θ Γ t T ρ l,
@@ -471,20 +423,6 @@ Proof.
     equivalent_star.
 Qed.
 
-Ltac t_instantiate_sat3_nil :=
-  match goal with
-  | H0: forall ρ lterms,
-      valid_interpretation ρ ->
-      satisfies (reducible_values ρ) ?gamma lterms ->
-      support ρ = nil ->
-      _,
-    H1: valid_interpretation ?theta0,
-    H2: satisfies (reducible_values ?theta0) ?gamma ?lterms0
-    |- _ =>
-      poseNew (Mark (H0, theta0, gamma, lterms0) "instantiate_open_reducible");
-      unshelve epose proof (H0 theta0 lterms0 H1 H2 _)
-  end.
-
 Lemma delta_beta_match_succ:
   forall Γ t t0 ts t' v,
     is_erased_term t0 ->
@@ -499,7 +437,8 @@ Lemma delta_beta_match_succ:
     [ Γ ⊨ open 0 ts t' ≡ v ] ->
     [ Γ ⊨ tmatch t t0 ts ≡ v ].
 Proof.
-  unfold open_equivalent, open_reducible; repeat step || t_instantiate_sat3_nil || t_substitutions.
+  unfold open_equivalent, open_reducible;
+    repeat step || t_instantiate_sat3_nil || t_substitutions.
   eapply equivalent_trans; eauto; repeat step || t_substitutions.
   eapply equivalent_trans; try apply equivalent_match_scrut;
     eauto with erased fv wf.

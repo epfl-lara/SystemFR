@@ -31,27 +31,23 @@ The file [dependencies.pdf](https://github.com/epfl-lara/SystemFR/blob/master/de
 
 ### Proofs for Scala Dependent Types project
 
-
-The typing algorithm maintains the following invariants, which are not proven in Coq:
+We prove the following properties and the soundness of the typing rules.
+We rely on the following assumptions:
 
 * The terms and types appearing in goals/context satisfy some well-formedness conditions
 * The types are appearing in goals/context are non-empty
 * Inferred types are always syntactically singletons
+* During delta-beta reduction, the term being evaluated has type `T_top`
+  (or equivalently, another arbitrary type)
+* In `untangle` ([Untangle.v](Untangle.v)), we know which terms have the Tau property, and we rely on the abstract model of `update` and `tlookup` specified using axioms in [TauProperty.v](TauProperty.v)
 
-We prove the following properties and the soundness of the rules used in our algorithm.
-
-* Properties: 2/3
-* Rules: 28/28
-
-#### Required properties (2/3)
+#### Properties
 
 * `widen` gives a larger type `widen_open_subtype` in [InferApp.v](InferApp.v)
 * `delta_beta_reduction` gives observationally equivalent terms: `delta_beta_obs_equiv` in [DeltaBetaReduction.v](DeltaBetaReduction.v)
+* `untangle` returns an equivalent type `untangle_open_equivalent_types` in [Untangle.v](Untangle.v)
 
-* `untangle` returns an equivalent type `untangle_equivalent_types` in [Untangle.v](Untangle.v) (WIP)
-
-
-#### Normalization Rules (9/9)
+#### Normalization Rules
 
 * NBase: `open_nbase1` and `open_nbase2` in [NormalizationBase.v](NormalizationBase.v)
 * NExists1: `open_nexists_1` in [NormalizationExists.v](NormalizationExists.v)
@@ -63,8 +59,7 @@ We prove the following properties and the soundness of the rules used in our alg
 * NMatch2: `open_nmatch_2` in [NormalizationMatch.v](NormalizationMatch.v)
 * NMatch3: `open_nmatch_3` in [NormalizationMatch.v](NormalizationMatch.v)
 
-
-#### Inference Rules (9/9)
+#### Inference Rules
 
 * TVar: `open_tvar` in [InferMisc.v](InferMisc.v)
 * TAbs: `open_tabs` in [InferMisc.v](InferMisc.v)
@@ -72,12 +67,12 @@ We prove the following properties and the soundness of the rules used in our alg
 * TLet `open_tlet` in [InferApp.v](InferApp.v)
 * TNil: `open_tnil` in [ErasedList.v](ErasedList.v)
 * TCons: `open_tcons` in [ErasedList.v](ErasedList.v)
+* TDots: `open_append_key` in [TauProperty.v](TauProperty.v)
 * TFix: `open_tfix` in [InferFix.v](InferFix.v)
 * TMatch: `open_tmatch` in [InferMatch.v](InferMatch.v)
 * TCheck: `open_subtype_reducible` in [ReducibilitySubtype.v](ReducibilitySubtype.v)
 
-
-#### Subtyping Rules (10/10)
+#### Subtyping Rules
 
 * SubTop: `open_subtype` in [SubtypeMisc.v](SubtypeMisc.v)
 * SubRefl: `open_subrefl` in [SubtypeMisc.v](SubtypeMisc.v)

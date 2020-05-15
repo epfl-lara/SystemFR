@@ -1,15 +1,10 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
-Require Export SystemFR.Syntax.
-Require Export SystemFR.ListUtils.
-Require Export SystemFR.AssocList.
-Require Export SystemFR.Tactics.
-
 Require Export SystemFR.SmallStep.
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.TWFLemmas.
-
+Require Export SystemFR.Options.
 
 Lemma substitute_nothing:
   forall t l tag,
@@ -397,4 +392,24 @@ Proof.
     repeat step || t_lookup || t_lookupor || list_utils;
     auto using lookupWeaken with bcongruence apply_any;
     auto 6 using lookupRight2, lookupNoneSupport with apply_any step_tactic.
+Qed.
+
+Lemma equivalent_subst_snoc:
+  forall l1 l2 a b,
+    equivalent_subst l1 l2 ->
+    equivalent_subst
+      (l1 ++ (a, b) :: nil)
+      (l2 ++ (a, get_or_else (lookup Nat.eq_dec l2 a) b) :: nil).
+Proof.
+  unfold equivalent_subst, get_or_else;
+    repeat step || list_utils || t_lookup || t_lookupor ||
+           (rewrite obvious_lookup in * by auto);
+    try solve [ apply lookupWeaken; steps; apply_any; steps ];
+    try solve [ unshelve epose proof (H s _); eauto; steps ].
+
+  - rewrite obvious_lookup in *; repeat step || t_lookup.
+    + apply eq_sym in H8; unshelve epose proof (H s b); repeat step || t_lookup.
+    + clear_marked. rewrite H8 in H0.
+      unshelve epose proof (H s t); repeat step || t_lookup.
+  - apply obvious_lookup; repeat step; eauto using lookup_support2.
 Qed.
