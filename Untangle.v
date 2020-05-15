@@ -104,6 +104,28 @@ Inductive untangle: context -> tree -> tree -> Prop :=
       untangle Γ T T' ->
       untangle Γ (Cons H T) (Cons H' T')
 
+| UntangleListMatch:
+     forall Γ T1 T2 T1' T2' t x y,
+       wf T2 2 ->
+       wf T2' 2 ->
+       is_erased_type T2 ->
+       is_erased_type T2' ->
+       subset (fv T2) (support Γ) ->
+       subset (fv T2') (support Γ) ->
+       wf t 0 ->
+       x <> y ->
+       ~ x ∈ fv_context Γ ->
+       ~ y ∈ fv_context Γ ->
+       ~ x ∈ fv T2 ->
+       ~ x ∈ fv T2' ->
+       ~ y ∈ fv T2 ->
+       ~ y ∈ fv T2' ->
+       untangle Γ T1 T1' ->
+       untangle ((x, T_top) :: (y, List) :: Γ)
+           (open 0 (open 1 T2 (fvar x term_var)) (fvar y term_var))
+           (open 0 (open 1 T2' (fvar x term_var)) (fvar y term_var)) ->
+       untangle Γ (List_Match t T1 T2) (List_Match t T1' T2')
+
 | UntangleSingleton:
     forall Γ T T' t,
       untangle Γ T T' ->
@@ -1021,6 +1043,88 @@ Proof.
     eauto with eapply_any.
 Qed.
 
+Opaque List.
+
+Lemma untangle_list_match_1:
+   forall Γ T1 T2 T1' T2' t x y,
+     wf T2' 2 ->
+     is_erased_type T2' ->
+     subset (fv T2') (support Γ) ->
+     wf t 0 ->
+     x <> y ->
+     ~ x ∈ fv_context Γ ->
+     ~ y ∈ fv_context Γ ->
+     ~ x ∈ fv T2 ->
+     ~ x ∈ fv T2' ->
+     ~ y ∈ fv T2 ->
+     ~ y ∈ fv T2' ->
+     [ Γ ⊨ T1 = T1' ] ->
+     [ (x, T_top) :: (y, List) :: Γ ⊨
+         open 0 (open 1 T2 (fvar x term_var)) (fvar y term_var) =
+         open 0 (open 1 T2' (fvar x term_var)) (fvar y term_var) ] ->
+     [ Γ ⊨ List_Match t T1 T2 <: List_Match t T1' T2' ].
+Proof.
+  unfold open_equivalent_types, open_subtype, subtype;
+    repeat step || simp_red_top_level_goal || simp_red_top_level_hyp.
+
+  - left; repeat step || simp_red_top_level_goal || exists uu;
+      eauto using equivalent_types_reducible_values.
+
+  - right.
+    repeat rewrite (open_none a) in * by eauto with wf.
+    repeat rewrite (open_none a0) in * by eauto with wf.
+    repeat open_none.
+    rewrite subst_list in *.
+    apply reducible_expr_value; steps; t_closer.
+    apply reducible_exists with a;
+      repeat step || list_utils || apply reducible_value_expr ||
+             apply is_erased_type_open || rewrite open_list ||
+      t_closer;
+      try solve [ simp_red_top_level_goal; t_closer ].
+    apply reducible_expr_value; steps; t_closer.
+    apply reducible_exists with a0;
+      repeat step || list_utils || apply reducible_value_expr || apply wf_open ||
+             apply fv_nils_open || simp_red_top_level_goal ||
+             apply is_erased_open || exists uu ||
+             apply is_erased_type_open || rewrite open_list;
+      t_closer.
+    + unshelve epose proof (H11 ρ ((x, a) :: (y, a0) :: l) _ _ _);
+        repeat step || apply SatCons || t_substitutions || list_utils;
+        t_closer;
+        try solve [ simp_red_top_level_goal; t_closer ];
+      eauto using equivalent_types_reducible_values.
+
+    + repeat rewrite (open_none a) in * by eauto with wf.
+      repeat rewrite (open_none a0) in * by eauto with wf.
+      repeat rewrite (open_none (psubstitute t l term_var)) in * by eauto with wf; auto.
+Qed.
+
+Lemma untangle_list_match:
+   forall Γ T1 T2 T1' T2' t x y,
+     wf T2 2 ->
+     wf T2' 2 ->
+     is_erased_type T2 ->
+     is_erased_type T2' ->
+     subset (fv T2) (support Γ) ->
+     subset (fv T2') (support Γ) ->
+     wf t 0 ->
+     x <> y ->
+     ~ x ∈ fv_context Γ ->
+     ~ y ∈ fv_context Γ ->
+     ~ x ∈ fv T2 ->
+     ~ x ∈ fv T2' ->
+     ~ y ∈ fv T2 ->
+     ~ y ∈ fv T2' ->
+     [ Γ ⊨ T1 = T1' ] ->
+     [ (x, T_top) :: (y, List) :: Γ ⊨
+         open 0 (open 1 T2 (fvar x term_var)) (fvar y term_var) =
+         open 0 (open 1 T2' (fvar x term_var)) (fvar y term_var) ] ->
+     [ Γ ⊨ List_Match t T1 T2 = List_Match t T1' T2' ].
+Proof.
+  intros; apply open_subtype_antisym;
+    eauto using untangle_list_match_1, open_equivalent_types_sym.
+Qed.
+
 Lemma untangle_open_equivalent_types:
   forall Γ T1 T2,
     untangle Γ T1 T2 ->
@@ -1033,5 +1137,6 @@ Proof.
     eauto using open_nexists_2;
     eauto using untangle_singleton;
     eauto using untangle_abstract;
+    eauto using untangle_list_match;
     eauto using open_ncons.
 Qed.
