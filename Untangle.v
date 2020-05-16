@@ -24,38 +24,50 @@ Definition incomparable_keys keys : Prop :=
 
 Inductive untangle: context -> tree -> tree -> Prop :=
 | UntangleFreshen:
-    forall Γ T T' template xs ys keys m,
-      is_erased_type template ->
-      wf template 0 ->
-      Forall (fun key => [ key : T_key ]v) keys ->
-      functional (combine ys keys) ->
-      functional (combine keys ys) ->
-      incomparable_keys keys ->
-      ~ m ∈ fv template ->
-      length keys = length xs ->
-      length ys = length xs ->
-      (forall y, y ∈ ys -> y ∈ support Γ -> False) ->
-      (forall y, y ∈ ys -> y ∈ fv template -> False) ->
-      (forall x, x ∈ xs -> x ∈ support Γ -> False) ->
-      (forall x, x ∈ fv template -> x ∈ xs \/ x ∈ support Γ) ->
-      T  = substitute template
-        (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
-      T' = substitute template
-        (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
-      untangle Γ
-               (T_exists T_tree (close 0 T m))
-               (T_exists_vars ys T_tree T')
+  forall Γ T0 T T' template xs ys keys m x,
+    is_erased_type template ->
+    is_erased_type T0 ->
+    wf template 0 ->
+    wf T0 1 ->
+    subset (fv T0) (support Γ) ->
+    ~ x ∈ fv_context Γ ->
+    Forall (fun key => [ key : T_key ]v) keys ->
+    functional (combine ys keys) ->
+    functional (combine keys ys) ->
+    incomparable_keys keys ->
+    ~ m ∈ fv template ->
+    length keys = length xs ->
+    length ys = length xs ->
+    (forall y, y ∈ ys -> y ∈ support Γ -> False) ->
+    (forall y, y ∈ ys -> y ∈ fv template -> False) ->
+    (forall x, x ∈ xs -> x ∈ support Γ -> False) ->
+    (forall x, x ∈ fv template -> x ∈ xs \/ x ∈ support Γ) ->
+    T  = substitute template
+      (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
+    T' = substitute template
+      (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
+    untangle ((x, T_tree) :: Γ)
+      (open 0 T0 (fvar x term_var))
+      (open 0 (close 0 T m) (fvar x term_var)) ->
+    untangle Γ (T_exists T_tree T0) (T_exists_vars ys T_tree T')
 
 | UntangleAbstract:
-    forall Γ T A,
+    forall Γ T A x T0,
       is_erased_type A ->
       is_erased_type T ->
+      is_erased_type T0 ->
+      wf T0 1 ->
       wf T 1 ->
       wf A 0 ->
       subset (fv A) (support Γ) ->
       subset (fv T) (support Γ) ->
+      subset (fv T0) (support Γ) ->
+      ~ x ∈ fv_context Γ ->
       [ Γ ⊨ tnil : A ] ->
-      untangle Γ (T_exists T_tree (shift_open 0 T (tlookup A (lvar 0 term_var)))) (T_exists A T)
+      untangle ((x, T_tree) :: Γ)
+        (open 0 T0 (fvar x term_var))
+        (open 0 (shift_open 0 T (tlookup A (lvar 0 term_var))) (fvar x term_var)) ->
+      untangle Γ (T_exists T_tree T0) (T_exists A T)
 
 | UntanglePi:
     forall Γ S S' T T' x,
@@ -823,6 +835,58 @@ Proof.
     apply functional_trans with _ ys; steps.
 Qed.
 
+Lemma in_pfv_range:
+  forall l x tag,
+    x ∈ pfv_range l tag ->
+    exists t, t ∈ range l /\ x ∈ pfv t tag.
+Proof.
+  induction l; repeat step || list_utils || instantiate_any; eauto.
+Qed.
+
+Lemma untangle_freshen2:
+  forall Γ T0 T T' template xs ys keys m x,
+    is_erased_type template ->
+    is_erased_type T0 ->
+    wf template 0 ->
+    wf T0 1 ->
+    subset (fv T0) (support Γ) ->
+    ~ x ∈ fv_context Γ ->
+    Forall (fun key => [ key : T_key ]v) keys ->
+    functional (combine ys keys) ->
+    functional (combine keys ys) ->
+    incomparable_keys keys ->
+    ~ m ∈ fv template ->
+    length keys = length xs ->
+    length ys = length xs ->
+    (forall y, y ∈ ys -> y ∈ support Γ -> False) ->
+    (forall y, y ∈ ys -> y ∈ fv template -> False) ->
+    (forall x, x ∈ xs -> x ∈ support Γ -> False) ->
+    (forall x, x ∈ fv template -> x ∈ xs \/ x ∈ support Γ) ->
+    T  = substitute template
+      (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
+    T' = substitute template
+      (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
+    [ (x, T_tree) :: Γ ⊨
+         open 0 T0 (fvar x term_var) =
+         open 0 (close 0 T m) (fvar x term_var) ] ->
+    [ Γ ⊨ T_exists T_tree T0 = T_exists_vars ys T_tree T' ].
+Proof.
+  intros; eapply open_equivalent_types_trans; eauto using untangle_freshen.
+  apply open_nexists_2 with x;
+    repeat step || apply is_erased_type_open || apply wf_close ||
+           apply subst_erased_type || apply wf_subst ||
+           apply wfs_combine7 || rewrite tree_fv in * ||
+           apply is_erased_type_close || apply erased_terms_combine3;
+    eauto with erased wf;
+    eauto using open_equivalent_types_refl.
+
+  unfold subset; intros; apply_anywhere fv_close; steps.
+  unshelve epose proof (fv_subst2 _ _ _ _ H19);
+    repeat step || list_utils || list_utils2 || instantiate_any || apply_anywhere in_pfv_range ||
+           rewrite pfv_select in * ||
+           unshelve erewrite reducible_val_fv in * by (eauto; steps).
+Qed.
+
 Lemma untangle_abstract:
   forall Γ T A,
     is_erased_type A ->
@@ -881,6 +945,39 @@ Proof.
       eauto using equivalent_sym with wf fv.
 
     rewrite (substitute_nothing5 tree); eauto with fv; eauto using equivalent_sym.
+Qed.
+
+Lemma untangle_abstract2:
+  forall Γ T A x T0,
+    is_erased_type A ->
+    is_erased_type T ->
+    is_erased_type T0 ->
+    wf T0 1 ->
+    wf T 1 ->
+    wf A 0 ->
+    subset (fv A) (support Γ) ->
+    subset (fv T) (support Γ) ->
+    subset (fv T0) (support Γ) ->
+    ~ x ∈ fv_context Γ ->
+    [ Γ ⊨ tnil : A ] ->
+    [ (x, T_tree) :: Γ ⊨
+         open 0 T0 (fvar x term_var) =
+         open 0 (shift_open 0 T (tlookup A (lvar 0 term_var))) (fvar x term_var) ] ->
+    [ Γ ⊨ T_exists T_tree T0 = T_exists A T ].
+Proof.
+  intros; eapply open_equivalent_types_trans; eauto using untangle_abstract.
+  apply open_nexists_2 with x;
+    repeat step || apply is_erased_type_open || apply wf_close || apply wf_lookup ||
+           apply subst_erased_type || apply wf_subst || apply wf_shift_open ||
+           apply is_erased_type_shift_open ||
+           apply is_erased_term_lookup ||
+           rewrite tree_fv in * ||
+           apply is_erased_type_close || apply erased_terms_combine3;
+    eauto with erased wf;
+    eauto using open_equivalent_types_refl.
+
+  eapply subset_transitive; eauto using pfv_shift_open2;
+    repeat step || sets || rewrite lookup_fv; eauto with sets.
 Qed.
 
 Lemma untangle_singleton:
@@ -982,11 +1079,11 @@ Lemma untangle_open_equivalent_types:
 Proof.
   induction 1; steps;
     eauto using open_equivalent_types_refl;
-    eauto using untangle_freshen;
     eauto using open_npi;
     eauto using open_nexists_2;
     eauto using untangle_singleton;
-    eauto using untangle_abstract;
+    eauto using untangle_freshen2;
+    eauto using untangle_abstract2;
     eauto using untangle_list_match;
     eauto using open_ncons.
 Qed.
