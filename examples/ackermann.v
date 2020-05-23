@@ -4,7 +4,7 @@ Require Extraction.
 Import Notations.UnTyped.
 
 
-Definition ackermann_example := Eval compute in 
+Definition ackermann_example := Eval compute in
   [|
    let ackermann :=
        def_rec ack m n =>
@@ -15,7 +15,7 @@ Definition ackermann_example := Eval compute in
                 | s n' => ack m' (ack m n') end
        end
    in
-   ackermann 2 2        
+   ackermann 2 2
     |].
 
 
@@ -24,4 +24,4 @@ Eval compute in eval ackermann_example 1000.
 
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
-Extraction "ackermann.ml" ackermann_example eval. 
+Extraction "ackermann.ml" ackermann_example eval.
