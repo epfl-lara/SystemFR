@@ -21,7 +21,11 @@ Definition ackermann_example := Eval compute in
 
 Eval compute in eval ackermann_example 1000.
 
+Example ackermann : (eval ackermann_example 1000) =  Some (succ (succ (succ (succ (succ (succ (succ zero))))))). (* 7 *)
+Proof.
+  native_compute; reflexivity. Qed.
 
+(* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 Extraction "ackermann.ml" ackermann_example eval.

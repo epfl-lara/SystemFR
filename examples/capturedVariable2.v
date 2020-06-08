@@ -4,7 +4,7 @@ Require Extraction.
 Import Notations.UnTyped.
 
 
-Definition capturedVariable2_example := Eval compute in 
+Definition capturedVariable2_example := Eval compute in
    [|
     let minus := def_rec f x y => match y with
                                  | 0 => x
@@ -26,9 +26,12 @@ Definition capturedVariable2_example := Eval compute in
     |].
 
 
-Eval compute in eval capturedVariable2_example 1000.
 
+Example capturedVariable2 : (eval capturedVariable2_example 1000) =  Some zero.
+Proof.
+  native_compute ; reflexivity. Qed.
 
+(* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
-Extraction "capturedVariable2.ml" capturedVariable2_example eval. 
+Extraction "capturedVariable2.ml" capturedVariable2_example eval.

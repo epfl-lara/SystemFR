@@ -296,3 +296,56 @@ Ltac force_invert P :=
   | H: ?F _ _ _ _ _ |- _ => unify F P; inversion H; clear H
   | H: ?F _ _ _ _ _ _ |- _ => unify F P; inversion H; clear H
   end.
+
+Hint Rewrite Bool.andb_true_iff: bools.
+Hint Rewrite Bool.andb_false_iff: bools.
+Hint Rewrite Bool.orb_true_iff: bools.
+Hint Rewrite Bool.orb_false_iff: bools.
+Hint Rewrite Bool.negb_true_iff: bools.
+Hint Rewrite Bool.negb_false_iff: bools.
+Ltac bools :=
+  autorewrite with bools in *.
+
+
+Ltac options :=
+unfold option_map in *.
+
+Ltac invert_constructor_equalities :=
+match goal with
+| H: ?F _ = ?F _ |- _ => is_constructor F; inversion H; clear H
+| H: ?F _ _ = ?F _ _ |- _ => is_constructor F; inversion H; clear H
+| H: ?F _ _ _ = ?F _ _ _ |- _ => is_constructor F; inversion H; clear H
+| H: ?F _ _ _ _ = ?F _ _ _ _ |- _ => is_constructor F; inversion H; clear H
+| H: ?F _ _ _ _ _ = ?F _ _ _ _ _ |- _ => is_constructor F; inversion H; clear H
+| H: ?F _ _ _ _ _ _ = ?F _ _ _ _ _ _ |- _ => is_constructor F; inversion H; clear H
+end.
+
+Ltac custom_light :=
+  (intros) ||
+  (subst).
+
+Ltac destruct_match :=
+match goal with
+| [ |- context[match ?t with _ => _ end]] =>
+let matched := fresh "matched" in
+destruct t eqn:matched
+| [ H: context[match ?t with _ => _ end] |- _ ] =>
+let matched := fresh "matched" in
+destruct t eqn:matched
+end.
+
+
+
+Ltac instantiate_eq_refl :=
+match goal with
+| H: _ |- _ => pose proof (proj1 (H _) eq_refl); clear H
+| H: _ |- _ => pose proof (proj2 (H _) eq_refl); clear H
+| H: _ |- _ => pose proof (H _ eq_refl); clear H
+| H: _ |- _ => pose proof (H _ _ eq_refl ); clear H
+| H: _ |- _ => pose proof (proj1 (H _ _ ) eq_refl); clear H
+| H: _ |- _ => pose proof (proj2 (H _ _ ) eq_refl); clear H
+| H: _ |- _ => pose proof (H _ _ _ eq_refl); clear H
+| H: _ |- _ => pose proof (H _ _ _ _ eq_refl); clear H
+| H: _ |- _ => pose proof (H _ _ _ _ _ eq_refl); clear H
+| H: _ |- _ => pose proof (H _ _ _ _ _ _ eq_refl); clear H
+end.

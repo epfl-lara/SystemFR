@@ -8,7 +8,7 @@ Fixpoint natToTreeNat (n: nat) := match n with
                                  | 0 => zero
                                  | S x => succ (natToTreeNat x) end.
 
-Definition sumAcc_example := Eval compute in 
+Definition sumAcc_example := Eval compute in
   [|
    let plus := (
        def_rec f x y =>
@@ -24,11 +24,13 @@ Definition sumAcc_example := Eval compute in
     |].
 
 
-Eval compute in eval sumAcc_example 1000.
+
+Example sumAcc : (eval sumAcc_example 1000) =  Some [| 7 |].
+Proof.
+  native_compute; reflexivity. Qed.
 
 
+(* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
-Extraction "sumAcc.ml" sumAcc_example eval. 
-
-
+Extraction "sumAcc.ml" sumAcc_example eval.

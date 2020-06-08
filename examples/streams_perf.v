@@ -21,6 +21,7 @@ Definition streams := Eval compute in
   let six := before t_true five in
   let seven := before t_true six in
   let eight := before t_true seven in
+  let nine := before t_true eight in
 
   let double := def_rec f st y => (
                   let head := (st ()) in
@@ -42,28 +43,23 @@ Definition streams := Eval compute in
   let getLast := def_rec f st => (
                    let head := (st ()) in
                    if (head._1) then (f (head._2)) else ()) in
-  (getLast (power eight eight))
+  (getLast (power seven seven))
   |].
 
 
-Fixpoint getNat (t:tree) :=
-  match t with
-  | succ t2 => S (getNat t2)
-  | _ => 0 end.
+Eval native_compute in (eval streams 20000).
 
 
-(* Eval compute in option_map getNat (eval streams 10000).*)
-(* Eval compute in (eval streams 20000). *)
-
-Example example1 : (eval streams 40000) = Some (uu).
+Example example1 : (eval streams 100000) = Some (uu).
 Proof.
   Set Ltac Profiling.
-  reflexivity.
+  native_compute.
   Show Ltac Profile.
+  reflexivity.
   Qed.
-(* 21.285s *)
 
 
+(* Extraction *)
 Extraction Language OCaml.
 Set Extraction AccessOpaque.
 Extraction "streams_perf.ml" streams eval.

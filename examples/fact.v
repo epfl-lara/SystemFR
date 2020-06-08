@@ -4,7 +4,7 @@ Require Extraction.
 Import Notations.UnTyped.
 
 
-Definition fact_example := Eval compute in 
+Definition fact_example := Eval compute in
   [|
    let plus :=
        def_rec plus x y =>
@@ -35,9 +35,11 @@ Fixpoint treeToNat (t: tree) :=
   end.
 
 
-Eval compute in option_map treeToNat (eval fact_example 30000).
+Example fact : (option_map treeToNat (eval fact_example 30000)) = Some 5040.
+Proof.
+  native_compute. reflexivity. Qed.
 
-
+(* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
-Extraction "fact.ml" fact_example eval. 
+Extraction "fact.ml" fact_example eval.

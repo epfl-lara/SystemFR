@@ -10,12 +10,13 @@ Open Scope list.
 (* Untyped embedded language *)
 Module UnTyped.
   Declare Custom Entry expr.
-  
+
   (* Entry point *)
   Notation "'⤳' t" := (fun (fv_id:nat) => t) (at level 100).
   Notation "[| x |]" := (x 0) (x custom expr).
   Notation "( x )" := (fun (fv_id:nat) => (x fv_id)) (in custom expr, x custom expr).
-  Notation "x" := (⤳ x) (in custom expr at level 0, x ident). 
+  Notation "x" := (⤳ x) (in custom expr at level 0, x ident).
+
   (* Variables (nameless) - not used in practice *)
   Notation "'ft{' v '}'" := (⤳ (fvar v term_var)) (in custom expr, v constr).
   Notation "'lt{' v '}'" := (⤳ (lvar v term_var)) (in custom expr, v constr).
@@ -33,7 +34,7 @@ Module UnTyped.
   Notation "'7'" := (⤳ (succ (succ (succ (succ (succ (succ (succ zero)))))))) (in custom expr).
   Notation "'8'" := (⤳ (succ (succ (succ (succ (succ (succ (succ (succ zero))))))))) (in custom expr).
   Notation "'9'" := (⤳ (succ (succ (succ (succ (succ (succ (succ (succ (succ zero)))))))))) (in custom expr).
-  
+
   Notation "'()'" := (⤳ uu) (in custom expr).
   Notation "'t_true'" := (⤳ttrue) (in custom expr).
   Notation "'t_false'" := (⤳tfalse) (in custom expr).
@@ -49,8 +50,8 @@ Module UnTyped.
   Notation "( t1 , t2 )" :=
     (fun (fv_id:nat) => (pp (t1 fv_id) (t2 fv_id)))
       (in custom expr, t1 custom expr, t2 custom expr).
-  Notation "t '._1'" := (fun fv_id => (pi1 (t fv_id))) (in custom expr at level 200, t custom expr).
-  Notation "t '._2'" := (fun fv_id => (pi2 (t fv_id))) (in custom expr at level 200, t custom expr).
+  Notation "t '._1'" := (fun fv_id => (pi1 (t fv_id))) (in custom expr at level 80, t custom expr).
+  Notation "t '._2'" := (fun fv_id => (pi2 (t fv_id))) (in custom expr at level 80, t custom expr).
 
   (* Needs Coq 8.11 to work
 Definition pp_notation (p1 : nat -> tree) (p2 : nat -> tree) : (nat -> tree) :=
@@ -71,7 +72,7 @@ Notation "( t1 , .. , t2 , tn )" :=
          let x := (fvar (S fv_id) term_var) in
          (notype_tfix (close 0 (notype_lambda (close 0 (t (S (S fv_id))) (S fv_id))) fv_id) )))
       (in custom expr at level 100, f ident, x ident, t custom expr).
-  Notation "'def_rec' f x y => t":=
+  Notation "'def_rec' f x y => t":= (* for convinience, recursive with 2 arguments *)
     (fun fv_id => (
          let f := (fvar fv_id term_var) in
          let x := (fvar (S fv_id) term_var) in
@@ -107,7 +108,7 @@ Notation "( t1 , .. , t2 , tn )" :=
   Notation "'right' t " :=
     (fun fv_id => tright (t fv_id))
       (in custom expr at level 180, right associativity, t custom expr).
-  Notation "'left' t " := 
+  Notation "'left' t " :=
     (fun fv_id => tleft (t fv_id))
       (in custom expr at level 180, right associativity, t custom expr).
   Notation "'match' t 'with' '|' 'left' l => t1 '|' 'right' r => t2 'end'" :=
@@ -129,7 +130,7 @@ Module Typed.
   Notation "( x )" := (fun (fv_id:nat) => (x fv_id)) (in custom type, x custom type).
   Notation "x" := (⤳ x) (in custom type at level 0, x ident).
 
-  (* Base Types *) 
+  (* Base Types *)
   Notation "'Nat'" := (⤳ T_nat) (in custom type).
   Notation "'Unit'" := (⤳ T_unit) (in custom type).
   Notation "'Bool'" := (⤳ T_bool) (in custom type).
@@ -206,7 +207,7 @@ End Typed.
 
 Module Tests.
   Import UnTyped.
-  Import Typed.  
+  Import Typed.
   Example base_types : ([|| Nat ||], [|| Unit ||], [|| Bool ||], [|| ⊤ ||], [|| ⊥ ||]) = (T_nat, T_unit, T_bool, T_top, T_bot). Proof. reflexivity. Qed.
   Example arrow_type1 : [|| (Nat -> Bool) -> Unit -> ⊤ ||] = T_arrow (T_arrow T_nat T_bool) (T_arrow T_unit T_top).
   Proof. reflexivity. Qed.
@@ -227,8 +228,4 @@ Module Tests.
   Example union_type1 : [|| Nat ∩ Bool ∪ Nat ||] = T_union (T_intersection T_nat T_bool) T_nat.
   Proof. reflexivity. Qed.
 
-End Tests.    
-
-
-
-
+End Tests.

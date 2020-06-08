@@ -22,28 +22,24 @@ Definition lists := Eval compute in
   let ten := cons () nine in
   let double := def_rec f l => match l with
                               | left x => nil
-                              | right p => right ((), (right ((), (f (p._2))))) end
-  in
+                              | right p => right ((), (right ((), (f (p._2))))) end in
   let power := def_rec f a b => match b with
                                | left x => a
                                | right p => f (double a) (p._2) end in
   let getLast := def_rec f l => match l with
                                | left x => ()
-                                            |right p => f (p._2) end in
+                               |right p => f (p._2) end in
+  getLast (power ten ten)
 
-  getLast (power six eight)|].
-(*
- power a b = a*2^b
- *)
-Fixpoint getNat (t:tree) :=
-  match t with
-  | tright (pp t1 t2) => S (getNat t2)
-  | _ => 0 end.
+|].
+
+(* power a b = a*2^b *)
 
 
-Example example1 : (eval lists 20000) = Some (uu).
+Example example1 : (eval lists 1000000) = Some (uu).
 Proof.
   Set Ltac Profiling.
+  native_compute.
   reflexivity.
   Show Ltac Profile.
   Qed.

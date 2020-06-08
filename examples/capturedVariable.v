@@ -4,15 +4,15 @@ Require Extraction.
 Import Notations.UnTyped.
 
 
-Definition capturedVariable_example := Eval compute in 
-  [|    
+Definition capturedVariable_example := Eval compute in
+  [|
    let lt := def_rec f x y =>
              match x with
              | 0 => t_true
              | s x' => match y with
                       | 0 => t_false
                       | s y' => (f x' y') end end in
-   
+
    let x := 5 in
    let lessThanX := fun y => (lt y x) in
    let x := 3 in
@@ -21,9 +21,12 @@ Definition capturedVariable_example := Eval compute in
    |].
 
 
-Eval compute in eval capturedVariable_example 1000.
 
+Example capturedVariable : (eval capturedVariable_example 1000) =  Some (pp ttrue ttrue).
+Proof.
+  native_compute; reflexivity. Qed.
 
+(* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
-Extraction "capturedVariable.ml" capturedVariable_example eval. 
+Extraction "capturedVariable.ml" capturedVariable_example eval.

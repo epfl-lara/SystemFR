@@ -4,7 +4,7 @@ Require Extraction.
 Import Notations.UnTyped.
 
 
-Definition natEq_example := Eval compute in 
+Definition natEq_example := Eval compute in
   [|
    let natEq := (
          def_rec f x y =>
@@ -51,9 +51,15 @@ Definition natEq_example := Eval compute in
 
 Print natEq_example.
 
+Example isEven: (eval natEq_example 10000) = Some ttrue.
+Proof.
+  native_compute.
+  reflexivity. Qed.
 
+
+(* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 
 Definition isEven := natEq_example.
-Extraction "isEven.ml" isEven eval. 
+Extraction "isEven.ml" isEven eval.
