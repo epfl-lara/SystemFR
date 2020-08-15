@@ -1,5 +1,7 @@
 # System FR [![Build Status][larabot-img]][larabot-ref]
 
+![System FR's logo](https://github.com/epfl-lara/SystemFR/blob/logo/logo/small.png)
+
 ### Description
 
 This project aims to formalize in Coq part of the [Stainless project](https://github.com/epfl-lara/stainless). It describes a call-by-value lambda-calculus and defines a rich type system (based on computations) that describes behaviors of lambda-calculus terms. Supported types include: System F polymorphism, recursive types, infinite intersections, refinement and dependent types, equality types.
