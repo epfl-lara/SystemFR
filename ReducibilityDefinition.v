@@ -222,6 +222,8 @@ Ltac simp_red_top_level_hyp :=
 
 Ltac simp_red_goal := rewrite_strat outermost hints reducible_values.
 
+Ltac simp_red_top_level_goal := rewrite_strat hints reducible_values.
+
 Ltac simp_red := simp_red_hyp || simp_red_goal.
 
 Ltac simp_red_nat :=
