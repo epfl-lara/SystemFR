@@ -140,6 +140,44 @@ Proof.
   - exists v1; steps; eauto with values smallstep star.
 Qed.
 
+Lemma star_smallstep_unary_primitive_inv:
+  forall t v,
+    star scbv_step t v ->
+    cbv_value v ->
+    forall t' o,
+      t = unary_primitive o t' ->
+      exists v1,
+        cbv_value v1 /\ star scbv_step t' v1.
+Proof.
+  induction 1; repeat step || step_inversion cbv_value || t_invert_step; eauto with cbvlemmas.
+  exists ttrue; steps.
+  exists tfalse; steps.
+  exists v1; steps; eauto with values smallstep star cbvlemmas.
+Qed.
+
+Lemma star_smallstep_binary_primitive_inv:
+  forall t v,
+    star scbv_step t v ->
+    cbv_value v ->
+    forall t1 t2 o,
+      t = binary_primitive o t1 t2 ->
+      exists v1 v2,
+        cbv_value v1 /\ star scbv_step t1 v1 /\ cbv_value v2 /\ star scbv_step t2 v2.
+Proof.
+  induction 1; repeat steps || step_inversion cbv_value || t_invert_step; eauto with cbvlemmas star smallstep.
+  all: try solve [exists (build_nat n1), (build_nat n2); steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists (build_nat n1), (succ (build_nat n2)); steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists (build_nat n2), (build_nat n2); steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists (build_nat n1), (succ (build_nat n)); steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists (build_nat n1), zero; steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists ttrue, ttrue; steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists ttrue, tfalse; steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists tfalse, ttrue; steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists tfalse, tfalse; steps; eauto with values smallstep star cbvlemmas].
+  all: try solve [exists v1, v2; steps; eauto with values smallstep star cbvlemmas].
+Qed.
+
+
 Lemma star_smallstep_ite_inv:
   forall t v,
     t ~>* v ->

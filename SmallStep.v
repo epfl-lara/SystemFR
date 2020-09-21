@@ -247,10 +247,13 @@ Inductive scbv_step: tree -> tree -> Prop :=
 
 | SPBetaAnd1: scbv_step (binary_primitive And ttrue ttrue) ttrue
 | SPBetaAnd2: scbv_step (binary_primitive And ttrue tfalse) tfalse
+| SPBetaAnd3: scbv_step (binary_primitive And tfalse ttrue) tfalse
+| SPBetaAnd4: scbv_step (binary_primitive And tfalse tfalse) tfalse
 
 | SPBetaOr1: scbv_step (binary_primitive Or tfalse tfalse) tfalse
 | SPBetaOr2: scbv_step (binary_primitive Or tfalse ttrue) ttrue
-
+| SPBetaOr3: scbv_step (binary_primitive Or ttrue tfalse) ttrue
+| SPBetaOr4: scbv_step (binary_primitive Or ttrue ttrue) ttrue
 
 (* reduction inside terms *)
 | SPAppLeft: forall t1 t2 t,
