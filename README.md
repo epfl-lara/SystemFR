@@ -1,6 +1,6 @@
 # System FR [![Build Status][larabot-img]][larabot-ref]
 
-![System FR's logo](https://github.com/epfl-lara/SystemFR/blob/logo/logo/small.png)
+![System FR's logo](logo/small.png?raw=true)
 
 ### Description
 
