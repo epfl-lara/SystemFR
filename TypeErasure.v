@@ -16,6 +16,7 @@ Fixpoint erase_term (t: tree): tree :=
   | tsize t => tsize (erase_term t)
 
   | lambda T t' => notype_lambda (erase_term t')
+  | notype_lambda t => notype_lambda (erase_term t)
   | app t1 t2 => app (erase_term t1) (erase_term t2)
 
   | forall_inst t1 t2 => erase_term t1
@@ -44,6 +45,7 @@ Fixpoint erase_term (t: tree): tree :=
   | type_inst t T => erase_term t
 
   | tfix T t => notype_tfix (erase_term t)
+  | notype_tfix t => notype_tfix (erase_term t)
 
   | tfold T t' => erase_term t'
   | tunfold t' => erase_term t'
