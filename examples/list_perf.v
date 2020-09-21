@@ -38,14 +38,11 @@ Definition lists := Eval compute in
 
 Example example1 : (eval lists 1000000) = Some (uu).
 Proof.
-  Set Ltac Profiling.
-  native_compute.
-  reflexivity.
-  Show Ltac Profile.
+  native_compute; reflexivity.
   Qed.
 
-
-
+(*
 Extraction Language OCaml.
 Set Extraction AccessOpaque.
 Extraction "list_perf.ml" lists eval.
+*)

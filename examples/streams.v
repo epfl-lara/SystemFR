@@ -4,7 +4,7 @@ Require Export SystemFR.Evaluator.
 Require Extraction.
 
 
-Definition streams_example := Eval compute in 
+Definition streams_example := Eval compute in
   fun n => [|
  let eq_nat := (
          def_rec f x y =>
@@ -23,7 +23,7 @@ Definition streams_example := Eval compute in
        match x with
        | 0 => y
        | s x' => s (f x' y) end) in
-         
+
  (* Stream: a function that returns a pair (head, stream) *)
  let constant := def_rec f x => (fun y => ((x, (f x)))) in
  let head := (fun l => ((l ())._1)) in
@@ -36,9 +36,9 @@ Definition streams_example := Eval compute in
                 plus (x._1) (f k' (x._2))) end in
  let take := def_rec f k stream => match k with
                            | 0 => (head stream)
-                           | s k' => (f k' (tail stream))  end in 
+                           | s k' => (f k' (tail stream))  end in
  let zipwith := def_rec f app s1 => fun s2 => fun y => ((app (head s1) (head s2)), (f app (tail s1) (tail s2))) in
- let fibonacci := def_rec f y => (1, (fun y => (1, (zipwith plus f (tail f))))) in 
+ let fibonacci := def_rec f y => (1, (fun y => (1, (zipwith plus f (tail f))))) in
 
  (take n fibonacci)  |].
 
@@ -48,6 +48,8 @@ Fixpoint natToTreeNat (n: nat) := match n with
                                  | 0 => zero
                                  | S x => succ (natToTreeNat x) end.
 
+(*
 Extraction Language OCaml.
 Set Extraction AccessOpaque.
 Extraction "streams_example.ml" streams_example eval natToTreeNat.
+*)

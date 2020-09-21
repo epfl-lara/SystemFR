@@ -59,6 +59,8 @@ Fixpoint natToTreeNat (n: nat) := match n with
                                  | 0 => zero
                                  | S x => succ (natToTreeNat x) end.
 
+(*
 Extraction Language OCaml.
 Set Extraction AccessOpaque.
 Extraction "streams_example.ml" streams_example eval natToTreeNat.
+*)

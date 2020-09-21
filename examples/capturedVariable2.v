@@ -31,7 +31,9 @@ Example capturedVariable2 : (eval capturedVariable2_example 1000) =  Some zero.
 Proof.
   native_compute ; reflexivity. Qed.
 
+(*
 (* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 Extraction "capturedVariable2.ml" capturedVariable2_example eval.
+*)

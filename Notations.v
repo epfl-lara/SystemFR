@@ -1,10 +1,7 @@
-Require Export SystemFR.Trees.
 Require Export SystemFR.Syntax.
 Require Export SystemFR.Freshness.
 
 Open Scope list.
-
-
 
 
 (* Untyped embedded language *)
@@ -208,23 +205,43 @@ End Typed.
 Module Tests.
   Import UnTyped.
   Import Typed.
-  Example base_types : ([|| Nat ||], [|| Unit ||], [|| Bool ||], [|| ⊤ ||], [|| ⊥ ||]) = (T_nat, T_unit, T_bool, T_top, T_bot). Proof. reflexivity. Qed.
-  Example arrow_type1 : [|| (Nat -> Bool) -> Unit -> ⊤ ||] = T_arrow (T_arrow T_nat T_bool) (T_arrow T_unit T_top).
+
+  Example base_types :
+    ([|| Nat ||], [|| Unit ||], [|| Bool ||], [|| ⊤ ||], [|| ⊥ ||]) =
+    (T_nat, T_unit, T_bool, T_top, T_bot).
   Proof. reflexivity. Qed.
-  Example arrow_type2 : [|| x : Nat -> y : Nat -> [x ≡ y] ||] = T_arrow T_nat (T_arrow T_nat (T_equiv (lvar 1 term_var) (lvar 0 term_var))).
+
+  Example arrow_type1 :
+    [|| (Nat -> Bool) -> Unit -> ⊤ ||] =
+    T_arrow (T_arrow T_nat T_bool) (T_arrow T_unit T_top).
   Proof. reflexivity. Qed.
+
+  Example arrow_type2 :
+    [|| x : Nat -> y : Nat -> [x ≡ y] ||] =
+    T_arrow T_nat (T_arrow T_nat (T_equiv (lvar 1 term_var) (lvar 0 term_var))).
+  Proof. reflexivity. Qed.
+
   Example prod_type1 : [|| Nat * Bool ||] = T_prod T_nat T_bool.
   Proof. simpl. reflexivity. Qed.
+
   Example prod_type2 : [|| x : Nat * Bool * Unit ||] = T_prod T_nat (T_prod T_bool T_unit).
   Proof. reflexivity. Qed.
+
   Example sum_type1 : [|| Bool -> Nat + Unit ||] = T_sum (T_arrow T_bool T_nat) T_unit.
   Proof. reflexivity. Qed.
-  Example sum_type2 : [|| Nat + x : Bool -> y : Nat * [x ≡ y] + Nat ||] =  T_sum T_nat (T_arrow T_bool (T_prod T_nat (T_sum (T_equiv (lvar 1 term_var) (lvar 0 term_var)) T_nat))).
+
+  Example sum_type2 :
+    [|| Nat + x : Bool -> y : Nat * [x ≡ y] + Nat ||] =
+    T_sum T_nat (T_arrow T_bool (T_prod T_nat
+                                        (T_sum (T_equiv (lvar 1 term_var) (lvar 0 term_var)) T_nat))).
   Proof. reflexivity. Qed.
+
   Example refine_type1 : [|| { x : Bool | x } ||] = T_refine T_bool (lvar 0 term_var).
   Proof. reflexivity. Qed.
+
   Example refine_by_type1 : [|| {{ x : Bool | [x ≡ x] }} ||] = (T_type_refine T_bool (T_equiv (lvar 0 term_var) (lvar 0 term_var))).
   Proof. reflexivity. Qed.
+
   Example union_type1 : [|| Nat ∩ Bool ∪ Nat ||] = T_union (T_intersection T_nat T_bool) T_nat.
   Proof. reflexivity. Qed.
 

@@ -39,7 +39,9 @@ Example fact : (option_map treeToNat (eval fact_example 30000)) = Some 5040.
 Proof.
   native_compute. reflexivity. Qed.
 
+(*
 (* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 Extraction "fact.ml" fact_example eval.
+*)

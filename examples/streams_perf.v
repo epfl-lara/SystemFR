@@ -52,14 +52,12 @@ Eval native_compute in (eval streams 20000).
 
 Example example1 : (eval streams 100000) = Some (uu).
 Proof.
-  Set Ltac Profiling.
-  native_compute.
-  Show Ltac Profile.
-  reflexivity.
-  Qed.
+  native_compute; reflexivity.
+Qed.
 
-
+(*
 (* Extraction *)
 Extraction Language OCaml.
 Set Extraction AccessOpaque.
 Extraction "streams_perf.ml" streams eval.
+*)

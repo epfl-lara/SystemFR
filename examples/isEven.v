@@ -56,10 +56,11 @@ Proof.
   native_compute.
   reflexivity. Qed.
 
-
+(*
 (* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 
 Definition isEven := natEq_example.
 Extraction "isEven.ml" isEven eval.
+*)

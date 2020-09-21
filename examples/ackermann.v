@@ -25,7 +25,9 @@ Example ackermann : (eval ackermann_example 1000) =  Some (succ (succ (succ (suc
 Proof.
   native_compute; reflexivity. Qed.
 
+(*
 (* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 Extraction "ackermann.ml" ackermann_example eval.
+*)

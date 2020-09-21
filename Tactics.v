@@ -318,21 +318,15 @@ match goal with
 | H: ?F _ _ _ _ _ _ = ?F _ _ _ _ _ _ |- _ => is_constructor F; inversion H; clear H
 end.
 
-Ltac custom_light :=
-  (intros) ||
-  (subst).
-
 Ltac destruct_match :=
-match goal with
-| [ |- context[match ?t with _ => _ end]] =>
-let matched := fresh "matched" in
-destruct t eqn:matched
-| [ H: context[match ?t with _ => _ end] |- _ ] =>
-let matched := fresh "matched" in
-destruct t eqn:matched
+  match goal with
+  | [ |- context[match ?t with _ => _ end]] =>
+    let matched := fresh "matched" in
+    destruct t eqn:matched
+  | [ H: context[match ?t with _ => _ end] |- _ ] =>
+    let matched := fresh "matched" in
+    destruct t eqn:matched
 end.
-
-
 
 Ltac instantiate_eq_refl :=
 match goal with

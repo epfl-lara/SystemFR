@@ -24,13 +24,13 @@ Definition sumAcc_example := Eval compute in
     |].
 
 
-
 Example sumAcc : (eval sumAcc_example 1000) =  Some [| 7 |].
 Proof.
   native_compute; reflexivity. Qed.
 
-
+(*
 (* Extraction *)
 Extraction Language Ocaml.
 Set Extraction AccessOpaque.
 Extraction "sumAcc.ml" sumAcc_example eval.
+*)
