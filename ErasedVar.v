@@ -9,20 +9,20 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma open_reducible_weaken:
-  forall theta (gamma : context) (x : nat) T u U,
-    open_reducible theta gamma u U ->
-    ~(x ∈ support gamma) ->
+  forall ρ Γ x T u U,
+    [ ρ; Γ ⊨ u : U ] ->
+    ~(x ∈ support Γ) ->
     ~(x ∈ fv u) ->
     ~(x ∈ fv U) ->
-    [ theta; (x, T) :: gamma ⊨ u : U ].
+    [ ρ; (x, T) :: Γ ⊨ u : U ].
 Proof.
-  unfold open_reducible in *; repeat step || step_inversion satisfies || t_substitutions.
+  unfold open_reducible; repeat step || step_inversion satisfies || t_substitutions.
 Qed.
 
 Lemma open_reducible_var:
-  forall tvars gamma x T,
-    lookup Nat.eq_dec gamma x = Some T ->
-    [ tvars; gamma ⊨ fvar x term_var : T ].
+  forall Θ Γ x T,
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+    [ Θ; Γ ⊨ fvar x term_var : T ].
 Proof.
   unfold open_reducible;
     repeat step || t_termlist || t_lookup;

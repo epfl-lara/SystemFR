@@ -9,35 +9,35 @@ Opaque annotated_tlt.
 Opaque reducible_values.
 
 Lemma annotated_subtype_rec:
-  forall tvars gamma n1 n2 T0 Ts,
-    [[ tvars; gamma ⊨ n1 ≡ n2 ]] ->
-    [[ tvars; gamma ⊨ T_rec n1 T0 Ts <: T_rec n2 T0 Ts ]].
+  forall Θ Γ n1 n2 T0 Ts,
+    [[ Θ; Γ ⊨ n1 ≡ n2 ]] ->
+    [[ Θ; Γ ⊨ T_rec n1 T0 Ts <: T_rec n2 T0 Ts ]].
 Proof.
-  unfold annotated_subtype, open_subtype, subtype, annotated_equivalent, open_equivalent;
+  unfold open_subtype, open_equivalent;
     repeat step;
     eauto using reducible_values_rec_equivalent.
 Qed.
 
 Lemma annotated_subtype_rec_pos:
-  forall X tvars gamma n1 n2 T0 Ts,
+  forall X Θ Γ n1 n2 T0 Ts,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
     twf Ts 1 ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
     is_annotated_type T0 ->
     is_annotated_type Ts ->
     ~(X ∈ pfv T0 type_var) ->
     ~(X ∈ pfv Ts type_var) ->
-    ~(X ∈ tvars) ->
+    ~(X ∈ Θ) ->
     has_polarities (topen 0 Ts (fvar X type_var)) ((X, Positive) :: nil) ->
-    [[ tvars; gamma ⊨ annotated_tlt n1 (succ n2) ≡ ttrue ]] ->
-    [[ tvars; gamma ⊨ n1 : T_nat ]] ->
-    [[ tvars; gamma ⊨ topen 0 Ts (T_rec zero T0 Ts) <: T0 ]] ->
-    [[ tvars; gamma ⊨ T_rec n2 T0 Ts <: T_rec n1 T0 Ts ]].
+    [[ Θ; Γ ⊨ annotated_tlt n1 (succ n2) ≡ ttrue ]] ->
+    [[ Θ; Γ ⊨ n1 : T_nat ]] ->
+    [[ Θ; Γ ⊨ topen 0 Ts (T_rec zero T0 Ts) <: T0 ]] ->
+    [[ Θ; Γ ⊨ T_rec n2 T0 Ts <: T_rec n1 T0 Ts ]].
 Proof.
-  unfold annotated_subtype, open_subtype, subtype, annotated_equivalent, open_equivalent;
+  unfold open_subtype, open_equivalent;
     repeat step.
 
   apply reducible_values_rec_pos with (psubstitute (erase_term n2) l term_var) X;

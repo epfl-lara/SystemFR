@@ -11,10 +11,10 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_values_rec_step:
-  forall theta t1 t2 T0 Ts v,
-    reducible_values theta v (T_rec t1 T0 Ts) ->
-    star scbv_step t1 t2 ->
-    reducible_values theta v (T_rec t2 T0 Ts).
+  forall ρ t1 t2 T0 Ts v,
+    [ ρ ⊨ v : T_rec t1 T0 Ts ]v ->
+    t1 ~>* t2 ->
+    [ ρ ⊨ v : T_rec t2 T0 Ts ]v.
 Proof.
   repeat step || simp_red;
     eauto with erased.
@@ -24,11 +24,11 @@ Proof.
 Qed.
 
 Lemma reducible_values_rec_backstep:
-  forall theta t1 t2 T0 Ts v,
-    reducible_values theta v (T_rec t1 T0 Ts) ->
+  forall ρ t1 t2 T0 Ts v,
+    [ ρ ⊨ v : T_rec t1 T0 Ts ]v ->
     is_erased_term t2 ->
-    star scbv_step t2 t1 ->
-    reducible_values theta v (T_rec t2 T0 Ts).
+    t2 ~>* t1 ->
+    [ ρ ⊨ v : T_rec t2 T0 Ts ]v.
 Proof.
   repeat step || simp_red;
     eauto with erased.
@@ -37,10 +37,10 @@ Proof.
 Qed.
 
 Lemma reducible_values_rec_equivalent:
-  forall theta t1 t2 T0 Ts v,
-    reducible_values theta v (T_rec t1 T0 Ts) ->
-    equivalent_terms t1 t2 ->
-    reducible_values theta v (T_rec t2 T0 Ts).
+  forall ρ t1 t2 T0 Ts v,
+    [ ρ ⊨ v : T_rec t1 T0 Ts ]v ->
+    [ t1 ≡ t2 ] ->
+    [ ρ ⊨ v : T_rec t2 T0 Ts ]v.
 Proof.
   repeat step || simp_red;
     eauto with erased;
@@ -50,29 +50,29 @@ Proof.
 Qed.
 
 Lemma reducible_rec_equivalent:
-  forall theta t1 t2 T0 Ts t,
-    reducible theta t (T_rec t1 T0 Ts) ->
-    valid_interpretation theta ->
-    equivalent_terms t1 t2 ->
-    reducible theta t (T_rec t2 T0 Ts).
+  forall ρ t1 t2 T0 Ts t,
+    [ ρ ⊨ t : T_rec t1 T0 Ts ] ->
+    valid_interpretation ρ ->
+    [ t1 ≡ t2 ] ->
+    [ ρ ⊨ t : T_rec t2 T0 Ts ].
 Proof.
   eauto using reducible_values_rec_equivalent, reducible_values_exprs.
 Qed.
 
 Lemma equivalent_rc_rec_step:
-  forall theta t1 t2 T0 Ts,
+  forall ρ t1 t2 T0 Ts,
     is_erased_term t1 ->
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     equivalent_rc
-      (fun t => reducible_values theta t (T_rec t1 T0 Ts))
-      (fun t => reducible_values theta t (T_rec t2 T0 Ts)).
+      (fun t => [ ρ ⊨ t : T_rec t1 T0 Ts ]v)
+      (fun t => [ ρ ⊨ t : T_rec t2 T0 Ts ]v).
 Proof.
   unfold equivalent_rc; steps;
     eauto using reducible_values_rec_step, reducible_values_rec_backstep.
 Qed.
 
 Lemma reducible_values_unfold:
-  forall theta v n T0 Ts,
+  forall ρ v n T0 Ts,
     wf n 0 ->
     twf n 0 ->
     wf T0 0 ->
@@ -85,13 +85,13 @@ Lemma reducible_values_unfold:
     pfv n term_var = nil ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
-    reducible_values theta v (T_rec (succ n) T0 Ts) ->
-    reducible_values theta v (topen 0 Ts (T_rec n T0 Ts)).
+    valid_interpretation ρ ->
+    [ ρ ⊨ v : T_rec (succ n) T0 Ts ]v ->
+    [ ρ ⊨ v : topen 0 Ts (T_rec n T0 Ts) ]v.
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat match goal with
-           | H: star scbv_step (succ _) ?v |- _ =>
+           | H: succ _ ~>* ?v |- _ =>
               poseNew (Mark 0 "inv succ");
               unshelve epose proof (star_smallstep_succ_inv _ v H _ _ eq_refl)
            | _ => step || simp_red || step_inversion cbv_value
@@ -104,19 +104,19 @@ Proof.
 Qed.
 
 Lemma red_one:
-  forall theta, reducible_values theta (succ zero) T_nat.
+  forall ρ, [ ρ ⊨ succ zero : T_nat ]v.
 Proof.
   repeat step || simp_red.
 Qed.
 
 Ltac inst_one :=
   match goal with
-  | H: forall a, reducible_values ?theta _ T_nat -> _ |- _ =>
-      poseNew (Mark 0 "once"); unshelve epose proof (H (succ zero) (red_one theta))
+  | H: forall a, [ ?ρ ⊨ _ : T_nat ]v -> _ |- _ =>
+      poseNew (Mark 0 "once"); unshelve epose proof (H (succ zero) (red_one ρ))
   end.
 
 Lemma reducible_unfold:
-  forall theta t n T0 Ts,
+  forall ρ t n T0 Ts,
     wf n 0 ->
     twf n 0 ->
     wf T0 0 ->
@@ -129,11 +129,11 @@ Lemma reducible_unfold:
     pfv n term_var = nil ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
-    reducible theta t (T_rec (succ n) T0 Ts) ->
-    reducible theta t (topen 0 Ts (T_rec n T0 Ts)).
+    valid_interpretation ρ ->
+    [ ρ ⊨ t : T_rec (succ n) T0 Ts ] ->
+    [ ρ ⊨ t : topen 0 Ts (T_rec n T0 Ts) ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat match goal with
            | _ => find_smallstep_value
            | _ => apply reducible_values_unfold
@@ -142,7 +142,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_unfold:
-  forall tvars gamma t n T0 Ts,
+  forall Θ Γ t n T0 Ts,
     wf n 0 ->
     twf n 0 ->
     wf T0 0 ->
@@ -152,11 +152,11 @@ Lemma open_reducible_unfold:
     is_erased_term n ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (fv n) (support gamma) ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
-    [ tvars; gamma ⊨ t : T_rec (succ n) T0 Ts ] ->
-    [ tvars; gamma ⊨ t : topen 0 Ts (T_rec n T0 Ts) ].
+    subset (fv n) (support Γ) ->
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
+    [ Θ; Γ ⊨ t : T_rec (succ n) T0 Ts ] ->
+    [ Θ; Γ ⊨ t : topen 0 Ts (T_rec n T0 Ts) ].
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
@@ -169,9 +169,9 @@ Qed.
 Lemma spos_succ_pred:
   forall (n : tree) v (lterms : list (nat * tree)),
     is_nat_value v ->
-    star scbv_step n v ->
-    equivalent_terms (spositive n) ttrue ->
-    equivalent_terms n (succ (tmatch n notype_err (lvar 0 term_var))).
+    n ~>* v ->
+    [ spositive n ≡ ttrue ] ->
+    [ n ≡ succ (tmatch n notype_err (lvar 0 term_var)) ].
 Proof.
   intros.
   apply equivalent_sym.
@@ -183,7 +183,7 @@ Proof.
     unfold spositive in *;
       repeat step || t_invert_star || t_deterministic_star.
     eapply star_trans; eauto with cbvlemmas.
-    eapply Trans; eauto with smallstep; steps.
+    eapply Relation_Operators.rt1n_trans; eauto with smallstep; steps.
 
   - apply equivalent_sym.
     apply equivalent_star; steps;
@@ -191,24 +191,24 @@ Proof.
 Qed.
 
 Lemma reducible_trec:
-  forall theta v n T0 Ts,
-    reducible theta v (T_rec n T0 Ts) ->
-    exists v', is_nat_value v' /\ star scbv_step n v'.
+  forall ρ v n T0 Ts,
+   [ ρ ⊨ v : T_rec n T0 Ts ] ->
+    exists v', is_nat_value v' /\ n ~>* v'.
 Proof.
-  unfold reducible, reduces_to; repeat step || simp_red.
+  unfold reduces_to; repeat step || simp_red.
   - exists zero; steps.
   - exists (succ n'); steps; eauto with is_nat_value.
 Qed.
 
 Ltac t_reducible_trec :=
   match goal with
-  | H: reducible _ _ (T_rec _ _ _) |- _ =>
+  | H:[ _ ⊨ _ : T_rec _ _ _ ] |- _ =>
     poseNew (Mark H "reducible_trec");
     pose proof (reducible_trec _ _ _ _ _ H)
   end.
 
 Lemma open_reducible_unfold2:
-  forall tvars gamma t n T0 Ts,
+  forall Θ Γ t n T0 Ts,
     wf n 0 ->
     twf n 0 ->
     wf T0 0 ->
@@ -218,16 +218,16 @@ Lemma open_reducible_unfold2:
     is_erased_term n ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (fv n) (support gamma) ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
-    (forall theta l,
-       valid_interpretation theta ->
-       satisfies (reducible_values theta) gamma l ->
-       support theta = tvars ->
-       equivalent_terms (spositive (psubstitute n l term_var)) ttrue) ->
-    [ tvars; gamma ⊨ t : T_rec n T0 Ts ] ->
-    [ tvars; gamma ⊨ t : topen 0 Ts (T_rec (notype_tpred n) T0 Ts) ].
+    subset (fv n) (support Γ) ->
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
+    (forall ρ l,
+       valid_interpretation ρ ->
+       satisfies (reducible_values ρ) Γ l ->
+       support ρ = Θ ->
+       [ spositive (psubstitute n l term_var) ≡ ttrue ]) ->
+    [ Θ; Γ ⊨ t : T_rec n T0 Ts ] ->
+    [ Θ; Γ ⊨ t : topen 0 Ts (T_rec (notype_tpred n) T0 Ts) ].
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen || t_instantiate_sat3 || t_reducible_trec;
@@ -241,8 +241,8 @@ Proof.
 Qed.
 
 Lemma reducible_fold:
-  forall theta t n T0 Ts,
-    valid_interpretation theta ->
+  forall ρ t n T0 Ts,
+    valid_interpretation ρ ->
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -251,11 +251,11 @@ Lemma reducible_fold:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    reducible theta n T_nat ->
-    reducible theta t (topen 0 Ts (T_rec n T0 Ts)) ->
-    reducible theta t (T_rec (succ n) T0 Ts).
+    [ ρ ⊨ n : T_nat ]  ->
+    [ ρ ⊨ t : topen 0 Ts (T_rec n T0 Ts) ] ->
+    [ ρ ⊨ t : T_rec (succ n) T0 Ts ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat match goal with
            | _ => step || simp_red
            end; eauto with values.
@@ -263,14 +263,14 @@ Proof.
   eexists; steps; eauto with cbvlemmas; t_closer.
 
   right.
-  unshelve eexists v0, (makeFresh (pfv n type_var :: pfv v0 type_var :: pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _;
+  unshelve eexists v0, (makeFresh (pfv n type_var :: pfv v0 type_var :: pfv T0 type_var :: pfv Ts type_var :: support ρ :: nil)), _, _;
     repeat step;
     try finisher;
     eauto with cbvlemmas.
 
   match goal with
-  | |- reducible_values ((?M,_) :: _) _ _ =>
-    eapply (reducible_rename_one_rc (fun v : tree => reducible_values theta v (T_rec n T0 Ts)) _ _ _ _ M M);
+  | |- [ (?M,_) :: _ ⊨ _ : _ ]v =>
+    eapply (reducible_rename_one_rc (fun v => [ ρ ⊨ v : T_rec n T0 Ts ]v) _ _ _ _ M M);
     repeat step || apply equivalent_rc_rec_step
   end;
     try finisher; t_closer;
@@ -282,7 +282,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_fold:
-  forall tvars gamma t n T0 Ts,
+  forall Θ Γ t n T0 Ts,
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -291,9 +291,9 @@ Lemma open_reducible_fold:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    [ tvars; gamma ⊨ n : T_nat ] ->
-    [ tvars; gamma ⊨ t : topen 0 Ts (T_rec n T0 Ts) ] ->
-    [ tvars; gamma ⊨ t : T_rec (succ n) T0 Ts ].
+    [ Θ; Γ ⊨ n : T_nat ] ->
+    [ Θ; Γ ⊨ t : topen 0 Ts (T_rec n T0 Ts) ] ->
+    [ Θ; Γ ⊨ t : T_rec (succ n) T0 Ts ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
@@ -309,18 +309,18 @@ Proof.
 Qed.
 
 Lemma reducible_unfold_zero:
-  forall theta t T0 Ts,
+  forall ρ t T0 Ts,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
     twf Ts 1 ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    valid_interpretation theta ->
-    reducible theta t (T_rec zero T0 Ts) ->
-    reducible theta t T0.
+    valid_interpretation ρ ->
+    [ ρ ⊨ t : T_rec zero T0 Ts ] ->
+    [ ρ ⊨ t : T0 ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat match goal with
            | _ => apply reducible_values_unfold
            | _ => step || unfold closed_value in * || simp_red || t_invert_star
@@ -328,15 +328,15 @@ Proof.
 Qed.
 
 Lemma open_reducible_unfold_zero:
-  forall tvars gamma t T0 Ts,
+  forall Θ Γ t T0 Ts,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
     twf Ts 1 ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    [ tvars; gamma ⊨ t : T_rec zero T0 Ts ] ->
-    [ tvars; gamma ⊨ t : T0 ].
+    [ Θ; Γ ⊨ t : T_rec zero T0 Ts ] ->
+    [ Θ; Γ ⊨ t : T0 ].
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
@@ -347,7 +347,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_unfold_zero2:
-  forall tvars gamma t T0 Ts n,
+  forall Θ Γ t T0 Ts n,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -355,13 +355,13 @@ Lemma open_reducible_unfold_zero2:
     is_erased_term n ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    (forall theta l,
-       valid_interpretation theta ->
-       satisfies (reducible_values theta) gamma l ->
-       support theta = tvars ->
-       equivalent_terms (substitute n l) zero) ->
-    [ tvars; gamma ⊨ t : T_rec n T0 Ts ] ->
-    [ tvars; gamma ⊨ t : T0 ].
+    (forall ρ l,
+       valid_interpretation ρ ->
+       satisfies (reducible_values ρ) Γ l ->
+       support ρ = Θ ->
+       [ substitute n l ≡ zero ]) ->
+    [ Θ; Γ ⊨ t : T_rec n T0 Ts ] ->
+    [ Θ; Γ ⊨ t : T0 ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen;
@@ -375,18 +375,18 @@ Proof.
 Qed.
 
 Lemma reducible_fold_zero:
-  forall theta t T0 Ts,
-    valid_interpretation theta ->
+  forall ρ t T0 Ts,
+    valid_interpretation ρ ->
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
     twf Ts 1 ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    reducible theta t T0 ->
-    reducible theta t (T_rec zero T0 Ts).
+    [ ρ ⊨ t : T0 ]  ->
+   [ ρ ⊨ t : T_rec zero T0 Ts ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat match goal with
            | _ => step || simp_red
            end; eauto with values.
@@ -396,15 +396,15 @@ Proof.
 Qed.
 
 Lemma open_reducible_fold_zero:
-  forall tvars gamma t T0 Ts,
+  forall Θ Γ t T0 Ts,
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
     twf Ts 1 ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    [ tvars; gamma ⊨ t : T0 ] ->
-    [ tvars; gamma ⊨ t : T_rec zero T0 Ts ].
+    [ Θ; Γ ⊨ t : T0 ] ->
+    [ Θ; Γ ⊨ t : T_rec zero T0 Ts ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
@@ -416,7 +416,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_fold2:
-  forall tvars gamma t n T0 Ts p pn,
+  forall Θ Γ t n T0 Ts p pn,
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -424,35 +424,35 @@ Lemma open_reducible_fold2:
     is_erased_type T0 ->
     is_erased_type Ts ->
     ~(p ∈ pfv n term_var) ->
-    ~(p ∈ pfv_context gamma term_var) ->
+    ~(p ∈ pfv_context Γ term_var) ->
     ~(p ∈ pfv t term_var) ->
     ~(p ∈ pfv T0 term_var) ->
     ~(p ∈ pfv Ts term_var) ->
     ~(pn ∈ pfv n term_var) ->
-    ~(pn ∈ pfv_context gamma term_var) ->
+    ~(pn ∈ pfv_context Γ term_var) ->
     ~(pn ∈ pfv t term_var) ->
     ~(pn ∈ pfv T0 term_var) ->
     ~(pn ∈ pfv Ts term_var) ->
     ~(p = pn) ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
-    [ tvars; gamma ⊨ n : T_nat ] ->
-    [ tvars; (p, T_equiv n zero) :: gamma ⊨ t : T0 ] ->
-    [ tvars; (p, T_equiv n (succ (fvar pn term_var))) :: (pn, T_nat) :: gamma ⊨
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
+    [ Θ; Γ ⊨ n : T_nat ] ->
+    [ Θ; (p, T_equiv n zero) :: Γ ⊨ t : T0 ] ->
+    [ Θ; (p, T_equiv n (succ (fvar pn term_var))) :: (pn, T_nat) :: Γ ⊨
         t : topen 0 Ts (T_rec (fvar pn term_var) T0 Ts) ] ->
-    [ tvars; gamma ⊨ t : T_rec n T0 Ts ].
+    [ Θ; Γ ⊨ t : T_rec n T0 Ts ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
 
-  unfold reducible, reduces_to in H23; repeat step || simp_red.
+  unfold reduces_to in H23; repeat step || simp_red.
 
   t_invert_nat_value; steps.
 
   - apply reducible_rec_equivalent with zero; t_closing;
       eauto using equivalent_sym, equivalent_star.
     apply reducible_fold_zero; steps; eauto with wf twf erased.
-    unshelve epose proof (H19 theta ((p, uu) :: lterms) _ _ _);
+    unshelve epose proof (H19 ρ ((p, uu) :: lterms) _ _ _);
       repeat step || list_utils || apply SatCons || simp_red || t_substitutions ||
              step_inversion NoDup || rewrite substitute_open in * || apply_any;
       eauto using equivalent_star;
@@ -468,9 +468,9 @@ Proof.
       eauto 3 with twf;
       eauto with erased;
       eauto using equivalent_sym, equivalent_star;
-      try solve [ unfold reducible, reduces_to; repeat step || simp_red || eexists; try t_closing; eauto with smallstep ].
+      try solve [ unfold reduces_to; repeat step || simp_red || eexists; try t_closing; eauto with smallstep ].
 
-    unshelve epose proof (H20 theta ((p, uu) :: (pn, v0) :: lterms) _ _ _);
+    unshelve epose proof (H20 ρ ((p, uu) :: (pn, v0) :: lterms) _ _ _);
       repeat step || list_utils || nodup || apply SatCons || simp_red || t_substitutions ||
              rewrite substitute_open in *;
       try solve [ apply equivalent_star; t_closing ];
@@ -479,8 +479,8 @@ Proof.
 Qed.
 
 Lemma reducible_unfold_in:
-  forall t1 t2 T n T0 Ts theta,
-    reducible theta t1 (T_rec n T0 Ts) ->
+  forall t1 t2 T n T0 Ts ρ,
+   [ ρ ⊨ t1 : T_rec n T0 Ts ] ->
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -492,25 +492,25 @@ Lemma reducible_unfold_in:
     is_erased_term t2 ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     pfv n term_var = nil ->
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
     (forall v,
-        reducible_values theta v T0 ->
-        equivalent_terms t1 v ->
-        equivalent_terms n zero ->
-        reducible theta (open 0 t2 v) T) ->
+        [ ρ ⊨ v : T0 ]v ->
+        [ t1 ≡ v ] ->
+        [ n ≡ zero ] ->
+        [ ρ ⊨ open 0 t2 v : T ]) ->
     (forall v,
-        reducible_values theta v (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ->
-        equivalent_terms t1 v ->
-        reducible theta (open 0 t2 v) T) ->
-    reducible theta (app (notype_lambda t2) t1) T.
+        [ ρ ⊨ v : topen 0 Ts (T_rec (notype_tpred n) T0 Ts) ]v ->
+        [ t1 ≡ v ] ->
+        [ ρ ⊨ open 0 t2 v : T ]) ->
+    [ ρ ⊨ app (notype_lambda t2) t1 : T ].
 Proof.
   intros.
-  unfold reducible, reduces_to in H; steps.
+  unfold reduces_to in H; steps.
 
   eapply star_backstep_reducible; eauto with cbvlemmas values;
     repeat step || list_utils.
@@ -526,7 +526,7 @@ Proof.
   apply (
       reducible_rename_one_rc
         _
-        (fun t => reducible_values theta t (T_rec (notype_tpred n) T0 Ts))
+        (fun t => [ ρ ⊨ t : T_rec (notype_tpred n) T0 Ts ]v)
         _ _ _ X X
    ) in H26;
     eauto with values;
@@ -541,11 +541,11 @@ Proof.
   - apply equivalent_rc_sym.
     apply equivalent_rc_rec_step; unfold notype_tpred; steps.
     eapply star_trans; eauto with cbvlemmas.
-    eapply Trans; eauto with star smallstep values.
+    eapply Relation_Operators.rt1n_trans; eauto with star smallstep values.
 Qed.
 
 Lemma open_reducible_unfold_in:
-  forall tvars gamma t1 t2 T n T0 Ts p1 p2 y,
+  forall Θ Γ t1 t2 T n T0 Ts p1 p2 y,
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -558,32 +558,32 @@ Lemma open_reducible_unfold_in:
     is_erased_term n ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (pfv t1 term_var) (support gamma) ->
-    subset (pfv t2 term_var) (support gamma) ->
-    subset (pfv n term_var) (support gamma) ->
-    subset (pfv T0 term_var) (support gamma) ->
-    subset (pfv Ts term_var) (support gamma) ->
-    ~(p1 ∈ tvars) ->
-    ~(p1 ∈ pfv_context gamma term_var) ->
-    ~(p1 ∈ support gamma) ->
+    subset (pfv t1 term_var) (support Γ) ->
+    subset (pfv t2 term_var) (support Γ) ->
+    subset (pfv n term_var) (support Γ) ->
+    subset (pfv T0 term_var) (support Γ) ->
+    subset (pfv Ts term_var) (support Γ) ->
+    ~(p1 ∈ Θ) ->
+    ~(p1 ∈ pfv_context Γ term_var) ->
+    ~(p1 ∈ support Γ) ->
     ~(p1 ∈ fv t1) ->
     ~(p1 ∈ fv t2) ->
     ~(p1 ∈ fv n) ->
     ~(p1 ∈ fv T0) ->
     ~(p1 ∈ fv Ts) ->
     ~(p1 ∈ fv T) ->
-    ~(p2 ∈ tvars) ->
-    ~(p2 ∈ pfv_context gamma term_var) ->
-    ~(p2 ∈ support gamma) ->
+    ~(p2 ∈ Θ) ->
+    ~(p2 ∈ pfv_context Γ term_var) ->
+    ~(p2 ∈ support Γ) ->
     ~(p2 ∈ fv t1) ->
     ~(p2 ∈ fv t2) ->
     ~(p2 ∈ fv n) ->
     ~(p2 ∈ fv T0) ->
     ~(p2 ∈ fv Ts) ->
     ~(p2 ∈ fv T) ->
-    ~(y ∈ tvars) ->
-    ~(y ∈ pfv_context gamma term_var) ->
-    ~(y ∈ support gamma) ->
+    ~(y ∈ Θ) ->
+    ~(y ∈ pfv_context Γ term_var) ->
+    ~(y ∈ support Γ) ->
     ~(y ∈ fv t1) ->
     ~(y ∈ fv t2) ->
     ~(y ∈ fv n) ->
@@ -591,14 +591,14 @@ Lemma open_reducible_unfold_in:
     ~(y ∈ fv Ts) ->
     ~(y ∈ fv T) ->
     NoDup (p1 :: p2 :: y :: nil) ->
-    [ tvars; gamma ⊨ t1 : T_rec n T0 Ts ] ->
-    [ tvars; (p2, T_equiv n zero) :: (p1, T_equiv t1 (fvar y term_var)) :: (y, T0) :: gamma ⊨
+    [ Θ; Γ ⊨ t1 : T_rec n T0 Ts ] ->
+    [ Θ; (p2, T_equiv n zero) :: (p1, T_equiv t1 (fvar y term_var)) :: (y, T0) :: Γ ⊨
         open 0 t2 (fvar y term_var) : T ] ->
-    [ tvars; (p1, T_equiv t1 (fvar y term_var)) ::
+    [ Θ; (p1, T_equiv t1 (fvar y term_var)) ::
              (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::
-             gamma ⊨
+             Γ ⊨
         open 0 t2 (fvar y term_var) : T ] ->
-    [ tvars; gamma ⊨ app (notype_lambda t2) t1 : T ].
+    [ Θ; Γ ⊨ app (notype_lambda t2) t1 : T ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || t_reducible_trec.
@@ -610,14 +610,14 @@ Proof.
     eauto with fv;
     eauto with erased.
 
-  - unshelve epose proof (H45 theta ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
+  - unshelve epose proof (H45 ρ ((p2, uu) :: (p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat step || list_utils || nodup || apply SatCons || simp_red || t_substitutions;
       t_closer.
 
-  - unshelve epose proof (H46 theta ((p1, uu) :: (y, v) :: lterms) _ _ _);
+  - unshelve epose proof (H46 ρ ((p1, uu) :: (y, v) :: lterms) _ _ _);
       repeat match goal with
-             | |- reducible_values _ _ T_nat => simp reducible_values
-             | |- reducible_values _ _ (T_equiv _ _) => simp reducible_values
+             | |- [ _ ⊨ _ : T_nat ]v => simp reducible_values
+             | |- [ _ ⊨ _ : T_equiv _ _ ]v => simp reducible_values
              | _ => repeat step || list_utils || nodup || apply SatCons || t_substitutions || fv_open
              end;
       t_closer.
@@ -625,20 +625,20 @@ Qed.
 
 Lemma equivalent_zero_contradiction:
   forall n,
-    equivalent_terms (tlt zero n) ttrue ->
-    star scbv_step n zero ->
+    [ tlt zero n ≡ ttrue ] ->
+    n ~>* zero ->
     False.
 Proof.
   intros.
   apply (equivalent_tlt_terms_trans _ _ zero zero) in H;
     steps.
   apply equivalent_true in H.
-  apply tlt_sound in H; steps; eauto with omega.
+  apply tlt_sound in H; steps; eauto with lia.
 Qed.
 
 Lemma reducible_unfold_pos_in:
-  forall (t1 t2 T n T0 Ts : tree) (theta : interpretation),
-    reducible theta t1 (T_rec n T0 Ts) ->
+  forall (t1 t2 T n T0 Ts : tree) (ρ : interpretation),
+   [ ρ ⊨ t1 : T_rec n T0 Ts ] ->
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -650,21 +650,21 @@ Lemma reducible_unfold_pos_in:
     is_erased_term t2 ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
     pfv n term_var = nil ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    equivalent_terms (tlt zero n) ttrue ->
+    [ tlt zero n ≡ ttrue ] ->
     (forall v,
-        reducible_values theta v (topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ->
-        equivalent_terms t1 v ->
-        reducible theta (open 0 t2 v) T) ->
-    reducible theta (app (notype_lambda t2) t1) T.
+        [ ρ ⊨ v : topen 0 Ts (T_rec (notype_tpred n) T0 Ts) ]v ->
+        [ t1 ≡ v ] ->
+        [ ρ ⊨ open 0 t2 v : T ]) ->
+    [ ρ ⊨ app (notype_lambda t2) t1 : T ].
 Proof.
   intros.
-  unfold reducible, reduces_to in H; steps.
+  unfold reduces_to in H; steps.
   eapply star_backstep_reducible; eauto with cbvlemmas values; repeat step || list_utils;
     eauto with wf.
 
@@ -679,7 +679,7 @@ Proof.
   apply (
       reducible_rename_one_rc
         _
-        (fun t => reducible_values theta t (T_rec (notype_tpred n) T0 Ts))
+        (fun t => [ ρ ⊨ t : T_rec (notype_tpred n) T0 Ts ]v)
         _ _ _ X X
    ) in H26;
     eauto with values;
@@ -693,11 +693,11 @@ Proof.
   - apply equivalent_rc_sym.
     apply equivalent_rc_rec_step; unfold notype_tpred; steps.
     eapply star_trans; eauto with cbvlemmas.
-    eapply Trans; eauto with star smallstep values.
+    eapply Relation_Operators.rt1n_trans; eauto with star smallstep values.
 Qed.
 
 Lemma open_reducible_unfold_pos_in:
-  forall tvars gamma t1 t2 T n T0 Ts p1 y,
+  forall Θ Γ t1 t2 T n T0 Ts p1 y,
     wf T0 0 ->
     twf T0 0 ->
     wf Ts 0 ->
@@ -710,23 +710,23 @@ Lemma open_reducible_unfold_pos_in:
     is_erased_term n ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (pfv t1 term_var) (support gamma) ->
-    subset (pfv t2 term_var) (support gamma) ->
-    subset (pfv n term_var) (support gamma) ->
-    subset (pfv T0 term_var) (support gamma) ->
-    subset (pfv Ts term_var) (support gamma) ->
-    ~(p1 ∈ tvars) ->
-    ~(p1 ∈ pfv_context gamma term_var) ->
-    ~(p1 ∈ support gamma) ->
+    subset (pfv t1 term_var) (support Γ) ->
+    subset (pfv t2 term_var) (support Γ) ->
+    subset (pfv n term_var) (support Γ) ->
+    subset (pfv T0 term_var) (support Γ) ->
+    subset (pfv Ts term_var) (support Γ) ->
+    ~(p1 ∈ Θ) ->
+    ~(p1 ∈ pfv_context Γ term_var) ->
+    ~(p1 ∈ support Γ) ->
     ~(p1 ∈ fv t1) ->
     ~(p1 ∈ fv t2) ->
     ~(p1 ∈ fv n) ->
     ~(p1 ∈ fv T0) ->
     ~(p1 ∈ fv Ts) ->
     ~(p1 ∈ fv T) ->
-    ~(y ∈ tvars) ->
-    ~(y ∈ pfv_context gamma term_var) ->
-    ~(y ∈ support gamma) ->
+    ~(y ∈ Θ) ->
+    ~(y ∈ pfv_context Γ term_var) ->
+    ~(y ∈ support Γ) ->
     ~(y ∈ fv t1) ->
     ~(y ∈ fv t2) ->
     ~(y ∈ fv n) ->
@@ -734,18 +734,18 @@ Lemma open_reducible_unfold_pos_in:
     ~(y ∈ fv Ts) ->
     ~(y ∈ fv T) ->
     NoDup (p1 :: y :: nil) ->
-    [ tvars; gamma ⊨ t1 : T_rec n T0 Ts ] ->
-    (forall theta l,
-      valid_interpretation theta ->
-      satisfies (reducible_values theta) gamma l ->
-      support theta = tvars ->
-      equivalent_terms (substitute (tlt zero n) l) ttrue) ->
-    [ tvars;
+    [ Θ; Γ ⊨ t1 : T_rec n T0 Ts ] ->
+    (forall ρ l,
+      valid_interpretation ρ ->
+      satisfies (reducible_values ρ) Γ l ->
+      support ρ = Θ ->
+      [ substitute (tlt zero n) l ≡ ttrue ]) ->
+    [ Θ;
         (p1, T_equiv t1 (fvar y term_var)) ::
         (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::
-        gamma ⊨
+        Γ ⊨
           open 0 t2 (fvar y term_var) : T ] ->
-    [ tvars; gamma ⊨ app (notype_lambda t2) t1 : T ].
+    [ Θ; Γ ⊨ app (notype_lambda t2) t1 : T ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || t_reducible_trec.
@@ -757,10 +757,10 @@ Proof.
     eauto with fv;
     eauto with erased.
 
-  unshelve epose proof (H37 theta ((p1, uu) :: (y, v) :: lterms) _ _ _);
+  unshelve epose proof (H37 ρ ((p1, uu) :: (y, v) :: lterms) _ _ _);
     repeat match goal with
-           | |- reducible_values _ _ T_nat => simp reducible_values
-           | |- reducible_values _ _ (T_equiv _ _) => simp reducible_values
+           | |- [ _ ⊨ _ : T_nat ]v => simp reducible_values
+           | |- [ _ ⊨ _ : T_equiv _ _ ]v => simp reducible_values
            | _ => repeat step || list_utils || nodup || apply SatCons || t_substitutions || fv_open
            end;
       t_closer.

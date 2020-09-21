@@ -5,24 +5,24 @@ Require Export SystemFR.TypeErasureLemmas.
 Require Export SystemFR.ErasedVar.
 
 Lemma annotated_reducible_var:
-  forall tvars gamma x T,
-    lookup Nat.eq_dec gamma x = Some T ->
-    [[ tvars; gamma ⊨ fvar x term_var : T ]].
+  forall Θ Γ x T,
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+    [[ Θ; Γ ⊨ fvar x term_var : T ]].
 Proof.
-  unfold annotated_reducible; intros;
+  intros;
     apply open_reducible_var; auto using in_erased_context.
 Qed.
 
 Lemma annotated_reducible_weaken:
-  forall tvars gamma x T u U,
-    [[ tvars; gamma ⊨ u : U ]] ->
-    ~(x ∈ support gamma) ->
+  forall Θ Γ x T u U,
+    [[ Θ; Γ ⊨ u : U ]] ->
+    ~(x ∈ support Γ) ->
     ~(x ∈ pfv u term_var) ->
     ~(x ∈ pfv U term_var) ->
-    ~(x ∈ tvars) ->
-    [[ tvars; (x,T) :: gamma ⊨ u : U ]].
+    ~(x ∈ Θ) ->
+    [[ Θ; (x,T) :: Γ ⊨ u : U ]].
 Proof.
-  unfold annotated_reducible; intros;
+  intros;
     apply open_reducible_weaken;
     repeat step || rewrite erased_context_support in *;
     eauto with fv.

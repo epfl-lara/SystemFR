@@ -6,7 +6,6 @@ Require Export SystemFR.SmallStep.
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.PrimitiveSize.
 Require Export SystemFR.PrimitiveRecognizers.
-Require Export SystemFR.RelationClosures.
 
 Lemma nat_value_fv:
   forall v tag,
@@ -59,7 +58,7 @@ Hint Rewrite is_lambda_fv: rfv.
 
 Lemma fv_smallstep:
   forall t t',
-    scbv_step t t' ->
+    t ~> t' ->
     forall x tag,
       x ∈ pfv t' tag ->
       x ∈ pfv t tag.
@@ -75,7 +74,7 @@ Hint Immediate fv_smallstep: fv.
 
 Lemma fv_smallstep_subset:
   forall t t' tag,
-    scbv_step t t' ->
+    t ~> t' ->
     subset (pfv t' tag) (pfv t tag).
 Proof.
   unfold subset; intros; eauto using fv_smallstep.
@@ -86,7 +85,7 @@ Hint Resolve fv_smallstep_subset: fv.
 Lemma fv_smallstep_subset2:
   forall t t' S tag,
     subset (pfv t tag) S ->
-    scbv_step t t' ->
+    t ~> t' ->
     subset (pfv t' tag) S.
 Proof.
   intros; eauto using subset_transitive with fv.
@@ -96,7 +95,7 @@ Hint Immediate fv_smallstep_subset2: fv.
 
 Lemma fv_smallstep_nil:
   forall t t' tag,
-    scbv_step t t' ->
+    t ~> t' ->
     pfv t tag = nil ->
     pfv t' tag = nil.
 Proof.
@@ -107,7 +106,7 @@ Hint Immediate fv_smallstep_nil: fv.
 
 Lemma fv_star_smallstep:
   forall t t',
-    star scbv_step t t' ->
+    t ~>* t' ->
     forall x tag,
       x ∈ pfv t' tag ->
       x ∈ pfv t tag.
@@ -119,7 +118,7 @@ Hint Immediate fv_star_smallstep: fv.
 
 Lemma fv_star_smallstep_nil:
   forall t t' tag,
-    star scbv_step t t' ->
+    t ~>* t' ->
     pfv t tag = nil ->
     pfv t' tag = nil.
 Proof.

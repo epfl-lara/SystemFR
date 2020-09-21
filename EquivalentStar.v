@@ -19,8 +19,8 @@ Definition inter_reducible t1 t2: Prop :=
   is_erased_term t1 /\
   is_erased_term t2 /\
   (
-    star scbv_step t1 t2 \/
-    star scbv_step t2 t1
+    t1 ~>* t2 \/
+    t2 ~>* t1
   ).
 
 Lemma inter_reducible_open:
@@ -36,7 +36,7 @@ Lemma star_inter_reducible:
   forall t1 t2,
     wf t1 0 ->
     is_erased_term t1 ->
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     inter_reducible t1 t2.
 Proof.
   unfold inter_reducible;
@@ -47,7 +47,7 @@ Lemma star_lift_inter_reducible:
   forall t1 t2,
     is_erased_term t1 ->
     wf t1 0 ->
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     term_lift inter_reducible t1 t2.
 Proof.
   eauto using star_inter_reducible with term_lift.
@@ -73,7 +73,7 @@ Qed.
 Lemma inter_reducible_step:
   forall t1 t1' t2,
     inter_reducible t1 t2 ->
-    scbv_step t1 t1' ->
+    t1 ~> t1' ->
     inter_reducible t1' t2.
 Proof.
   unfold inter_reducible;
@@ -89,7 +89,7 @@ Lemma inter_reducible_value:
   forall t v,
     inter_reducible t v ->
     cbv_value v ->
-    star scbv_step t v.
+    t ~>* v.
 Proof.
   induction 1;
     repeat step || t_invert_star.
@@ -100,7 +100,7 @@ Lemma term_lift_inter_reducible_tsize:
     term_lift inter_reducible t v ->
     ~ top_level_var v ->
     cbv_value v ->
-    star scbv_step (tsize t) (build_nat (tsize_semantics v)).
+    tsize t ~>* build_nat (tsize_semantics v).
 Proof.
   induction 1;
     repeat step || step_inversion cbv_value || list_utils;
@@ -166,7 +166,7 @@ Lemma term_lift_inter_reducible_value:
     term_lift inter_reducible t v ->
     cbv_value v ->
     exists v',
-      star scbv_step t v' /\
+      t ~>* v' /\
       cbv_value v' /\
       term_lift inter_reducible v v'.
 Proof.
@@ -350,7 +350,7 @@ Lemma term_lift_inter_reducible_open:
 Proof.
   induction 1;
     repeat step || top_level_unfold inter_reducible ||
-           (rewrite open_none in * by eauto 2 with wf omega);
+           (rewrite open_none in * by eauto 2 with wf lia);
     try solve [ constructor; unfold inter_reducible; steps ].
 Qed.
 
@@ -446,10 +446,10 @@ Lemma term_lift_inter_reducible_step:
     wf t2 0 ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    forall t1', scbv_step t1 t1' ->
+    forall t1', t1 ~> t1' ->
     exists t2',
       term_lift inter_reducible t1' t2' /\
-      star scbv_step t2 t2'.
+      t2 ~>* t2'.
 Proof.
   induction 1;
     repeat step || t_invert_step || instantiate_any || list_utils;
@@ -593,7 +593,7 @@ Qed.
 
 Lemma term_lift_inter_reducible_star:
   forall t1 t1',
-    star scbv_step t1 t1' ->
+    t1 ~>* t1' ->
     forall t2,
       term_lift inter_reducible t1 t2 ->
       wf t1 0 ->
@@ -602,7 +602,7 @@ Lemma term_lift_inter_reducible_star:
       is_erased_term t2 ->
       exists t2',
         term_lift inter_reducible t1' t2' /\
-        star scbv_step t2 t2'.
+        t2 ~>* t2'.
 Proof.
   induction 1; steps;
     eauto using term_lift_refl with star.
@@ -644,7 +644,7 @@ Lemma term_lift_inter_reducible_equivalent:
     is_erased_term t2 ->
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
-    equivalent_terms t1 t2.
+    [ t1 ≡ t2 ].
 Proof.
   unfold equivalent_terms;
     steps;
@@ -672,8 +672,8 @@ Lemma equivalent_star:
     is_erased_term t1 ->
     wf t1 0 ->
     pfv t1 term_var = nil ->
-    star scbv_step t1 t2 ->
-    equivalent_terms t1 t2.
+    t1 ~>* t2 ->
+    [ t1 ≡ t2 ].
 Proof.
   intros.
   apply term_lift_inter_reducible_equivalent; steps; eauto with wf erased fv.
@@ -701,12 +701,12 @@ Qed.
 
 Lemma equivalent_normalizing:
   forall t1 t2 v1,
-   equivalent_terms t1 t2 ->
-   star scbv_step t1 v1 ->
+   [ t1 ≡ t2 ] ->
+   t1 ~>* v1 ->
    cbv_value v1 ->
    exists v2,
-     equivalent_terms v1 v2 /\
-     star scbv_step t2 v2 /\
+     [ v1 ≡ v2 ] /\
+     t2 ~>* v2 /\
      cbv_value v2
 .
 Proof.
@@ -726,19 +726,19 @@ Qed.
 
 Ltac equivalent_normalizing :=
   match goal with
-  | H1: equivalent_terms ?t1 ?t2,
-    H2: star scbv_step ?t1 ?v1 |- _ =>
+  | H1: [ ?t1 ≡ ?t2 ],
+    H2: ?t1 ~>* ?v1 |- _ =>
     poseNew (Mark (H1, H2) "equivalent_normalizing");
     unshelve epose proof (equivalent_normalizing _ _ _ H1 H2 _)
   end.
 
 Lemma equivalent_value:
   forall t v,
-   equivalent_terms t v ->
+   [ t ≡ v ] ->
    cbv_value v ->
    exists v',
-     equivalent_terms v' v /\
-     star scbv_step t v' /\
+     [ v' ≡ v ] /\
+     t ~>* v' /\
      cbv_value v'
 .
 Proof.
@@ -750,12 +750,12 @@ Qed.
 
 Ltac equivalent_value :=
   match goal with
-  | H: equivalent_terms ?t ?v |- _ =>
+  | H: [ ?t ≡ ?v ] |- _ =>
     cbv_value v;
     not_cbv_value t;
     poseNew (Mark (t, v) "equivalent_value");
     unshelve epose proof (equivalent_value _ _ H _)
-  | H: equivalent_terms ?v ?t |- _ =>
+  | H: [ ?v ≡ ?t ] |- _ =>
     cbv_value v;
     not_cbv_value t;
     poseNew (Mark (t, v) "equivalent_value");

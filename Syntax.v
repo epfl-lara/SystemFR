@@ -100,21 +100,21 @@ Definition tvar_list := list nat.
 
 Definition context: Type := list (nat * tree).
 
-Fixpoint pfv_context gamma tag :=
-  match gamma with
+Fixpoint pfv_context Γ tag :=
+  match Γ with
   | nil => nil
-  | (x,T) :: gamma' => x :: pfv T tag ++ pfv_context gamma' tag
+  | (x,T) :: Γ' => x :: pfv T tag ++ pfv_context Γ' tag
   end.
 
-Definition fv_context gamma := pfv_context gamma term_var.
+Definition fv_context Γ := pfv_context Γ term_var.
 
 Hint Unfold fv_context: core.
 
 Lemma fv_context_append:
-  forall gamma1 gamma2 tag,
-    pfv_context (gamma1 ++ gamma2) tag = pfv_context gamma1 tag ++ pfv_context gamma2 tag.
+  forall Γ1 Γ2 tag,
+    pfv_context (Γ1 ++ Γ2) tag = pfv_context Γ1 tag ++ pfv_context Γ2 tag.
 Proof.
-  induction gamma1; repeat step || rewrite app_assoc_reverse.
+  induction Γ1; repeat step || rewrite app_assoc_reverse.
 Qed.
 
 Hint Rewrite fv_context_append: list_utils.
@@ -142,7 +142,7 @@ Hint Unfold closed_mapping: core.
 Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   match t with
   | fvar x tag' =>
-    match lookup Nat.eq_dec l x with
+    match lookup PeanoNat.Nat.eq_dec l x with
     | None => t
     | Some e =>
       if (tag_eq_dec tag tag')
@@ -226,14 +226,14 @@ Definition substitute_type_vars t l := psubstitute t l type_var.
 Hint Unfold substitute: core.
 Hint Unfold substitute_type_vars: core.
 
-Fixpoint psubstitute_context (gamma: context) (l: list (nat * tree)) tag: context :=
-  match gamma with
+Fixpoint psubstitute_context (Γ: context) (l: list (nat * tree)) tag: context :=
+  match Γ with
   | nil => nil
-  | (x,T) :: gamma' => (x, psubstitute T l tag) :: psubstitute_context gamma' l tag
+  | (x,T) :: Γ' => (x, psubstitute T l tag) :: psubstitute_context Γ' l tag
   end.
 
-Definition substitute_context (gamma: context) (l: list (nat * tree)): context :=
-  psubstitute_context gamma l term_var.
+Definition substitute_context (Γ: context) (l: list (nat * tree)): context :=
+  psubstitute_context Γ l term_var.
 
 Fixpoint wf t k :=
   match t with
@@ -393,22 +393,22 @@ Fixpoint twf t k :=
   | T_rec n T0 Ts => twf n k /\ twf T0 k /\ twf Ts (S k)
   end.
 
-Fixpoint wfs (gamma: list (nat * tree)) k :=
-  match gamma with
+Fixpoint wfs (Γ: list (nat * tree)) k :=
+  match Γ with
   | nil => True
-  | (x,A) :: gamma' => wf A k /\ wfs gamma' k
+  | (x,A) :: Γ' => wf A k /\ wfs Γ' k
   end.
 
-Fixpoint twfs (gamma: list (nat * tree)) k :=
-  match gamma with
+Fixpoint twfs (Γ: list (nat * tree)) k :=
+  match Γ with
   | nil => True
-  | (x,A) :: gamma' => twf A k /\ twfs gamma' k
+  | (x,A) :: Γ' => twf A k /\ twfs Γ' k
   end.
 
 Fixpoint open (k: nat) (t rep: tree) :=
   match t with
   | fvar _ _ => t
-  | lvar i term_var => if (Nat.eq_dec k i) then rep else t
+  | lvar i term_var => if (PeanoNat.Nat.eq_dec k i) then rep else t
   | lvar i type_var => t
   | notype_err => t
   | err T => err (open k T rep)
@@ -487,7 +487,7 @@ Fixpoint open (k: nat) (t rep: tree) :=
 
 Fixpoint close (k: nat) (t: tree) (x: nat) :=
   match t with
-  | fvar y term_var => if (Nat.eq_dec x y) then lvar k term_var else t
+  | fvar y term_var => if (PeanoNat.Nat.eq_dec x y) then lvar k term_var else t
   | fvar _ type_var => t
   | lvar _ _ => t
   | notype_err => t
@@ -568,7 +568,7 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
 Fixpoint topen (k: nat) (t rep: tree) :=
   match t with
   | fvar _ _ => t
-  | lvar i type_var => if (Nat.eq_dec k i) then rep else t
+  | lvar i type_var => if (PeanoNat.Nat.eq_dec k i) then rep else t
   | lvar i term_var => t
 
   | notype_err => t
@@ -650,7 +650,7 @@ Fixpoint topen (k: nat) (t rep: tree) :=
 Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
   match t with
   | fvar _ term_var => t
-  | fvar y type_var => if (Nat.eq_dec y x) then lvar k type_var else t
+  | fvar y type_var => if (PeanoNat.Nat.eq_dec y x) then lvar k type_var else t
   | lvar i _ => t
 
   | err T => err (tclose k T x)

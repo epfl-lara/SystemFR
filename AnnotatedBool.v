@@ -3,39 +3,36 @@ Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.ErasedBool.
 
 Lemma annotated_reducible_true:
-  forall tvars gamma,
-    [[ tvars; gamma ⊨ ttrue : T_bool ]].
+  forall Θ Γ,
+    [[ Θ; Γ ⊨ ttrue : T_bool ]].
 Proof.
-  unfold annotated_reducible;
-    repeat step; eauto using open_reducible_true.
+  eauto using open_reducible_true.
 Qed.
 
 Lemma annotated_reducible_false:
-  forall tvars gamma,
-    [[ tvars; gamma ⊨ tfalse : T_bool ]].
+  forall Θ Γ,
+    [[ Θ; Γ ⊨ tfalse : T_bool ]].
 Proof.
-  unfold annotated_reducible;
-    repeat step; eauto using open_reducible_false.
+  intros; eauto using open_reducible_false.
 Qed.
 
 Lemma annotated_reducible_ite:
-  forall tvars gamma b t1 t2 T x,
-    ~(x ∈ fv_context gamma) ->
+  forall Θ Γ b t1 t2 T x,
+    ~(x ∈ fv_context Γ) ->
     ~(x ∈ fv b) ->
     ~(x ∈ fv t1) ->
     ~(x ∈ fv t2) ->
     ~(x ∈ fv T) ->
-    ~(x ∈ tvars) ->
+    ~(x ∈ Θ) ->
     wf t1 0 ->
     wf t2 0 ->
-    subset (fv t1) (support gamma) ->
-    subset (fv t2) (support gamma) ->
-    [[ tvars; gamma ⊨ b : T_bool ]] ->
-    [[ tvars; (x, T_equiv b ttrue)  :: gamma ⊨ t1 : T ]] ->
-    [[ tvars; (x, T_equiv b tfalse) :: gamma ⊨ t2 : T ]] ->
-    [[ tvars; gamma ⊨ ite b t1 t2 : T ]].
+    subset (fv t1) (support Γ) ->
+    subset (fv t2) (support Γ) ->
+    [[ Θ; Γ ⊨ b : T_bool ]] ->
+    [[ Θ; (x, T_equiv b ttrue)  :: Γ ⊨ t1 : T ]] ->
+    [[ Θ; (x, T_equiv b tfalse) :: Γ ⊨ t2 : T ]] ->
+    [[ Θ; Γ ⊨ ite b t1 t2 : T ]].
 Proof.
-  unfold annotated_reducible;
-    repeat step || apply open_reducible_ite with x;
+  repeat step || apply open_reducible_ite with x;
     side_conditions.
 Qed.

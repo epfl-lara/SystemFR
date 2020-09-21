@@ -1,18 +1,18 @@
 Require Import PeanoNat.
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.TWFLemmas.
 Require Export SystemFR.ErasedTermLemmas.
 
-Opaque Nat.eq_dec.
+Opaque PeanoNat.Nat.eq_dec.
 
 Fixpoint swap_term_holes t i j :=
   match t with
   | fvar _ _ => t
   | lvar k term_var =>
-    if (Nat.eq_dec k i)
+    if (PeanoNat.Nat.eq_dec k i)
     then lvar j term_var
-    else if (Nat.eq_dec k j)
+    else if (PeanoNat.Nat.eq_dec k j)
     then lvar i term_var
     else t
   | lvar k type_var => t
@@ -107,8 +107,8 @@ Lemma swap_term_holes_open:
     open j1 (open j2 (swap_term_holes t j1 j2) rep1) rep2).
 Proof.
   induction t;
-    repeat step || t_equality || (rewrite open_none by eauto with wf omega);
-    eauto with wf omega.
+    repeat step || t_equality || (rewrite open_none by eauto with wf lia);
+    eauto with wf lia.
 Qed.
 
 Lemma swap_term_holes_nothing:
@@ -118,7 +118,7 @@ Lemma swap_term_holes_nothing:
     k <= j ->
     swap_term_holes t i j = t.
 Proof.
-  induction t; repeat step || t_equality; eauto with omega.
+  induction t; repeat step || t_equality; eauto with lia.
 Qed.
 
 Lemma is_erased_swap_term_holes:
@@ -148,7 +148,7 @@ Lemma wf_swap_term_holes:
     wf t (S k) ->
     wf (open (S k) (swap_term_holes t k (S k)) rep) k.
 Proof.
-  induction t; steps; eauto with wf omega.
+  induction t; steps; eauto with wf lia.
 Qed.
 
 Hint Resolve wf_swap_term_holes: wf.
@@ -159,7 +159,7 @@ Lemma wf_swap_term_holes_2:
     wf t (S (S k)) ->
     wf (open (S k) (swap_term_holes t k (S k)) rep) (S k).
 Proof.
-  induction t; repeat step || unshelve eauto with wf omega.
+  induction t; repeat step || unshelve eauto with wf lia.
 Qed.
 
 Hint Resolve wf_swap_term_holes_2: wf.
@@ -196,7 +196,7 @@ Lemma swap_term_holes_open_2:
     swap_term_holes (open j t rep) j i.
 Proof.
   induction t; repeat step || t_equality || rewrite (swap_term_holes_nothing _ 0);
-    try omega.
+    try lia.
 Qed.
 
 Lemma swap_term_holes_open_3:
@@ -208,6 +208,6 @@ Lemma swap_term_holes_open_3:
     swap_term_holes (open k t rep) j i.
 Proof.
   induction t; repeat step || t_equality;
-    eauto with omega;
-    try solve [ erewrite swap_term_holes_nothing; eauto with omega ].
+    eauto with lia;
+    try solve [ erewrite swap_term_holes_nothing; eauto with lia ].
 Qed.

@@ -1,7 +1,6 @@
 Require Import Coq.Strings.String.
 Require Import PeanoNat.
 Require Import Psatz.
-Require Import Omega.
 
 Require Export SystemFR.Syntax.
 
@@ -33,12 +32,12 @@ Proof.
 Qed.
 
 Lemma twfs_lookup:
-  forall gamma x T k,
-    twfs gamma k ->
-    lookup Nat.eq_dec gamma x = Some T ->
+  forall Γ x T k,
+    twfs Γ k ->
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
     twf T k.
 Proof.
-  induction gamma; steps; eauto.
+  induction Γ; steps; eauto.
 Qed.
 
 Hint Immediate twfs_lookup: twf.
@@ -90,7 +89,7 @@ Hint Immediate twf_open_rev: twf.
 Lemma twf_topen:
   forall t rep k, twf t (S k) -> twf rep k -> twf (topen k t rep) k.
 Proof.
-  induction t; repeat step || apply_any; try omega; eauto 1 with twf.
+  induction t; repeat step || apply_any; try lia; eauto 1 with twf.
 Qed.
 
 Hint Resolve twf_topen: twf.
@@ -98,7 +97,7 @@ Hint Resolve twf_topen: twf.
 Lemma twf_open:
   forall t rep i k, twf t k -> twf rep k -> twf (open i t rep) k.
 Proof.
-  induction t; repeat step || apply_any; try omega; eauto 1 with twf.
+  induction t; repeat step || apply_any; try lia; eauto 1 with twf.
 Qed.
 
 Hint Resolve twf_open: twf.

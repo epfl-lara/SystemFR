@@ -28,7 +28,7 @@ Qed.
 
 Lemma tlt_a_zero:
   forall a,
-    star scbv_step (tlt a zero) ttrue ->
+    tlt a zero ~>* ttrue ->
     False.
 Proof.
   unfold tlt, tlt_fix in *;
@@ -38,11 +38,11 @@ Qed.
 Lemma tlt_zero_b:
   forall b,
     cbv_value b ->
-    star scbv_step (tlt zero b) ttrue ->
+    tlt zero b ~>* ttrue ->
     1 <= tree_size b.
 Proof.
   destruct 1; repeat step;
-    eauto with omega;
+    eauto with lia;
     try solve [ inversion H; unfold tlt in *;
       repeat step || t_invert_step || star_smallstep_app_onestep || t_invert_star
     ].
@@ -54,7 +54,7 @@ Lemma tlt_something:
     cbv_value b ->
     wf a 0 ->
     wf b 0 ->
-    star scbv_step (tlt a b) ttrue ->
+    tlt a b ~>* ttrue ->
     exists b', b = succ b' /\
       (a = zero \/ exists a', a = succ a').
 Proof.
@@ -73,8 +73,8 @@ Lemma tlt_succ:
     cbv_value b ->
     wf a 0 ->
     wf b 0 ->
-    star scbv_step (tlt (succ a) (succ b)) ttrue ->
-    star scbv_step (tlt a b) ttrue.
+    tlt (succ a) (succ b) ~>* ttrue ->
+    tlt a b ~>* ttrue.
 Proof.
   unfold tlt, tlt_fix; steps.
 
@@ -91,7 +91,7 @@ Lemma tlt_sound:
     forall b,
       cbv_value b ->
       wf b 0 ->
-      star scbv_step (tlt a b) ttrue ->
+      tlt a b ~>* ttrue ->
       tree_size a < tree_size b.
 Proof.
   induction 1; steps; eauto using tlt_zero_b; eauto with lia;
@@ -104,11 +104,11 @@ Qed.
 
 Ltac tlt_sound :=
   match goal with
-  | H: star scbv_step (tlt ?a ?b) ttrue |- _ =>
+  | H: tlt ?a ?b ~>* ttrue |- _ =>
     cbv_value a; cbv_value b;
     poseNew (Mark (a,b) "tlt_sound");
     unshelve epose proof (tlt_sound a _ _ b _ _ H)
-  | H: equivalent_terms (tlt ?a ?b) ttrue |- _ =>
+  | H: [ tlt ?a ?b ≡ ttrue ] |- _ =>
     cbv_value a; cbv_value b;
     poseNew (Mark (a,b) "tlt_sound");
     unshelve epose proof (tlt_sound a _ _ b _ _ _)
@@ -134,7 +134,7 @@ Proof.
 Qed.
 
 Ltac one_step_aux :=
- eapply Trans; [ eauto using is_nat_value_build_nat with values smallstep cbvlemmas | idtac ];
+ eapply Relation_Operators.rt1n_trans; [ eauto using is_nat_value_build_nat with values smallstep cbvlemmas | idtac ];
    repeat step || (rewrite open_none in * by (repeat step; eauto using is_nat_value_build_nat with wf)).
 
 Ltac one_step := unshelve one_step_aux; steps.
@@ -142,7 +142,7 @@ Ltac one_step := unshelve one_step_aux; steps.
 Lemma tlt_complete:
   forall a b,
     a < b ->
-    star scbv_step (tlt (build_nat a) (build_nat b)) ttrue.
+    tlt (build_nat a) (build_nat b) ~>* ttrue.
 Proof.
   unfold tlt, tlt_fix; induction a; destruct b; repeat step || eauto with lia || one_step.
 Qed.
@@ -152,7 +152,7 @@ Lemma tlt_complete2:
     is_nat_value a ->
     is_nat_value b ->
     tree_size a < tree_size b ->
-    star scbv_step (tlt a b) ttrue.
+    tlt a b ~>* ttrue.
 Proof.
   repeat step || is_nat_value_buildable || apply tlt_complete || rewrite tree_size_build_nat in *.
 Qed.
@@ -165,9 +165,9 @@ Lemma equivalent_tlt_terms:
     wf t2 0 ->
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
-    star scbv_step t1 v1 ->
-    star scbv_step t2 v2 ->
-    equivalent_terms (tlt t1 t2) (tlt v1 v2).
+    t1 ~>* v1 ->
+    t2 ~>* v2 ->
+    [ tlt t1 t2 ≡ tlt v1 v2 ].
 Proof.
   unfold tlt, tlt_fix; repeat step || apply equivalent_app;
     try solve [ equivalent_star ];
@@ -176,10 +176,10 @@ Qed.
 
 Lemma equivalent_tlt_terms_trans:
   forall t1 t2 v1 v2 t,
-    equivalent_terms (tlt t1 t2) t ->
-    star scbv_step t1 v1 ->
-    star scbv_step t2 v2 ->
-    equivalent_terms (tlt v1 v2) t.
+    [ tlt t1 t2 ≡ t ] ->
+    t1 ~>* v1 ->
+    t2 ~>* v2 ->
+    [ tlt v1 v2 ≡ t ].
 Proof.
   intros.
   eapply equivalent_trans; try eassumption.

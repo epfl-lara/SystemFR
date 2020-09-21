@@ -9,30 +9,30 @@ Require Export SystemFR.EquivalenceLemmas2.
 
 Opaque reducible_values.
 
-Definition computable_equality_with f_eq theta T : Prop :=
+Definition computable_equality_with f_eq ρ T : Prop :=
   wf f_eq 0 /\
   is_erased_term f_eq /\
   pfv f_eq term_var = nil /\
-  reducible theta f_eq (T_arrow T (T_arrow T T_bool)) /\
+  [ ρ ⊨ f_eq : T_arrow T (T_arrow T T_bool) ] /\
   forall v1 v2,
-    reducible_values theta v1 T ->
-    reducible_values theta v2 T ->
-      star scbv_step (app (app f_eq v1) v2) ttrue <->
-      equivalent_terms v1 v2.
+    [ ρ ⊨ v1 : T ]v ->
+    [ ρ ⊨ v2 : T ]v ->
+      app (app f_eq v1) v2 ~>* ttrue <->
+      [ v1 ≡ v2 ].
 
-Definition computable_equality theta T : Prop :=
+Definition computable_equality ρ T : Prop :=
   exists f_eq,
-    computable_equality_with f_eq theta T.
+    computable_equality_with f_eq ρ T.
 
 Lemma computable_equality_subtype:
-  forall theta A B,
-    computable_equality theta A ->
-    valid_interpretation theta ->
-    subtype theta B A ->
+  forall ρ A B,
+    computable_equality ρ A ->
+    valid_interpretation ρ ->
+    [ ρ ⊨ B <: A ] ->
     is_erased_type B ->
     wf A 0 ->
     wf B 0 ->
-    computable_equality theta B.
+    computable_equality ρ B.
 Proof.
   unfold computable_equality, computable_equality_with;
     repeat step.
@@ -46,21 +46,21 @@ Proof.
   repeat unfold reduces_to in *; steps; t_closer.
 
   unshelve epose proof (H13 a _ _ _ _); repeat step || open_none.
-  exists v; repeat step || simp_red.
+  exists v1; repeat step || simp_red.
 Qed.
 
 Lemma computable_equality_prod:
-  forall theta A B,
-    valid_interpretation theta ->
+  forall ρ A B,
+    valid_interpretation ρ ->
     wf A 0 ->
     wf B 0 ->
     is_erased_type A ->
     is_erased_type B ->
     pfv A term_var = nil ->
     pfv B term_var = nil ->
-    computable_equality theta A ->
-    computable_equality theta B ->
-    computable_equality theta (T_prod A B).
+    computable_equality ρ A ->
+    computable_equality ρ B ->
+    computable_equality ρ (T_prod A B).
 Proof.
   unfold computable_equality, computable_equality_with; steps.
   exists (notype_lambda (notype_lambda (
@@ -132,7 +132,7 @@ Proof.
     apply reducible_lambda; repeat step || simp_red || list_utils || open_none; eauto with lia; t_closer.
 
     apply star_smallstep_reducible with (nat_eq u u0);
-      repeat step || unfold reducible, reduces_to;
+      repeat step || unfold reduces_to;
       try solve [
         unfold nat_eq, nat_eq_fix, closed_term; repeat step || list_utils; eauto with lia; t_closer
       ].

@@ -1,5 +1,5 @@
 Require Import Coq.Strings.String.
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.Syntax.
 Require Export SystemFR.Tactics.
@@ -14,7 +14,7 @@ Require Export SystemFR.FVLemmas.
 Open Scope string_scope.
 Open Scope list_scope.
 
-Opaque Nat.eq_dec.
+Opaque PeanoNat.Nat.eq_dec.
 
 Lemma open_close:
   forall t rep x k,
@@ -22,7 +22,7 @@ Lemma open_close:
     open k (close k t x) rep = psubstitute t ((x, rep) :: nil) term_var.
 Proof.
   induction t;
-    repeat step || t_equality || list_utils; eauto with omega.
+    repeat step || t_equality || list_utils; eauto with lia.
 Qed.
 
 Lemma open_close2:
@@ -31,7 +31,7 @@ Lemma open_close2:
     open k (close k t x) (fvar x term_var) = t.
 Proof.
   induction t;
-    repeat step || t_equality || list_utils; eauto with omega.
+    repeat step || t_equality || list_utils; eauto with lia.
 Qed.
 
 Lemma topen_tclose:
@@ -40,7 +40,7 @@ Lemma topen_tclose:
     topen k (tclose k T x) rep = psubstitute T ((x, rep) :: nil) type_var.
 Proof.
   induction T;
-    repeat step || t_equality || list_utils; eauto with omega.
+    repeat step || t_equality || list_utils; eauto with lia.
 Qed.
 
 Lemma topen_tclose2:
@@ -49,7 +49,7 @@ Lemma topen_tclose2:
     topen k (tclose k T X) (fvar X type_var) = T.
 Proof.
   induction T;
-    repeat step || t_equality || list_utils; eauto with omega.
+    repeat step || t_equality || list_utils; eauto with lia.
 Qed.
 
 Lemma topen_twice:
@@ -63,14 +63,14 @@ Lemma topen_twice:
       topen k (tclose k (topen (S k) A (topen 0 B (fvar X type_var))) X) R.
 Proof.
   induction A; repeat step || t_equality || apply_any || list_utils;
-    eauto with twf omega.
+    eauto with twf lia.
   - rewrite topen_tclose;
       repeat step || fv_open || list_utils || apply twf_topen;
-      eauto with twf omega.
+      eauto with twf lia.
     + rewrite substitute_topen3; steps.
       rewrite substitute_nothing; steps.
       rewrite topen_none; steps; eauto with twf.
-      apply twf_monotone with 0; eauto with twf omega.
-    + apply twf_monotone with 0; try omega.
+      apply twf_monotone with 0; eauto with twf lia.
+    + apply twf_monotone with 0; try lia.
       apply twf_topen; steps.
 Qed.

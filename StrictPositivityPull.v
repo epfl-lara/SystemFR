@@ -1,7 +1,7 @@
 Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm.
 
-Require Import Omega.
+Require Import Psatz.
 
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
@@ -10,12 +10,12 @@ Require Export SystemFR.StrictPositivityLemma.
 Require Export SystemFR.ReducibilitySubst.
 
 Opaque makeFresh.
-Opaque Nat.eq_dec.
+Opaque PeanoNat.Nat.eq_dec.
 Opaque reducible_values.
 Opaque strictly_positive.
 
 Lemma strictly_positive_pull_forall:
-  forall T theta A B v X,
+  forall T ρ A B v X,
     ~(X ∈ pfv T type_var) ->
     twf A 0 ->
     twf B 0 ->
@@ -29,12 +29,12 @@ Lemma strictly_positive_pull_forall:
     pfv A term_var = nil ->
     pfv B term_var = nil ->
     pfv T term_var = nil ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     strictly_positive (topen 0 T (fvar X type_var)) (X :: nil) ->
-    reducible_values theta v (topen 0 T (T_forall A B)) ->
+    [ ρ ⊨ v : topen 0 T (T_forall A B) ]v ->
     forall a,
-      reducible_values theta a A ->
-      reducible_values theta v (topen 0 T (open 0 B a)).
+      [ ρ ⊨ a : A ]v ->
+      [ ρ ⊨ v : topen 0 T (open 0 B a) ]v.
 Proof.
   steps.
   apply reducible_values_subst_head with
@@ -54,9 +54,9 @@ Proof.
 
   rewrite cons_app.
   lazymatch goal with
-  | H: wf ?B 1 |- reducible_values (((?X,?RC) :: nil) ++ ?theta) ?v ?T =>
+  | H: wf ?B 1 |- [ ((?X,?RC) :: nil) ++ ?ρ ⊨ ?v : ?T ]v =>
     eapply strictly_positive_push_forall with
-      ((X, fun a2 v => reducible_values theta v (T_forall A B)) :: nil) A
+      ((X, fun a2 v => [ ρ ⊨ v : T_forall A B ]v) :: nil) A
   end;
     repeat step || apply wf_topen || apply twf_topen || unfold non_empty ||
            apply is_erased_type_topen || list_utils || simp_red ||

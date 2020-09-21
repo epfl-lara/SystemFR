@@ -6,22 +6,22 @@ Lemma equivalent_refl:
     is_erased_term t ->
     wf t 0 ->
     pfv t term_var = nil ->
-    equivalent_terms t t.
+    [ t ≡ t ].
 Proof.
   unfold equivalent_terms; steps.
 Qed.
 
 Lemma equivalent_sym:
-  forall t1 t2, equivalent_terms t1 t2 -> equivalent_terms t2 t1.
+  forall t1 t2, [ t1 ≡ t2 ] -> [ t2 ≡ t1 ].
 Proof.
   unfold equivalent_terms; steps; eauto with eapply_any.
 Qed.
 
 Lemma equivalent_trans:
   forall t1 t2 t3,
-    equivalent_terms t1 t2 ->
-    equivalent_terms t2 t3 ->
-    equivalent_terms t1 t3
+    [ t1 ≡ t2 ] ->
+    [ t2 ≡ t3 ] ->
+    [ t1 ≡ t3 ]
 .
 Proof.
   unfold equivalent_terms; steps; eauto 3 with apply_any.
@@ -30,18 +30,18 @@ Qed.
 
 Lemma equivalent_square:
   forall t1 t2 t3 t4,
-    equivalent_terms t1 t3 ->
-    equivalent_terms t1 t2 ->
-    equivalent_terms t3 t4 ->
-    equivalent_terms t2 t4.
+    [ t1 ≡ t3 ] ->
+    [ t1 ≡ t2 ] ->
+    [ t3 ≡ t4 ] ->
+    [ t2 ≡ t4 ].
 Proof.
   eauto using equivalent_trans, equivalent_sym.
 Qed.
 
 Lemma equivalent_open:
   forall t1 k1 a1 t2 k2 a2,
-    equivalent_terms t1 t2 ->
-    equivalent_terms (open k1 t1 a1) (open k2 t2 a2).
+    [ t1 ≡ t2 ] ->
+    [ open k1 t1 a1 ≡ open k2 t2 a2 ].
 Proof.
   unfold equivalent_terms;
     repeat step ||
@@ -52,9 +52,9 @@ Qed.
 
 Lemma equivalent_star_true:
   forall t1 t2,
-    equivalent_terms t1 t2 ->
-    star scbv_step t1 ttrue ->
-    star scbv_step t2 ttrue.
+    [ t1 ≡ t2 ] ->
+    t1 ~>* ttrue ->
+    t2 ~>* ttrue.
 Proof.
   intros.
   equivalence_instantiate (ite (lvar 0 term_var) ttrue tfalse);
@@ -65,15 +65,15 @@ Qed.
 
 Lemma equivalent_true:
   forall t,
-    equivalent_terms t ttrue ->
-    star scbv_step t ttrue.
+    [ t ≡ ttrue ] ->
+    t ~>* ttrue.
 Proof.
   intros; eauto using equivalent_star_true, equivalent_sym with star.
 Qed.
 
 Lemma equivalent_value_true:
   forall v,
-    equivalent_terms v ttrue ->
+    [ v ≡ ttrue ] ->
     cbv_value v ->
     v = ttrue.
 Proof.
@@ -83,7 +83,7 @@ Proof.
 Qed.
 
 Lemma false_true_not_equivalent:
-  equivalent_terms tfalse ttrue ->
+  [ tfalse ≡ ttrue ] ->
   False.
 Proof.
   repeat step || apply_anywhere equivalent_true || t_invert_star.
@@ -91,9 +91,9 @@ Qed.
 
 Lemma equivalent_star_false:
   forall t1 t2,
-    equivalent_terms t1 t2 ->
-    star scbv_step t1 tfalse ->
-    star scbv_step t2 tfalse.
+    [ t1 ≡ t2 ] ->
+    t1 ~>* tfalse ->
+    t2 ~>* tfalse.
 Proof.
   intros.
   equivalence_instantiate (ite (lvar 0 term_var) tfalse ttrue);
@@ -104,15 +104,15 @@ Qed.
 
 Lemma equivalent_false:
   forall t,
-    equivalent_terms t tfalse ->
-    star scbv_step t tfalse.
+    [ t ≡ tfalse ] ->
+    t ~>* tfalse.
 Proof.
   intros; eauto using equivalent_star_false, equivalent_sym with star.
 Qed.
 
 Lemma equivalent_value_false:
   forall v,
-    equivalent_terms v tfalse ->
+    [ v ≡ tfalse ] ->
     cbv_value v ->
     v = tfalse.
 Proof.
@@ -131,7 +131,7 @@ Ltac not_normalizing :=
 Lemma equivalent_value_unit:
   forall v,
     cbv_value v ->
-    equivalent_terms uu v ->
+    [ uu ≡ v ] ->
     v = uu.
 Proof.
   inversion 1;

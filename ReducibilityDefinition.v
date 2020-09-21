@@ -8,11 +8,11 @@ Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm.
 Require Import Coq.Classes.RelationClasses.
 
-Require Import Omega.
+Require Import Psatz.
 
 Definition reduces_to (P: tree -> Prop) (t: tree) :=
   closed_term t /\
-  exists v, P v /\ star scbv_step t v.
+  exists v, P v /\ t ~>* v.
 
 Lemma reduces_to_equiv:
   forall (P P': tree -> Prop) t,
@@ -23,121 +23,124 @@ Proof.
   unfold reduces_to; repeat step; eauto.
 Qed.
 
-Equations (noind) reducible_values (theta: interpretation) (v: tree) (T: tree): Prop
-    by wf (get_measure T) lt_measure :=
-  reducible_values theta v (fvar X type_var) :=
-    match lookup Nat.eq_dec theta X with
+Reserved Notation "[ ρ ⊨ v : T ]v" (at level 60, ρ at level 60, v at level 60).
+Reserved Notation "[ ρ ⊨ t : T ]"  (at level 60, ρ at level 60, t at level 60).
+
+Equations (noind) reducible_values (ρ: interpretation) (v: tree) (T: tree): Prop
+    by wf (get_measure T) lt_measure := {
+  reducible_values ρ v (fvar X type_var) :=
+    match lookup PeanoNat.Nat.eq_dec ρ X with
     | None => False
     | Some P => P v
     end;
 
-  reducible_values theta v T_unit := v = uu;
+  reducible_values ρ v T_unit := v = uu;
 
-  reducible_values theta v T_bool := v = ttrue \/ v = tfalse;
+  reducible_values ρ v T_bool := v = ttrue \/ v = tfalse;
 
-  reducible_values theta v T_nat := is_nat_value v;
+  reducible_values ρ v T_nat := is_nat_value v;
 
-  reducible_values theta v (T_abs T) :=
+  reducible_values ρ v (T_abs T) :=
     closed_value v /\
     exists X,
-      ~(X ∈ support theta) /\
+      ~(X ∈ support ρ) /\
       ~(X ∈ pfv T type_var) /\
       forall RC,
         reducibility_candidate RC ->
-        reducible_values ((X,RC) :: theta) v (topen 0 T (fvar X type_var));
+        [ (X,RC) :: ρ ⊨ v : topen 0 T (fvar X type_var) ]v;
 
-  reducible_values theta v (T_arrow A B) :=
+  reducible_values ρ v (T_arrow A B) :=
     exists (_: is_erased_type B),
     closed_value v /\
     forall a (p: is_erased_term a),
       wf a 0 ->
       pfv a term_var = nil ->
-      reducible_values theta a A ->
-      reduces_to (fun t => reducible_values theta t (open 0 B a)) (app v a);
+      [ ρ ⊨ a : A ]v ->
+      [ ρ ⊨ app v a : open 0 B a ];
 
-  reducible_values theta v (T_prod A B) :=
+  reducible_values ρ v (T_prod A B) :=
     exists (_: is_erased_type B),
     closed_value v /\
     exists a b (_: is_erased_term a),
       wf a 0 /\
       pfv a term_var = nil /\
       v = pp a b /\
-      reducible_values theta a A /\
-      reducible_values theta b (open 0 B a);
+      [ ρ ⊨ a : A ]v /\
+      [ ρ ⊨ b : open 0 B a ]v;
 
-  reducible_values theta v (T_sum A B) :=
+  reducible_values ρ v (T_sum A B) :=
     closed_value v /\ (
-      (exists v', v = tleft v' /\ reducible_values theta v' A) \/
-      (exists v', v = tright v' /\ reducible_values theta v' B)
+      (exists v', v = tleft v' /\ [ ρ ⊨ v' : A ]v) \/
+      (exists v', v = tright v' /\ [ ρ ⊨ v' : B ]v)
     );
 
-  reducible_values theta v (T_refine T p) :=
+  reducible_values ρ v (T_refine T p) :=
     closed_value v /\
-    reducible_values theta v T /\
+    [ ρ ⊨ v : T ]v /\
     is_erased_term p /\
     wf p 1 /\
     pfv p term_var = nil /\
-    star scbv_step (open 0 p v) ttrue;
+    open 0 p v ~>* ttrue;
 
-  reducible_values theta v (T_type_refine T1 T2) :=
+  reducible_values ρ v (T_type_refine T1 T2) :=
     exists (_: is_erased_type T2),
     exists (_: closed_value v),
-      reducible_values theta v T1 /\
-      exists p, reducible_values theta p (open 0 T2 v);
+      [ ρ ⊨ v : T1 ]v /\
+      exists p, [ ρ ⊨ p : open 0 T2 v ]v;
 
-  reducible_values theta v (T_intersection A B) :=
+  reducible_values ρ v (T_intersection A B) :=
     closed_value v /\
-    reducible_values theta v A /\
-    reducible_values theta v B;
+    [ ρ ⊨ v : A ]v /\
+    [ ρ ⊨ v : B ]v;
 
-  reducible_values theta v (T_union A B) :=
+  reducible_values ρ v (T_union A B) :=
     closed_value v /\ (
-      reducible_values theta v A \/
-      reducible_values theta v B
+      [ ρ ⊨ v : A ]v \/
+      [ ρ ⊨ v : B ]v
     );
 
-  reducible_values theta v T_top :=
-    closed_value v;
+  reducible_values ρ v T_top := closed_value v;
 
-  reducible_values theta v T_bot := False;
+  reducible_values ρ v T_bot := False;
 
-  reducible_values theta v (T_equiv t1 t2) :=
+  reducible_values ρ v (T_equiv t1 t2) :=
     v = uu /\
-    equivalent_terms t1 t2;
+    [ t1 ≡ t2 ];
 
-  reducible_values theta v (T_forall A B) :=
+  reducible_values ρ v (T_forall A B) :=
     exists (_: is_erased_type B),
     closed_value v /\
     forall a (p: is_erased_term a),
       wf a 0 ->
       pfv a term_var = nil ->
-      reducible_values theta a A ->
-      reducible_values theta v (open 0 B a);
+      [ ρ ⊨ a : A ]v ->
+      [ ρ ⊨ v : open 0 B a ]v;
 
-  reducible_values theta v (T_exists A B) :=
+  reducible_values ρ v (T_exists A B) :=
     exists (_: is_erased_type B),
     closed_value v /\
     exists a (_: is_erased_term a),
       wf a 0 /\
       pfv a term_var = nil /\
-      reducible_values theta a A /\
-      reducible_values theta v (open 0 B a);
+      [ ρ ⊨ a : A ]v /\
+      [ ρ ⊨ v : open 0 B a ]v;
 
-  reducible_values theta v (T_rec n T0 Ts) :=
+  reducible_values ρ v (T_rec n T0 Ts) :=
     closed_value v /\
     is_erased_term n /\ (
-      (star scbv_step n zero /\ reducible_values theta v T0) \/
-      (exists n' X (p1: is_nat_value n') (p2: star scbv_step n (succ n')),
+      (n ~>* zero /\ [ ρ ⊨ v : T0 ]v) \/
+      (exists n' X (p1: is_nat_value n') (p2: n ~>* succ n'),
          ~(X ∈ pfv T0 type_var) /\
          ~(X ∈ pfv Ts type_var) /\
-         ~(X ∈ support theta) /\
-         reducible_values ((X, fun t => reducible_values theta t (T_rec n' T0 Ts)) :: theta)
-                          v
-                          (topen 0 Ts (fvar X type_var))
+         ~(X ∈ support ρ) /\
+          [ (X, fun t => [ ρ ⊨ t : T_rec n' T0 Ts ]v) :: ρ ⊨ v : topen 0 Ts (fvar X type_var) ]v
       )
     );
 
-  reducible_values theta v T := False
+  reducible_values _ _ _ := False
+}
+  where "[ ρ ⊨ v : T ]v" := (reducible_values ρ v T)
+  where "[ ρ ⊨ t : T ]" := (reduces_to (fun v => [ ρ ⊨ v : T ]v) t)
 .
 
 Hint Transparent lt_measure: core.
@@ -146,55 +149,50 @@ Ltac reducibility_definition :=
   repeat step || autorewrite with bsize || unfold "<<", get_measure, closed_value, closed_term in *;
     try solve [ apply right_lex, right_lex, lt_index_step; steps ];
     try solve [ apply right_lex, lt_index_step; steps ];
-    try solve [ apply leq_lt_measure; omega ];
-    try solve [ apply left_lex; omega ].
+    try solve [ apply leq_lt_measure; lia ];
+    try solve [ apply left_lex; lia ].
 
 Solve Obligations with reducibility_definition.
 
 Fail Next Obligation. (* no more obligations for reducible_values *)
 
-Definition reducible (theta: interpretation) t T : Prop :=
-  reduces_to (fun t => reducible_values theta t T) t.
+Notation "'[' ρ '⊨' T1 '<:' T2 ']'" := (forall v, [ ρ ⊨ v : T1 ]v -> [ ρ ⊨ v : T2 ]v)
+  (at level 60, ρ at level 60, T1 at level 60).
 
-Definition subtype theta T1 T2 :=
-  forall v, reducible_values theta v T1 -> reducible_values theta v T2.
+Definition open_reducible (Θ: tvar_list) (Γ: context) t T : Prop :=
+  forall ρ lterms,
+    valid_interpretation ρ ->
+    satisfies (reducible_values ρ) Γ lterms  ->
+    support ρ = Θ ->
+    [ ρ ⊨ substitute t lterms : substitute T lterms ].
 
-Definition open_reducible (tvars: tvar_list) (gamma: context) t T : Prop :=
-  forall theta lterms,
-    valid_interpretation theta ->
-    satisfies (reducible_values theta) gamma lterms  ->
-    support theta = tvars ->
-    reducible theta
-              (substitute t lterms)
-              (substitute T lterms).
+Definition open_subtype (Θ: tvar_list) (Γ: context) T1 T2 : Prop :=
+  forall ρ l,
+   valid_interpretation ρ ->
+   satisfies (reducible_values ρ) Γ l ->
+   support ρ = Θ ->
+   [ ρ ⊨ substitute T1 l <: substitute T2 l ].
 
-Definition open_subtype (tvars: tvar_list) (gamma: context) T1 T2 : Prop :=
-  forall theta l,
-   valid_interpretation theta ->
-   satisfies (reducible_values theta) gamma l ->
-   support theta = tvars ->
-   subtype theta (substitute T1 l) (substitute T2 l).
+Definition open_equivalent (Θ: tvar_list) (Γ: context) t1 t2 : Prop :=
+  forall ρ l,
+    valid_interpretation ρ ->
+    satisfies (reducible_values ρ) Γ l ->
+    support ρ = Θ ->
+    [ substitute t1 l ≡ substitute t2 l ].
 
-Definition open_equivalent (tvars: tvar_list) (gamma: context) t1 t2 : Prop :=
-  forall theta l,
-    valid_interpretation theta ->
-    satisfies (reducible_values theta) gamma l ->
-    support theta = tvars ->
-    equivalent_terms (substitute t1 l) (substitute t2 l).
+Notation "'[' Θ ';' Γ '⊨' t ':' T ']'" := (open_reducible Θ Γ t T)
+  (at level 60, Θ at level 60, Γ at level 60, t at level 60).
 
-Notation "'[' tvars ';' gamma '⊨' t ':' T ']'" := (open_reducible tvars gamma t T)
-  (at level 50, t at level 50).
+Notation "'[' Θ ';' Γ '⊨' T1 '<:' T2 ']'" := (open_subtype Θ Γ T1 T2)
+  (at level 60, Θ at level 60, Γ at level 60, T1 at level 60).
 
-Notation "'[' tvars ';' gamma '⊨' T1 '<:' T2 ']'" := (open_subtype tvars gamma T1 T2)
-  (at level 50, T1 at level 50).
-
-Notation "'[' tvars ';' gamma '⊨' t1 '≡' t2 ']'" := (open_equivalent tvars gamma t1 t2)
-  (at level 50, t1 at level 50).
+Notation "'[' Θ ';' Γ '⊨' t1 '≡' t2 ']'" := (open_equivalent Θ Γ t1 t2)
+  (at level 60, Θ at level 60, Γ at level 60, t1 at level 60, t2 at level 60).
 
 Lemma reducibility_rewrite:
-  forall theta t T,
-    reduces_to (fun t => reducible_values theta t T) t =
-    reducible theta t T.
+  forall ρ t T,
+    reduces_to (fun v => [ ρ ⊨ v : T ]v) t =
+    [ ρ ⊨ t : T ].
 Proof.
   reflexivity.
 Qed.
@@ -228,5 +226,5 @@ Ltac simp_red := simp_red_hyp || simp_red_goal.
 
 Ltac simp_red_nat :=
   match goal with
-  | H: reducible_values _ _ T_nat |- _ => simp reducible_values in H
+  | H: [ _ ⊨ _ : T_nat ]v |- _ => simp reducible_values in H
   end.

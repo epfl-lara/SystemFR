@@ -11,7 +11,7 @@ Require Export SystemFR.FVLemmasClose.
 Require Export SystemFR.WFLemmasClose.
 
 Require Import PeanoNat.
-Require Import Omega.
+Require Import Psatz.
 
 Open Scope list_scope.
 
@@ -20,7 +20,7 @@ Opaque reducible_values.
 Opaque lt.
 
 Definition reducibility_subst_prop (U: tree) : Prop :=
- forall theta V X v P,
+ forall ρ V X v P,
     is_erased_type U ->
     wf U 0 ->
     pfv U term_var = nil ->
@@ -28,10 +28,10 @@ Definition reducibility_subst_prop (U: tree) : Prop :=
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    valid_interpretation theta ->
-    lookup Nat.eq_dec theta X = Some P ->
-    (forall (t: tree), P t <-> reducible_values theta t V) ->
-    reducible_values theta v U <-> reducible_values theta v (psubstitute U ((X,V) :: nil) type_var).
+    valid_interpretation ρ ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some P ->
+    (forall (t: tree), P t <-> [ ρ ⊨ t : V ]v) ->
+    [ ρ ⊨ v : U ]v <-> [ ρ ⊨ v : psubstitute U ((X,V) :: nil) type_var ]v.
 
 Lemma reducibility_subst_fvar:
   forall m n tag,
@@ -43,7 +43,7 @@ Proof.
 Qed.
 
 Lemma reducibility_subst_induct_1:
-  forall theta U V X v P,
+  forall ρ U V X v P,
     reducibility_subst_prop U ->
     is_erased_type U ->
     wf U 0 ->
@@ -52,17 +52,17 @@ Lemma reducibility_subst_induct_1:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    valid_interpretation theta ->
-    lookup Nat.eq_dec theta X = Some P ->
-    (forall (t: tree), P t <-> reducible_values theta t V) ->
-    reducible_values theta v U ->
-    reducible_values theta v (psubstitute U ((X,V) :: nil) type_var).
+    valid_interpretation ρ ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some P ->
+    (forall (t: tree), P t <-> [ ρ ⊨ t : V ]v) ->
+    [ ρ ⊨ v : U ]v ->
+    [ ρ ⊨ v : psubstitute U ((X,V) :: nil) type_var ]v.
 Proof.
   unfold reducibility_subst_prop; intros; eauto with eapply_any.
 Qed.
 
 Lemma reducibility_subst_induct_2:
-  forall theta U V X v P,
+  forall ρ U V X v P,
     reducibility_subst_prop U ->
     is_erased_type U ->
     wf U 0 ->
@@ -71,17 +71,17 @@ Lemma reducibility_subst_induct_2:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    valid_interpretation theta ->
-    lookup Nat.eq_dec theta X = Some P ->
-    (forall (t: tree), P t <-> reducible_values theta t V) ->
-    reducible_values theta v (psubstitute U ((X,V) :: nil) type_var) ->
-    reducible_values theta v U.
+    valid_interpretation ρ ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some P ->
+    (forall (t: tree), P t <-> [ ρ ⊨ t : V ]v) ->
+    [ ρ ⊨ v : psubstitute U ((X,V) :: nil) type_var ]v ->
+    [ ρ ⊨ v : U ]v.
 Proof.
   unfold reducibility_subst_prop; intros; eauto with eapply_any.
 Qed.
 
 Lemma reducibility_subst_induct_3:
-  forall theta U V X v P a,
+  forall ρ U V X v P a,
     reducibility_subst_prop (open 0 U a) ->
     is_erased_type U ->
     wf U 1 ->
@@ -93,11 +93,11 @@ Lemma reducibility_subst_induct_3:
     is_erased_term a ->
     wf a 0 ->
     pfv a term_var = nil ->
-    valid_interpretation theta ->
-    lookup Nat.eq_dec theta X = Some P ->
-    (forall (t: tree), P t <-> reducible_values theta t V) ->
-    reducible_values theta v (open 0 U a) ->
-    reducible_values theta v (open 0 (psubstitute U ((X,V) :: nil) type_var) a).
+    valid_interpretation ρ ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some P ->
+    (forall (t: tree), P t <-> [ ρ ⊨ t : V ]v) ->
+    [ ρ ⊨ v : open 0 U a ]v ->
+    [ ρ ⊨ v : open 0 (psubstitute U ((X,V) :: nil) type_var) a ]v.
 Proof.
   unfold reducibility_subst_prop; intros.
   rewrite substitute_open2 in * by
@@ -107,7 +107,7 @@ Proof.
 Qed.
 
 Lemma reducibility_subst_induct_4:
-  forall theta U V X v P a,
+  forall ρ U V X v P a,
     reducibility_subst_prop (open 0 U a) ->
     is_erased_type U ->
     wf U 1 ->
@@ -119,11 +119,11 @@ Lemma reducibility_subst_induct_4:
     is_erased_term a ->
     wf a 0 ->
     pfv a term_var = nil ->
-    valid_interpretation theta ->
-    lookup Nat.eq_dec theta X = Some P ->
-    (forall (t: tree), P t <-> reducible_values theta t V) ->
-    reducible_values theta v (open 0 (psubstitute U ((X,V) :: nil) type_var) a) ->
-    reducible_values theta v (open 0 U a).
+    valid_interpretation ρ ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some P ->
+    (forall (t: tree), P t <-> [ ρ ⊨ t : V ]v) ->
+    [ ρ ⊨ v : open 0 (psubstitute U ((X,V) :: nil) type_var) a ]v ->
+    [ ρ ⊨ v : open 0 U a ]v.
 Proof.
   unfold reducibility_subst_prop; intros.
   rewrite substitute_open2 in * by
@@ -259,13 +259,13 @@ Proof.
   unfold prop_at; intros; unfold reducibility_subst_prop;
     repeat step || simp_red.
 
-  - exists (makeFresh ((X :: nil) :: support theta ::
+  - exists (makeFresh ((X :: nil) :: support ρ ::
                   pfv V type_var :: pfv T type_var ::
                   pfv (psubstitute T ((X, V) :: nil) type_var) type_var :: nil)
       ); repeat step || finisher.
     instantiate_any.
     lazymatch goal with
-    | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
+    | H: [ _ ⊨ _ : _ ]v |- [ (?M,?RC) :: _ ⊨ _ : _ ]v =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
     end;
       repeat step || finisher || rewrite substitute_topen2.
@@ -278,19 +278,19 @@ Proof.
       try finisher;
       try solve [ apply_anywhere reducible_unused3; repeat step || finisher || apply_any ].
 
-  - exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support theta ::
+  - exists (makeFresh ((X0 :: nil) :: (X :: nil) :: support ρ ::
                              pfv V type_var :: pfv T type_var ::
                              pfv (psubstitute T ((X, V) :: nil) type_var) type_var :: nil)
       ); repeat step || finisher.
     instantiate_any.
 
     lazymatch goal with
-    | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
+    | H: [ _ ⊨ _ : _ ]v |- [ (?M,?RC) :: _ ⊨ _ : _ ]v =>
       apply (reducible_rename_one _ _ _ _ _ M) in H
     end; repeat step || finisher.
 
     lazymatch goal with
-    | H: reducible_values _ _ _ |- _ =>
+    | H: [ _ ⊨ _ : _ ]v |- _ =>
       rewrite substitute_topen2 in H by repeat step || finisher
     end.
 
@@ -329,12 +329,12 @@ Proof.
                  pfv T0 type_var :: pfv Ts type_var ::
                  pfv (psubstitute T0 ((X, V) :: nil) type_var) type_var ::
                  pfv (psubstitute Ts ((X, V) :: nil) type_var) type_var ::
-                 support theta :: nil)
+                 support ρ :: nil)
     ), _, _; eauto;
       repeat step || finisher.
 
     lazymatch goal with
-    | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
+    | H: [ _ ⊨ _ : _ ]v |- [ (?M,?RC) :: _ ⊨ _ : _ ]v =>
       apply (reducible_rename_one_rc _ RC _ _ _ _ M) in H
     end; repeat step || unfold equivalent_rc || rewrite substitute_topen2;
       try finisher.
@@ -368,12 +368,12 @@ Proof.
                  pfv T0 type_var :: pfv Ts type_var ::
                  pfv (psubstitute T0 ((X, V) :: nil) type_var) type_var ::
                  pfv (psubstitute Ts ((X, V) :: nil) type_var) type_var ::
-                 support theta :: nil)
+                 support ρ :: nil)
     ), _, _; eauto;
       repeat step || finisher.
 
     lazymatch goal with
-    | H: reducible_values _ _ _ |- reducible_values ((?M,?RC) :: _) _ _ =>
+    | H: [ _ ⊨ _ : _ ]v |- [ (?M,?RC) :: _ ⊨ _ : _ ]v =>
       apply (reducible_rename_one_rc _ RC _ _ _ _ M) in H
     end; repeat step || unfold equivalent_rc || rewrite substitute_topen2;
       try finisher.
@@ -432,8 +432,8 @@ Proof.
 Qed.
 
 Lemma reducibility_subst:
-  forall (theta: interpretation) U V X v P,
-    valid_interpretation theta ->
+  forall (ρ: interpretation) U V X v P,
+    valid_interpretation ρ ->
     is_erased_type U ->
     wf U 0 ->
     pfv U term_var = nil ->
@@ -441,19 +441,18 @@ Lemma reducibility_subst:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    valid_interpretation theta ->
-    lookup Nat.eq_dec theta X = Some P ->
-    (forall (t: tree), P t <-> reducible_values theta t V) ->
-    reducible_values theta v U <-> reducible_values theta v (psubstitute U ((X,V) :: nil) type_var).
+    valid_interpretation ρ ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some P ->
+    (forall (t: tree), P t <-> [ ρ ⊨ t : V ]v) ->
+    [ ρ ⊨ v : U ]v <-> [ ρ ⊨ v : psubstitute U ((X,V) :: nil) type_var ]v.
 Proof.
   intros; eapply reducibility_subst_aux; eauto.
 Qed.
 
 Lemma reducible_values_subst_head:
-  forall (theta : interpretation) U V X v,
-    reducible_values ((X, fun v => reducible_values theta v V) :: theta) v
-                     (topen 0 U (fvar X type_var)) ->
-    valid_interpretation theta ->
+  forall (ρ : interpretation) U V X v,
+    [ (X, fun v => [ ρ ⊨ v : V ]v) :: ρ ⊨ v : topen 0 U (fvar X type_var) ]v ->
+    valid_interpretation ρ ->
     (X ∈ pfv U type_var -> False) ->
     (X ∈ pfv V type_var -> False) ->
     is_erased_type U ->
@@ -463,17 +462,17 @@ Lemma reducible_values_subst_head:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    reducible_values theta v (topen 0 U V).
+    [ ρ ⊨ v : topen 0 U V ]v.
 Proof.
   intros.
-  apply reducible_unused3 with X (fun v => reducible_values theta v V);
+  apply reducible_unused3 with X (fun v => [ ρ ⊨ v : V ]v);
     repeat step || fv_open  || list_utils || apply reducibility_is_candidate.
 
   lazymatch goal with
-  | H: reducible_values ((?X,?RC) :: ?theta) ?v ?U |- _ =>
+  | H: [ (?X,?RC) :: ?ρ ⊨ ?v : ?U ]v |- _ =>
     unshelve epose proof (proj1 (
-      reducibility_subst ((X,RC) :: theta) U V X v
-                         (fun v => reducible_values theta v V)
+      reducibility_subst ((X,RC) :: ρ) U V X v
+                         (fun v => [ ρ ⊨ v : V ]v)
                          _ _ _ _ _ _ _ _ _ _ _) H)
   end;
     repeat step || list_utils || t_substitutions || rewrite substitute_nothing3 in *;
@@ -484,8 +483,8 @@ Proof.
 Qed.
 
 Lemma reducible_values_subst_head2:
-  forall (theta : interpretation) U V X v,
-    valid_interpretation theta ->
+  forall (ρ : interpretation) U V X v,
+    valid_interpretation ρ ->
     (X ∈ pfv U type_var -> False) ->
     (X ∈ pfv V type_var -> False) ->
     is_erased_type U ->
@@ -495,20 +494,19 @@ Lemma reducible_values_subst_head2:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    reducible_values theta v (topen 0 U V) ->
-    reducible_values ((X, fun v => reducible_values theta v V) :: theta) v
-                     (topen 0 U (fvar X type_var)).
+    [ ρ ⊨ v : topen 0 U V ]v ->
+    [ (X, fun v => [ ρ ⊨ v : V ]v) :: ρ ⊨ v : topen 0 U (fvar X type_var) ]v.
 Proof.
   intros.
-  apply (reducible_unused2 _ _ X _ (fun v => reducible_values theta v V)) in H9;
+  apply (reducible_unused2 _ _ X _ (fun v => [ ρ ⊨ v : V ]v)) in H9;
     repeat step || fv_open  || list_utils;
     eauto using reducibility_is_candidate.
 
   lazymatch goal with
-  | H: reducible_values _ _ _ |- reducible_values ((?X,?RC) :: ?theta) ?v ?U =>
+  | H: [ _ ⊨ _ : _ ]v |- [ (?X,?RC) :: ?ρ ⊨ ?v : ?U ]v =>
     unshelve epose proof (
-      reducibility_subst ((X,RC) :: theta) U V X v
-                         (fun v => reducible_values theta v V)
+      reducibility_subst ((X,RC) :: ρ) U V X v
+                         (fun v => [ ρ ⊨ v : V ]v)
                          _ _ _ _ _ _ _ _ _ _ _)
   end;
     repeat step || list_utils || t_substitutions || rewrite substitute_nothing3 in *;
@@ -519,8 +517,8 @@ Proof.
 Qed.
 
 Lemma reducible_subst_head2:
-  forall (theta : interpretation) U V X t,
-    valid_interpretation theta ->
+  forall (ρ : interpretation) U V X t,
+    valid_interpretation ρ ->
     (X ∈ pfv U type_var -> False) ->
     (X ∈ pfv V type_var -> False) ->
     is_erased_type U ->
@@ -530,19 +528,18 @@ Lemma reducible_subst_head2:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    reducible theta t (topen 0 U V) ->
-    reducible ((X, fun v => reducible_values theta v V) :: theta) t
-              (topen 0 U (fvar X type_var)).
+    [ ρ ⊨ t : topen 0 U V ] ->
+    [ (X, fun v => [ ρ ⊨ v : V ]v) :: ρ ⊨ t : topen 0 U (fvar X type_var) ].
 Proof.
-  repeat unfold reducible, reduces_to;
+  repeat unfold reduces_to;
     repeat step;
       t_closer;
     eauto using reducible_values_subst_head2.
 Qed.
 
 Lemma reducible_values_subst_head3:
-  forall theta U V X v,
-    valid_interpretation theta ->
+  forall ρ U V X v,
+    valid_interpretation ρ ->
     (X ∈ pfv V type_var -> False) ->
     is_erased_type U ->
     wf U 0 ->
@@ -552,8 +549,8 @@ Lemma reducible_values_subst_head3:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    reducible_values theta v (psubstitute U ((X, V) :: nil) type_var) ->
-    reducible_values ((X, fun v => reducible_values theta v V) :: theta) v U.
+    [ ρ ⊨ v : psubstitute U ((X, V) :: nil) type_var ]v ->
+    [ (X, fun v => [ ρ ⊨ v : V ]v) :: ρ ⊨ v : U ]v.
 Proof.
   intros.
   rewrite <- (topen_tclose2 U X 0);
@@ -566,8 +563,8 @@ Proof.
 Qed.
 
 Lemma reducible_subst_head3:
-  forall theta U V X t,
-    valid_interpretation theta ->
+  forall ρ U V X t,
+    valid_interpretation ρ ->
     (X ∈ pfv V type_var -> False) ->
     is_erased_type U ->
     wf U 0 ->
@@ -577,10 +574,10 @@ Lemma reducible_subst_head3:
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    reducible theta t (psubstitute U ((X, V) :: nil) type_var) ->
-    reducible ((X, fun v => reducible_values theta v V) :: theta) t U.
+    [ ρ ⊨ t : psubstitute U ((X, V) :: nil) type_var ] ->
+    [ (X, fun v => [ ρ ⊨ v : V ]v) :: ρ ⊨ t : U ].
 Proof.
-  repeat unfold reducible, reduces_to;
+  repeat unfold reduces_to;
     repeat step;
       t_closer;
     eauto using reducible_values_subst_head3.

@@ -1,7 +1,7 @@
 Require Import Equations.Equations.
 Require Import Coq.Classes.RelationClasses.
 
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.NoTypeFVar.
@@ -45,7 +45,7 @@ Equations strictly_positive (T: tree) (vars: list nat): Prop
   strictly_positive _ vars := False.
 
 
-Solve All Obligations with (repeat step || autorewrite with bsize in *; try omega; eauto with omega).
+Solve All Obligations with (repeat step || autorewrite with bsize in *; try lia; eauto with lia).
 
 Fail Next Obligation.
 

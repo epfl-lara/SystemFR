@@ -1,34 +1,20 @@
 Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm.
 
-Require Import Omega.
+Require Import Psatz.
 
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 
 Require Export SystemFR.OpenTOpen.
-
-Require Export SystemFR.WFLemmas.
-Require Export SystemFR.TWFLemmas.
-Require Export SystemFR.ErasedTermLemmas.
-
 Require Export SystemFR.ReducibilitySubst.
-
-Require Export SystemFR.IdRelation.
-Require Export SystemFR.EqualWithRelation.
-Require Export SystemFR.EquivalentPairsWithRelation.
-
-Require Export SystemFR.AssocList.
-
 Require Export SystemFR.TOpenTClose.
 Require Export SystemFR.NoTypeFVar.
 Require Export SystemFR.Polarity.
-
-Require Export SystemFR.NoTypeFVarLemmas.
-Require Export SystemFR.ErasedTermLemmas.
+Require Export SystemFR.EquivalentPairsWithRelation.
 
 Opaque makeFresh.
-Opaque Nat.eq_dec.
+Opaque PeanoNat.Nat.eq_dec.
 Opaque reducible_values.
 
 Lemma polarity_open_aux:
@@ -40,14 +26,14 @@ Lemma polarity_open_aux:
 Proof.
   induction m; destruct T;
     repeat step || constructor || step_inversion has_polarities;
-      eauto with omega;
+      eauto with lia;
       eauto with b_polarity.
   exists X; repeat
          step || fv_open || list_utils ||
          (progress rewrite is_erased_term_tfv in * by steps) ||
          (rewrite <- open_topen by (steps; eauto with twf)).
 
-  apply_any; repeat step || autorewrite with bsize; try omega.
+  apply_any; repeat step || autorewrite with bsize; try lia.
 Qed.
 
 Lemma polarity_open:
@@ -76,8 +62,8 @@ Qed.
 Lemma equivalent_pairs_same:
   forall pols pols' rel X X',
     equivalent_pairs_with_relation rel pols pols' eq ->
-    lookup Nat.eq_dec rel X = Some X' ->
-    lookup Nat.eq_dec (swap rel) X' = Some X ->
+    lookup PeanoNat.Nat.eq_dec rel X = Some X' ->
+    lookup PeanoNat.Nat.eq_dec (swap rel) X' = Some X ->
     ((X, Negative) ∈ pols -> False) ->
     (X', Negative) ∈ pols' ->
     False.
@@ -108,7 +94,7 @@ Proof.
   repeat step || step_inversion has_polarities.
   force_invert equal_with_relation;
     repeat step;
-    try solve [ constructor; eauto with omega; eauto using equivalent_pairs_same ].
+    try solve [ constructor; eauto with lia; eauto using equivalent_pairs_same ].
 Qed.
 
 Hint Immediate has_polarities_rename_fvar: b_hp_rename.
@@ -164,8 +150,8 @@ Proof.
   unfold hp_rename_prop_aux, hp_rename_prop.
   repeat
     step || step_inversion has_polarities || step_inversion equal_with_relation || constructor;
-    eauto using hp_rename_induct_invert with omega;
-    eauto using hp_rename_induct with omega.
+    eauto using hp_rename_induct_invert with lia;
+    eauto using hp_rename_induct with lia.
 
   - exists (makeFresh (pfv Ts' type_var :: support pols' :: range rel :: nil)); steps; try finisher.
     eapply (
@@ -173,7 +159,7 @@ Proof.
                          ((X, makeFresh (pfv Ts' type_var :: support pols' :: range rel :: nil)) :: rel)); eauto 1;
       repeat step || apply equal_with_relation_topen || finisher || autorewrite with bsize ||
              apply equivalent_with_pairs_cons;
-      try omega; try finisher.
+      try lia; try finisher.
 Qed.
 
 Hint Immediate has_polarities_rename_rec: b_hp_rename.
@@ -183,7 +169,7 @@ Lemma strong_induction_aux:
     (forall n, (forall n', n' < n -> P n') -> P n) ->
     forall n, forall n', n' < n -> P n'.
 Proof.
-  induction n; repeat step; eauto with omega.
+  induction n; repeat step; eauto with lia.
 Qed.
 
 Lemma strong_induction:
@@ -202,8 +188,8 @@ Proof.
       unfold hp_rename_prop_aux, hp_rename_prop;
       repeat
         step || step_inversion has_polarities || step_inversion equal_with_relation || constructor;
-        eauto using hp_rename_induct with omega;
-        eauto using hp_rename_induct_invert with omega
+        eauto using hp_rename_induct with lia;
+        eauto using hp_rename_induct_invert with lia
     ].
 Qed.
 
@@ -214,8 +200,8 @@ Qed.
 
 Lemma equivalent_with_pairs_refl:
   forall T rel (l: list (nat * T)),
-    (forall x, x ∈ support l -> lookup Nat.eq_dec rel x = Some x) ->
-    (forall x, x ∈ support l -> lookup Nat.eq_dec (swap rel) x = Some x) ->
+    (forall x, x ∈ support l -> lookup PeanoNat.Nat.eq_dec rel x = Some x) ->
+    (forall x, x ∈ support l -> lookup PeanoNat.Nat.eq_dec (swap rel) x = Some x) ->
     equivalent_pairs_with_relation rel l l eq.
 Proof.
   induction l; steps.
@@ -246,11 +232,11 @@ Lemma has_polarities_swap_aux:
     has_polarities (swap_type_holes T i j) pols.
 Proof.
   induction n; destruct T; repeat step || constructor || apply_any || step_inversion has_polarities;
-    eauto with omega.
+    eauto with lia.
 
   exists X; repeat step || rewrite pfv_swap_type_holes in *.
   rewrite topen_swap2; steps.
-  apply IHn; repeat step || autorewrite with bsize in *; try omega.
+  apply IHn; repeat step || autorewrite with bsize in *; try lia.
 Qed.
 
 Lemma has_polarities_swap:
@@ -272,14 +258,14 @@ Proof.
     repeat step || constructor || t_lookup ||
            step_inversion has_polarities || apply_any ||
            rewrite support_invert_polarities in *;
-    eauto with omega;
+    eauto with lia;
     eauto using pair_in_list.
 
   define M (makeFresh ((X :: nil) :: pfv T3 type_var :: pfv (topen (S k) T3 (fvar X type_var)) type_var :: support pols :: nil)).
   exists M; steps; try finisher.
 
   rewrite open_swap; steps.
-  apply_any; repeat step || autorewrite with bsize; eauto with omega; try finisher.
+  apply_any; repeat step || autorewrite with bsize; eauto with lia; try finisher.
 
   rewrite topen_swap; repeat step || apply has_polarities_swap.
   apply has_polarities_rename_one with X0; steps; try finisher.

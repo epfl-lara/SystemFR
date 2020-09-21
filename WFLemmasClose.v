@@ -1,5 +1,5 @@
 Require Import Coq.Strings.String.
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.Syntax.
 Require Export SystemFR.Tactics.

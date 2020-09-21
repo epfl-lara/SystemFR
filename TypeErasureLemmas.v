@@ -9,17 +9,16 @@ Require Export SystemFR.ListUtils.
 Require Export SystemFR.SmallStep.
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.TWFLemmas.
-Require Export SystemFR.RelationClosures.
 Require Export SystemFR.ErasedTermLemmas.
 
 Open Scope list_scope.
 
 Lemma in_erased_context:
-  forall (gamma : context) (x : nat) (T : tree) eq,
-    lookup eq gamma x = Some T ->
-    lookup eq (erase_context gamma) x = Some (erase_type T).
+  forall (Γ : context) (x : nat) (T : tree) eq,
+    lookup eq Γ x = Some T ->
+    lookup eq (erase_context Γ) x = Some (erase_type T).
 Proof.
-  induction gamma; steps.
+  induction Γ; steps.
 Qed.
 
 Lemma erased_context_support:
@@ -77,11 +76,11 @@ Qed.
 Hint Immediate erase_type_var: fv.
 
 Lemma erase_context_var:
-  forall gamma x tag,
-    x ∈ pfv_context (erase_context gamma) tag ->
-    x ∈ pfv_context gamma tag.
+  forall Γ x tag,
+    x ∈ pfv_context (erase_context Γ) tag ->
+    x ∈ pfv_context Γ tag.
 Proof.
-  induction gamma; repeat step || list_utils; eauto with fv.
+  induction Γ; repeat step || list_utils; eauto with fv.
 Qed.
 
 Hint Immediate erase_context_var: fv.
@@ -133,9 +132,9 @@ Qed.
 Hint Resolve erase_type_twf: twf.
 
 Lemma pfv_erase_context_subst:
-  forall S gamma tag,
-    subset (pfv_context gamma tag) S ->
-    subset (pfv_context (erase_context gamma) tag) S.
+  forall S Γ tag,
+    subset (pfv_context Γ tag) S ->
+    subset (pfv_context (erase_context Γ) tag) S.
 Proof.
   unfold subset; steps; eauto with fv.
 Qed.

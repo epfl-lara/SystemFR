@@ -22,13 +22,13 @@ Definition nat_eq (a: tree) (b: tree) :=
 Lemma nat_eq_zero_b:
   forall b,
     cbv_value b ->
-    star scbv_step (nat_eq zero b) ttrue ->
+    nat_eq zero b ~>* ttrue ->
     b = zero.
 Proof.
   unfold nat_eq, nat_eq_fix.
   destruct 1;
     repeat step || t_invert_star || star_smallstep_app_onestep;
-    eauto with omega;
+    eauto with lia;
     eauto with values.
 Qed.
 
@@ -38,10 +38,10 @@ Lemma nat_eq_succ:
     cbv_value b ->
     wf a 0 ->
     wf b 0 ->
-    star scbv_step (nat_eq (succ a) b) ttrue ->
+    nat_eq (succ a) b ~>* ttrue ->
     exists b',
       b = succ b' /\
-      star scbv_step (nat_eq a b') ttrue.
+      nat_eq a b' ~>* ttrue.
 Proof.
   unfold nat_eq, nat_eq_fix; steps.
 
@@ -58,7 +58,7 @@ Lemma nat_eq_nat:
     cbv_value b ->
     wf a 0 ->
     wf b 0 ->
-    star scbv_step (nat_eq a b) ttrue ->
+    nat_eq a b ~>* ttrue ->
       (a = zero \/ exists a', a = succ a').
 Proof.
   unfold nat_eq, nat_eq_fix; steps.
@@ -74,7 +74,7 @@ Lemma nat_eq_sound:
     forall b,
       cbv_value b ->
       wf b 0 ->
-      star scbv_step (nat_eq a b) ttrue ->
+      nat_eq a b ~>* ttrue ->
       a = b.
 Proof.
   induction 1; steps;
@@ -86,11 +86,11 @@ Qed.
 
 Ltac nat_eq_sound :=
   match goal with
-  | H: star scbv_step (nat_eq ?a ?b) ttrue |- _ =>
+  | H: nat_eq ?a ?b ~>* ttrue |- _ =>
     cbv_value a; cbv_value b;
     poseNew (Mark (a,b) "nat_eq_sound");
     unshelve epose proof (nat_eq_sound a _ _ b _ _ H)
-  | H: equivalent_terms (nat_eq ?a ?b) ttrue |- _ =>
+  | H: [ nat_eq ?a ?b ≡ ttrue ] |- _ =>
     cbv_value a; cbv_value b;
     poseNew (Mark (a,b) "tlt_sound");
     unshelve epose proof (nat_eq_sound a _ _ b _ _ _)
@@ -117,14 +117,14 @@ Qed.
 
 
 Ltac one_step_aux :=
- eapply Trans; [ eauto using is_nat_value_build_nat with values smallstep cbvlemmas | idtac ];
+ eapply Relation_Operators.rt1n_trans; [ eauto using is_nat_value_build_nat with values smallstep cbvlemmas | idtac ];
    repeat step || (rewrite open_none in * by (repeat step; eauto using is_nat_value_build_nat with wf)).
 
 Ltac one_step := unshelve one_step_aux; steps.
 
 Lemma nat_eq_complete:
   forall n,
-    star scbv_step (nat_eq (build_nat n) (build_nat n)) ttrue.
+    nat_eq (build_nat n) (build_nat n) ~>* ttrue.
 Proof.
   unfold nat_eq, nat_eq_fix.
   induction n; repeat step || one_step.
@@ -133,7 +133,7 @@ Qed.
 Lemma nat_eq_complete2:
   forall v,
     is_nat_value v ->
-    star scbv_step (nat_eq v v) ttrue.
+    nat_eq v v ~>* ttrue.
 Proof.
   repeat step || is_nat_value_buildable || apply nat_eq_complete.
 Qed.
@@ -141,8 +141,8 @@ Qed.
 Lemma nat_eq_bool:
   forall v1, is_nat_value v1 ->
     forall v2, is_nat_value v2 ->
-      star scbv_step (nat_eq v1 v2) ttrue \/
-      star scbv_step (nat_eq v1 v2) tfalse.
+      nat_eq v1 v2 ~>* ttrue \/
+      nat_eq v1 v2 ~>* tfalse.
 Proof.
   induction 1; inversion 1;
     repeat step;
@@ -169,9 +169,9 @@ Lemma equivalent_nat_eq_terms:
     wf t2 0 ->
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
-    star scbv_step t1 v1 ->
-    star scbv_step t2 v2 ->
-    equivalent_terms (nat_eq t1 t2) (nat_eq v1 v2).
+    t1 ~>* v1 ->
+    t2 ~>* v2 ->
+    [ nat_eq t1 t2 ≡ nat_eq v1 v2 ].
 Proof.
   unfold nat_eq, nat_eq_fix; repeat step || apply equivalent_app;
     try solve [ equivalent_star ];
@@ -180,10 +180,10 @@ Qed.
 
 Lemma equivalent_nat_eq_terms_trans:
   forall t1 t2 v1 v2 t,
-    equivalent_terms (nat_eq t1 t2) t ->
-    star scbv_step t1 v1 ->
-    star scbv_step t2 v2 ->
-    equivalent_terms (nat_eq v1 v2) t.
+    [ nat_eq t1 t2 ≡ t ] ->
+    t1 ~>* v1 ->
+    t2 ~>* v2 ->
+    [ nat_eq v1 v2 ≡ t ].
 Proof.
   intros.
   eapply equivalent_trans; try eassumption.

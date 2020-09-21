@@ -7,15 +7,15 @@ Require Export SystemFR.TypedEquality.
 Opaque reducible_values.
 
 Lemma computable_equality_typed_equality:
-  forall theta T v1 v2,
-    equivalent_at theta T v1 v2 ->
-    computable_equality theta T ->
+  forall ρ T v1 v2,
+    [ ρ ⊨ v1 ≡ v2 : T ] ->
+    computable_equality ρ T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     cbv_value v1 ->
     cbv_value v2 ->
-    equivalent_terms v1 v2.
+    [ v1 ≡ v2 ].
 Proof.
   unfold computable_equality, computable_equality_with, equivalent_at;
     repeat step.

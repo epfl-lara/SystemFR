@@ -12,24 +12,24 @@ Proof.
 Qed.
 
 Lemma reducible_type_abs:
-  forall theta t T X,
+  forall ρ t T X,
     fv t = nil ->
     fv T = nil ->
     wf t 0 ->
     wf T 1 ->
     is_erased_term t ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     (X ∈ pfv T type_var -> False) ->
-    (X ∈ support theta -> False) ->
+    (X ∈ support ρ -> False) ->
     (forall RC,
       reducibility_candidate RC ->
-      reducible ((X,RC) :: theta) t (topen 0 T (fvar X type_var))) ->
-    reducible theta t (T_abs T).
+      [ (X,RC) :: ρ ⊨ t : topen 0 T (fvar X type_var) ]) ->
+   [ ρ ⊨ t : T_abs T ].
 Proof.
   intros.
   unshelve epose proof (H7 (fun _ => False) _); steps; eauto using reducibility_candidate_empty; t_closing.
 
-  unfold reducible, reduces_to in *; repeat step || simp_red; t_closing.
+  unfold reduces_to in *; repeat step || simp_red; t_closing.
   exists v; repeat step || simp_red; t_closing;
     eauto 3 using red_is_val, reducibility_candidate_empty with step_tactic.
   exists X; steps.
@@ -38,20 +38,20 @@ Proof.
 Qed.
 
 Lemma open_reducible_type_abs:
-  forall tvars gamma t T (X : nat),
-    subset (pfv t term_var) (support gamma) ->
-    subset (pfv T term_var) (support gamma) ->
+  forall Θ Γ t T (X : nat),
+    subset (pfv t term_var) (support Γ) ->
+    subset (pfv T term_var) (support Γ) ->
     wf t 0 ->
     wf T 1 ->
-    (X ∈ pfv_context gamma term_var -> False) ->
-    (X ∈ pfv_context gamma type_var -> False) ->
+    (X ∈ pfv_context Γ term_var -> False) ->
+    (X ∈ pfv_context Γ type_var -> False) ->
     (X ∈ pfv t term_var -> False) ->
     (X ∈ pfv T term_var -> False) ->
     (X ∈ pfv T type_var -> False) ->
-    (X ∈ tvars -> False) ->
+    (X ∈ Θ -> False) ->
     is_erased_term t ->
-    open_reducible (X :: tvars) gamma t (topen 0 T (fvar X type_var)) ->
-    [ tvars; gamma ⊨ t : T_abs T ].
+    [ X :: Θ; Γ ⊨ t : topen 0 T (fvar X type_var) ] ->
+    [ Θ; Γ ⊨ t : T_abs T ].
 Proof.
   unfold open_reducible; repeat step || t_termlist.
 
@@ -63,30 +63,30 @@ Proof.
 
   match goal with
   | H: forall _ _, _ |- _ =>
-      unshelve epose proof (H ((X,RC) :: theta) lterms _ _ _)
+      unshelve epose proof (H ((X,RC) :: ρ) lterms _ _ _)
   end;
     repeat step || t_substitutions;
     eauto using satisfies_unused.
 Qed.
 
 Lemma reducible_inst:
-  forall theta t U V,
+  forall ρ t U V,
     wf V 0 ->
     twf V 0 ->
     pfv V term_var = nil ->
     wf U 0 ->
     pfv U term_var = nil ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     is_erased_type U ->
     is_erased_type V ->
-    reducible theta t (T_abs U) ->
-    reducible theta t (topen 0 U V).
+    [ ρ ⊨ t : T_abs U ] ->
+    [ ρ ⊨ t : topen 0 U V ].
 Proof.
-  unfold reducible, reduces_to in *;
+  unfold reduces_to in *;
     repeat step || list_utils || simp_red || unfold reduces_to in *.
   match goal with
   | H: forall RC, reducibility_candidate RC -> _ |- _ =>
-      unshelve epose proof (H (fun v => reducible_values theta v V) _); steps;
+      unshelve epose proof (H (fun v => [ ρ ⊨ v : V ]v) _); steps;
         eauto using reducibility_is_candidate
   end.
   exists v; steps; eauto using star_trans with cbvlemmas.
@@ -96,16 +96,16 @@ Proof.
 Qed.
 
 Lemma open_reducible_inst:
-  forall tvars (gamma : context) t U V,
+  forall Θ (Γ : context) t U V,
     wf U 0 ->
     wf V 0 ->
     twf V 0 ->
     is_erased_type U ->
     is_erased_type V ->
-    subset (fv U) (support gamma) ->
-    subset (fv V) (support gamma) ->
-    [ tvars; gamma ⊨ t : T_abs U ] ->
-    [ tvars; gamma ⊨ t : topen 0 U V ].
+    subset (fv U) (support Γ) ->
+    subset (fv V) (support Γ) ->
+    [ Θ; Γ ⊨ t : T_abs U ] ->
+    [ Θ; Γ ⊨ t : topen 0 U V ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite substitute_topen || apply reducible_inst ||

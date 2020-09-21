@@ -4,7 +4,7 @@ Require Import Equations.Prop.Subterm.
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
 Require Import PeanoNat.
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.IdRelation.
 Require Export SystemFR.RedTactics.
@@ -16,55 +16,55 @@ Opaque makeFresh.
 Opaque lt.
 
 Definition renamable_prop T: Prop :=
-  forall T' t theta theta' rel,
-    equivalent_with_relation rel theta theta' equivalent_rc ->
+  forall T' v ρ ρ' rel,
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
     equal_with_relation type_var rel T T' ->
-      reducible_values theta t T <->
-      reducible_values theta' t T'.
+      [ ρ ⊨ v : T ]v <->
+      [ ρ' ⊨ v : T' ]v.
 
 Lemma reducible_rename_induct:
-  forall theta theta' rel A A' v,
+  forall ρ ρ' rel A A' v,
     renamable_prop A ->
     equal_with_relation type_var rel A A' ->
-    equivalent_with_relation rel theta theta' equivalent_rc ->
-    reducible_values theta v A ->
-    reducible_values theta' v A'.
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
+    [ ρ ⊨ v : A ]v ->
+    [ ρ' ⊨ v : A' ]v.
 Proof.
   unfold renamable_prop; repeat step || eapply_any.
 Qed.
 
 Lemma reducible_rename_induct_back:
-  forall theta theta' rel A A' v,
+  forall ρ ρ' rel A A' v,
     renamable_prop A ->
     equal_with_relation type_var rel A A' ->
-    equivalent_with_relation rel theta theta' equivalent_rc ->
-    reducible_values theta' v A' ->
-    reducible_values theta v A.
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
+    [ ρ' ⊨ v : A' ]v ->
+    [ ρ ⊨ v : A ]v.
 Proof.
   unfold renamable_prop; repeat step || eapply_any.
 Qed.
 
 Lemma reducible_rename_induct_open:
-  forall theta theta' rel B B' v a,
+  forall ρ ρ' rel B B' v a,
     renamable_prop (open 0 B a) ->
     equal_with_relation type_var rel B B' ->
-    equivalent_with_relation rel theta theta' equivalent_rc ->
-    reducible_values theta v (open 0 B a) ->
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
+    [ ρ ⊨ v : open 0 B a ]v ->
     is_erased_term a ->
-    reducible_values theta' v (open 0 B' a).
+    [ ρ' ⊨ v : open 0 B' a ]v.
 Proof.
   unfold renamable_prop; repeat step || eapply_any || apply equal_with_relation_open2 || apply equal_with_relation_refl;
     eauto with fv.
 Qed.
 
 Lemma reducible_rename_induct_open_back:
-  forall theta theta' rel B B' v a,
+  forall ρ ρ' rel B B' v a,
     renamable_prop (open 0 B a) ->
     equal_with_relation type_var rel B B' ->
-    equivalent_with_relation rel theta theta' equivalent_rc ->
-    reducible_values theta' v (open 0 B' a) ->
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
+    [ ρ' ⊨ v : open 0 B' a ]v ->
     is_erased_term a ->
-    reducible_values theta v (open 0 B a).
+    [ ρ ⊨ v : open 0 B a ]v.
 Proof.
   unfold renamable_prop; repeat step || eapply_any || apply equal_with_relation_open2 || apply equal_with_relation_refl;
     eauto with fv.
@@ -95,47 +95,47 @@ Ltac t_prove_reduces_to :=
   end.
 
 Lemma reducible_rename_reduces_to:
-  forall T1 T2 t theta theta' rel A' B' a,
-    equivalent_with_relation rel theta theta' equivalent_rc ->
+  forall T1 T2 t ρ ρ' rel A' B' a,
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
     prop_until renamable_prop (S (type_nodes T1 + type_nodes T2), notype_err) ->
     is_erased_term a ->
     wf a 0 ->
     pfv a term_var = nil ->
-    reducible_values theta' a A' ->
+    [ ρ' ⊨ a : A' ]v ->
     is_erased_type T2 ->
     is_erased_type B' ->
     (forall a,
         is_erased_term a ->
         wf a 0 ->
         pfv a term_var = nil ->
-        reducible_values theta a T1 ->
-        reduces_to (fun t0 : tree => reducible_values theta t0 (open 0 T2 a)) (app t a)) ->
+        [ ρ ⊨ a : T1 ]v ->
+        reduces_to (fun t0 : tree => [ ρ ⊨ t0 : open 0 T2 a ]v) (app t a)) ->
     equal_with_relation type_var rel T1 A' ->
     equal_with_relation type_var rel T2 B' ->
-    reduces_to (fun t0 : tree => reducible_values theta' t0 (open 0 B' a)) (app t a).
+    [ ρ' ⊨ app t a : open 0 B' a ].
 Proof.
   repeat step || t_reduces_to || t_reduces_to2 || t_prove_reduces_to || t_induct_all.
 Qed.
 
 Lemma reducible_rename_reduces_to_back:
-  forall T1 T2 t theta theta' rel A' B' a,
-    equivalent_with_relation rel theta theta' equivalent_rc ->
+  forall T1 T2 t ρ ρ' rel A' B' a,
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
     prop_until renamable_prop (S (type_nodes T1 + type_nodes T2), notype_err) ->
     is_erased_term a ->
     wf a 0 ->
     pfv a term_var = nil ->
-    reducible_values theta a T1 ->
+    [ ρ ⊨ a : T1 ]v ->
     is_erased_type T2 ->
     is_erased_type B' ->
     (forall a,
         is_erased_term a ->
         wf a 0 ->
         pfv a term_var = nil ->
-        reducible_values theta' a A' ->
-        reduces_to (fun t0 : tree => reducible_values theta' t0 (open 0 B' a)) (app t a)) ->
+        [ ρ' ⊨ a : A' ]v ->
+        reduces_to (fun t0 : tree => [ ρ' ⊨ t0 : open 0 B' a ]v) (app t a)) ->
     equal_with_relation type_var rel T1 A' ->
     equal_with_relation type_var rel T2 B' ->
-    reduces_to (fun t0 : tree => reducible_values theta t0 (open 0 T2 a)) (app t a).
+    [ ρ ⊨ app t a : open 0 T2 a ].
 Proof.
   repeat step || t_reduces_to || t_reduces_to2 || t_prove_reduces_to || t_induct_all.
 Qed.
@@ -213,13 +213,13 @@ Proof.
   unfold prop_at; intros; unfold renamable_prop;
   repeat match goal with
          | H1: equal_with_relation _ _ ?T ?T',
-           H: reducible_values _ ?t ?T |- reducible_values _ ?t ?T' \/ _ => left
+           H: [ _ ⊨ ?t : ?T ]v |- [ _ ⊨ ?t : ?T' ]v \/ _ => left
          | H1: equal_with_relation _ _ ?T' ?T,
-           H: reducible_values _ ?t ?T |- reducible_values _ ?t ?T' \/ _ => left
+           H: [ _ ⊨ ?t : ?T ]v |- [ _ ⊨ ?t : ?T' ]v \/ _ => left
          | H1: equal_with_relation _ _ ?T ?T',
-           H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t ?T' => right
+           H: [ _ ⊨ ?t : ?T ]v |- _ \/ [ _ ⊨ ?t : ?T' ]v => right
          | H1: equal_with_relation _ _ ?T' ?T,
-           H: reducible_values _ ?t ?T |- _ \/ reducible_values _ ?t ?T' => right
+           H: [ _ ⊨ ?t : ?T ]v |- _ \/ [ _ ⊨ ?t : ?T' ]v => right
          | _ => step || simp_red || step_inversion equal_with_relation || t_induct_all || find_exists
          end.
 Qed.
@@ -252,9 +252,9 @@ Proof.
   unfold prop_at; intros; unfold renamable_prop;
   repeat match goal with
          | H1: equal_with_relation _ _ ?T ?T',
-           H: reducible_values _ ?t ?T |- exists _ _, _ /\ _ /\ reducible_values _ _ ?T' /\ _ => exists t
+           H: [ _ ⊨ ?t : ?T ]v |- exists _ _, _ /\ _ /\ [ _ ⊨ _ : ?T' ]v /\ _ => exists t
          | H1: equal_with_relation _ _ ?T' ?T,
-           H: reducible_values _ ?t ?T |- exists _ _, _ /\ _ /\ reducible_values _ _ ?T' /\ _ => exists t
+           H: [ _ ⊨ ?t : ?T ]v |- exists _ _, _ /\ _ /\ [ _ ⊨ _ : ?T' ]v /\ _ => exists t
          | _ => step || simp_red || step_inversion equal_with_relation || t_induct_all
          end;
   eauto 2 with erased.
@@ -294,13 +294,13 @@ Lemma reducible_rename_rec: forall m n T0 Ts, prop_until renamable_prop m -> pro
 Proof.
   unfold prop_at; intros; unfold renamable_prop;
   repeat match goal with
-         | H: star scbv_step _ zero |- _ \/ _ => left
-         | H: star scbv_step _ (succ _) |- _ => right
+         | H: _ ~>* zero |- _ \/ _ => left
+         | H: _ ~>* succ _ |- _ => right
          | _ => step || simp_red || step_inversion equal_with_relation ||
                equal_with_erased || find_exists || t_induct_all
          end.
 
-  - unshelve eexists n', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support theta' :: nil)), _, _; eauto;
+  - unshelve eexists n', (makeFresh (pfv T0' type_var :: pfv Ts' type_var ::  support ρ' :: nil)), _, _; eauto;
       repeat step || finisher.
     eapply reducible_rename_induct; try eassumption;
       repeat step || unfold equivalent_rc ||
@@ -319,7 +319,7 @@ Proof.
           eauto using equal_with_relation_refl with fv equal_with_relation.
 
   - (* case recursive type at n + 1 *)
-   unshelve eexists n'0, (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support theta :: nil)), _, _; eauto;
+   unshelve eexists n'0, (makeFresh (pfv T0 type_var :: pfv Ts type_var :: support ρ :: nil)), _, _; eauto;
       repeat step || finisher.
 
    eapply reducible_rename_induct_back; try eassumption;
@@ -349,21 +349,21 @@ Proof.
 Qed.
 
 Lemma reducible_rename :
-  forall T T' t theta theta' rel,
-    reducible_values theta t T ->
-    equivalent_with_relation rel theta theta' equivalent_rc ->
+  forall T T' v ρ ρ' rel,
+    [ ρ ⊨ v : T ]v ->
+    equivalent_with_relation rel ρ ρ' equivalent_rc ->
     equal_with_relation type_var rel T T' ->
-    reducible_values theta' t T'     .
+    [ ρ' ⊨ v : T' ]v     .
 Proof.
-  intros; eapply (reducible_rename_aux _ T eq_refl T' t theta theta' rel); eauto 1.
+  intros; eapply (reducible_rename_aux _ T eq_refl T' v ρ ρ' rel); eauto 1.
 Qed.
 
 Lemma reducible_rename_one:
-  forall RC theta v T X Y,
-    reducible_values ((X,RC) :: theta) v (topen 0 T (fvar X type_var)) ->
+  forall RC ρ v T X Y,
+    [ (X,RC) :: ρ ⊨ v : topen 0 T (fvar X type_var) ]v ->
     (X ∈ pfv T type_var -> False) ->
     (Y ∈ pfv T type_var -> False) ->
-    reducible_values ((Y,RC) :: theta) v (topen 0 T (fvar Y type_var)).
+    [ (Y,RC) :: ρ ⊨ v : topen 0 T (fvar Y type_var) ]v.
 Proof.
   intros.
   eapply (reducible_rename _ _ _ _ _ ((X,Y) :: idrel (pfv T type_var))); eauto;
@@ -377,18 +377,18 @@ Qed.
 
 Ltac reducible_rename_one :=
   match goal with
-  | H: reducible_values ((?X,?RC) :: ?theta) ?v (topen 0 ?T (fvar ?X type_var)) |-
-       reducible_values ((?Y,?RC) :: ?theta) ?v (topen 0 ?T (fvar ?Y type_var)) =>
+  | H: [ (?X,?RC) :: ?ρ ⊨ ?v : topen 0 ?T (fvar ?X type_var) ]v |-
+       [ (?Y,?RC) :: ?ρ ⊨ ?v : topen 0 ?T (fvar ?Y type_var) ]v =>
     apply reducible_rename_one with X
   end.
 
 Lemma reducible_rename_one_rc:
-  forall RC RC' theta v T X Y,
-    reducible_values ((X,RC) :: theta) v (topen 0 T (fvar X type_var)) ->
+  forall RC RC' ρ v T X Y,
+    [ (X,RC) :: ρ ⊨ v : topen 0 T (fvar X type_var) ]v ->
     equivalent_rc RC RC' ->
     (X ∈ pfv T type_var -> False) ->
     (Y ∈ pfv T type_var -> False) ->
-    reducible_values ((Y,RC') :: theta) v (topen 0 T (fvar Y type_var)).
+    [ (Y,RC') :: ρ ⊨ v : topen 0 T (fvar Y type_var) ]v.
 Proof.
   intros.
   eapply (reducible_rename _ _ _ _ _ ((X,Y) :: idrel (pfv T type_var))); eauto;
@@ -401,22 +401,22 @@ Proof.
 Qed.
 
 Lemma reducible_rename_rc:
-  forall RC RC' theta v T X,
-    reducible_values ((X, RC) :: theta) v (topen 0 T (fvar X type_var)) ->
+  forall RC RC' ρ v T X,
+    [ (X, RC) :: ρ ⊨ v : topen 0 T (fvar X type_var) ]v ->
     equivalent_rc RC RC' ->
     (X ∈ pfv T type_var -> False) ->
-    reducible_values ((X, RC') :: theta) v (topen 0 T (fvar X type_var)).
+    [ (X, RC') :: ρ ⊨ v : topen 0 T (fvar X type_var) ]v.
 Proof.
   eauto using reducible_rename_one_rc.
 Qed.
 
 Lemma reducible_rename_permute:
-  forall T theta1 theta2 X Y (RC : tree -> Prop) v,
-    ~(Y ∈ support theta1) ->
+  forall T ρ1 ρ2 X Y (RC : tree -> Prop) v,
+    ~(Y ∈ support ρ1) ->
     ~(X ∈ pfv T type_var) ->
     ~(Y ∈ pfv T type_var) ->
-    reducible_values ((X, RC) :: theta1 ++ theta2) v (topen 0 T (fvar X type_var)) ->
-    reducible_values (theta1 ++ (Y, RC) :: theta2) v (topen 0 T (fvar Y type_var)).
+    [ (X, RC) :: ρ1 ++ ρ2 ⊨ v : topen 0 T (fvar X type_var) ]v ->
+    [ ρ1 ++ (Y, RC) :: ρ2 ⊨ v : topen 0 T (fvar Y type_var) ]v.
 Proof.
   intros.
   eapply (reducible_rename _ _ _ _ _ ((X,Y) :: idrel (pfv T type_var))); eauto;
@@ -427,12 +427,12 @@ Proof.
 Qed.
 
 Lemma rename_var_arrow:
-  forall X Y RC theta f A,
+  forall X Y RC ρ f A,
     twf A 0 ->
     ~X ∈ pfv A type_var ->
     ~Y ∈ pfv A type_var ->
-    reducible_values ((X, RC) :: theta) f (T_arrow A (fvar X type_var)) <->
-    reducible_values ((Y, RC) :: theta) f (T_arrow A (fvar Y type_var)).
+    [ (X, RC) :: ρ ⊨ f : T_arrow A (fvar X type_var) ]v <->
+    [ (Y, RC) :: ρ ⊨ f : T_arrow A (fvar Y type_var) ]v.
 Proof.
   steps.
 

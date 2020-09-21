@@ -4,7 +4,7 @@ Require Import Coq.Strings.String.
 Require Export SystemFR.ReducibilityUnused.
 Require Export SystemFR.BaseType.
 
-Require Import Omega.
+Require Import Psatz.
 
 Opaque reducible_values.
 
@@ -29,44 +29,44 @@ Qed.
 Hint Immediate base_type_erased: erased.
 
 Lemma base_type_approx_aux:
-  forall n X Ts T theta l v RC,
+  forall n X Ts T ρ l v RC,
     type_nodes T < n ->
     wfs l 0 ->
     pclosed_mapping l type_var ->
     base_type X Ts T ->
     erased_terms l ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     reducibility_candidate RC ->
     (* RC can be instantiated by the denotation of T_rec zero T0 Ts *)
-    reducible_values ((X, RC) :: theta) v (psubstitute Ts l term_var) ->
-    reducible_values theta v (psubstitute T l term_var).
+    reducible_values ((X, RC) :: ρ) v (psubstitute Ts l term_var) ->
+    [ ρ ⊨ v : psubstitute T l term_var ]v.
 Proof.
-  induction n; intros; try omega; inversion H2;
+  induction n; intros; try lia; inversion H2;
     repeat match goal with
     | _ =>
       step || simp_red || find_exists ||
       (rewrite substitute_open2 in * by (t_closing; eauto with fv))
     end;
-    try omega;
-    try solve [ eapply_any; steps; eauto with omega ];
+    try lia;
+    try solve [ eapply_any; steps; eauto with lia ];
     try solve [ eapply_any; repeat step || autorewrite with bsize in *;
-                eauto 1; try omega; eauto 2 using base_type_open; eauto 2 with erased ];
+                eauto 1; try lia; eauto 2 using base_type_open; eauto 2 with erased ];
     t_closer;
     eauto 2 using reducible_values_closed with step_tactic;
     try solve [ eapply reducible_unused3; eauto 1; repeat step || rewrite fv_subst_different_tag in * by steps ].
 Qed.
 
 Lemma base_type_approx:
-  forall X Ts T theta l v RC,
+  forall X Ts T ρ l v RC,
     (* RC can be instantiated by the denotation of T_rec zero T0 Ts *)
-    reducible_values ((X, RC) :: theta) v (psubstitute Ts l term_var) ->
+    reducible_values ((X, RC) :: ρ) v (psubstitute Ts l term_var) ->
     wfs l 0 ->
     pclosed_mapping l type_var ->
     base_type X Ts T ->
     erased_terms l ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     reducibility_candidate RC ->
-    reducible_values theta v (psubstitute T l term_var).
+    [ ρ ⊨ v : psubstitute T l term_var ]v.
 Proof.
   intros; eauto using base_type_approx_aux.
 Qed.

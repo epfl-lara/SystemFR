@@ -5,7 +5,7 @@ Lemma equivalent_value_nat:
   forall v v',
     cbv_value v ->
     is_nat_value v' ->
-    equivalent_terms v v' ->
+    [ v ≡ v' ] ->
     v = v'.
 Proof.
   intros.
@@ -21,8 +21,8 @@ Qed.
 Lemma equivalent_nat:
   forall t v,
     is_nat_value v ->
-    equivalent_terms t v ->
-    star scbv_step t v.
+    [ t ≡ v ] ->
+    t ~>* v.
 Proof.
   intros.
   apply_anywhere equivalent_sym.
@@ -35,9 +35,9 @@ Qed.
 Lemma equivalent_star_nat:
   forall t t' v,
     is_nat_value v ->
-    equivalent_terms t t' ->
-    star scbv_step t v ->
-    star scbv_step t' v.
+    [ t ≡ t' ] ->
+    t ~>* v ->
+    t' ~>* v.
 Proof.
   intros.
   pose proof H0 as HH; unfold equivalent_terms in HH; steps;

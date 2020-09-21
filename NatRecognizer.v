@@ -32,20 +32,20 @@ Qed.
 Lemma eval_nat_recognizer:
   forall v,
     is_nat_value v ->
-    star scbv_step (open 0 (nat_recognizer v) v) ttrue.
+    open 0 (nat_recognizer v) v ~>* ttrue.
 Proof.
   induction 1;
     repeat step; eauto using star_one with smallstep.
 
-  eapply Trans; eauto with smallstep values.
+  eapply Relation_Operators.rt1n_trans; eauto with smallstep values.
   rewrite (open_none _ 1); eauto using wf_nat_recognizer.
 Qed.
 
 Lemma eval_nat_recognizer2:
   forall v1 v2,
     is_nat_value v2 ->
-      star scbv_step (open 0 (nat_recognizer v1) v2) ttrue \/
-      star scbv_step (open 0 (nat_recognizer v1) v2) tfalse.
+      open 0 (nat_recognizer v1) v2 ~>* ttrue \/
+      open 0 (nat_recognizer v1) v2 ~>* tfalse.
 Proof.
   induction v1; inversion 1;
     repeat
@@ -63,7 +63,7 @@ Lemma true_nat_recognizer:
     is_nat_value v ->
     forall v',
       cbv_value v' ->
-      star scbv_step (open 0 (nat_recognizer v) v') ttrue ->
+      open 0 (nat_recognizer v) v' ~>* ttrue ->
       v = v'
 .
 Proof.

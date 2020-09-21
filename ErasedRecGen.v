@@ -15,22 +15,22 @@ Require Export SystemFR.StrictPositivitySubst.
 Require Export SystemFR.BaseTypeLemmas.
 Require Export SystemFR.BaseTypeSyntaxLemmas.
 
-Require Import Omega.
+Require Import Psatz.
 
 Opaque reducible_values.
 Opaque strictly_positive.
 Opaque makeFresh.
 
 Lemma non_empty_nat:
-  forall theta, non_empty theta T_nat.
+  forall ρ, non_empty ρ T_nat.
 Proof.
   unfold non_empty; intros; exists zero; repeat step || simp_red.
 Qed.
 
 Ltac t_instantiate_reducible3 :=
   match goal with
-  | H1: reducible_values _ ?v ?T, H3: forall a, _ -> _ -> _ |- _ =>
-    poseNew (Mark (v,H3) "t_instantiate_reducible");
+  | H1: [ _ ⊨ ?v : _ ]v, H3: forall a, _ -> _ -> _ |- _ =>
+    poseNew (Mark (v, H3) "t_instantiate_reducible");
     unshelve epose proof (H3 v _ H1)
   end.
 
@@ -38,7 +38,7 @@ Ltac t_instantiate_reducible3 :=
 (** Rules for unfold **)
 
 Lemma reducible_values_unfold_gen:
-  forall T0 Ts theta v X,
+  forall T0 Ts ρ v X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -49,16 +49,16 @@ Lemma reducible_values_unfold_gen:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
-    reducible_values theta v (intersect T0 Ts) ->
-    reducible_values theta v (topen 0 Ts (intersect T0 Ts)).
+    valid_interpretation ρ ->
+    [ ρ ⊨ v : intersect T0 Ts ]v ->
+    [ ρ ⊨ v : topen 0 Ts (intersect T0 Ts) ]v.
 Proof.
   unfold intersect in *; repeat step.
   apply strictly_positive_push_forall2 with X;
     repeat match goal with
-           | H: reducible_values _ _ (T_forall _ _) |- _ => simp reducible_values in H
-           | H: reducible_values _ _ (T_rec _ _ _) |- _ => simp reducible_values in H
-           | H1: reducible_values _ ?v T_nat, H3: forall a, _ -> _ -> _ |- _ =>
+           | H: [ _ ⊨ _ : T_forall _ _ ]v |- _ => simp reducible_values in H
+           | H: [ _ ⊨ _ : T_rec _ _ _ ]v |- _  => simp reducible_values in H
+           | H1: [ _ ⊨ ?v : T_nat ]v, H3: forall a, _ -> _ -> _ |- _ =>
              poseNew (Mark (v,H3) "t_instantiate_reducible");
              unshelve epose proof (H3 (succ v) _ _ _ _)
            | _ => step || (rewrite open_none in * by steps) || apply reducible_values_succ || list_utils
@@ -74,7 +74,7 @@ Proof.
       eauto with twf wf erased fv values.
 
   lazymatch goal with
-  | H: star scbv_step ?v1 ?v2 |- _ =>
+  | H: ?v1 ~>* ?v2 |- _ =>
     unshelve epose proof (star_smallstep_value v1 v2 H _); clear H2
   end;
     repeat step || list_utils;
@@ -82,7 +82,7 @@ Proof.
 Qed.
 
 Lemma reducible_unfold_gen:
-  forall T0 Ts theta t X,
+  forall T0 Ts ρ t X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -93,18 +93,18 @@ Lemma reducible_unfold_gen:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
-    reducible theta t (intersect T0 Ts) ->
-    reducible theta t (topen 0 Ts (intersect T0 Ts)).
+    valid_interpretation ρ ->
+    [ ρ ⊨ t : intersect T0 Ts ] ->
+    [ ρ ⊨ t : topen 0 Ts (intersect T0 Ts) ].
 Proof.
-  unfold reducible, reduces_to; steps.
+  unfold reduces_to; steps.
   exists v; repeat step || apply star_unfold_fold;
     try solve [ t_closing ];
     eauto using reducible_values_unfold_gen.
 Qed.
 
 Lemma open_reducible_unfold_gen:
-  forall T0 Ts tvars gamma t X,
+  forall T0 Ts Θ Γ t X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -113,10 +113,10 @@ Lemma open_reducible_unfold_gen:
     strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
-    [ tvars; gamma ⊨ t : intersect T0 Ts ] ->
-    [ tvars; gamma ⊨ t : topen 0 Ts (intersect T0 Ts) ].
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
+    [ Θ; Γ ⊨ t : intersect T0 Ts ] ->
+    [ Θ; Γ ⊨ t : topen 0 Ts (intersect T0 Ts) ].
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
@@ -147,7 +147,7 @@ Qed.
 (** Rules for unfold_in **)
 
 Lemma reducible_unfold_in_gen:
-  forall T0 Ts theta t1 t2 X T,
+  forall T0 Ts ρ t1 t2 X T,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -164,17 +164,17 @@ Lemma reducible_unfold_in_gen:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
-    reducible theta t1 (intersect T0 Ts) ->
+    valid_interpretation ρ ->
+    [ ρ ⊨ t1 : intersect T0 Ts ] ->
     (forall v,
-      equivalent_terms t1 v ->
-      reducible_values theta v (topen 0 Ts (intersect T0 Ts)) ->
-      reducible theta (open 0 t2 v) T) ->
-    reducible theta (app (notype_lambda t2) t1) T.
+      [ t1 ≡ v ] ->
+      [ ρ ⊨ v : topen 0 Ts (intersect T0 Ts) ]v ->
+      [ ρ ⊨ open 0 t2 v : T ]) ->
+    [ ρ ⊨ app (notype_lambda t2) t1 : T ].
 Proof.
   intros.
   match goal with
-  | H: reducible _ _ (intersect _ _) |- _ => unfold reducible, reduces_to in H
+  | H:[ _ ⊨ _ : intersect _ _ ] |- _ => unfold reduces_to in H
   end; steps.
 
   eapply star_backstep_reducible; eauto with cbvlemmas values;
@@ -192,18 +192,18 @@ Proof.
 Qed.
 
 Lemma open_reducible_unfold_in_gen:
-  forall T0 Ts tvars gamma t1 t2 X T p y,
-    ~(p ∈ tvars) ->
-    ~(p ∈ pfv_context gamma term_var) ->
-    ~(p ∈ support gamma) ->
+  forall T0 Ts Θ Γ t1 t2 X T p y,
+    ~(p ∈ Θ) ->
+    ~(p ∈ pfv_context Γ term_var) ->
+    ~(p ∈ support Γ) ->
     ~(p ∈ fv t1) ->
     ~(p ∈ fv t2) ->
     ~(p ∈ fv T0) ->
     ~(p ∈ fv Ts) ->
     ~(p ∈ fv T) ->
-    ~(y ∈ tvars) ->
-    ~(y ∈ pfv_context gamma term_var) ->
-    ~(y ∈ support gamma) ->
+    ~(y ∈ Θ) ->
+    ~(y ∈ pfv_context Γ term_var) ->
+    ~(y ∈ support Γ) ->
     ~(y ∈ fv t1) ->
     ~(y ∈ fv t2) ->
     ~(y ∈ fv T0) ->
@@ -217,21 +217,19 @@ Lemma open_reducible_unfold_in_gen:
     wf t2 0 ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    subset (pfv t1 term_var) (support gamma) ->
-    subset (pfv t2 term_var) (support gamma) ->
+    subset (pfv t1 term_var) (support Γ) ->
+    subset (pfv t2 term_var) (support Γ) ->
     ~(p = y) ->
     ~(X ∈ pfv Ts type_var) ->
     strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
-    [ tvars; gamma ⊨ t1 : intersect T0 Ts ] ->
-    [ tvars; (p, T_equiv t1 (fvar y term_var)) ::
-             (y, topen 0 Ts (intersect T0 Ts)) ::
-             gamma ⊨
-        open 0 t2 (fvar y term_var) : T ] ->
-    [ tvars; gamma ⊨ app (notype_lambda t2) t1 : T ].
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
+    [ Θ; Γ ⊨ t1 : intersect T0 Ts ] ->
+    [ Θ; (p, T_equiv t1 (fvar y term_var)) :: (y, topen 0 Ts (intersect T0 Ts)) :: Γ ⊨
+      open 0 t2 (fvar y term_var) : T ] ->
+    [ Θ; Γ ⊨ app (notype_lambda t2) t1 : T ].
 Proof.
   unfold open_reducible;
     repeat step || rewrite substitute_topen;
@@ -260,9 +258,9 @@ Proof.
     eapply strictly_positive_rename_one; eauto;
       repeat step; try finisher.
 
-  - unshelve epose proof (H33 theta ((p, uu) :: (y,v) :: lterms) _ _ _);
+  - unshelve epose proof (H33 ρ ((p, uu) :: (y,v) :: lterms) _ _ _);
       repeat match goal with
-             | |- reducible_values _ _ (T_equiv _ _) => simp reducible_values
+             | |- [ _ ⊨ _ : T_equiv _ _ ]v => simp reducible_values
              | _ => step || list_utils || nodup || apply SatCons || t_substitutions || fv_open
              end;
         t_closer.
@@ -272,7 +270,7 @@ Qed.
 (** Fold Rules **)
 
 Lemma reducible_values_fold_gen:
-  forall T0 Ts theta v X,
+  forall T0 Ts ρ v X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -283,12 +281,12 @@ Lemma reducible_values_fold_gen:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     (forall v,
-        reducible_values theta v (topen 0 Ts (T_rec zero T0 Ts)) ->
-        reducible_values theta v T0) ->
-    reducible_values theta v (topen 0 Ts (intersect T0 Ts)) ->
-    reducible_values theta v (intersect T0 Ts).
+        [ ρ ⊨ v : topen 0 Ts (T_rec zero T0 Ts) ]v ->
+        [ ρ ⊨ v : T0 ]v) ->
+    [ ρ ⊨ v : topen 0 Ts (intersect T0 Ts) ]v ->
+    [ ρ ⊨ v : intersect T0 Ts ]v.
 Proof.
   unfold intersect in *; repeat step.
   simp reducible_values; repeat step || (rewrite open_none in * by steps); try solve [ t_closing ].
@@ -308,7 +306,7 @@ Proof.
       repeat step || simp_red || rewrite open_none in * by steps.
   - (* case a = n+1 *)
     right; exists v0, (makeFresh (
-                     support theta ::
+                     support ρ ::
                      pfv v0 type_var ::
                      pfv T0 type_var ::
                      pfv Ts type_var ::
@@ -326,7 +324,7 @@ Proof.
 Qed.
 
 Lemma reducible_fold_gen:
-  forall T0 Ts theta t X,
+  forall T0 Ts ρ t X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -337,14 +335,14 @@ Lemma reducible_fold_gen:
     is_erased_type Ts ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     (forall v,
-        reducible_values theta v (topen 0 Ts (T_rec zero T0 Ts)) ->
-        reducible_values theta v T0) ->
-    reducible theta t (topen 0 Ts (intersect T0 Ts)) ->
-    reducible theta t (intersect T0 Ts).
+        [ ρ ⊨ v : topen 0 Ts (T_rec zero T0 Ts) ]v ->
+        [ ρ ⊨ v : T0 ]v) ->
+    [ ρ ⊨ t : topen 0 Ts (intersect T0 Ts) ] ->
+    [ ρ ⊨ t : intersect T0 Ts ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat step.
   exists v; repeat step;
     try solve [ t_closing ];
@@ -353,7 +351,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_fold_gen:
-  forall T0 Ts tvars gamma t X,
+  forall T0 Ts Θ Γ t X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -362,21 +360,20 @@ Lemma open_reducible_fold_gen:
     strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
-    (forall theta l,
-        valid_interpretation theta ->
-        satisfies (reducible_values theta) gamma l ->
-        support theta = tvars ->
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
+    (forall ρ l,
+        valid_interpretation ρ ->
+        satisfies (reducible_values ρ) Γ l ->
+        support ρ = Θ ->
         (forall v,
-            reducible_values theta v
-                             (topen 0 (psubstitute Ts l term_var)
-                                    (T_rec zero
-                                           (psubstitute T0 l term_var)
-                                           (psubstitute Ts l term_var))) ->
-            reducible_values theta v (psubstitute T0 l term_var))) ->
-    [ tvars; gamma ⊨ t : topen 0 Ts (intersect T0 Ts) ] ->
-    [ tvars; gamma ⊨ t : intersect T0 Ts ].
+            [ ρ ⊨ v : topen 0 (psubstitute Ts l term_var)
+                              (T_rec zero
+                                     (psubstitute T0 l term_var)
+                                     (psubstitute Ts l term_var)) ]v ->
+            [ ρ ⊨ v : psubstitute T0 l term_var ]v)) ->
+    [ Θ; Γ ⊨ t : topen 0 Ts (intersect T0 Ts) ] ->
+    [ Θ; Γ ⊨ t : intersect T0 Ts ].
 Proof.
   unfold open_reducible; steps.
   apply reducible_fold_gen with X;
@@ -394,7 +391,7 @@ Proof.
 Qed.
 
 Lemma open_reducible_fold_gen2:
-  forall T0 Ts tvars gamma t X,
+  forall T0 Ts Θ Γ t X,
     wf T0 0 ->
     wf Ts 0 ->
     twf T0 0 ->
@@ -403,15 +400,15 @@ Lemma open_reducible_fold_gen2:
     strictly_positive (topen 0 Ts (fvar X type_var)) (X :: nil) ->
     is_erased_type T0 ->
     is_erased_type Ts ->
-    subset (fv T0) (support gamma) ->
-    subset (fv Ts) (support gamma) ->
+    subset (fv T0) (support Γ) ->
+    subset (fv Ts) (support Γ) ->
     base_type X (topen 0 Ts (fvar X type_var)) T0 ->
-    [ tvars; gamma ⊨ t : topen 0 Ts (intersect T0 Ts) ] ->
-    [ tvars; gamma ⊨ t : intersect T0 Ts ].
+    [ Θ; Γ ⊨ t : topen 0 Ts (intersect T0 Ts) ] ->
+    [ Θ; Γ ⊨ t : intersect T0 Ts ].
 Proof.
   intros; apply open_reducible_fold_gen with X; steps.
   apply base_type_approx with X (topen 0 Ts (fvar X type_var))
-    (fun v => reducible_values theta v (T_rec zero (psubstitute T0 l term_var) (psubstitute Ts l term_var)));
+    (fun v => [ ρ ⊨ v : T_rec zero (psubstitute T0 l term_var) (psubstitute Ts l term_var) ]v) ;
     repeat step || apply reducibility_is_candidate || list_utils;
     eauto with wf fv;
     eauto with erased.

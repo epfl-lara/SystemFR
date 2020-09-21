@@ -1,5 +1,5 @@
 Require Import Coq.Strings.String.
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.TWFLemmas.
@@ -15,7 +15,7 @@ Lemma open_topen:
 Proof.
   induction t;
     repeat step || t_equality || apply_any ||
-      (rewrite topen_none by (steps;eauto with twf omega)) ||
-      (rewrite open_none by (steps;eauto with wf omega));
-        eauto with wf twf omega.
+      (rewrite topen_none by (steps;eauto with twf lia)) ||
+      (rewrite open_none by (steps;eauto with wf lia));
+        eauto with wf twf lia.
 Qed.

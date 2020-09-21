@@ -1,6 +1,6 @@
 Require Import Equations.Equations.
 
-Require Import Omega.
+Require Import Psatz.
 
 
 Require Export SystemFR.Syntax.

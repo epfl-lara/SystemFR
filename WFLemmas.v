@@ -1,7 +1,6 @@
 Require Import Coq.Strings.String.
 Require Import PeanoNat.
 Require Import Psatz.
-Require Import Omega.
 
 Require Export SystemFR.Syntax.
 
@@ -59,20 +58,20 @@ Qed.
 Hint Immediate wfs_monotone2: wf.
 
 Lemma wfs_lookup:
-  forall gamma x T k,
-    wfs gamma k ->
-    lookup Nat.eq_dec gamma x = Some T ->
+  forall Γ x T k,
+    wfs Γ k ->
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
     wf T k.
 Proof.
-  induction gamma; steps; eauto.
+  induction Γ; steps; eauto.
 Qed.
 
 Hint Immediate wfs_lookup: wf.
 
 Lemma wfs_lookup2:
-  forall gamma x T k,
-    wfs gamma 0 ->
-    lookup Nat.eq_dec gamma x = Some T ->
+  forall Γ x T k,
+    wfs Γ 0 ->
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
     wf T k.
 Proof.
   intros; eauto using wfs_lookup with wf.
@@ -110,7 +109,7 @@ Hint Immediate wf_topen_rev: wf.
 Lemma wf_open:
   forall t rep k, wf t (S k) -> wf rep k -> wf (open k t rep) k.
 Proof.
-  induction t; repeat step || apply_any; try omega; eauto 1 with wf.
+  induction t; repeat step || apply_any; try lia; eauto 1 with wf.
 Qed.
 
 Hint Resolve wf_open: wf.
@@ -118,7 +117,7 @@ Hint Resolve wf_open: wf.
 Lemma wf_topen:
   forall t rep i k, wf t k -> wf rep k -> wf (topen i t rep) k.
 Proof.
-  induction t; repeat step || apply_any; try omega; eauto 1 with wf.
+  induction t; repeat step || apply_any; try lia; eauto 1 with wf.
 Qed.
 
 Hint Resolve wf_topen: wf.

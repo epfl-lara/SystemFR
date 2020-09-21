@@ -8,8 +8,8 @@ Require Import PeanoNat.
 
 Definition similar_sets (rel: map nat nat) (vars vars': list nat): Prop :=
   forall x y,
-    lookup Nat.eq_dec rel x = Some y ->
-    lookup Nat.eq_dec (swap rel) y = Some x ->
+    lookup PeanoNat.Nat.eq_dec rel x = Some y ->
+    lookup PeanoNat.Nat.eq_dec (swap rel) y = Some x ->
     (x ∈ vars <-> y ∈ vars').
 
 Lemma no_type_fvar_rename:

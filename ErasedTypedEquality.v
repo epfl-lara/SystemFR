@@ -5,16 +5,16 @@ Opaque T_equivalent_at.
 Opaque reducible_values.
 
 Lemma fun_apply:
-  forall theta A B f1 f2 a1 a2,
-    valid_interpretation theta ->
+  forall ρ A B f1 f2 a1 a2,
+    valid_interpretation ρ ->
     wf A 0 ->
     wf B 0 ->
     twf B 0 ->
     pfv A term_var = nil ->
     pfv B term_var = nil ->
-    equivalent_at theta A a1 a2 ->
-    equivalent_at theta (T_arrow A B) f1 f2 ->
-    equivalent_at theta B (app f1 a1) (app f2 a2).
+    [ ρ ⊨ a1 ≡ a2 : A ] ->
+    [ ρ ⊨ f1 ≡ f2 : T_arrow A B ] ->
+    [ ρ ⊨ app f1 a1 ≡ app f2 a2 : B ].
 Proof.
   unfold equivalent_at; steps;
     eauto using reducible_app2, reducible_value_expr.
@@ -31,12 +31,12 @@ Proof.
 
   - eapply equivalent_square; eauto.
     + eapply equivalent_trans.
-      * unfold reducible, reduces_to in H5; steps.
+      * unfold reduces_to in H5; steps.
         apply equivalent_beta with v; steps; t_closer.
       * repeat step || rewrite open_none in * by t_closer.
         apply equivalent_refl; repeat step || list_utils; eauto with wf erased fv.
     + eapply equivalent_trans.
-      * unfold reducible, reduces_to in H8; steps.
+      * unfold reduces_to in H8; steps.
         apply equivalent_beta with v; steps; t_closer.
       * repeat step || rewrite open_none in * by t_closer.
 
@@ -53,14 +53,14 @@ Proof.
 
         -- apply (equivalent_square _ _ _ _ H16); eauto.
           ++ eapply equivalent_trans.
-            ** unfold reducible, reduces_to in *; repeat step.
+            ** unfold reduces_to in *; repeat step.
                eapply equivalent_beta; eauto;
                  repeat step || list_utils;
                  try solve [ t_closer ].
             ** repeat step || (rewrite open_none in * by t_closer).
                apply equivalent_refl; steps; t_closer.
           ++ eapply equivalent_trans.
-            ** unfold reducible, reduces_to in *; repeat step.
+            ** unfold reduces_to in *; repeat step.
                eapply equivalent_beta; eauto;
                  repeat step || list_utils;
                  try solve [ t_closer ].
@@ -69,13 +69,13 @@ Proof.
 Qed.
 
 Lemma open_equivalent_fun_apply:
-  forall tvars gamma A B a1 a2 f1 f2 p p',
+  forall Θ Γ A B a1 a2 f1 f2 p p',
     wf A 0 ->
     wf B 0 ->
     twf A 0 ->
     twf B 0 ->
-    subset (fv A) (support gamma) ->
-    subset (fv B) (support gamma) ->
+    subset (fv A) (support Γ) ->
+    subset (fv B) (support Γ) ->
     is_erased_type A ->
     is_erased_type B ->
     is_erased_term a1 ->
@@ -90,9 +90,9 @@ Lemma open_equivalent_fun_apply:
     pfv a2 term_var = nil ->
     pfv f1 term_var = nil ->
     pfv f2 term_var = nil ->
-    [ tvars; gamma ⊨ p : T_equivalent_at (T_arrow A B) f1 f2 ] ->
-    [ tvars; gamma ⊨ p': T_equivalent_at A a1 a2 ] ->
-    [ tvars; gamma ⊨ uu: T_equivalent_at B (app f1 a1) (app f2 a2) ].
+    [ Θ; Γ ⊨ p : T_equivalent_at (T_arrow A B) f1 f2 ] ->
+    [ Θ; Γ ⊨ p': T_equivalent_at A a1 a2 ] ->
+    [ Θ; Γ ⊨ uu: T_equivalent_at B (app f1 a1) (app f2 a2) ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || rewrite subst_equivalent_at in *.
@@ -116,7 +116,7 @@ Proof.
 Qed.
 
 Lemma open_equivalent_at_equivalent:
-  forall tvars gamma t1 t2 A,
+  forall Θ Γ t1 t2 A,
     is_erased_type A ->
     is_erased_term t1 ->
     is_erased_term t2 ->
@@ -124,10 +124,10 @@ Lemma open_equivalent_at_equivalent:
     wf t1 0 ->
     wf t2 0 ->
     twf A 0 ->
-    [ tvars; gamma ⊨ t1 : A ] ->
-    [ tvars; gamma ⊨ t2 : A ] ->
-    [ tvars; gamma ⊨ t1 ≡ t2 ] ->
-    [ tvars; gamma ⊨ uu: T_equivalent_at A t1 t2 ].
+    [ Θ; Γ ⊨ t1 : A ] ->
+    [ Θ; Γ ⊨ t2 : A ] ->
+    [ Θ; Γ ⊨ t1 ≡ t2 ] ->
+    [ Θ; Γ ⊨ uu: T_equivalent_at A t1 t2 ].
 Proof.
   unfold open_reducible, open_equivalent;
     repeat step || t_instantiate_sat3 || rewrite subst_equivalent_at ||
@@ -140,25 +140,25 @@ Qed.
 
 (*
 Lemma fun_ext:
-  forall theta A B f1 f2,
-    valid_interpretation theta ->
-    reducible theta f1 (T_arrow A B) ->
-    reducible theta f2 (T_arrow A B) ->
+  forall ρ A B f1 f2,
+    valid_interpretation ρ ->
+    [ ρ ⊨ f1 : T_arrow A B ] ->
+    [ ρ ⊨ f2 : T_arrow A B ] ->
     (forall a,
-      equivalent_at theta B (app f1 a) (app f2 a)) ->
-    equivalent_at theta (T_arrow A B) f1 f2.
+      equivalent_at ρ B (app f1 a) (app f2 a)) ->
+    equivalent_at ρ (T_arrow A B) f1 f2.
 Proof.
   intros; unfold equivalent_at; steps.
 Admitted.
 
 Lemma open_reducible_fun_ext:
-  forall tvars gamma A B f1 f2 p x,
-    [ tvars; gamma ⊨ f1 : T_arrow A B ] ->
-    [ tvars; gamma ⊨ f2 : T_arrow A B ] ->
-    [ tvars; (x, A) :: gamma ⊨ p: T_equivalent_at B
+  forall Θ Γ A B f1 f2 p x,
+    [ Θ; Γ ⊨ f1 : T_arrow A B ] ->
+    [ Θ; Γ ⊨ f2 : T_arrow A B ] ->
+    [ Θ; (x, A) :: Γ ⊨ p: T_equivalent_at B
                                    (app f1 (fvar x term_var))
                                    (app f2 (fvar x term_var)) ] ->
-    [ tvars; gamma ⊨ uu: T_equivalent_at (T_arrow A B) f1 f2 ].
+    [ Θ; Γ ⊨ uu: T_equivalent_at (T_arrow A B) f1 f2 ].
 Proof.
 Admitted.
 *)

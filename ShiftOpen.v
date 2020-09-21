@@ -268,7 +268,7 @@ Lemma open_shift:
     open k C t = open (k + i) (shift k C i) t.
 Proof.
   induction C;
-    repeat step || t_equality; eauto with omega wf;
+    repeat step || t_equality; eauto with lia wf;
     try solve [ repeat rewrite <- plus_Sn_m; apply_any; auto ].
 Qed.
 
@@ -294,7 +294,7 @@ Lemma shift_twice:
     shift k (shift k C i) j = shift k C (i + j).
 Proof.
   induction C;
-    repeat step || rewrite Plus.plus_assoc_reverse; eauto with omega.
+    repeat step || rewrite Plus.plus_assoc_reverse; eauto with lia.
 Qed.
 
 Lemma open_shift_open:
@@ -305,7 +305,7 @@ Lemma open_shift_open:
 Proof.
   induction C1;
     repeat step || t_equality || rewrite shift_nothing in * || rewrite shift_twice in * || rewrite (PeanoNat.Nat.add_comm k);
-    eauto with omega;
+    eauto with lia;
     eauto using open_shift_zero.
 Qed.
 
@@ -325,7 +325,7 @@ Lemma shift_nothing2:
     wf t k ->
     shift k t i = t.
 Proof.
-  induction t; repeat step || t_equality; eauto with omega.
+  induction t; repeat step || t_equality; eauto with lia.
 Qed.
 
 Lemma substitute_shift:

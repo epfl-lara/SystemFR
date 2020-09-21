@@ -1,4 +1,5 @@
 Require Import String.
+Require Import Relations.
 
 Require Export SystemFR.PrimitiveSize.
 Require Export SystemFR.PrimitiveRecognizers.
@@ -131,16 +132,18 @@ Proof.
     repeat step || list_utils || unfold singleton, add in *.
 Qed.
 
+Reserved Notation "t1 '~>' t2" (at level 20).
+
 Inductive scbv_step: tree -> tree -> Prop :=
 (* beta reduction *)
 | SPBetaProj1: forall v1 v2,
     cbv_value v1 ->
     cbv_value v2 ->
-    scbv_step (pi1 (pp v1 v2)) v1
+    pi1 (pp v1 v2) ~> v1
 | SPBetaProj2: forall v1 v2,
     cbv_value v1 ->
     cbv_value v2 ->
-    scbv_step (pi2 (pp v1 v2)) v2
+    pi2 (pp v1 v2) ~> v2
 
 | SPBetaApp: forall t v,
     cbv_value v ->
@@ -149,113 +152,111 @@ Inductive scbv_step: tree -> tree -> Prop :=
       (open 0 t v)
 
 | SPBetaIte1: forall t1 t2,
-    scbv_step (ite ttrue t1 t2) t1
+    ite ttrue t1 t2 ~> t1
 | SPBetaIte2: forall t1 t2,
-    scbv_step (ite tfalse t1 t2) t2
+    ite tfalse t1 t2 ~> t2
 
 (* `notype_tfix` has a dummy hole which is used for type annotation in the `tfix` tree.
    During evaluation, we fill it with a zero *)
 | SPBetaFix: forall ts,
-    scbv_step (notype_tfix ts) (open 0 (open 1 ts zero) (notype_tfix ts))
+    notype_tfix ts ~> open 0 (open 1 ts zero) (notype_tfix ts)
 
 | SPBetaMatch0: forall t0 ts,
-    scbv_step
-      (tmatch zero t0 ts)
-      t0
+    tmatch zero t0 ts ~> t0
 | SPBetaMatchS: forall v t0 ts,
     cbv_value v ->
-    scbv_step
-      (tmatch (succ v) t0 ts)
-      (open 0 ts v)
+    tmatch (succ v) t0 ts ~> open 0 ts v
 
 | SPBetaMatchLeft: forall v tl tr,
     cbv_value v ->
-    scbv_step (sum_match (tleft v) tl tr) (open 0 tl v)
+    sum_match (tleft v) tl tr ~> open 0 tl v
 | SPBetaMatchRight: forall v tl tr,
     cbv_value v ->
-    scbv_step (sum_match (tright v) tl tr) (open 0 tr v)
+    sum_match (tright v) tl tr ~> open 0 tr v
 
 | SPBetaSize:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-      scbv_step (tsize v) (build_nat (tsize_semantics v))
+      tsize v ~> build_nat (tsize_semantics v)
 
 | SPBetaIsPair:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-      scbv_step (boolean_recognizer 0 v) (is_pair v)
+      boolean_recognizer 0 v ~> is_pair v
 | SPBetaIsSucc:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-      scbv_step (boolean_recognizer 1 v) (is_succ v)
+      boolean_recognizer 1 v ~> is_succ v
 | SPBetaIsLambda:
     forall v,
       cbv_value v ->
       ~ top_level_var v ->
-      scbv_step (boolean_recognizer 2 v) (is_lambda v)
+      boolean_recognizer 2 v ~> is_lambda v
 
 (* reduction inside terms *)
 | SPAppLeft: forall t1 t2 t,
-    scbv_step t1 t2 ->
-    scbv_step (app t1 t) (app t2 t)
+    t1 ~> t2 ->
+    app t1 t ~> app t2 t
 | SPAppRight: forall t1 t2 v,
     cbv_value v ->
-    scbv_step t1 t2 ->
-    scbv_step (app v t1) (app v t2)
+    t1 ~> t2 ->
+    app v t1 ~> app v t2
 | SPPairL: forall t1 t2 t,
-    scbv_step t1 t2 ->
-    scbv_step (pp t1 t) (pp t2 t)
+    t1 ~> t2 ->
+    pp t1 t ~> pp t2 t
 | SPPairR: forall t1 t2 v,
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     cbv_value v ->
-    scbv_step (pp v t1) (pp v t2)
+    pp v t1 ~> pp v t2
 | SPProj1: forall t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (pi1 t1) (pi1 t2)
+    t1 ~> t2 ->
+    pi1 t1 ~> pi1 t2
 | SPProj2: forall t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (pi2 t1) (pi2 t2)
+    t1 ~> t2 ->
+    pi2 t1 ~> pi2 t2
 
 | SPSucc: forall t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (succ t1) (succ t2)
+    t1 ~> t2 ->
+    succ t1 ~> succ t2
 | SPMatch: forall t1 t2 t0 ts,
-    scbv_step t1 t2 ->
-    scbv_step (tmatch t1 t0 ts) (tmatch t2 t0 ts)
+    t1 ~> t2 ->
+    tmatch t1 t0 ts ~> tmatch t2 t0 ts
 
 | SPIte: forall t1 t1' t2 t3,
-    scbv_step t1 t1' ->
-    scbv_step (ite t1 t2 t3) (ite t1' t2 t3)
+    t1 ~> t1' ->
+    ite t1 t2 t3 ~> ite t1' t2 t3
 
 | SPLeft: forall t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (tleft t1) (tleft t2)
+    t1 ~> t2 ->
+    tleft t1 ~> tleft t2
 | SPRight: forall t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (tright t1) (tright t2)
+    t1 ~> t2 ->
+    tright t1 ~> tright t2
 | SPSumMatch: forall t1 t2 tl tr,
-    scbv_step t1 t2 ->
-    scbv_step (sum_match t1 tl tr) (sum_match t2 tl tr)
+    t1 ~> t2 ->
+    sum_match t1 tl tr ~> sum_match t2 tl tr
 
 | SPTSize: forall t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (tsize t1) (tsize t2)
+    t1 ~> t2 ->
+    tsize t1 ~> tsize t2
 
 | SPRecognizer: forall r t1 t2,
-    scbv_step t1 t2 ->
-    scbv_step (boolean_recognizer r t1) (boolean_recognizer r t2)
-.
+    t1 ~> t2 ->
+    boolean_recognizer r t1 ~> boolean_recognizer r t2
+  where "t1 ~> t2" := (scbv_step t1 t2).
+
+Notation "t1 ~>* t2" := (Relation_Operators.clos_refl_trans_1n _ scbv_step t1 t2) (at level 20).
 
 Hint Constructors scbv_step: smallstep.
 
 Lemma scbv_step_same:
   forall t1 t2 t3,
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     t2 = t3 ->
-    scbv_step t1 t3.
+    t1 ~> t3.
 Proof.
   steps.
 Qed.
@@ -263,24 +264,24 @@ Qed.
 Ltac t_invert_step :=
   match goal with
   | _ => step_inversion scbv_step
-  | H: scbv_step (boolean_recognizer _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (app _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (tunfold _) _ |- _ => inversion H; clear H
-  | H: scbv_step (tunfold_in _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (ite _ _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (tmatch _ _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (pp _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (pi1 _) _ |- _ => inversion H; clear H
-  | H: scbv_step (pi2 _) _ |- _ => inversion H; clear H
-  | H: scbv_step (sum_match _ _ _) _ |- _ => inversion H; clear H
-  | H: scbv_step (tsize _) _ |- _ => inversion H; clear H
+  | H: boolean_recognizer _ _ ~> _ |- _ => inversion H; clear H
+  | H: app _ _ ~> _ |- _ => inversion H; clear H
+  | H: tunfold _ ~> _ |- _ => inversion H; clear H
+  | H: tunfold_in _ _ ~> _ |- _ => inversion H; clear H
+  | H: ite _ _ _ ~> _ |- _ => inversion H; clear H
+  | H: tmatch _ _ _ ~> _ |- _ => inversion H; clear H
+  | H: pp _ _ ~> _ |- _ => inversion H; clear H
+  | H: pi1 _ ~> _ |- _ => inversion H; clear H
+  | H: pi2 _ ~> _ |- _ => inversion H; clear H
+  | H: sum_match _ _ _ ~> _ |- _ => inversion H; clear H
+  | H: tsize _ ~> _ |- _ => inversion H; clear H
   end.
 
 Lemma evaluate_step:
   forall v,
     cbv_value v ->
     forall t,
-      scbv_step v t ->
+      v ~> t ->
       False.
 Proof.
   induction 1;
@@ -291,7 +292,7 @@ Qed.
 
 Lemma evaluate_step2:
   forall t v,
-    scbv_step v t ->
+    v ~> t ->
     cbv_value v ->
     False.
 Proof.
@@ -300,7 +301,7 @@ Qed.
 
 Lemma evaluate_step3:
   forall t t',
-    scbv_step t t' ->
+    t ~> t' ->
     forall e,
       t = notype_lambda e ->
       False.
@@ -310,7 +311,7 @@ Qed.
 
 Lemma evaluate_step4:
   forall t t',
-    scbv_step t t' ->
+    t ~> t' ->
     forall e,
       t = type_abs e ->
       False.
@@ -342,17 +343,17 @@ Ltac no_step :=
   match goal with
   | H: cbv_value err |- _ => inversion H
   | H1: cbv_value ?v,
-    H2: scbv_step ?v ?t |- _ =>
+    H2: ?v ~> ?t |- _ =>
     apply False_ind; apply evaluate_step with v t; auto 2
   | H1: is_nat_value ?v,
-    H2: scbv_step ?v ?t |- _ =>
+    H2: ?v ~> ?t |- _ =>
     apply False_ind; apply evaluate_step with v t; eauto 2 with values
   | H1: cbv_value ?v1,
     H2: cbv_value ?v2,
-    H3: scbv_step (pp ?v1 ?v2) ?t |- _ =>
+    H3: pp ?v1 ?v2 ~> ?t |- _ =>
     apply False_ind; apply evaluate_step with (pp v1 v2) t; auto with values
   | H1: cbv_value ?v,
-    H3: scbv_step (succ ?v) ?t |- _ =>
+    H3: succ ?v ~> ?t |- _ =>
     apply False_ind; apply evaluate_step with (succ v) t; auto with values
   | _ => t_invert_step; fail
   end.
@@ -362,9 +363,9 @@ Hint Immediate evaluate_step3: smallstep.
 
 Lemma deterministic_step:
   forall t1 t2,
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     forall t3,
-      scbv_step t1 t3 ->
+      t1 ~> t3 ->
       t2 = t3.
 Proof.
   induction 1; repeat step || t_equality;
@@ -373,8 +374,8 @@ Qed.
 
 Ltac deterministic_step :=
   match goal with
-  | H1: scbv_step ?t1 ?t2,
-    H2: scbv_step ?t1 ?t3 |- _ =>
+  | H1: ?t1 ~> ?t2,
+    H2: ?t1 ~> ?t3 |- _ =>
     pose proof (deterministic_step _ _ H1 _ H2); clear H2
   end.
 

@@ -7,48 +7,48 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_true:
-  forall theta, reducible_values theta ttrue T_bool.
+  forall ρ, [ ρ ⊨ ttrue : T_bool ]v.
 Proof.
   repeat step || simp_red.
 Qed.
 
 Lemma open_reducible_true:
-  forall tvars gamma,
-    [ tvars; gamma ⊨ ttrue : T_bool ].
+  forall Θ Γ,
+    [ Θ; Γ ⊨ ttrue : T_bool ].
 Proof.
-  unfold open_reducible, reducible, reduces_to, closed_term in *; steps;
+  unfold open_reducible,reduces_to, closed_term in *; steps;
     eauto using reducible_true with star.
 Qed.
 
 Lemma reducible_false:
-  forall theta, reducible_values theta tfalse T_bool.
+  forall ρ, [ ρ ⊨ tfalse : T_bool ]v.
 Proof.
   repeat step || simp_red.
 Qed.
 
 Lemma open_reducible_false:
-  forall tvars gamma,
-    [ tvars; gamma ⊨ tfalse : T_bool ].
+  forall Θ Γ,
+    [ Θ; Γ ⊨ tfalse : T_bool ].
 Proof.
-  unfold open_reducible, reducible, reduces_to, closed_term in *; steps;
+  unfold open_reducible,reduces_to, closed_term in *; steps;
     eauto using reducible_false with star.
 Qed.
 
 Lemma reducible_ite:
-  forall theta T b t1 t2,
+  forall ρ T b t1 t2,
     wf t1 0 ->
     wf t2 0 ->
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    valid_interpretation theta ->
-    reducible theta b T_bool ->
-    (equivalent_terms b ttrue -> reducible theta t1 T) ->
-    (equivalent_terms b tfalse -> reducible theta t2 T) ->
-    reducible theta (ite b t1 t2) T.
+    valid_interpretation ρ ->
+    [ ρ ⊨ b : T_bool ] ->
+    ([ b ≡ ttrue ] -> [ ρ ⊨ t1 : T ]) ->
+    ([ b ≡ tfalse ] -> [ ρ ⊨ t2 : T ]) ->
+    [ ρ ⊨ ite b t1 t2 : T ].
 Proof.
-  repeat step || top_level_unfold reducible || top_level_unfold reduces_to ||
+  repeat step || top_level_unfold reduces_to ||
          top_level_unfold closed_term ||
          simp_red.
 
@@ -70,22 +70,22 @@ Proof.
 Qed.
 
 Lemma open_reducible_ite:
-  forall tvars gamma T b t1 t2 x,
+  forall Θ Γ T b t1 t2 x,
     wf t1 0 ->
     wf t2 0 ->
-    subset (fv t1) (support gamma) ->
-    subset (fv t2) (support gamma) ->
+    subset (fv t1) (support Γ) ->
+    subset (fv t2) (support Γ) ->
     ~(x ∈ fv b) ->
     ~(x ∈ fv T) ->
-    ~(x ∈ fv_context gamma) ->
-    ~(x ∈ tvars) ->
+    ~(x ∈ fv_context Γ) ->
+    ~(x ∈ Θ) ->
     is_erased_term b ->
     is_erased_term t1 ->
     is_erased_term t2 ->
-    [ tvars; gamma ⊨ b : T_bool ] ->
-    [ tvars; (x, T_equiv b ttrue) :: gamma ⊨ t1 : T ] ->
-    [ tvars; (x, T_equiv b tfalse) :: gamma ⊨ t2 : T ] ->
-    [ tvars; gamma ⊨ ite b t1 t2 : T ].
+    [ Θ; Γ ⊨ b : T_bool ] ->
+    [ Θ; (x, T_equiv b ttrue) :: Γ ⊨ t1 : T ] ->
+    [ Θ; (x, T_equiv b tfalse) :: Γ ⊨ t2 : T ] ->
+    [ Θ; Γ ⊨ ite b t1 t2 : T ].
 Proof.
   intros; unfold open_reducible; steps.
 

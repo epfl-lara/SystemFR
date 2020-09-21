@@ -3,7 +3,7 @@ Require Export SystemFR.EquivalentStar.
 Lemma equivalent_match:
   forall t v tn t0 ts,
     is_nat_value v ->
-    star scbv_step tn v ->
+    tn ~>* v ->
     is_erased_term tn ->
     is_erased_term t0 ->
     is_erased_term ts ->
@@ -13,9 +13,9 @@ Lemma equivalent_match:
     pfv tn term_var = nil ->
     pfv t0 term_var = nil ->
     pfv ts term_var = nil ->
-    (v = zero -> equivalent_terms t0 t) ->
-    (forall v', v = succ v' -> equivalent_terms (open 0 ts v') t) ->
-    equivalent_terms (tmatch tn t0 ts) t.
+    (v = zero -> [ t0 ≡ t ]) ->
+    (forall v', v = succ v' -> [ open 0 ts v' ≡ t ]) ->
+    [ tmatch tn t0 ts ≡ t ].
 Proof.
   inversion 1; repeat step || t_invert_star;
     try solve [ eapply equivalent_trans; try eassumption; equivalent_star ].
@@ -32,8 +32,8 @@ Lemma equivalent_match_zero:
     pfv n term_var = nil ->
     pfv e1 term_var = nil ->
     pfv e2 term_var = nil ->
-    star scbv_step n zero ->
-    equivalent_terms (tmatch n e1 e2) e1.
+    n ~>* zero ->
+    [ tmatch n e1 e2 ≡ e1 ].
 Proof.
   intros; apply equivalent_star; repeat step || list_utils;
     eauto using star_trans with smallstep cbvlemmas.
@@ -41,9 +41,9 @@ Qed.
 
 Lemma equivalent_match_zero2:
   forall n e1 e2 e,
-    star scbv_step n zero ->
-    equivalent_terms (tmatch n e1 e2) e ->
-    equivalent_terms e1 e.
+    n ~>* zero ->
+    [ tmatch n e1 e2 ≡ e ] ->
+    [ e1 ≡ e ].
 Proof.
   intros.
   eapply equivalent_trans; try eassumption.
@@ -65,8 +65,8 @@ Lemma equivalent_match_succ:
     pfv e1 term_var = nil ->
     pfv e2 term_var = nil ->
     cbv_value v ->
-    star scbv_step n (succ v) ->
-    equivalent_terms (tmatch n e1 e2) (open 0 e2 v).
+    n ~>* succ v ->
+    [ tmatch n e1 e2 ≡ open 0 e2 v ].
 Proof.
   intros.
   apply equivalent_star; repeat step || list_utils;
@@ -78,9 +78,9 @@ Lemma equivalent_match_succ2:
     cbv_value v ->
     is_erased_term v ->
     wf v 0 ->
-    star scbv_step n (succ v) ->
-    equivalent_terms (tmatch n e1 e2) e ->
-    equivalent_terms (open 0 e2 v) e.
+    n ~>* succ v ->
+    [ tmatch n e1 e2 ≡ e ] ->
+    [ open 0 e2 v ≡ e ].
 Proof.
   intros.
   eapply equivalent_trans; try eassumption.

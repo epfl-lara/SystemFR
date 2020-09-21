@@ -11,8 +11,8 @@ Lemma equivalent_ite_true:
     pfv b term_var = nil ->
     pfv e1 term_var = nil ->
     pfv e2 term_var = nil ->
-    star scbv_step b ttrue ->
-    equivalent_terms (ite b e1 e2) e1.
+    b ~>* ttrue ->
+    [ ite b e1 e2 ≡ e1 ].
 Proof.
   intros; eapply equivalent_star; repeat step || list_utils;
     eauto using star_trans with cbvlemmas smallstep.
@@ -29,8 +29,8 @@ Lemma equivalent_ite_false:
     pfv b term_var = nil ->
     pfv e1 term_var = nil ->
     pfv e2 term_var = nil ->
-    star scbv_step b tfalse ->
-    equivalent_terms (ite b e1 e2) e2.
+    b ~>* tfalse ->
+    [ ite b e1 e2 ≡ e2 ].
 Proof.
   intros; eapply equivalent_star; repeat step || list_utils;
     eauto using star_trans with cbvlemmas smallstep.
@@ -47,10 +47,10 @@ Lemma equivalent_ite:
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
     pfv t3 term_var = nil ->
-    (star scbv_step t1 ttrue \/ star scbv_step t1 tfalse) ->
-    (star scbv_step t1 ttrue -> equivalent_terms t2 t) ->
-    (star scbv_step t1 tfalse -> equivalent_terms t3 t) ->
-    equivalent_terms (ite t1 t2 t3) t.
+    (t1 ~>* ttrue \/ t1 ~>* tfalse) ->
+    (t1 ~>* ttrue -> [ t2 ≡ t ]) ->
+    (t1 ~>* tfalse -> [ t3 ≡ t ]) ->
+    [ ite t1 t2 t3 ≡ t ].
 Proof.
   steps; eauto using equivalent_ite_true, equivalent_ite_false, equivalent_sym, equivalent_trans.
 Qed.
@@ -66,9 +66,9 @@ Lemma equivalent_ite_true2:
     pfv b term_var = nil ->
     pfv e1 term_var = nil ->
     pfv e2 term_var = nil ->
-    star scbv_step b ttrue ->
-    equivalent_terms e1 e ->
-    equivalent_terms (ite b e1 e2) e.
+    b ~>* ttrue ->
+    [ e1 ≡ e ] ->
+    [ ite b e1 e2 ≡ e ].
 Proof.
   eauto using equivalent_ite_true, equivalent_sym, equivalent_trans.
 Qed.
@@ -84,18 +84,18 @@ Lemma equivalent_ite_false2:
     pfv b term_var = nil ->
     pfv e1 term_var = nil ->
     pfv e2 term_var = nil ->
-    star scbv_step b tfalse ->
-    equivalent_terms (ite b e1 e2) e ->
-    equivalent_terms e2 e.
+    b ~>* tfalse ->
+    [ ite b e1 e2 ≡ e ] ->
+    [ e2 ≡ e ].
 Proof.
   eauto using equivalent_ite_false, equivalent_sym, equivalent_trans.
 Qed.
 
 Lemma equivalent_ite_true3:
   forall b e1 e2 e,
-    star scbv_step b ttrue ->
-    equivalent_terms (ite b e1 e2) e ->
-    equivalent_terms e1 e.
+    b ~>* ttrue ->
+    [ ite b e1 e2 ≡ e ] ->
+    [ e1 ≡ e ].
 Proof.
   intros.
   eapply equivalent_trans; try eassumption.
@@ -105,9 +105,9 @@ Qed.
 
 Lemma equivalent_ite_false3:
   forall b e1 e2 e,
-    star scbv_step b tfalse ->
-    equivalent_terms (ite b e1 e2) e ->
-    equivalent_terms e2 e.
+    b ~>* tfalse ->
+    [ ite b e1 e2 ≡ e ] ->
+    [ e2 ≡ e ].
 Proof.
   intros.
   eapply equivalent_trans; try eassumption.

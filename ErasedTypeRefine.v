@@ -11,16 +11,16 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_type_refine:
-  forall theta t1 t2 A B,
-    valid_interpretation theta ->
+  forall ρ t1 t2 A B,
+    valid_interpretation ρ ->
     is_erased_type B ->
     wf B 1 ->
     fv B = nil ->
-    reducible theta t1 A ->
-    reducible theta t2 (open 0 B t1) ->
-    reducible theta t1 (T_type_refine A B).
+    [ ρ ⊨ t1 : A ] ->
+    [ ρ ⊨ t2 : open 0 B t1 ] ->
+    [ ρ ⊨ t1 : T_type_refine A B ].
 Proof.
-  unfold reducible, reduces_to in *; repeat step;
+  unfold reduces_to in *; repeat step;
     eauto with wf; eauto with fv.
 
   eexists; steps; eauto;
@@ -30,13 +30,13 @@ Proof.
 Qed.
 
 Lemma open_reducible_type_refine:
-  forall tvars gamma t1 t2 A B,
+  forall Θ Γ t1 t2 A B,
     is_erased_type B ->
     wf B 1 ->
-    subset (fv B) (support gamma) ->
-    [ tvars; gamma ⊨ t1 : A ] ->
-    [ tvars; gamma ⊨ t2 : open 0 B t1 ] ->
-    [ tvars; gamma ⊨ t1 : T_type_refine A B ].
+    subset (fv B) (support Γ) ->
+    [ Θ; Γ ⊨ t1 : A ] ->
+    [ Θ; Γ ⊨ t2 : open 0 B t1 ] ->
+    [ Θ; Γ ⊨ t1 : T_type_refine A B ].
 Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3 || t_substitutions;
@@ -48,9 +48,9 @@ Proof.
 Qed.
 
 Lemma open_reducible_get_refinement_witness:
-  forall tvars gamma t1 t2 A B T x,
-    ~(x ∈ tvars) ->
-    ~(x ∈ fv_context gamma) ->
+  forall Θ Γ t1 t2 A B T x,
+    ~(x ∈ Θ) ->
+    ~(x ∈ fv_context Γ) ->
     ~(x ∈ fv t1) ->
     ~(x ∈ fv t2) ->
     ~(x ∈ fv T) ->
@@ -60,20 +60,20 @@ Lemma open_reducible_get_refinement_witness:
     wf t2 0 ->
     wf B 1 ->
     is_erased_term t2 ->
-    subset (fv t1) (support gamma) ->
-    subset (fv t2) (support gamma) ->
-    subset (fv B) (support gamma) ->
-    [ tvars; gamma ⊨ t1 : T_type_refine A B ] ->
-    [ tvars; (x, open 0 B t1) :: gamma ⊨ t2 : T ] ->
-    [ tvars; gamma ⊨ app (notype_lambda t2) uu : T ].
+    subset (fv t1) (support Γ) ->
+    subset (fv t2) (support Γ) ->
+    subset (fv B) (support Γ) ->
+    [ Θ; Γ ⊨ t1 : T_type_refine A B ] ->
+    [ Θ; (x, open 0 B t1) :: Γ ⊨ t2 : T ] ->
+    [ Θ; Γ ⊨ app (notype_lambda t2) uu : T ].
 Proof.
   unfold open_reducible; repeat step || t_instantiate_sat3.
   eapply backstep_reducible; eauto with smallstep values;
     repeat step || list_utils; eauto with fv wf erased.
   rewrite open_none; eauto with wf.
-  top_level_unfold reducible; top_level_unfold reduces_to; repeat step || simp_red.
+  top_level_unfold reduces_to; repeat step || simp_red.
 
-  unshelve epose proof (H14 theta ((x, p) :: lterms) _ _ _);
+  unshelve epose proof (H14 ρ ((x, p) :: lterms) _ _ _);
     repeat step || list_utils || apply SatCons || t_substitutions || fv_open;
     t_closer;
     eauto with twf.

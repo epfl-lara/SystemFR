@@ -3,41 +3,37 @@ Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
 
 Lemma annotated_reducible_intersection:
-  forall tvars gamma t T1 T2,
-    [[ tvars; gamma ⊨ t : T1 ]] ->
-    [[ tvars; gamma ⊨ t : T2 ]] ->
-    [[ tvars; gamma ⊨ t : T_intersection T1 T2 ]].
+  forall Θ Γ t T1 T2,
+    [[ Θ; Γ ⊨ t : T1 ]] ->
+    [[ Θ; Γ ⊨ t : T2 ]] ->
+    [[ Θ; Γ ⊨ t : T_intersection T1 T2 ]].
 Proof.
-  unfold annotated_reducible;
-    repeat step;
-    eauto using open_reducible_intersection.
+  intros; eauto using open_reducible_intersection.
 Qed.
 
 Lemma annotated_reducible_union_elim:
-  forall tvars gamma t t' T1 T2 T z,
-    ~(z ∈ fv_context gamma) ->
+  forall Θ Γ t t' T1 T2 T z,
+    ~(z ∈ fv_context Γ) ->
     ~(z ∈ fv t') ->
     ~(z ∈ fv T) ->
     ~(z ∈ fv T1) ->
     ~(z ∈ fv T2) ->
-    ~(z ∈ tvars) ->
-    subset (fv t') (support gamma) ->
-    subset (fv T1) (support gamma) ->
-    subset (fv T2) (support gamma) ->
-    subset (fv T) (support gamma) ->
+    ~(z ∈ Θ) ->
+    subset (fv t') (support Γ) ->
+    subset (fv T1) (support Γ) ->
+    subset (fv T2) (support Γ) ->
+    subset (fv T) (support Γ) ->
     wf t' 1 ->
     wf T1 0 ->
     wf T2 0 ->
     wf T 0 ->
     is_annotated_term t' ->
-    [[ tvars; gamma ⊨ t : T_union T1 T2 ]] ->
-    [[ tvars; (z,T1) :: gamma ⊨ open 0 t' (fvar z term_var) : T ]] ->
-    [[ tvars; (z,T2) :: gamma ⊨ open 0 t' (fvar z term_var) : T ]] ->
-    [[ tvars; gamma ⊨ tlet t (T_union T1 T2) t' : T ]].
+    [[ Θ; Γ ⊨ t : T_union T1 T2 ]] ->
+    [[ Θ; (z,T1) :: Γ ⊨ open 0 t' (fvar z term_var) : T ]] ->
+    [[ Θ; (z,T2) :: Γ ⊨ open 0 t' (fvar z term_var) : T ]] ->
+    [[ Θ; Γ ⊨ tlet t (T_union T1 T2) t' : T ]].
 Proof.
-  unfold annotated_reducible;
-    repeat step.
-  apply open_reducible_union_elim with (erase_type T1) (erase_type T2) z;
+  intros; apply open_reducible_union_elim with (erase_type T1) (erase_type T2) z;
     repeat step || erase_open;
     side_conditions.
 Qed.

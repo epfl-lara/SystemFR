@@ -17,7 +17,7 @@ Require Export SystemFR.AssocList.
 
 Require Import Coq.Lists.List.
 
-Require Import Omega.
+Require Import Psatz.
 
 Opaque strictly_positive.
 
@@ -28,15 +28,15 @@ Lemma strictly_positive_erased_aux:
     strictly_positive T vars ->
     strictly_positive (erase_type T) vars.
 Proof.
-  induction n; destruct T; repeat step || destruct_tag || simp_spos; try omega;
+  induction n; destruct T; repeat step || destruct_tag || simp_spos; try lia;
     eauto using no_type_fvar_erased;
-    eauto with omega.
+    eauto with lia.
   right; exists X; steps; eauto with fv.
   change (fvar X type_var) with (erase_type (fvar X type_var)).
   rewrite <- erase_type_topen; steps.
   apply_any;
     repeat step || autorewrite with bsize in * ||
-    unshelve eauto 2 with annot omega step_tactic.
+    unshelve eauto 2 with annot lia step_tactic.
 Qed.
 
 Lemma strictly_positive_erased:

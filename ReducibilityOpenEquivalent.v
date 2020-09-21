@@ -11,24 +11,24 @@ Require Export SystemFR.OpenTOpen.
 Opaque reducible_values.
 
 Definition reducibility_open_equivalent_prop T : Prop :=
-  forall T' t1 t2 theta v,
+  forall T' t1 t2 ρ v,
     T = open 0 T' t1 ->
     is_erased_type T' ->
     wf T' 1 ->
     pfv T' term_var = nil ->
-    equivalent_terms t1 t2 ->
-    reducible_values theta v T ->
-    reducible_values theta v (open 0 T' t2).
+    [ t1 ≡ t2 ] ->
+    [ ρ ⊨ v : T ]v ->
+    [ ρ ⊨ v : open 0 T' t2 ]v.
 
 Lemma reducibility_open_equivalent_induction:
-  forall T t1 t2 theta v,
+  forall T t1 t2 ρ v,
     reducibility_open_equivalent_prop (open 0 T t1) ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
-    equivalent_terms t1 t2 ->
-    reducible_values theta v (open 0 T t1) ->
-    reducible_values theta v (open 0 T t2).
+    [ t1 ≡ t2 ] ->
+    [ ρ ⊨ v : open 0 T t1 ]v ->
+    [ ρ ⊨ v : open 0 T t2 ]v.
 Proof.
   unfold
     prop_until,
@@ -39,18 +39,18 @@ Proof.
 Qed.
 
 Lemma reducibility_open_equivalent_induction_open:
-  forall n o T t1 t2 theta v a,
+  forall n o T t1 t2 ρ v a,
     prop_until reducibility_open_equivalent_prop (n, o) ->
     type_nodes T < n ->
     is_erased_type T ->
     wf T 2 ->
     pfv T term_var = nil ->
-    equivalent_terms t1 t2 ->
+    [ t1 ≡ t2 ] ->
     is_erased_term a ->
     wf a 0 ->
     pfv a term_var = nil ->
-    reducible_values theta v (open 0 (open 1 T t1) a) ->
-    reducible_values theta v (open 0 (open 1 T t2) a).
+    [ ρ ⊨ v : open 0 (open 1 T t1) a ]v ->
+    [ ρ ⊨ v : open 0 (open 1 T t2) a ]v.
 Proof.
   unfold prop_until, prop_at, reducibility_open_equivalent_prop, get_measure;
     intros.
@@ -246,7 +246,7 @@ Proof.
       eauto with fv.
 
     apply reducible_rename_rc with
-        (fun t => reducible_values theta t (T_rec n' (open 0 T'2 t1) (open 0 T'3 t1)));
+        (fun v => [ ρ ⊨ v : T_rec n' (open 0 T'2 t1) (open 0 T'3 t1) ]v);
       repeat step || fv_open || unfold equivalent_rc || list_utils ||
              rewrite is_erased_term_tfv in * by eauto with erased;
       eauto with fv.
@@ -299,30 +299,30 @@ Proof.
 Qed.
 
 Lemma reducibility_open_equivalent:
-  forall T t1 t2 theta v,
-    reducible_values theta v (open 0 T t1) ->
-    valid_interpretation theta ->
+  forall T t1 t2 ρ v,
+    [ ρ ⊨ v : open 0 T t1 ]v ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
-    equivalent_terms t1 t2 ->
-    reducible_values theta v (open 0 T t2).
+    [ t1 ≡ t2 ] ->
+    [ ρ ⊨ v : open 0 T t2 ]v.
 Proof.
   intros; eapply reducibility_open_equivalent_aux; eauto using equivalent_sym.
 Qed.
 
 Lemma reducibility_values_ltr:
-  forall T t1 t2 theta v,
-    reducible_values theta v (open 0 T t1) ->
-    valid_interpretation theta ->
+  forall T t1 t2 ρ v,
+    [ ρ ⊨ v : open 0 T t1 ]v ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
     is_erased_term t1 ->
     wf t1 0 ->
     pfv t1 term_var = nil ->
-    star scbv_step t1 t2 ->
-    reducible_values theta v (open 0 T t2).
+    t1 ~>* t2 ->
+    [ ρ ⊨ v : open 0 T t2 ]v.
 Proof.
   intros; eapply reducibility_open_equivalent; eauto; repeat step;
     eauto with wf erased;
@@ -330,17 +330,17 @@ Proof.
 Qed.
 
 Lemma reducibility_values_rtl:
-  forall T t1 t2 theta v,
-    reducible_values theta v (open 0 T t2) ->
-    valid_interpretation theta ->
+  forall T t1 t2 ρ v,
+    [ ρ ⊨ v : open 0 T t2 ]v ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
     is_erased_term t1 ->
     wf t1 0 ->
     pfv t1 term_var = nil ->
-    star scbv_step t1 t2 ->
-    reducible_values theta v (open 0 T t1).
+    t1 ~>* t2 ->
+    [ ρ ⊨ v : open 0 T t1 ]v.
 Proof.
   intros; eapply reducibility_open_equivalent; eauto; repeat step;
     eauto with wf erased;
@@ -348,33 +348,33 @@ Proof.
 Qed.
 
 Lemma reducibility_ltr:
-  forall T t1 t2 theta t,
-    reducible theta t (open 0 T t1) ->
-    valid_interpretation theta ->
+  forall T t1 t2 ρ t,
+    [ ρ ⊨ t : open 0 T t1 ] ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
     is_erased_term t1 ->
     wf t1 0 ->
     pfv t1 term_var = nil ->
-    star scbv_step t1 t2 ->
-    reducible theta t (open 0 T t2).
+    t1 ~>* t2 ->
+    [ ρ ⊨ t : open 0 T t2 ].
 Proof.
   eauto using reducible_values_exprs, reducibility_values_ltr.
 Qed.
 
 Lemma reducibility_rtl:
-  forall T t1 t2 theta t,
-    reducible theta t (open 0 T t2) ->
-    valid_interpretation theta ->
+  forall T t1 t2 ρ t,
+    [ ρ ⊨ t : open 0 T t2 ] ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
     is_erased_term t1 ->
     wf t1 0 ->
     pfv t1 term_var = nil ->
-    star scbv_step t1 t2 ->
-    reducible theta t (open 0 T t1).
+    t1 ~>* t2 ->
+    [ ρ ⊨ t : open 0 T t1 ].
 Proof.
   eauto using reducible_values_exprs, reducibility_values_rtl.
 Qed.

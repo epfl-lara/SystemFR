@@ -1,5 +1,4 @@
 Require Import Psatz.
-Require Import Omega.
 
 Require Export SystemFR.StarInversions.
 Require Export SystemFR.SizeLemmas.
@@ -54,8 +53,8 @@ Qed.
 
 Definition lt_index (t1 t2: tree) :=
   exists v1 v2 (p1: is_nat_value v1) (p2: is_nat_value v2),
-     star scbv_step t1 v1 /\
-     star scbv_step t2 v2 /\
+     t1 ~>* v1 /\
+     t2 ~>* v2 /\
      nat_value_to_nat v1 p1 < nat_value_to_nat v2 p2
 .
 
@@ -67,18 +66,18 @@ Ltac tlu :=
 Lemma acc_ind_aux:
   forall m t v (p: is_nat_value v),
     nat_value_to_nat v p < m ->
-    star scbv_step t v ->
+    t ~>* v ->
     Acc lt_index t.
 Proof.
-  induction m; destruct p; steps; try omega.
-  - apply Acc_intro; repeat step || tlu || t_deterministic_star || simp nat_value_to_nat in *; try omega.
+  induction m; destruct p; steps; try lia.
+  - apply Acc_intro; repeat step || tlu || t_deterministic_star || simp nat_value_to_nat in *; try lia.
   - apply Acc_intro; repeat step || tlu || t_deterministic_star || simp nat_value_to_nat in *.
     apply IHm with v1 p1; steps.
     match goal with
     | H1: context[nat_value_to_nat ?t ?p1],
       H2: context[nat_value_to_nat ?t ?p2] |- _ =>
       rewrite (nat_value_to_nat_fun t p1 p2) in *
-    end; eauto with omega.
+    end; eauto with lia.
 Qed.
 
 Lemma acc_ind:
@@ -112,7 +111,7 @@ Lemma leq_lt_measure:
     (a1, b1) << (a2, b2).
 Proof.
   unfold "<<", lt_partial; intros;
-  destruct (Nat.eq_dec a1 a2); steps; eauto using right_lex; eauto using left_lex with lia.
+  destruct (PeanoNat.Nat.eq_dec a1 a2); steps; eauto using right_lex; eauto using left_lex with lia.
 Qed.
 
 Lemma measure_induction:
@@ -133,12 +132,12 @@ Proof.
     match goal with
     | |- context[nat_value_to_nat ?t?p]  =>
       rewrite (nat_value_to_nat_fun t p1 p) in *
-    end; eauto with omega.
+    end; eauto with lia.
 Qed.
 
 Lemma lt_index_step:
   forall t v,
-    star scbv_step t (succ v) ->
+    t ~>* succ v ->
     is_nat_value v ->
     lt_index v t.
 Proof.
@@ -157,9 +156,9 @@ Lemma leq_lt_measure':
     lexprod nat (nat * tree) lt lt_partial (a1, (b1, c1)) (a2, (b2, c2)).
 Proof.
   intros.
-  destruct (Nat.eq_dec a1 a2); steps.
-  - apply right_lex, left_lex; omega.
-  - apply left_lex; omega.
+  destruct (PeanoNat.Nat.eq_dec a1 a2); steps.
+  - apply right_lex, left_lex; lia.
+  - apply left_lex; lia.
 Qed.
 
 Lemma leq_leq_lt_measure:
@@ -170,11 +169,11 @@ Lemma leq_leq_lt_measure:
     lexprod nat (nat * tree) lt lt_partial (a1, (b1, c1)) (a2, (b2, c2)).
 Proof.
   intros.
-  destruct (Nat.eq_dec a1 a2);
-  destruct (Nat.eq_dec b1 b2); steps;
-    eauto using right_lex, left_lex with omega.
+  destruct (PeanoNat.Nat.eq_dec a1 a2);
+  destruct (PeanoNat.Nat.eq_dec b1 b2); steps;
+    eauto using right_lex, left_lex with lia.
   - apply right_lex, right_lex; steps.
-  - apply right_lex, left_lex; omega.
+  - apply right_lex, left_lex; lia.
 Qed.
 
 Lemma type_nodes_get_measure:

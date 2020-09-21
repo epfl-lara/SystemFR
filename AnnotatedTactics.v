@@ -3,13 +3,13 @@ Require Export SystemFR.ReducibilityDefinition.
 Require Export SystemFR.AnnotatedTermLemmas.
 
 Lemma open_reducible_same:
-  forall tvars gamma t T tvars' gamma' t' T',
-    open_reducible tvars gamma t T ->
-    tvars = tvars' ->
-    gamma = gamma' ->
+  forall Θ Γ t T Θ' Γ' t' T',
+    [ Θ; Γ ⊨ t : T ] ->
+    Θ = Θ' ->
+    Γ = Γ' ->
     t = t' ->
     T = T' ->
-    open_reducible tvars' gamma' t' T'.
+    [ Θ'; Γ' ⊨ t' : T' ].
 Proof.
   steps.
 Qed.

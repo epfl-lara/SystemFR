@@ -6,14 +6,13 @@ Require Export SystemFR.EquivalentContext.
 Opaque reducible_values.
 
 Lemma annotated_equivalent_pair_ext:
-  forall tvars gamma t A B,
+  forall Θ Γ t A B,
     is_annotated_term t ->
     wf t 0 ->
-    [[ tvars; gamma ⊨ t: T_prod A B ]] ->
-    [[ tvars; gamma ⊨ t ≡ pp (pi1 t) (pi2 t) ]].
+    [[ Θ; Γ ⊨ t: T_prod A B ]] ->
+    [[ Θ; Γ ⊨ t ≡ pp (pi1 t) (pi2 t) ]].
 Proof.
-  unfold annotated_reducible, open_reducible, reducible, reduces_to,
-         annotated_equivalent, open_equivalent;
+  unfold open_reducible, reduces_to, open_equivalent;
     repeat step || t_instantiate_sat3 || simp_red.
 
   apply equivalent_trans with (pp a b).

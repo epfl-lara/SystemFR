@@ -9,8 +9,8 @@ Open Scope list_scope.
 Inductive equal_with_relation tag rel: tree -> tree -> Prop :=
 | EWRTVar:
     forall X X',
-      lookup Nat.eq_dec rel X = Some X' ->
-      lookup Nat.eq_dec (swap rel) X' = Some X ->
+      lookup PeanoNat.Nat.eq_dec rel X = Some X' ->
+      lookup PeanoNat.Nat.eq_dec (swap rel) X' = Some X ->
       equal_with_relation tag rel (fvar X tag) (fvar X' tag)
 | EWRFVar:
     forall X tag',
@@ -333,8 +333,8 @@ Qed.
 
 Lemma equal_with_relation_refl2:
   forall t tag rel,
-    (forall x, x ∈ pfv t tag -> lookup Nat.eq_dec rel x = Some x) ->
-    (forall x, x ∈ pfv t tag -> lookup Nat.eq_dec (swap rel) x = Some x) ->
+    (forall x, x ∈ pfv t tag -> lookup PeanoNat.Nat.eq_dec rel x = Some x) ->
+    (forall x, x ∈ pfv t tag -> lookup PeanoNat.Nat.eq_dec (swap rel) x = Some x) ->
     equal_with_relation tag rel t t.
 Proof.
   induction t; repeat step || list_utils || constructor || apply_any || destruct_tag.
@@ -390,8 +390,8 @@ Lemma equal_with_relation_pfv:
     X ∈ pfv T tag ->
     exists X',
       X' ∈ pfv T' tag /\
-      lookup Nat.eq_dec rel X = Some X' /\
-      lookup Nat.eq_dec (swap rel) X' = Some X.
+      lookup PeanoNat.Nat.eq_dec rel X = Some X' /\
+      lookup PeanoNat.Nat.eq_dec (swap rel) X' = Some X.
 Proof.
   induction 1;
     repeat match goal with
@@ -417,8 +417,8 @@ Lemma equal_with_relation_pfv2:
     X' ∈ pfv T' tag ->
     exists X,
       X ∈ pfv T tag /\
-      lookup Nat.eq_dec rel X = Some X' /\
-      lookup Nat.eq_dec (swap rel) X' = Some X.
+      lookup PeanoNat.Nat.eq_dec rel X = Some X' /\
+      lookup PeanoNat.Nat.eq_dec (swap rel) X' = Some X.
 Proof.
   intros.
   apply equal_with_relation_swap in H.
@@ -598,9 +598,9 @@ Lemma equal_with_relation_scbv_step:
   forall tag rel t1 t2,
     equal_with_relation tag rel t1 t2 ->
     forall t1',
-      scbv_step t1 t1' ->
+      t1 ~> t1' ->
       exists t2',
-        scbv_step t2 t2' /\
+        t2 ~> t2' /\
         equal_with_relation tag rel t1' t2'.
 Proof.
   induction 1; inversion 1;
@@ -619,25 +619,25 @@ Proof.
       eauto using equal_with_relation_top_level_var3, equal_with_relation_succ_refl with smallstep.
 Qed.
 
-Ltac t_ewr_scbv_step :=
+Ltac equal_with_relation_scbv_step :=
   match goal with
-  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: scbv_step ?t1 ?t1' |- _ =>
+  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: ?t1 ~> ?t1' |- _ =>
     poseNew (Mark (H1,H2) "ewr_scbv_step");
     pose proof (equal_with_relation_scbv_step _ _ _ _ H1 _ H2)
   end.
 
 Lemma equal_with_relation_star:
   forall t1 t1',
-    star scbv_step t1 t1' ->
+    t1 ~>* t1' ->
     forall tag rel t2,
       equal_with_relation tag rel t1 t2 ->
       exists t2',
-        star scbv_step t2 t2' /\
+        t2 ~>* t2' /\
         equal_with_relation tag rel t1' t2'.
 Proof.
   induction 1;
     repeat match goal with
-           | _ => step || t_ewr_scbv_step
+           | _ => step || equal_with_relation_scbv_step
            | H1: forall _ _ _, equal_with_relation _ _ _ _ -> _,
              H2: equal_with_relation _ _ _ _ |- _ => apply H1 in H2
            end; eauto with smallstep star.
@@ -645,10 +645,10 @@ Qed.
 
 Lemma equal_with_relation_star2:
   forall tag rel t1 t2 t2',
-    star scbv_step t2 t2' ->
+    t2 ~>* t2' ->
     equal_with_relation tag rel t1 t2 ->
     exists t1',
-      star scbv_step t1 t1' /\
+      t1 ~>* t1' /\
       equal_with_relation tag rel t1' t2'.
 Proof.
   intros.
@@ -661,17 +661,17 @@ Qed.
 
 Ltac t_ewr_star :=
   match goal with
-  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: star scbv_step ?t1 ?t1' |- _ =>
+  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: ?t1 ~>* ?t1' |- _ =>
     poseNew (Mark 0 "ewr_star");
     pose proof (equal_with_relation_star _ _ _ H2 _ _ H1)
-  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: star scbv_step ?t2 ?t2' |- _ =>
+  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: ?t2 ~>* ?t2' |- _ =>
     poseNew (Mark 0 "ewr_star");
     pose proof (equal_with_relation_star2 _ _ _ _ _ H2 H1)
   end.
 
-Ltac t_ewr_scbv_step_back :=
+Ltac equal_with_relation_scbv_step_back :=
   match goal with
-  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: scbv_step ?t2 ?t2' |- _ =>
+  | H1: equal_with_relation _ ?rel ?t1 ?t2, H2: ?t2 ~> ?t2' |- _ =>
     poseNew (Mark (H1,H2) "ewr_scbv_step");
     unshelve epose proof (equal_with_relation_scbv_step _ (swap rel) t2 t1 _ _ H2);
     eauto using equal_with_relation_swap
@@ -683,7 +683,7 @@ Lemma equal_with_relation_irred:
     irred T1 ->
     irred T2.
 Proof.
-  unfold irred; repeat step || t_ewr_scbv_step_back;
+  unfold irred; repeat step || equal_with_relation_scbv_step_back;
     eauto.
 Qed.
 

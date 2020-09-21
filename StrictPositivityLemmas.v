@@ -1,7 +1,7 @@
 Require Import Equations.Equations.
 Require Import Equations.Prop.Subterm.
 
-Require Import Omega.
+Require Import Psatz.
 
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
@@ -13,34 +13,34 @@ Require Export SystemFR.NoTypeFVarLemmas.
 Require Export SystemFR.ReducibilityUnused.
 
 Opaque makeFresh.
-Opaque Nat.eq_dec.
+Opaque PeanoNat.Nat.eq_dec.
 Opaque reducible_values.
 Opaque strictly_positive.
 
-Definition non_empty theta A := exists v, reducible_values theta v A.
+Definition non_empty ρ A := exists v, [ ρ ⊨ v : A ]v.
 
 Lemma instantiate_non_empty:
-  forall theta A,
-    non_empty theta A ->
-    exists a, reducible_values theta a A.
+  forall ρ A,
+    non_empty ρ A ->
+    exists a, [ ρ ⊨ a : A ]v.
 Proof.
   unfold non_empty; steps; eauto.
 Qed.
 
 Ltac instantiate_non_empty :=
   match goal with
-  | H: non_empty ?theta ?A |- _ =>
-    poseNew (Mark (theta,A) "instantiate_non_empty");
+  | H: non_empty ?ρ ?A |- _ =>
+    poseNew (Mark (ρ,A) "instantiate_non_empty");
     pose proof (instantiate_non_empty _ _ H)
   end.
 
 Lemma non_empty_extend:
-  forall theta A x RC,
-    non_empty theta A ->
+  forall ρ A x RC,
+    non_empty ρ A ->
     reducibility_candidate RC ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     ~(x ∈ pfv A type_var) ->
-    non_empty ((x, RC) :: theta) A.
+    non_empty ((x, RC) :: ρ) A.
 Proof.
   unfold non_empty; repeat step || exists v || apply reducible_unused2.
 Qed.
@@ -54,14 +54,14 @@ Lemma strictly_positive_open_aux:
     strictly_positive (open k T rep) vars.
 Proof.
   induction n; destruct T; repeat step || simp_spos || apply no_type_fvar_open || apply IHn ;
-    try omega;
+    try lia;
     try solve [ left; repeat step || apply no_type_fvar_open ];
     try solve [ right; eexists; eauto; repeat step || apply no_type_fvar_open ].
 
   right. exists X; repeat step || fv_open || list_utils || rewrite is_erased_term_tfv in * by steps.
   rewrite <- open_topen;
     repeat step || apply IHn || autorewrite with bsize in * || apply is_erased_type_topen;
-    eauto with twf wf omega.
+    eauto with twf wf lia.
 Qed.
 
 Lemma strictly_positive_open:
@@ -75,27 +75,27 @@ Proof.
 Qed.
 
 Lemma push_all_cons:
-  forall X (RC: tree -> Prop) theta (P: tree -> Prop),
-    (X, fun v => forall a, P a -> RC v) :: push_all P theta = push_all P ((X, fun a => RC) :: theta).
+  forall X (RC: tree -> Prop) ρ (P: tree -> Prop),
+    (X, fun v => forall a, P a -> RC v) :: push_all P ρ = push_all P ((X, fun a => RC) :: ρ).
 Proof.
   steps.
 Qed.
 
 Lemma push_is_candidate:
-  forall (theta : interpretation) (A a : tree) (RC : tree -> Prop),
+  forall (ρ : interpretation) (A a : tree) (RC : tree -> Prop),
     reducibility_candidate RC ->
-    reducible_values theta a A ->
-    reducibility_candidate (fun v : tree => reducible_values theta a A -> RC v).
+    [ ρ ⊨ a : A ]v ->
+    reducibility_candidate (fun v : tree => [ ρ ⊨ a : A ]v -> RC v).
 Proof.
   repeat step || unfold non_empty in * || unfold reducibility_candidate in * || instantiate_any;
     eauto with fv wf.
 Qed.
 
 Lemma push_all_is_candidate:
-  forall (theta : interpretation) (A : tree) (RC : tree -> Prop),
+  forall (ρ : interpretation) (A : tree) (RC : tree -> Prop),
     reducibility_candidate RC ->
-    non_empty theta A ->
-    reducibility_candidate (fun v : tree => forall a, reducible_values theta a A -> RC v).
+    non_empty ρ A ->
+    reducibility_candidate (fun v : tree => forall a, [ ρ ⊨ a : A ]v -> RC v).
 Proof.
   repeat step || unfold non_empty in * || unfold reducibility_candidate in * || instantiate_any;
     eauto with fv wf.
@@ -103,8 +103,8 @@ Qed.
 
 Ltac find_exists2 :=
   match goal with
-  | H1: reducible_values ?theta ?a ?T1,
-    H2: reducible_values ?theta ?v (open 0 ?T2 ?a)
+  | H1: [ ?ρ ⊨ ?a : ?T1 ]v,
+    H2: [ ?ρ ⊨ ?v : open 0 ?T2 ?a ]v
     |- _ =>
     exists a
   end.
@@ -136,7 +136,7 @@ Lemma strictly_positive_rename_aux:
     strictly_positive T' vars'.
 Proof.
   induction n;
-    try solve [ intros; omega ];
+    try solve [ intros; lia ];
     destruct T; inversion 3;
     repeat match goal with
            | _ => step || simp_spos || destruct_tag
@@ -146,7 +146,7 @@ Proof.
              apply IHn with T vars rel
             end;
     eauto using no_type_fvar_rename;
-    try omega.
+    try lia.
 
   right.
   exists (makeFresh ((X :: nil) :: pfv Ts' type_var :: nil));
@@ -159,7 +159,7 @@ Proof.
     apply IHn with T (X :: nil) ((X,M) :: rel)
   end;
     repeat unfold similar_sets || step || autorewrite with bsize in * || apply equal_with_relation_topen;
-      try omega;
+      try lia;
       try finisher.
 Qed.
 
@@ -188,11 +188,11 @@ Lemma strictly_positive_swap_aux:
     strictly_positive (swap_type_holes T i j) vars.
 Proof.
   induction n; destruct T; repeat step || simp_spos || apply_any;
-    try omega;
+    try lia;
     eauto using no_type_fvar_swap.
   right; exists X; repeat step || rewrite pfv_swap_type_holes in *.
   rewrite topen_swap2; steps.
-  apply IHn; repeat step || autorewrite with bsize in *; try omega.
+  apply IHn; repeat step || autorewrite with bsize in *; try lia.
 Qed.
 
 Lemma strictly_positive_swap:
@@ -212,12 +212,12 @@ Lemma strictly_positive_topen_aux:
 Proof.
   induction n; destruct T; repeat step || simp_spos || apply IHn;
     eauto using no_type_fvar_in_topen;
-    try omega.
+    try lia.
   right; exists (makeFresh ((X0 :: nil) :: (X :: nil) :: pfv T3 type_var :: pfv (topen (S k) T3 (fvar X type_var)) type_var :: nil)); steps; try finisher.
 
   rewrite open_swap; repeat step.
   apply IHn; repeat step || autorewrite with bsize in *;
-    try omega;
+    try lia;
     try finisher.
   rewrite topen_swap; steps.
   apply strictly_positive_swap.
@@ -234,15 +234,15 @@ Proof.
 Qed.
 
 Lemma support_push_one:
-  forall theta a,
-    support (push_one a theta) = support theta.
+  forall ρ a,
+    support (push_one a ρ) = support ρ.
 Proof.
   unfold push_one; repeat step || rewrite support_map_values.
 Qed.
 
 Lemma support_push_all:
-  forall theta P,
-    support (push_all P theta) = support theta.
+  forall ρ P,
+    support (push_all P ρ) = support ρ.
 Proof.
   unfold push_all; repeat step || rewrite support_map_values.
 Qed.
@@ -258,62 +258,62 @@ Qed.
 
 Definition pre_interpretation := list (nat * (tree -> tree -> Prop)).
 
-Fixpoint forall_implies (P: tree -> Prop) (pre_theta: pre_interpretation) (theta: interpretation) :=
-  match pre_theta, theta with
+Fixpoint forall_implies (P: tree -> Prop) (pre_ρ: pre_interpretation) (ρ: interpretation) :=
+  match pre_ρ, ρ with
   | nil, nil => True
-  | (X,pre_rc) :: pre_theta', (Y,rc) :: theta' =>
+  | (X,pre_rc) :: pre_ρ', (Y,rc) :: ρ' =>
       X = Y /\
-      forall_implies P pre_theta' theta' /\
+      forall_implies P pre_ρ' ρ' /\
       forall (v: tree), (forall a, P a -> pre_rc a v) -> rc v
   | _, _ => False
   end.
 
 Lemma forall_implies_apply:
-  forall P pre_theta theta X pre_rc rc v,
-    forall_implies P pre_theta theta ->
-    lookup Nat.eq_dec pre_theta X = Some pre_rc ->
-    lookup Nat.eq_dec theta X = Some rc ->
+  forall P pre_ρ ρ X pre_rc rc v,
+    forall_implies P pre_ρ ρ ->
+    lookup PeanoNat.Nat.eq_dec pre_ρ X = Some pre_rc ->
+    lookup PeanoNat.Nat.eq_dec ρ X = Some rc ->
     (forall a, P a -> pre_rc a v) ->
     rc v.
 Proof.
-  induction pre_theta; destruct theta; repeat step || eapply_any.
+  induction pre_ρ; destruct ρ; repeat step || eapply_any.
 Qed.
 
 Ltac t_forall_implies_apply :=
   match goal with
-  | H1: forall_implies ?P ?ptheta ?theta,
-    H2: lookup _ ?ptheta ?X = Some ?prc,
-    H3: lookup _ ?theta ?X = Some ?rc |- ?rc ?v =>
+  | H1: forall_implies ?P ?pre_ρ ?ρ,
+    H2: lookup _ ?pre_ρ ?X = Some ?prc,
+    H3: lookup _ ?ρ ?X = Some ?rc |- ?rc ?v =>
     apply (forall_implies_apply _ _ _ _ _ _ _ H1 H2 H3)
   end.
 
 Lemma forall_implies_support:
-  forall P pre_theta theta,
-    forall_implies P pre_theta theta ->
-    support pre_theta = support theta.
+  forall P pre_ρ ρ,
+    forall_implies P pre_ρ ρ ->
+    support pre_ρ = support ρ.
 Proof.
-  induction pre_theta; destruct theta; repeat step || f_equal.
+  induction pre_ρ; destruct ρ; repeat step || f_equal.
 Qed.
 
 Ltac t_forall_implies_support :=
   match goal with
-  | H: forall_implies ?P ?ptheta ?theta |- _ =>
-    poseNew (Mark (ptheta,theta) "forall_implies_suppoft");
+  | H: forall_implies ?P ?pre_ρ ?ρ |- _ =>
+    poseNew (Mark (pre_ρ,ρ) "forall_implies_suppoft");
     pose proof (forall_implies_support _ _ _ H)
   end.
 
 Lemma forall_implies_equiv:
-  forall P1 P2 ptheta theta,
-    forall_implies P1 ptheta theta ->
+  forall P1 P2 pre_ρ ρ,
+    forall_implies P1 pre_ρ ρ ->
     (forall x, P1 x <-> P2 x) ->
-    forall_implies P2 ptheta theta.
+    forall_implies P2 pre_ρ ρ.
 Proof.
-  induction ptheta; destruct theta; steps; eauto with eapply_any.
+  induction pre_ρ; destruct ρ; steps; eauto with eapply_any.
 Qed.
 
 Ltac t_forall_implies_equiv :=
   match goal with
-  | H1: forall_implies ?P1 ?ptheta ?theta |- forall_implies _ ?ptheta ?theta =>
+  | H1: forall_implies ?P1 ?pre_ρ ?ρ |- forall_implies _ ?pre_ρ ?ρ =>
       apply forall_implies_equiv with P1
   end.
 
@@ -325,7 +325,7 @@ Lemma strictly_positive_append_aux:
     strictly_positive T (vars1 ++ vars2).
 Proof.
   induction n; destruct T;
-    repeat omega || step || destruct_tag || simp_spos || apply_any;
+    repeat lia || step || destruct_tag || simp_spos || apply_any;
       eauto using no_type_fvar_append.
 Qed.
 

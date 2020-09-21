@@ -1,7 +1,7 @@
 Require Export SystemFR.SwapTypeHoles.
 Require Export SystemFR.SwapTermHoles.
 
-Require Import Omega.
+Require Import Psatz.
 
 (* measure for ensuring termination of reducible_values *)
 (* see file ReducibilityMeasure for the full measure *)
@@ -43,7 +43,7 @@ Lemma type_nodes_opening:
     type_nodes (open k T rep) = type_nodes T.
 Proof.
   induction T; repeat step || rewrite_any || apply type_nodes_term_form;
-    try omega.
+    try lia.
 Qed.
 
 Hint Rewrite type_nodes_opening: bsize.

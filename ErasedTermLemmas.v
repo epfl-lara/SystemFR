@@ -2,7 +2,6 @@ Require Export SystemFR.SubstitutionLemmas.
 Require Export SystemFR.PrimitiveSize.
 Require Export SystemFR.PrimitiveRecognizers.
 Require Export SystemFR.SmallStep.
-Require Export SystemFR.RelationClosures.
 
 Lemma is_erased_term_twf:
   forall t k,
@@ -141,7 +140,7 @@ Hint Immediate is_erased_is_lambda: erased.
 
 Lemma erase_scbv_step:
   forall t1 t2,
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     is_erased_term t1 ->
     is_erased_term t2.
 Proof.
@@ -153,7 +152,7 @@ Hint Immediate erase_scbv_step: erased.
 
 Lemma erase_star_scbv_step:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     is_erased_term t1 ->
     is_erased_term t2.
 Proof.

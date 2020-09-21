@@ -8,15 +8,15 @@ Opaque loop.
 Opaque reducible_values.
 
 Definition reducibility_equivalent_prop T : Prop :=
-  forall v1 v2 theta,
-    equivalent_terms v1 v2 ->
+  forall v1 v2 ρ,
+    [ v1 ≡ v2 ] ->
     cbv_value v2 ->
     is_erased_type T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    valid_interpretation theta ->
-    reducible_values theta v1 T ->
-    reducible_values theta v2 T.
+    valid_interpretation ρ ->
+    [ ρ ⊨ v1 : T ]v ->
+    [ ρ ⊨ v2 : T ]v.
 
 Lemma reducibility_equivalent_nat:
   forall m, prop_at reducibility_equivalent_prop m T_nat.
@@ -58,31 +58,31 @@ Proof.
 Qed.
 
 Lemma reducibility_equivalent_inst:
-  forall theta T v1 v2,
-    equivalent_terms v1 v2 ->
+  forall ρ T v1 v2,
+    [ v1 ≡ v2 ] ->
     reducibility_equivalent_prop T ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    reducible_values theta v1 T ->
+    [ ρ ⊨ v1 : T ]v ->
     cbv_value v2 ->
-    reducible_values theta v2 T.
+    [ ρ ⊨ v2 : T ]v.
 Proof.
   unfold reducibility_equivalent_prop;
     repeat step; eauto.
 Qed.
 
 Lemma reducibility_equivalent_reduces_to:
-  forall theta T e1 e2,
-    reduces_to (fun v => reducible_values theta v T) e1 ->
-    equivalent_terms e1 e2 ->
+  forall ρ T e1 e2,
+    [ ρ ⊨ e1 : T ] ->
+    [ e1 ≡ e2 ] ->
     reducibility_equivalent_prop T ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    reduces_to (fun v => reducible_values theta v T) e2.
+    [ ρ ⊨ e2 : T ].
 Proof.
   unfold reducibility_equivalent_prop, reduces_to;
     repeat step || equivalent_normalizing;
@@ -358,30 +358,30 @@ Proof.
 Qed.
 
 Lemma reducibility_equivalent:
-  forall T v1 v2 theta,
-    equivalent_terms v1 v2 ->
+  forall T v1 v2 ρ,
+    [ v1 ≡ v2 ] ->
     cbv_value v2 ->
     is_erased_type T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    valid_interpretation theta ->
-    reducible_values theta v1 T ->
-    reducible_values theta v2 T.
+    valid_interpretation ρ ->
+    [ ρ ⊨ v1 : T ]v ->
+    [ ρ ⊨ v2 : T ]v.
 Proof.
   intros; eapply reducibility_equivalent_aux; eauto.
 Qed.
 
 Lemma reducibility_equivalent2:
-  forall T t1 t2 theta,
-    equivalent_terms t1 t2 ->
+  forall T t1 t2 ρ,
+    [ t1 ≡ t2 ] ->
     is_erased_type T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    valid_interpretation theta ->
-    reducible theta t1 T ->
-    reducible theta t2 T.
+    valid_interpretation ρ ->
+    [ ρ ⊨ t1 : T ] ->
+    [ ρ ⊨ t2 : T ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat step;
     t_closer.
 

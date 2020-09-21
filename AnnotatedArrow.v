@@ -5,39 +5,38 @@ Require Export SystemFR.ErasedArrow.
 Opaque reducible_values.
 
 Lemma annotated_reducible_lambda:
-  forall tvars gamma t U V x,
-    ~(x ∈ fv_context gamma) ->
+  forall Θ Γ t U V x,
+    ~(x ∈ fv_context Γ) ->
     ~(x ∈ fv t) ->
     ~(x ∈ fv V) ->
-    ~(x ∈ tvars) ->
+    ~(x ∈ Θ) ->
     wf U 0 ->
     wf t 1 ->
-    subset (fv_context gamma) (support gamma) ->
-    subset (fv U) (support gamma) ->
-    subset (fv t) (support gamma) ->
+    subset (fv_context Γ) (support Γ) ->
+    subset (fv U) (support Γ) ->
+    subset (fv t) (support Γ) ->
     is_annotated_term t ->
     is_annotated_type V ->
-    [[ tvars; (x,U) :: gamma ⊨ open 0 t (fvar x term_var): open 0 V (fvar x term_var) ]] ->
-    [[ tvars; gamma ⊨ lambda U t: T_arrow U V ]].
+    [[ Θ; (x,U) :: Γ ⊨ open 0 t (fvar x term_var): open 0 V (fvar x term_var) ]] ->
+    [[ Θ; Γ ⊨ lambda U t: T_arrow U V ]].
 Proof.
-  unfold annotated_reducible; intros.
-  apply open_reducible_lambda with x;
+  intros; apply open_reducible_lambda with x;
     steps;
     erase_open;
     side_conditions.
 Qed.
 
 Lemma annotated_reducible_app:
-  forall tvars gamma t1 t2 U V,
+  forall Θ Γ t1 t2 U V,
     is_annotated_type V ->
     is_annotated_term t2 ->
     wf V 1 ->
-    subset (fv V) (support gamma) ->
-    [[ tvars; gamma ⊨ t1 : T_arrow U V ]] ->
-    [[ tvars; gamma ⊨ t2 : U ]] ->
-    [[ tvars; gamma ⊨ app t1 t2 : open 0 V t2 ]].
+    subset (fv V) (support Γ) ->
+    [[ Θ; Γ ⊨ t1 : T_arrow U V ]] ->
+    [[ Θ; Γ ⊨ t2 : U ]] ->
+    [[ Θ; Γ ⊨ app t1 t2 : open 0 V t2 ]].
 Proof.
-  unfold annotated_reducible; intros; erase_open.
+  intros; erase_open.
   apply open_reducible_app with (erase_type U);
     side_conditions.
 Qed.

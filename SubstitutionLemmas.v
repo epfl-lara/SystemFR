@@ -48,9 +48,9 @@ Qed.
 Hint Rewrite substitute_nothing3: bsubst.
 
 Lemma substitute_nothing_context:
-  forall gamma tag, psubstitute_context gamma nil tag = gamma.
+  forall Γ tag, psubstitute_context Γ nil tag = Γ.
 Proof.
-  induction gamma; repeat step || autorewrite with bsubst in *.
+  induction Γ; repeat step || autorewrite with bsubst in *.
 Qed.
 
 Hint Rewrite substitute_nothing_context: bsubst.
@@ -129,12 +129,12 @@ Proof.
 Qed.
 
 Lemma substitute_cons_context:
-  forall gamma x l rep tag,
+  forall Γ x l rep tag,
     pfv rep tag = nil ->
-    psubstitute_context gamma ((x,rep) :: l) tag =
-      psubstitute_context (psubstitute_context gamma ((x,rep) :: nil) tag) l tag.
+    psubstitute_context Γ ((x,rep) :: l) tag =
+      psubstitute_context (psubstitute_context Γ ((x,rep) :: nil) tag) l tag.
 Proof.
-  induction gamma;
+  induction Γ;
     repeat match goal with
            | _ => step
            | |- _ :: _ = _ :: _ => f_equal
@@ -216,35 +216,35 @@ Proof.
 Qed.
 
 Lemma same_support_substitute:
-  forall gamma l tag,
-    support (psubstitute_context gamma l tag) = support gamma.
+  forall Γ l tag,
+    support (psubstitute_context Γ l tag) = support Γ.
 Proof.
-  induction gamma; steps.
+  induction Γ; steps.
 Qed.
 
 Hint Rewrite same_support_substitute: bsubst.
 
 Lemma lookup_subst:
-  forall gamma x T l tag,
-    lookup Nat.eq_dec gamma x = Some T ->
-      lookup Nat.eq_dec (psubstitute_context gamma l tag) x =
+  forall Γ x T l tag,
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+      lookup PeanoNat.Nat.eq_dec (psubstitute_context Γ l tag) x =
       Some (psubstitute T l tag).
 Proof.
-  induction gamma; steps.
+  induction Γ; steps.
 Qed.
 
 Lemma lookup_subst2:
-  forall gamma x l tag,
-    lookup Nat.eq_dec gamma x = None ->
-    lookup Nat.eq_dec (psubstitute_context gamma l tag) x = None.
+  forall Γ x l tag,
+    lookup PeanoNat.Nat.eq_dec Γ x = None ->
+    lookup PeanoNat.Nat.eq_dec (psubstitute_context Γ l tag) x = None.
 Proof.
-  induction gamma; steps.
+  induction Γ; steps.
 Qed.
 
 Definition equivalent_subst (l1 l2: list (nat * tree)): Prop :=
   forall s t,
-    lookup Nat.eq_dec l1 s = Some t <->
-    lookup Nat.eq_dec l2 s = Some t.
+    lookup PeanoNat.Nat.eq_dec l1 s = Some t <->
+    lookup PeanoNat.Nat.eq_dec l2 s = Some t.
 
 Lemma subst_permutation:
   forall t l1 l2 tag,
@@ -287,8 +287,8 @@ Qed.
 Definition weak_equivalent_subst { T } (vars: list nat) (l1 l2: list (nat * T)): Prop :=
   forall s t,
     s ∈ vars -> (
-      lookup Nat.eq_dec l1 s = Some t <->
-      lookup Nat.eq_dec l2 s = Some t
+      lookup PeanoNat.Nat.eq_dec l1 s = Some t <->
+      lookup PeanoNat.Nat.eq_dec l2 s = Some t
     ).
 
 Lemma weaker_equivalent_subst:

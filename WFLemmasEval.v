@@ -2,7 +2,6 @@ Require Export SystemFR.WFLemmas.
 Require Export SystemFR.SmallStep.
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.PrimitiveRecognizers.
-Require Export SystemFR.RelationClosures.
 
 Lemma wf_nat_value:
   forall v k, is_nat_value v -> wf v k.
@@ -46,7 +45,7 @@ Hint Immediate wf_is_lambda: wf.
 
 Lemma wf_smallstep:
   forall t1 t2,
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     wf t1 0 ->
     wf t2 0.
 Proof.
@@ -57,7 +56,7 @@ Hint Immediate wf_smallstep: wf.
 
 Lemma wf_star_smallstep:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     wf t1 0 ->
     wf t2 0.
 Proof.

@@ -14,26 +14,26 @@ Require Export SystemFR.SubstitutionLemmas.
 Open Scope list_scope.
 
 Inductive satisfies (P: tree -> tree -> Prop):
-  list (nat * tree) -> (* gamma *)
+  list (nat * tree) -> (* Γ *)
   list (nat * tree) -> (* lterms *)
   Prop :=
 | SatNil: satisfies P nil nil
 | SatCons:
-    forall x t T gamma lterms,
+    forall x t T Γ lterms,
       ~(x ∈ fv T) ->
-      ~(x ∈ fv_context gamma) ->
+      ~(x ∈ fv_context Γ) ->
       pfv t term_var = nil ->
       pfv t type_var = nil ->
       wf t 0 ->
       twf t 0 ->
       P t (substitute T lterms) ->
-      satisfies P gamma lterms ->
-      satisfies P ((x,T) :: gamma) ((x,t) :: lterms).
+      satisfies P Γ lterms ->
+      satisfies P ((x,T) :: Γ) ((x,t) :: lterms).
 
 Lemma satisfies_nodup:
-  forall P gamma lterms,
-    satisfies P gamma lterms ->
-    NoDup (support gamma).
+  forall P Γ lterms,
+    satisfies P Γ lterms ->
+    NoDup (support Γ).
 Proof.
   induction 1; repeat step; eauto with fv.
 Qed.
@@ -48,11 +48,11 @@ Ltac t_satisfies_nodup :=
   end.
 
 Lemma satisfies_lookup:
-  forall P gamma lterms,
-    satisfies P gamma lterms ->
+  forall P Γ lterms,
+    satisfies P Γ lterms ->
     forall x t T,
-      lookup Nat.eq_dec gamma x = Some T ->
-      lookup Nat.eq_dec lterms x = Some t ->
+      lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+      lookup PeanoNat.Nat.eq_dec lterms x = Some t ->
       P t (substitute T lterms).
 Proof.
   induction 1; steps; eauto.
@@ -63,19 +63,19 @@ Proof.
 Qed.
 
 Lemma satisfies_lookup2:
-  forall P gamma lterms x t T,
-    satisfies P gamma lterms ->
-    lookup Nat.eq_dec gamma x = Some T ->
-    lookup Nat.eq_dec lterms x = Some t ->
+  forall P Γ lterms x t T,
+    satisfies P Γ lterms ->
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+    lookup PeanoNat.Nat.eq_dec lterms x = Some t ->
     P t (substitute T lterms).
 Proof.
   intros; eapply satisfies_lookup; eauto.
 Qed.
 
 Lemma satisfies_same_support:
-  forall P gamma lterms,
-    satisfies P gamma lterms ->
-    support gamma = support lterms.
+  forall P Γ lterms,
+    satisfies P Γ lterms ->
+    support Γ = support lterms.
 Proof.
   induction 1; steps.
 Qed.
@@ -106,9 +106,9 @@ Ltac t_termlist :=
   end.
 
 Lemma var_in_support:
-  forall x P gamma l,
-    satisfies P gamma l ->
-    ~(x ∈ support gamma) ->
+  forall x P Γ l,
+    satisfies P Γ l ->
+    ~(x ∈ support Γ) ->
     x ∈ support l ->
     False.
 Proof.
@@ -121,24 +121,24 @@ Ltac t_satisfies :=
   end.
 
 Lemma satisfies_tail:
-  forall p gamma1 gamma2 l1 l2,
-    satisfies p (gamma1 ++ gamma2) (l1 ++ l2) ->
-    support gamma1 = support l1 ->
-    satisfies p gamma2 l2.
+  forall p Γ1 Γ2 l1 l2,
+    satisfies p (Γ1 ++ Γ2) (l1 ++ l2) ->
+    support Γ1 = support l1 ->
+    satisfies p Γ2 l2.
 Proof.
-  induction gamma1; destruct l1; repeat step || step_inversion satisfies; eauto.
+  induction Γ1; destruct l1; repeat step || step_inversion satisfies; eauto.
 Qed.
 
 Lemma satisfies_cut:
-  forall p gamma1 gamma2 lterms,
-    satisfies p (gamma1 ++ gamma2) lterms ->
+  forall p Γ1 Γ2 lterms,
+    satisfies p (Γ1 ++ Γ2) lterms ->
     exists l1 l2,
       lterms = l1 ++ l2 /\
-      support gamma1 = support l1 /\
-      support gamma2 = support l2 /\
-      satisfies p gamma2 l2.
+      support Γ1 = support l1 /\
+      support Γ2 = support l2 /\
+      satisfies p Γ2 l2.
 Proof.
-  induction gamma1; destruct lterms; steps; repeat step || step_inversion satisfies.
+  induction Γ1; destruct lterms; steps; repeat step || step_inversion satisfies.
   - exists nil, nil; steps.
   - exists nil, ((n,t) :: lterms);
       repeat step || t_termlist || apply SatCons;  eauto with btermlist.
@@ -154,11 +154,11 @@ Ltac satisfies_cut :=
   end.
 
 Lemma satisfies_fair_split:
-  forall P gamma1 gamma2 l1 l2 x t T,
-    satisfies P (gamma1 ++ (x, T) :: gamma2) (l1 ++ (x, t) :: l2) ->
-    support gamma1 = support l1.
+  forall P Γ1 Γ2 l1 l2 x t T,
+    satisfies P (Γ1 ++ (x, T) :: Γ2) (l1 ++ (x, t) :: l2) ->
+    support Γ1 = support l1.
 Proof.
-  induction gamma1;
+  induction Γ1;
     repeat step || step_inversion satisfies || t_termlist || rewrite fv_context_append in * || list_utils.
 
   - destruct l1; repeat step || t_satisfies_nodup || rewrite support_append in *.
@@ -171,9 +171,9 @@ Proof.
 Qed.
 
 Lemma x_not_in_support:
-  forall P gamma1 gamma2 l x T,
-    satisfies P (gamma1 ++ (x, T) :: gamma2) l ->
-    x ∈ support gamma1 ->
+  forall P Γ1 Γ2 l x T,
+    satisfies P (Γ1 ++ (x, T) :: Γ2) l ->
+    x ∈ support Γ1 ->
     False.
 Proof.
   repeat step || t_satisfies_nodup || rewrite support_append in *;
@@ -183,8 +183,8 @@ Qed.
 Hint Immediate x_not_in_support: fv.
 
 Lemma x_not_in_support2:
-  forall P gamma1 gamma2 l1 l2 x t T,
-    satisfies P (gamma1 ++ (x, T) :: gamma2) (l1 ++ (x, t) :: l2) ->
+  forall P Γ1 Γ2 l1 l2 x t T,
+    satisfies P (Γ1 ++ (x, T) :: Γ2) (l1 ++ (x, t) :: l2) ->
     x ∈ support l1 ->
     False.
 Proof.
@@ -196,10 +196,10 @@ Qed.
 Hint Immediate x_not_in_support2: fv.
 
 Lemma satisfies_y_in_support:
-  forall P gamma1 gamma2 l1 l2 x y t T,
-    satisfies P (gamma1 ++ (x, T) :: gamma2) (l1 ++ (x, t) :: l2) ->
+  forall P Γ1 Γ2 l1 l2 x y t T,
+    satisfies P (Γ1 ++ (x, T) :: Γ2) (l1 ++ (x, t) :: l2) ->
     y ∈ support l1 ->
-    y ∈ support gamma1.
+    y ∈ support Γ1.
 Proof.
   intros.
   erewrite satisfies_fair_split; eauto.

@@ -9,30 +9,29 @@ Require Export SystemFR.ErasedPair.
 Require Export SystemFR.ErasedQuant.
 Require Export SystemFR.ErasedNat.
 
-Require Import Omega.
+Require Import Psatz.
 
 Opaque reducible_values.
 Opaque makeFresh.
 Opaque tlt.
 
 Lemma reducible_fix_zero:
-  forall theta T ts v,
+  forall ρ T ts v,
     wf ts 1 ->
     wf T 1 ->
     pfv ts term_var = nil ->
     pfv T term_var = nil ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     is_erased_term ts ->
     is_erased_type T ->
-    star scbv_step (notype_tfix ts) v ->
+    notype_tfix ts ~>* v ->
     cbv_value v ->
     (forall tx n,
-      reducible_values theta n T_nat ->
-      reducible_values theta tx
-                       (T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T) ->
-      equivalent_terms tx (notype_tfix ts) ->
-      reducible theta (open 0 ts tx) (open 0 T n)) ->
-    reducible theta (notype_tfix ts) (open 0 T zero).
+      [ ρ ⊨ n : T_nat ]v ->
+      [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+      [ tx ≡ notype_tfix ts ] ->
+      [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
+    [ ρ ⊨ notype_tfix ts : open 0 T zero ].
 Proof.
   intros.
   eapply backstep_reducible; steps;
@@ -54,7 +53,7 @@ Qed.
 Lemma scbv_step_fix_open:
   forall ts,
     wf ts 1 ->
-    scbv_step (notype_tfix ts) (open 0 ts (notype_tfix ts)).
+    notype_tfix ts ~> open 0 ts (notype_tfix ts).
 Proof.
   intros.
   eapply scbv_step_same; eauto with smallstep.
@@ -62,7 +61,7 @@ Proof.
 Qed.
 
 Lemma reducible_fix_strong_induction_aux:
-  forall n theta T tsv v ts,
+  forall n ρ T tsv v ts,
     tree_size v < n ->
     fv T = nil ->
     fv ts = nil ->
@@ -71,20 +70,17 @@ Lemma reducible_fix_strong_induction_aux:
     is_nat_value v ->
     is_erased_term ts ->
     is_erased_type T ->
-    valid_interpretation theta ->
-    star scbv_step (notype_tfix ts) tsv ->
+    valid_interpretation ρ ->
+    notype_tfix ts ~>* tsv ->
     cbv_value tsv ->
     (forall tx n,
-       reducible_values theta n T_nat ->
-       reducible_values theta tx
-         (T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T) ->
-       equivalent_terms tx (notype_tfix ts) ->
-       reducible theta
-         (open 0 ts tx)
-         (open 0 T n)) ->
-    reducible theta (notype_tfix ts) (open 0 T v).
+       [ ρ ⊨ n : T_nat ]v ->
+       [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+       [ tx ≡ notype_tfix ts ] ->
+       [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
+    [ ρ ⊨ notype_tfix ts : open 0 T v ].
 Proof.
-  induction n; repeat step || simp_red_goal || simp_red_top_level_hyp; try omega;
+  induction n; repeat step || simp_red_goal || simp_red_top_level_hyp; try lia;
     eapply backstep_reducible;
       repeat step || list_utils;
       eauto using scbv_step_fix_open;
@@ -109,11 +105,11 @@ Proof.
       repeat step || simp_red_goal || simp_red_top_level_hyp || rewrite open_tlt in * || tlt_sound ||
       rewrite open_none in * by t_closer;
       try solve [ unshelve t_closer; auto ];
-      try omega.
+      try lia.
 Qed.
 
 Lemma reducible_fix_strong_induction:
-  forall theta T v ts tsv,
+  forall ρ T v ts tsv,
     fv T = nil ->
     fv ts = nil ->
     wf T 1 ->
@@ -121,42 +117,36 @@ Lemma reducible_fix_strong_induction:
     is_nat_value v ->
     is_erased_term ts ->
     is_erased_type T ->
-    valid_interpretation theta ->
-    star scbv_step (notype_tfix ts) tsv ->
+    valid_interpretation ρ ->
+    notype_tfix ts ~>* tsv ->
     cbv_value tsv ->
     (forall tx n,
-       reducible_values theta n T_nat ->
-       reducible_values theta tx
-         (T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T) ->
-       equivalent_terms tx (notype_tfix ts) ->
-       reducible theta
-         (open 0 ts tx)
-         (open 0 T n)) ->
-    reducible theta (notype_tfix ts) (open 0 T v).
+       [ ρ ⊨ n : T_nat ]v ->
+       [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+       [ tx ≡ notype_tfix ts ] ->
+       [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
+    [ ρ ⊨ notype_tfix ts : open 0 T v ].
 Proof.
   eauto using reducible_fix_strong_induction_aux.
 Qed.
 
 Lemma reducible_fix_strong_induction_forall:
-  forall theta ts tsv T,
+  forall ρ ts tsv T,
     fv T = nil ->
     fv ts = nil ->
     wf T 1 ->
     wf ts 1 ->
     is_erased_term ts ->
-    valid_interpretation theta ->
+    valid_interpretation ρ ->
     is_erased_type T ->
-    star scbv_step (notype_tfix ts) tsv ->
+    notype_tfix ts ~>* tsv ->
     cbv_value tsv ->
     (forall tx n,
-       reducible_values theta n T_nat ->
-       reducible_values theta tx
-                        (T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T) ->
-       equivalent_terms tx (notype_tfix ts) ->
-       reducible theta
-         (open 0 ts tx)
-         (open 0 T n)) ->
-    reducible theta (notype_tfix ts) (T_forall T_nat T).
+       [ ρ ⊨ n : T_nat ]v ->
+       [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+       [ tx ≡ notype_tfix ts ] ->
+       [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
+    [ ρ ⊨ notype_tfix ts : T_forall T_nat T ].
 Proof.
   repeat step.
 
@@ -168,24 +158,24 @@ Proof.
 Qed.
 
 Lemma open_reducible_fix_strong_induction:
-  forall tvars ts gamma T n y p,
+  forall Θ ts Γ T n y p,
     wf T 1 ->
     wf ts 1 ->
-    subset (fv T) (support gamma) ->
-    subset (fv ts) (support gamma) ->
+    subset (fv T) (support Γ) ->
+    subset (fv ts) (support Γ) ->
     ~(p ∈ fv T) ->
-    ~(p ∈ fv_context gamma) ->
+    ~(p ∈ fv_context Γ) ->
     ~(y ∈ fv ts) ->
     ~(y ∈ fv T) ->
-    ~(y ∈ fv_context gamma) ->
+    ~(y ∈ fv_context Γ) ->
     ~(n ∈ fv ts) ->
     ~(n ∈ fv T) ->
-    ~(n ∈ fv_context gamma) ->
+    ~(n ∈ fv_context Γ) ->
     is_erased_term ts ->
     is_erased_type T ->
     cbv_value ts ->
     NoDup (n :: y :: p :: nil) ->
-    [ tvars;
+    [ Θ;
         (p, T_equiv (fvar y term_var) (notype_tfix ts)) ::
         (y,
           (T_forall
@@ -193,9 +183,9 @@ Lemma open_reducible_fix_strong_induction:
              T)
         ) ::
         (n, T_nat) ::
-        gamma ⊨
+        Γ ⊨
       open 0 ts (fvar y term_var) : open 0 T (fvar n term_var) ] ->
-    [ tvars; gamma ⊨ notype_tfix ts : T_forall T_nat T ].
+    [ Θ; Γ ⊨ notype_tfix ts : T_forall T_nat T ].
 Proof.
   unfold open_reducible in *; steps.
 
@@ -208,7 +198,7 @@ Proof.
     eauto with erased;
     try solve [ rewrite substitute_open2; eauto with wf ].
 
-  unshelve epose proof (H15 theta ((p, uu) :: (y, tx) :: (n, n0) :: lterms) _ _ _) as HH;
+  unshelve epose proof (H15 ρ ((p, uu) :: (y, tx) :: (n, n0) :: lterms) _ _ _) as HH;
     repeat step || apply SatCons || nodup || rewrite pfv_tlt in * || rewrite pfv_shift2 in * || list_utils;
     eauto 2 with fv;
     eauto 2 with wf;

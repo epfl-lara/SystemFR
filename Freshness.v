@@ -1,5 +1,5 @@
 Require Import Coq.Lists.List.
-Require Import Omega.
+Require Import Psatz.
 
 Require Export SystemFR.Tactics.
 Require Export SystemFR.ListUtils.
@@ -18,7 +18,7 @@ Definition succ_max l := S (max l).
 
 Lemma in_list_smaller (l: list nat): forall (w: nat), In w l -> w <= max l.
 Proof.
-  induction l; repeat step || instantiate_any; omega.
+  induction l; repeat step || instantiate_any; lia.
 Qed.
 
 Ltac t_list_smaller :=
@@ -26,18 +26,18 @@ Ltac t_list_smaller :=
   | H: _ |- _ => apply in_list_smaller in H
   end.
 
-Lemma freshMakeFresh: forall {T} (gamma: list (nat * T)),
-    fresh gamma (succ_max (support gamma)).
+Lemma freshMakeFresh: forall {T} (Γ: list (nat * T)),
+    fresh Γ (succ_max (support Γ)).
 Proof.
   unfold succ_max;
-  repeat step || t_list_smaller; omega.
+  repeat step || t_list_smaller; lia.
 Qed.
 
 Lemma freshMakeFresh2: forall (l: list nat),
     succ_max l ∈ l -> False.
 Proof.
   unfold succ_max;
-  repeat step || t_list_smaller; omega.
+  repeat step || t_list_smaller; lia.
 Qed.
 
 Hint Immediate freshMakeFresh freshMakeFresh2: fresh.
@@ -54,7 +54,7 @@ Lemma length_makeFresh:
     makeFresh ll > max l.
 Proof.
   induction ll; repeat step || list_utils || instantiate_any;
-    eauto with omega.
+    eauto with lia.
 Qed.
 
 Lemma in_makeFresh:
@@ -65,7 +65,7 @@ Lemma in_makeFresh:
 Proof.
   intros.
   apply length_makeFresh in H.
-  repeat step || t_list_smaller; omega.
+  repeat step || t_list_smaller; lia.
 Qed.
 
 Lemma eq_makeFresh:
@@ -75,7 +75,7 @@ Lemma eq_makeFresh:
     False.
 Proof.
   intros.
-  apply length_makeFresh in H; steps; eauto with omega.
+  apply length_makeFresh in H; steps; eauto with lia.
 Qed.
 
 Ltac finisher :=
@@ -93,7 +93,7 @@ Lemma instantiate1:
     (forall x, (x ∈ L -> False) -> P x) ->
     P (makeFresh (F :: L :: nil)).
 Proof.
-  repeat step || apply_any || finisher || t_list_smaller; omega.
+  repeat step || apply_any || finisher || t_list_smaller; lia.
 Qed.
 
 Lemma instantiate2:
@@ -102,7 +102,7 @@ Lemma instantiate2:
     P (makeFresh (F :: L :: nil))
       (S (makeFresh (F :: L :: nil))).
 Proof.
-  repeat step || apply_any || finisher || t_list_smaller; eauto with omega.
+  repeat step || apply_any || finisher || t_list_smaller; eauto with lia.
 Qed.
 
 Lemma instantiate3:
@@ -112,7 +112,7 @@ Lemma instantiate3:
       (S (makeFresh (F :: L :: nil)))
       (S (S (makeFresh (F :: L :: nil)))).
 Proof.
-  repeat step || apply_any || finisher || t_list_smaller; eauto with omega.
+  repeat step || apply_any || finisher || t_list_smaller; eauto with lia.
 Qed.
 
 Lemma instantiate4:
@@ -124,7 +124,7 @@ Lemma instantiate4:
       (S (S (makeFresh (F :: L :: nil))))
       (S (S (S (makeFresh (F :: L :: nil))))).
 Proof.
-  repeat step || apply_any || finisher || t_list_smaller; eauto with omega.
+  repeat step || apply_any || finisher || t_list_smaller; eauto with lia.
 Qed.
 
 

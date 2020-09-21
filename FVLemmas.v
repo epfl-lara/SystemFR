@@ -6,61 +6,61 @@ Require Import Coq.Arith.PeanoNat.
 Require Export SystemFR.Syntax.
 
 Lemma fv_context_support:
-  forall gamma x tag,
-   x ∈ support gamma ->
-   x ∈ pfv_context gamma tag.
+  forall Γ x tag,
+   x ∈ support Γ ->
+   x ∈ pfv_context Γ tag.
 Proof.
-  induction gamma; repeat step || list_utils.
+  induction Γ; repeat step || list_utils.
 Qed.
 
 Hint Immediate fv_context_support: fv.
 
 Lemma fv_context_support2:
-  forall gamma x tag S,
+  forall Γ x tag S,
    x ∈ S ->
-   subset S (support gamma) ->
-   x ∈ pfv_context gamma tag.
+   subset S (support Γ) ->
+   x ∈ pfv_context Γ tag.
 Proof.
-  unfold subset; induction gamma; repeat step || list_utils || instantiate_any; eauto.
+  unfold subset; induction Γ; repeat step || list_utils || instantiate_any; eauto.
 Qed.
 
 Hint Immediate fv_context_support2: fv.
 
 Lemma fv_lookup:
-  forall gamma x T tag,
-    lookup Nat.eq_dec gamma x = Some T ->
-    subset (pfv T tag) (pfv_context gamma tag).
+  forall Γ x T tag,
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+    subset (pfv T tag) (pfv_context Γ tag).
 Proof.
-  induction gamma;
+  induction Γ;
     repeat step || unfold subset in * || list_utils; eauto.
 Qed.
 
 Hint Immediate fv_lookup: fv.
 
 Lemma fv_lookup2:
-  forall gamma x T y tag,
-    lookup Nat.eq_dec gamma x = Some T ->
+  forall Γ x T y tag,
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
     y ∈ pfv T tag ->
-    y ∈ pfv_context gamma tag.
+    y ∈ pfv_context Γ tag.
 Proof.
-  induction gamma; repeat step || sets || unfold subset in * || list_utils; eauto.
+  induction Γ; repeat step || sets || unfold subset in * || list_utils; eauto.
 Qed.
 
 Hint Immediate fv_lookup2: fv.
 
 Lemma fv_lookup3:
-  forall gamma x T tag,
-    lookup Nat.eq_dec gamma x = Some T ->
-    x ∈ pfv_context gamma tag.
+  forall Γ x T tag,
+    lookup PeanoNat.Nat.eq_dec Γ x = Some T ->
+    x ∈ pfv_context Γ tag.
 Proof.
-  induction gamma; repeat step || list_utils; eauto.
+  induction Γ; repeat step || list_utils; eauto.
 Qed.
 
 Hint Immediate fv_lookup3: fv.
 
 Lemma fv_lookup4:
   forall l x T y tag,
-    lookup Nat.eq_dec l x = Some T ->
+    lookup PeanoNat.Nat.eq_dec l x = Some T ->
     y ∈ pfv T tag ->
     y ∈ pfv_range l tag.
 Proof.
@@ -217,7 +217,7 @@ Qed.
 Lemma closed_mapping_lookup:
   forall l x t tag,
     pclosed_mapping l tag ->
-    lookup Nat.eq_dec l x = Some t ->
+    lookup PeanoNat.Nat.eq_dec l x = Some t ->
     pfv t tag = nil.
 Proof.
   induction l; steps; eauto.
@@ -265,7 +265,7 @@ Qed.
 Lemma closed_mapping_fv2:
   forall l x y t tag,
     pclosed_mapping l tag ->
-    lookup Nat.eq_dec l x = Some t ->
+    lookup PeanoNat.Nat.eq_dec l x = Some t ->
     y ∈ pfv t tag ->
     False.
 Proof.

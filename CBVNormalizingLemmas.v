@@ -75,7 +75,7 @@ Qed.
 Lemma scbv_normalizing_step:
   forall t1 t2,
     scbv_normalizing t1 ->
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     scbv_normalizing t2.
 Proof.
   unfold scbv_normalizing; steps.
@@ -86,7 +86,7 @@ Qed.
 Lemma scbv_normalizing_back:
   forall t1 t2,
     scbv_normalizing t2 ->
-    scbv_step t1 t2 ->
+    t1 ~> t2 ->
     scbv_normalizing t1.
 Proof.
   unfold scbv_normalizing; steps; eauto with smallstep star.

@@ -73,7 +73,7 @@ Proof.
 Qed.
 
 
-(* fresh s gamma holds if variable x does not appear in the context gamma *)
+(* fresh s Γ holds if variable x does not appear in the context Γ *)
 Definition fresh { X Y } (m: map X Y) x := ~(x ∈ support m).
 Hint Unfold fresh: core.
 
@@ -260,11 +260,11 @@ Ltac t_lookupor :=
   end.
 
 Lemma obvious_lookup:
-  forall X Y gamma1 (x: X) (U: Y) gamma2 dec,
-    ~(x ∈ support gamma1) ->
-    lookup dec (gamma1 ++ (x,U) :: gamma2) x = Some U.
+  forall X Y Γ1 (x: X) (U: Y) Γ2 dec,
+    ~(x ∈ support Γ1) ->
+    lookup dec (Γ1 ++ (x,U) :: Γ2) x = Some U.
 Proof.
-  induction gamma1;
+  induction Γ1;
     repeat match goal with
            |  _ => step || step_inversion is_context || t_lookup
            end.
@@ -273,29 +273,29 @@ Qed.
 Hint Rewrite obvious_lookup using assumption: blookup.
 
 Lemma lookup_remove:
-  forall {A B} gamma1 (x y: A) U gamma2 y (T: B) dec,
-    lookup dec (gamma1 ++ (x, U) :: gamma2) y = Some T ->
+  forall {A B} Γ1 (x y: A) U Γ2 y (T: B) dec,
+    lookup dec (Γ1 ++ (x, U) :: Γ2) y = Some T ->
     x <> y ->
-    lookup dec (gamma1 ++ gamma2) y = Some T.
+    lookup dec (Γ1 ++ Γ2) y = Some T.
 Proof.
-  induction gamma1; steps; eauto.
+  induction Γ1; steps; eauto.
 Qed.
 
 Hint Immediate lookup_remove: blookup.
 
 Lemma lookup_remove2:
-  forall {A B} gamma1 (x y: A) U gamma2 y dec,
+  forall {A B} Γ1 (x y: A) U Γ2 y dec,
     x <> y ->
-    @lookup A B dec (gamma1 ++ (x, U) :: gamma2) y = @lookup A B dec (gamma1 ++ gamma2) y.
+    @lookup A B dec (Γ1 ++ (x, U) :: Γ2) y = @lookup A B dec (Γ1 ++ Γ2) y.
 Proof.
-  induction gamma1; steps; eauto.
+  induction Γ1; steps; eauto.
 Qed.
 
 Fixpoint remove_support (l: list (nat * nat)) x :=
   match l with
   | nil => nil
   | (a,b) :: ls =>
-    if Nat.eq_dec a x
+    if PeanoNat.Nat.eq_dec a x
     then remove_support ls x
     else (a,b) :: remove_support ls x
   end.

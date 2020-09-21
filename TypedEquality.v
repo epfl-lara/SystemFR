@@ -28,18 +28,23 @@ Proof.
     repeat step.
 Qed.
 
-Definition equivalent_at theta A t1 t2: Prop :=
-  reducible theta t1 A /\
-  reducible theta t2 A /\
+Definition equivalent_at ρ A t1 t2: Prop :=
+  [ ρ ⊨ t1 : A ] /\
+  [ ρ ⊨ t2 : A ] /\
   forall f,
     is_erased_term f ->
     wf f 0 ->
     pfv f term_var = nil ->
-    reducible_values theta f (T_arrow A T_bool) ->
-    equivalent_terms (app f t1) (app f t2).
+    [ ρ ⊨ f : T_arrow A T_bool ]v ->
+    [ app f t1 ≡ app f t2 ].
+
+Notation "[ ρ ⊨ t1 ≡ t2 : A ]" := (equivalent_at ρ A t1 t2)
+  (at level 60, ρ at level 60, t1 at level 60, t2 at level 60).
+Notation "[ t1 ≡ t2 : A ]" := ([ nil ⊨ t1 ≡ t2 : A ])
+  (at level 60, t1 at level 60, t2 at level 60).
 
 Lemma equivalent_at_prop_type:
-  forall theta A t1 t2,
+  forall ρ A t1 t2,
     is_erased_type A ->
     is_erased_term t1 ->
     is_erased_term t2 ->
@@ -47,8 +52,8 @@ Lemma equivalent_at_prop_type:
     wf t1 0 ->
     wf t2 0 ->
     twf A 0 ->
-    equivalent_at theta A t1 t2 ->
-    reducible_values theta uu (T_equivalent_at A t1 t2).
+    [ ρ ⊨ t1 ≡ t2 : A ] ->
+    [ ρ ⊨ uu : T_equivalent_at A t1 t2 ]v.
 Proof.
   unfold equivalent_at, T_equivalent_at;
     repeat step || simp_red_top_level_goal ||
@@ -64,7 +69,7 @@ Proof.
 Qed.
 
 Lemma equivalent_at_type_prop:
-  forall theta A t1 t2 p,
+  forall ρ A t1 t2 p,
     is_erased_type A ->
     is_erased_term t1 ->
     is_erased_term t2 ->
@@ -75,9 +80,9 @@ Lemma equivalent_at_type_prop:
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
     twf A 0 ->
-    valid_interpretation theta ->
-    reducible_values theta p (T_equivalent_at A t1 t2) ->
-    equivalent_at theta A t1 t2.
+    valid_interpretation ρ ->
+    [ ρ ⊨ p : T_equivalent_at A t1 t2 ]v ->
+    [ ρ ⊨ t1 ≡ t2 : A ].
 Proof.
   unfold equivalent_at, T_equivalent_at;
     repeat step || simp reducible_values in H10 || list_utils ||
@@ -95,7 +100,7 @@ Proof.
 Qed.
 
 Lemma equivalent_at_type_prop2:
-  forall theta A t1 t2 p,
+  forall ρ A t1 t2 p,
     is_erased_type A ->
     is_erased_term t1 ->
     is_erased_term t2 ->
@@ -106,11 +111,11 @@ Lemma equivalent_at_type_prop2:
     pfv t1 term_var = nil ->
     pfv t2 term_var = nil ->
     twf A 0 ->
-    valid_interpretation theta ->
-    reducible theta p (T_equivalent_at A t1 t2) ->
-    equivalent_at theta A t1 t2.
+    valid_interpretation ρ ->
+    [ ρ ⊨ p : T_equivalent_at A t1 t2 ] ->
+    [ ρ ⊨ t1 ≡ t2 : A ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat step;
     eauto using equivalent_at_type_prop.
 Qed.

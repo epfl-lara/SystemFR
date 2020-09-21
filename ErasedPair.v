@@ -9,12 +9,12 @@ Opaque reducible_values.
 Opaque makeFresh.
 
 Lemma reducible_values_pp:
-  forall theta v1 v2 T1 T2,
-    valid_interpretation theta ->
-    reducible_values theta v1 T1 ->
-    reducible_values theta v2 (open 0 T2 v1) ->
+  forall ρ v1 v2 T1 T2,
+    valid_interpretation ρ ->
+    [ ρ ⊨ v1 : T1 ]v ->
+    [ ρ ⊨ v2 : open 0 T2 v1 ]v ->
     is_erased_type T2 ->
-    reducible_values theta (pp v1 v2) (T_prod T1 T2).
+    [ ρ ⊨ pp v1 v2 : T_prod T1 T2 ]v.
 Proof.
   repeat step || simp reducible_values || t_closer ||
          rewrite reducibility_rewrite || unshelve exists v1, v2;
@@ -25,16 +25,16 @@ Proof.
 Qed.
 
 Lemma reducible_pp:
-  forall theta U V t1 t2,
-    valid_interpretation theta ->
+  forall ρ U V t1 t2,
+    valid_interpretation ρ ->
     is_erased_type V ->
     wf V 1 ->
     pfv V term_var = nil ->
-    reducible theta t1 U ->
-    reducible theta t2 (open 0 V t1) ->
-    reducible theta (pp t1 t2) (T_prod U V).
+    [ ρ ⊨ t1 : U ] ->
+    [ ρ ⊨ t2 : open 0 V t1 ] ->
+    [ ρ ⊨ pp t1 t2 : T_prod U V ].
 Proof.
-  unfold reducible, reduces_to; repeat step || list_utils; try t_closer.
+  unfold reduces_to; repeat step || list_utils; try t_closer.
 
   exists (pp v0 v); repeat step || simp_red;
     try t_closer;
@@ -47,13 +47,13 @@ Proof.
 Qed.
 
 Lemma open_reducible_pp:
-  forall tvars gamma U V t1 t2,
+  forall Θ Γ U V t1 t2,
     is_erased_type V ->
     wf V 1 ->
-    subset (fv V) (support gamma) ->
-    [ tvars; gamma ⊨ t1 : U ] ->
-    [ tvars; gamma ⊨ t2 : open 0 V t1 ] ->
-    [ tvars; gamma ⊨ pp t1 t2 : T_prod U V ].
+    subset (fv V) (support Γ) ->
+    [ Θ; Γ ⊨ t1 : U ] ->
+    [ Θ; Γ ⊨ t2 : open 0 V t1 ] ->
+    [ Θ; Γ ⊨ pp t1 t2 : T_prod U V ].
 Proof.
   unfold open_reducible in *; steps; eauto using reducible_pp.
   apply reducible_pp; repeat step;
@@ -64,10 +64,10 @@ Proof.
 Qed.
 
 Lemma reducible_values_pi1:
-  forall theta U V t,
-    valid_interpretation theta ->
-    reducible_values theta t (T_prod U V) ->
-    reducible theta (pi1 t) U.
+  forall ρ U V t,
+    valid_interpretation ρ ->
+    [ ρ ⊨ t : T_prod U V ]v ->
+    [ ρ ⊨ pi1 t : U ].
 Proof.
   repeat step || t_values_info2 || simp_red.
   eapply backstep_reducible; repeat step || list_utils;
@@ -78,13 +78,13 @@ Proof.
 Qed.
 
 Lemma reducible_pi1:
-  forall theta U V t,
-    valid_interpretation theta ->
-    reducible theta t (T_prod U V) ->
-    reducible theta (pi1 t) U.
+  forall ρ U V t,
+    valid_interpretation ρ ->
+    [ ρ ⊨ t : T_prod U V ] ->
+    [ ρ ⊨ pi1 t : U ].
 Proof.
-  intros theta U V t HV H.
-  unfold reducible, reduces_to in H; steps.
+  intros ρ U V t HV H.
+  unfold reduces_to in H; steps.
   eapply star_backstep_reducible; steps;
     eauto with cbvlemmas;
     eauto using reducible_values_pi1;
@@ -92,20 +92,20 @@ Proof.
 Qed.
 
 Lemma open_reducible_pi1:
-  forall tvars gamma U V t,
-    [ tvars; gamma ⊨ t : T_prod U V ] ->
-    [ tvars; gamma ⊨ pi1 t : U ].
+  forall Θ Γ U V t,
+    [ Θ; Γ ⊨ t : T_prod U V ] ->
+    [ Θ; Γ ⊨ pi1 t : U ].
 Proof.
   unfold open_reducible in *; steps; eauto using reducible_pi1.
 Qed.
 
 Lemma reducible_values_pi2:
-  forall theta U V t,
-    valid_interpretation theta ->
+  forall ρ U V t,
+    valid_interpretation ρ ->
     wf V 1 ->
     pfv V term_var = nil ->
-    reducible_values theta t (T_prod U V) ->
-    reducible theta (pi2 t) (open 0 V (pi1 t)).
+    [ ρ ⊨ t : T_prod U V ]v ->
+    [ ρ ⊨ pi2 t : open 0 V (pi1 t) ].
 Proof.
   repeat step || t_values_info2 || simp_red.
   eapply backstep_reducible; repeat step || list_utils || simp_red;
@@ -123,41 +123,41 @@ Proof.
 Qed.
 
 Lemma reducible_pi2:
-  forall theta U V t,
-    valid_interpretation theta ->
+  forall ρ U V t,
+    valid_interpretation ρ ->
     is_erased_type V ->
     wf V 1 ->
     pfv V term_var = nil ->
-    reducible theta t (T_prod U V) ->
-    reducible theta (pi2 t) (open 0 V (pi1 t)).
+    [ ρ ⊨ t : T_prod U V ] ->
+    [ ρ ⊨ pi2 t : open 0 V (pi1 t) ].
 Proof.
-  repeat step || top_level_unfold reducible || top_level_unfold reduces_to.
+  repeat step || top_level_unfold reduces_to.
   eapply star_backstep_reducible; eauto with cbvlemmas; t_closer.
   eapply reducibility_rtl; eauto with cbvlemmas; t_closer;
     eauto using reducible_values_pi2.
 Qed.
 
 Lemma reducible_pi2_nodep:
-  forall theta U V t,
-    valid_interpretation theta ->
+  forall ρ U V t,
+    valid_interpretation ρ ->
     is_erased_type V ->
     wf V 0 ->
     pfv V term_var = nil ->
-    reducible theta t (T_prod U V) ->
-    reducible theta (pi2 t) V.
+    [ ρ ⊨ t : T_prod U V ] ->
+    [ ρ ⊨ pi2 t : V ].
 Proof.
   intros.
-  unshelve epose proof (reducible_pi2 theta U V t _ _ _ _ _); repeat step || open_none;
+  unshelve epose proof (reducible_pi2 ρ U V t _ _ _ _ _); repeat step || open_none;
     eauto with wf.
 Qed.
 
 Lemma open_reducible_pi2:
-  forall tvars gamma U V t,
+  forall Θ Γ U V t,
     is_erased_type V ->
     wf V 1 ->
-    subset (fv V) (support gamma) ->
-    [ tvars; gamma ⊨ t : T_prod U V ] ->
-    [ tvars; gamma ⊨ pi2 t : open 0 V (pi1 t) ].
+    subset (fv V) (support Γ) ->
+    [ Θ; Γ ⊨ t : T_prod U V ] ->
+    [ Θ; Γ ⊨ pi2 t : open 0 V (pi1 t) ].
 Proof.
   unfold open_reducible in *; repeat step || t_substitutions.
   eapply reducible_pi2;
@@ -167,15 +167,15 @@ Proof.
 Qed.
 
 Lemma reducible_unit:
-  forall theta, reducible theta uu T_unit.
+  forall ρ, [ ρ ⊨ uu : T_unit ].
 Proof.
-  repeat step || simp_red || unfold reducible, reduces_to || eexists;
+  repeat step || simp_red || unfold reduces_to || eexists;
     eauto with smallstep step_tactic.
 Qed.
 
 Lemma open_reducible_unit:
-  forall theta gamma,
-    [ theta; gamma ⊨ uu : T_unit ].
+  forall Θ Γ,
+    [ Θ; Γ ⊨ uu : T_unit ].
 Proof.
   unfold open_reducible in *; repeat step;
     auto using reducible_unit.

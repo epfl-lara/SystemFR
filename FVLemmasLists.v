@@ -6,8 +6,8 @@ Require Export SystemFR.TypeErasureLemmas.
 Require Export SystemFR.TermList.
 
 Lemma satisfies_closed_mapping:
-  forall P lterms gamma tag,
-    satisfies P gamma lterms ->
+  forall P lterms Γ tag,
+    satisfies P Γ lterms ->
     pclosed_mapping lterms tag.
 Proof.
   induction lterms; destruct tag;
@@ -48,8 +48,8 @@ Qed.
 Hint Extern 50 => eapply closed_mapping_append: b_cmap.
 
 Lemma satisfies_fv_nil:
-  forall P gamma lterms,
-    satisfies P gamma lterms ->
+  forall P Γ lterms,
+    satisfies P Γ lterms ->
     forall t,
       t ∈ range lterms ->
       fv t = nil.
@@ -62,9 +62,9 @@ Qed.
 Hint Extern 50 => eapply satisfies_fv_nil: fv.
 
 Lemma fv_satisfies_nil:
-  forall P gamma lterms t,
-    satisfies P gamma lterms ->
-    subset (fv t) (support gamma) ->
+  forall P Γ lterms t,
+    satisfies P Γ lterms ->
+    subset (fv t) (support Γ) ->
     fv (substitute t lterms) = nil.
 Proof.
   repeat step || t_termlist || list_utils || apply fv_nils2 || rewrite_any;
@@ -74,9 +74,9 @@ Qed.
 Hint Extern 50 => eapply fv_satisfies_nil: fv.
 
 Lemma subset_same_support:
-  forall P gamma lterms S,
-    satisfies P gamma lterms ->
-    subset S (support gamma) ->
+  forall P Γ lterms S,
+    satisfies P Γ lterms ->
+    subset S (support Γ) ->
     subset S (support lterms).
 Proof.
   repeat step || t_termlist || rewrite_any.
@@ -85,10 +85,10 @@ Qed.
 Hint Immediate subset_same_support: fv.
 
 Lemma fv_nils3:
-  forall P gamma t l,
+  forall P Γ t l,
     is_annotated_term t ->
-    subset (pfv t term_var) (support gamma) ->
-    satisfies P (erase_context gamma) l ->
+    subset (pfv t term_var) (support Γ) ->
+    satisfies P (erase_context Γ) l ->
     pfv (psubstitute (erase_term t) l term_var) term_var = nil.
 Proof.
   intros.

@@ -8,8 +8,8 @@ Lemma equivalent_context:
     is_erased_term C ->
     wf C 1 ->
     pfv C term_var = nil ->
-    equivalent_terms t1 t2 ->
-    equivalent_terms (open 0 C t1) (open 0 C t2).
+    [ t1 ≡ t2 ] ->
+    [ open 0 C t1 ≡ open 0 C t2 ].
 Proof.
   unfold equivalent_terms;
     steps;
@@ -38,11 +38,11 @@ Ltac equivalent_terms_ok :=
 
 Ltac find_context i :=
   match goal with
-  | |- equivalent_terms (?F ?e1) (?F ?e2) =>
+  | |- [ ?F ?e1 ≡ ?F ?e2 ] =>
     equivalent_context (F (lvar i term_var)) e1 e2
-  | |- equivalent_terms (?F ?e1 ?e) (?F ?e2 ?e) =>
+  | |- [ ?F ?e1 ?e ≡ ?F ?e2 ?e ] =>
     equivalent_context (F (lvar i term_var) e) e1 e2
-  | |- equivalent_terms (?F ?e1 ?e ?e') (?F ?e2 ?e ?e') =>
+  | |- [ ?F ?e1 ?e ?e' ≡ ?F ?e2 ?e ?e' ] =>
     equivalent_context (F (lvar i term_var) e e') e1 e2
   end;
   repeat step || list_utils || rewrite open_none in * by equivalent_terms_ok;
@@ -50,8 +50,8 @@ Ltac find_context i :=
 
 Lemma equivalent_tsize:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (tsize e1) (tsize e2).
+    [ e1 ≡ e2 ] ->
+    [ tsize e1 ≡ tsize e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
@@ -61,8 +61,8 @@ Lemma equivalent_app_left:
     is_erased_term e ->
     wf e 0 ->
     pfv e term_var = nil ->
-    equivalent_terms e1 e2 ->
-    equivalent_terms (app e1 e) (app e2 e).
+    [ e1 ≡ e2 ] ->
+    [ app e1 e ≡ app e2 e ].
 Proof.
   intros; equivalent_context (app (lvar 0 term_var) e) e1 e2;
     repeat step || rewrite open_none in *;
@@ -71,86 +71,86 @@ Qed.
 
 Ltac find_middle_point :=
   match goal with
-  | |- equivalent_terms (?F ?e1 ?e2) (?F ?e1' ?e2') =>
+  | |- [ ?F ?e1 ?e2 ≡ ?F ?e1' ?e2' ] =>
     apply equivalent_trans with (F e1 e2')
-  | |- equivalent_terms (?F ?e1 ?e2 ?e) (?F ?e1' ?e2' ?e) =>
+  | |- [ ?F ?e1 ?e2 ?e ≡ ?F ?e1' ?e2' ?e ] =>
     apply equivalent_trans with (F e1 e2' e)
-  | |- equivalent_terms (?F ?e1 ?e2 ?e3) (?F ?e1' ?e2' ?e3') =>
+  | |- [ ?F ?e1 ?e2 ?e3 ≡ ?F ?e1' ?e2' ?e3' ] =>
     apply equivalent_trans with (F e1 e2 e3')
   end.
 
 Lemma equivalent_app:
   forall e1 e2 e1' e2',
-    equivalent_terms e1 e1' ->
-    equivalent_terms e2 e2' ->
-    equivalent_terms (app e1 e2) (app e1' e2').
+    [ e1 ≡ e1' ] ->
+    [ e2 ≡ e2' ] ->
+    [ app e1 e2 ≡ app e1' e2' ].
 Proof.
   intros; find_middle_point; try solve [ find_context 0 ].
 Qed.
 
 Lemma equivalent_pp:
   forall e1 e2 e1' e2',
-    equivalent_terms e1 e1' ->
-    equivalent_terms e2 e2' ->
-    equivalent_terms (pp e1 e2) (pp e1' e2').
+    [ e1 ≡ e1' ] ->
+    [ e2 ≡ e2' ] ->
+    [ pp e1 e2 ≡ pp e1' e2' ].
 Proof.
   intros; find_middle_point; try solve [ find_context 0 ].
 Qed.
 
 Lemma equivalent_left:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (tleft e1) (tleft e2).
+    [ e1 ≡ e2 ] ->
+    [ tleft e1 ≡ tleft e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
 
 Lemma equivalent_right:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (tright e1) (tright e2).
+    [ e1 ≡ e2 ] ->
+    [ tright e1 ≡ tright e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
 
 Lemma equivalent_succ:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (succ e1) (succ e2).
+    [ e1 ≡ e2 ] ->
+    [ succ e1 ≡ succ e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
 
 Lemma equivalent_lambda:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (notype_lambda e1) (notype_lambda e2).
+    [ e1 ≡ e2 ] ->
+    [ notype_lambda e1 ≡ notype_lambda e2 ].
 Proof.
   intros; find_context 1; steps.
 Qed.
 
 Lemma equivalent_pi1:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (pi1 e1) (pi1 e2).
+    [ e1 ≡ e2 ] ->
+    [ pi1 e1 ≡ pi1 e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
 
 Lemma equivalent_pi2:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (pi2 e1) (pi2 e2).
+    [ e1 ≡ e2 ] ->
+    [ pi2 e1 ≡ pi2 e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
 
 Lemma equivalent_ite:
   forall e1 e2 e3 e1' e2' e3',
-    equivalent_terms e1 e1' ->
-    equivalent_terms e2 e2' ->
-    equivalent_terms e3 e3' ->
-    equivalent_terms (ite e1 e2 e3) (ite e1' e2' e3').
+    [ e1 ≡ e1' ] ->
+    [ e2 ≡ e2' ] ->
+    [ e3 ≡ e3' ] ->
+    [ ite e1 e2 e3 ≡ ite e1' e2' e3' ].
 Proof.
   intros.
   find_middle_point; try solve [ find_context 0 ].
@@ -159,26 +159,26 @@ Qed.
 
 Lemma equivalent_recognizer:
   forall e1 e2 r,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (boolean_recognizer r e1) (boolean_recognizer r e2).
+    [ e1 ≡ e2 ] ->
+    [ boolean_recognizer r e1 ≡ boolean_recognizer r e2 ].
 Proof.
   intros; find_context 0; steps.
 Qed.
 
 Lemma equivalent_fix:
   forall e1 e2,
-    equivalent_terms e1 e2 ->
-    equivalent_terms (notype_tfix e1) (notype_tfix e2).
+    [ e1 ≡ e2 ] ->
+    [ notype_tfix e1 ≡ notype_tfix e2 ].
 Proof.
   intros; find_context 2; steps.
 Qed.
 
 Lemma equivalent_match:
   forall e1 e2 e3 e1' e2' e3',
-    equivalent_terms e1 e1' ->
-    equivalent_terms e2 e2' ->
-    equivalent_terms e3 e3' ->
-    equivalent_terms (tmatch e1 e2 e3) (tmatch e1' e2' e3').
+    [ e1 ≡ e1' ] ->
+    [ e2 ≡ e2' ] ->
+    [ e3 ≡ e3' ] ->
+    [ tmatch e1 e2 e3 ≡ tmatch e1' e2' e3' ].
 Proof.
   intros.
   find_middle_point; try solve [ find_context 1 ].
@@ -187,10 +187,10 @@ Qed.
 
 Lemma equivalent_sum_match:
   forall e1 e2 e3 e1' e2' e3',
-    equivalent_terms e1 e1' ->
-    equivalent_terms e2 e2' ->
-    equivalent_terms e3 e3' ->
-    equivalent_terms (sum_match e1 e2 e3) (sum_match e1' e2' e3').
+    [ e1 ≡ e1' ] ->
+    [ e2 ≡ e2' ] ->
+    [ e3 ≡ e3' ] ->
+    [ sum_match e1 e2 e3 ≡ sum_match e1' e2' e3' ].
 Proof.
   intros.
   find_middle_point; try solve [ find_context 1 ].
@@ -199,15 +199,15 @@ Qed.
 
 Lemma equivalent_value_pair:
   forall v1 v2 v',
-    equivalent_terms (pp v1 v2) v' ->
+    [ pp v1 v2 ≡ v' ] ->
     cbv_value v1 ->
     cbv_value v2 ->
     cbv_value v' ->
     exists v1' v2',
       cbv_value v1' /\
       cbv_value v2' /\
-      equivalent_terms v1 v1' /\
-      equivalent_terms v2 v2' /\
+      [ v1 ≡ v1' ] /\
+      [ v2 ≡ v2' ] /\
       v' = pp v1' v2'.
 Proof.
   intros.
@@ -226,12 +226,12 @@ Qed.
 
 Lemma equivalent_value_left:
   forall v v',
-    equivalent_terms (tleft v) v' ->
+    [ tleft v ≡ v' ] ->
     cbv_value v ->
     cbv_value v' ->
     exists v'',
       cbv_value v'' /\
-      equivalent_terms v v'' /\
+      [ v ≡ v'' ] /\
       v' = tleft v''.
 Proof.
   intros.
@@ -246,12 +246,12 @@ Qed.
 
 Lemma equivalent_value_right:
   forall v v',
-    equivalent_terms (tright v) v' ->
+    [ tright v ≡ v' ] ->
     cbv_value v ->
     cbv_value v' ->
     exists v'',
       cbv_value v'' /\
-      equivalent_terms v v'' /\
+      [ v ≡ v'' ] /\
       v' = tright v''.
 Proof.
   intros.
@@ -272,9 +272,9 @@ Lemma equivalent_beta:
     pfv f term_var = nil ->
     wf t 0 ->
     wf f 1 ->
-    star scbv_step t v ->
+    t ~>* v ->
     cbv_value v ->
-    equivalent_terms (app (notype_lambda f) t) (open 0 f t).
+    [ app (notype_lambda f) t ≡ open 0 f t ].
 Proof.
   intros.
   eapply equivalent_trans with (app (notype_lambda f) v);

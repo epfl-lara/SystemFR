@@ -1,6 +1,14 @@
 #! /bin/bash
 
-coqdep -Q . SystemFR -dumpgraph dependencies.dot *.v
+coqdep -Q . SystemFR *.v |
+  sed '/^[^.]*.vio/d' |
+  sed 's/\.vo//g' |
+  sed 's/[A-Za-z0-9]\+\.\(glob\|v\.beautified\|required_vo\|v\)//g' |
+  makefile2dot.py > dependencies_temp.dot
+
+tred dependencies_temp.dot > dependencies.dot
+
+sed -i '$ d' dependencies.dot
 
 finished=0
 total=0
@@ -14,13 +22,17 @@ do
   if $(make -q $vo)
   then
     finished=$((finished+1))
-    sed -i s/=\"$base\"/=\"$base\",fillcolor=lightgreen,style=filled/g dependencies.dot
+    echo "$base [style=filled, fillcolor=lightgreen];" >> dependencies.dot
+  else
+    echo "$base [style=filled, fillcolor=lightcoral];" >> dependencies.dot
   fi
 done
 
+echo "}" >> dependencies.dot
+
 dot -T pdf dependencies.dot > dependencies.pdf
 
-rm dependencies.dot
+rm dependencies.dot dependencies_temp.dot
 
 echo "Finished: $finished"
 echo "Total: $total"

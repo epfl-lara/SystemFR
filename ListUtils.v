@@ -1,4 +1,4 @@
-Require Import Omega.
+Require Import Psatz.
 
 Require Import Coq.Lists.List.
 Require Import Coq.Strings.String.
@@ -7,7 +7,7 @@ Require Import Coq.Arith.PeanoNat.
 
 Require Export SystemFR.Tactics.
 
-Notation "A - n" := (List.remove Nat.eq_dec n A).
+Notation "A - n" := (List.remove PeanoNat.Nat.eq_dec n A).
 Notation "A ++ B" := (List.app A B).
 Notation "x ∈ A" := (In x A) (at level 70).
 
@@ -23,7 +23,7 @@ Fixpoint diff {A} (dec: forall a b: A, { a = b } + { a <> b }) (l1 l2: list A): 
   | x :: xs => diff dec (remove dec x l1) xs
   end.
 
-Notation "A -- B" := (diff Nat.eq_dec A B) (at level 50).
+Notation "A -- B" := (diff PeanoNat.Nat.eq_dec A B) (at level 50).
 
 Lemma add_mem: forall {T} (s: list T) x, x ∈ (add s x).
   steps.

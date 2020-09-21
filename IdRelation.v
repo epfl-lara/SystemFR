@@ -20,7 +20,7 @@ Fixpoint idrel (l: list nat) :=
 Lemma idrel_lookup:
   forall l x,
     x ∈ l ->
-    lookup Nat.eq_dec (idrel l) x = Some x.
+    lookup PeanoNat.Nat.eq_dec (idrel l) x = Some x.
 Proof.
   induction l; steps.
 Qed.
@@ -28,7 +28,7 @@ Qed.
 Lemma idrel_lookup_swap:
   forall l x,
     x ∈ l ->
-    lookup Nat.eq_dec (swap (idrel l)) x = Some x.
+    lookup PeanoNat.Nat.eq_dec (swap (idrel l)) x = Some x.
 Proof.
   induction l; steps.
 Qed.
@@ -43,7 +43,7 @@ Qed.
 Lemma idrel_lookup_fail:
   forall l x,
     (x ∈ l -> False) ->
-    lookup Nat.eq_dec (idrel l) x = None.
+    lookup PeanoNat.Nat.eq_dec (idrel l) x = None.
 Proof.
   induction l; steps.
 Qed.
@@ -51,7 +51,7 @@ Qed.
 Lemma idrel_lookup_swap_fail:
   forall l x,
     (x ∈ l -> False) ->
-    lookup Nat.eq_dec (swap (idrel l)) x = None.
+    lookup PeanoNat.Nat.eq_dec (swap (idrel l)) x = None.
 Proof.
   induction l; steps.
 Qed.
@@ -87,10 +87,10 @@ Proof.
 Qed.
 
 Lemma equivalent_with_idrel:
-  forall T (l: list nat) (x: nat) theta t (equiv: T -> T -> Prop),
+  forall T (l: list nat) (x: nat) ρ t (equiv: T -> T -> Prop),
     (x ∈ l -> False) ->
     (forall v, equiv v v) ->
-    equivalent_with_relation (idrel l) theta ((x,t) :: theta) equiv.
+    equivalent_with_relation (idrel l) ρ ((x,t) :: ρ) equiv.
 Proof.
   unfold equivalent_with_relation;
     repeat step || t_lookup ||
@@ -104,10 +104,10 @@ Proof.
 Qed.
 
 Lemma equivalent_with_idrel2:
-  forall T (l: list nat) (x: nat) theta t (equiv: T -> T -> Prop),
+  forall T (l: list nat) (x: nat) ρ t (equiv: T -> T -> Prop),
     (x ∈ l -> False) ->
     (forall v, equiv v v) ->
-    equivalent_with_relation (idrel l) ((x,t) :: theta) theta equiv.
+    equivalent_with_relation (idrel l) ((x,t) :: ρ) ρ equiv.
 Proof.
   unfold equivalent_with_relation;
     repeat step || t_lookup ||
@@ -129,13 +129,13 @@ Ltac t_idrel :=
   (rewrite idrel_lookup_swap_fail in * by auto).
 
 Lemma equivalent_with_relation_permute:
-  forall T theta1 theta2 v M l (equiv: T -> T -> Prop),
-    ~(M ∈ support theta1) ->
+  forall T ρ1 ρ2 v M l (equiv: T -> T -> Prop),
+    ~(M ∈ support ρ1) ->
     (forall v, equiv v v) ->
     equivalent_with_relation
       ((M, M) :: idrel l)
-      (theta1 ++ (M, v) :: theta2)
-      ((M, v) :: theta1 ++ theta2)
+      (ρ1 ++ (M, v) :: ρ2)
+      ((M, v) :: ρ1 ++ ρ2)
       equiv
 .
 Proof.
@@ -170,13 +170,13 @@ Proof.
 Qed.
 
 Lemma equivalent_with_relation_permute2:
-  forall T theta1 theta2 v X Y l (equiv: T -> T -> Prop),
-    ~(X ∈ support theta1) ->
+  forall T ρ1 ρ2 v X Y l (equiv: T -> T -> Prop),
+    ~(X ∈ support ρ1) ->
     (forall v, equiv v v) ->
     equivalent_with_relation
       ((Y, X) :: idrel l)
-      ((Y, v) :: theta1 ++ theta2)
-      (theta1 ++ (X, v) :: theta2)
+      ((Y, v) :: ρ1 ++ ρ2)
+      (ρ1 ++ (X, v) :: ρ2)
       equiv
 .
 Proof.

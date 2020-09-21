@@ -36,7 +36,7 @@ Proof.
 Qed.
 
 Lemma scbv_step_loop:
-  scbv_step loop loop.
+  loop ~> loop.
 Proof.
   unfold loop.
   eauto using scbv_step_same with smallstep.
@@ -44,7 +44,7 @@ Qed.
 
 Lemma scbv_step_loop2:
   forall t,
-    scbv_step loop t ->
+    loop ~> t ->
     t = loop.
 Proof.
   intros; eauto using deterministic_step, scbv_step_loop.
@@ -52,7 +52,7 @@ Qed.
 
 Lemma not_star_scbv_step_loop':
   forall t v,
-    star scbv_step t v ->
+    t ~>* v ->
     t = loop ->
     cbv_value v ->
     False.
@@ -65,7 +65,7 @@ Qed.
 
 Lemma not_star_scbv_step_loop:
   forall v,
-    star scbv_step loop v ->
+    loop ~>* v ->
     cbv_value v ->
     False.
 Proof.
