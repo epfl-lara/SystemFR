@@ -15,6 +15,14 @@ Proof.
   decide equality.
 Qed.
 
+Lemma op_eq_dec:
+  forall o1 o2: op, { o1 = o2 } + { o1 <> o2 }.
+Proof.
+  intros.
+  decide equality.
+Defined.
+
+
 Fixpoint pfv t tag: list nat :=
   match t with
   | fvar y tag' =>
@@ -53,6 +61,9 @@ Fixpoint pfv t tag: list nat :=
   | zero => nil
   | succ t' => pfv t' tag
   | tmatch t' t0 ts => pfv t' tag ++ pfv t0 tag ++ pfv ts tag
+
+  | unary_primitive _ t => pfv t tag
+  | binary_primitive _ t1 t2 => pfv t1 tag ++ pfv t2 tag
 
   | tfix T t' => pfv T tag ++ pfv t' tag
   | notype_tfix t' => pfv t' tag
@@ -183,6 +194,9 @@ Fixpoint psubstitute t (l: list (nat * tree)) (tag: fv_tag): tree :=
   | succ t' => succ (psubstitute t' l tag)
   | tmatch t' t1 t2 => tmatch (psubstitute t' l tag) (psubstitute t1 l tag) (psubstitute t2 l tag)
 
+  | unary_primitive o t => unary_primitive o (psubstitute t l tag)
+  | binary_primitive o t1 t2 => binary_primitive o (psubstitute t1 l tag) (psubstitute t2 l tag)
+
   | tfix T t' => tfix (psubstitute T l tag) (psubstitute t' l tag)
   | notype_tfix t' => notype_tfix (psubstitute t' l tag)
 
@@ -276,6 +290,9 @@ Fixpoint wf t k :=
       wf t1 k /\
       wf t2 (S k)
 
+  | unary_primitive _ t => wf t k
+  | binary_primitive _ t1 t2 => wf t1 k /\ wf t2 k
+
   | tfix T t' => wf T (S k) /\ wf t' (S (S k))
   | notype_tfix t' => wf t' (S (S k))
 
@@ -354,6 +371,9 @@ Fixpoint twf t k :=
       twf t' k /\
       twf t1 k /\
       twf t2 k
+
+  | unary_primitive _ t => twf t k
+  | binary_primitive _ t1 t2 => twf t1 k /\ twf t2 k
 
   | tfix T t' => twf T k /\ twf t' k
   | notype_tfix t' => twf t' k
@@ -446,6 +466,9 @@ Fixpoint open (k: nat) (t rep: tree) :=
           (open k t1 rep)
           (open (S k) t2 rep)
 
+  | unary_primitive o t => unary_primitive o (open k t rep)
+  | binary_primitive o t1 t2 => binary_primitive o (open k t1 rep) (open k t2 rep)
+
   | tfix T t' => tfix (open (S k) T rep) (open (S (S k)) t' rep)
   | notype_tfix t' => notype_tfix (open (S (S k)) t' rep)
 
@@ -525,6 +548,9 @@ Fixpoint close (k: nat) (t: tree) (x: nat) :=
           (close k t' x)
           (close k t1 x)
           (close (S k) t2 x)
+
+  | unary_primitive o t => unary_primitive o (close k t x)
+  | binary_primitive o t1 t2 => binary_primitive o (close k t1 x) (close k t2 x)
 
   | tfix T t' => tfix (close (S k) T x) (close (S (S k)) t' x)
   | notype_tfix t' => notype_tfix (close (S (S k)) t' x)
@@ -607,6 +633,9 @@ Fixpoint topen (k: nat) (t rep: tree) :=
           (topen k t1 rep)
           (topen k t2 rep)
 
+  | unary_primitive o t => unary_primitive o (topen k t rep)
+  | binary_primitive o t1 t2 => binary_primitive o (topen k t1 rep) (topen k t2 rep)
+
   | tfix T t' => tfix (topen k T rep) (topen k t' rep)
   | notype_tfix t' => notype_tfix (topen k t' rep)
 
@@ -688,6 +717,9 @@ Fixpoint tclose (k: nat) (t: tree) (x: nat) :=
           (tclose k t' x)
           (tclose k t1 x)
           (tclose k t2 x)
+
+  | unary_primitive o t => unary_primitive o (tclose k t x)
+  | binary_primitive o t1 t2 => binary_primitive o (tclose k t1 x) (tclose k t2 x)
 
   | tfix T t' => tfix (tclose k T x) (tclose k t' x)
   | notype_tfix t' => notype_tfix (tclose k t' x)

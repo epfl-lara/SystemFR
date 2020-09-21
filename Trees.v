@@ -2,6 +2,8 @@ Require Export SystemFR.Tactics.
 
 Inductive fv_tag: Set := term_var | type_var.
 
+Inductive op: Set := plus | minus | mul | div | eq | neq | lt | leq | gt | geq | Not | And | Or | Cup | Nop .
+
 Ltac destruct_tag :=
   match goal with
   | tag: fv_tag |- _ => destruct tag
@@ -62,6 +64,9 @@ Inductive tree: Set :=
   | succ: tree -> tree
   | tmatch: tree -> tree -> tree -> tree
 
+  | unary_primitive : op -> tree -> tree
+  | binary_primitive : op -> tree -> tree -> tree
+
   | tfix: tree -> tree -> tree
   | notype_tfix: tree -> tree
 
@@ -121,6 +126,9 @@ Fixpoint is_annotated_term t :=
   | zero => True
   | succ t' => is_annotated_term t'
   | tmatch t' t0 ts => is_annotated_term t' /\ is_annotated_term t0 /\ is_annotated_term ts
+
+  | unary_primitive _ t => is_annotated_term t
+  | binary_primitive _ t1 t2 => is_annotated_term t1 /\ is_annotated_term t2
 
   | tfix T t' => is_annotated_type T /\ is_annotated_term t'
 
@@ -261,6 +269,9 @@ Fixpoint tree_size t :=
   | succ t' =>  1 + tree_size t'
   | tmatch t' t0 ts => 1 + tree_size t' + tree_size t0 + tree_size ts
 
+  | unary_primitive _ t => 1 + tree_size t
+  | binary_primitive _ t1 t2 => 1 + tree_size t1 + tree_size t2
+
   | tfix T t' => 1 + tree_size T + tree_size t'
   | notype_tfix t' => 1 + tree_size t'
 
@@ -314,3 +325,8 @@ Lemma build_nat_inj:
 Proof.
   induction n1; destruct n2; steps.
 Qed.
+
+Ltac build_nat_inj :=
+  match goal with
+  |H: build_nat ?n1 = build_nat ?n2 |- _ => apply build_nat_inj in H
+  end.
