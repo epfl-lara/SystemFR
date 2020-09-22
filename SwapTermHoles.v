@@ -54,6 +54,9 @@ Fixpoint swap_term_holes t i j :=
           (swap_term_holes t1 i j)
           (swap_term_holes t2 (S i) (S j))
 
+  | unary_primitive o t => unary_primitive o (swap_term_holes t i j)
+  | binary_primitive o t1 t2 => binary_primitive o (swap_term_holes t1 i j) (swap_term_holes t2 i j)
+
   | tfix T t' => tfix (swap_term_holes T (S i) (S j)) (swap_term_holes t' (S (S i))  (S (S j)))
   | notype_tfix t' => notype_tfix (swap_term_holes t' (S (S i)) (S (S j)))
 

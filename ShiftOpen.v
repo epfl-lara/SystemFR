@@ -43,6 +43,9 @@ Fixpoint shift (k: nat) (t: tree) (i: nat) :=
           (shift k t1 i)
           (shift (S k) t2 i)
 
+  | unary_primitive o t => unary_primitive o (shift k t i)
+  | binary_primitive o t1 t2 => binary_primitive o (shift k t1 i) (shift k t2 i)
+
   | tfix T t' => tfix (shift (S k) T i) (shift (S (S k)) t' i)
   | notype_tfix t' => notype_tfix (shift (S (S k)) t' i)
 
@@ -122,6 +125,9 @@ Fixpoint shift_open (k: nat) (t rep: tree) :=
           (shift_open k t' rep)
           (shift_open k t1 rep)
           (shift_open (S k) t2 (shift 0 rep 1))
+
+  | unary_primitive o t => unary_primitive o (shift_open k t rep)
+  | binary_primitive o t1 t2 => binary_primitive o (shift_open k t1 rep) (shift_open k t2 rep)
 
   | tfix T t' => tfix (shift_open (S k) T (shift 0 rep 1)) (shift_open (S (S k)) t' (shift 0 rep 2))
   | notype_tfix t' => notype_tfix (shift_open (S (S k)) t' (shift 0 rep 2))

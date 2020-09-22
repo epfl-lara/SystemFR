@@ -204,43 +204,43 @@ Inductive scbv_step: tree -> tree -> Prop :=
 | SPBetaPlus: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive plus v1 v2) (build_nat (n1 + n2))
+    scbv_step (binary_primitive Plus v1 v2) (build_nat (n1 + n2))
 | SPBetaMinus: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive minus v1 v2) (build_nat (n1 - n2))
+    scbv_step (binary_primitive Minus v1 v2) (build_nat (n1 - n2))
 | SPBetaMul: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive mul v1 v2) (build_nat (n1 * n2))
+    scbv_step (binary_primitive Mul v1 v2) (build_nat (n1 * n2))
 | SPBetaDiv: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat (S n2) ->
-    scbv_step (binary_primitive div v1 v2) (build_nat (PeanoNat.Nat.div n1 (S n2)))
+    scbv_step (binary_primitive Div v1 v2) (build_nat (PeanoNat.Nat.div n1 (S n2)))
 | SPBetaEq: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive eq  v1 v2) (if PeanoNat.Nat.eqb n1 n2 then ttrue else tfalse)
+    scbv_step (binary_primitive Eq  v1 v2) (if PeanoNat.Nat.eqb n1 n2 then ttrue else tfalse)
 | SPBetaNeq: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive neq v1 v2) (if (PeanoNat.Nat.eq_dec n1 n2) then tfalse else ttrue)
+    scbv_step (binary_primitive Neq v1 v2) (if (PeanoNat.Nat.eq_dec n1 n2) then tfalse else ttrue)
 | SPBetaLt: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive lt  v1 v2) (if PeanoNat.Nat.ltb n1 n2 then ttrue else tfalse)
+    scbv_step (binary_primitive Lt  v1 v2) (if PeanoNat.Nat.ltb n1 n2 then ttrue else tfalse)
 | SPBetaLeq: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive leq v1 v2) (if PeanoNat.Nat.leb n1 n2 then ttrue else tfalse)
+    scbv_step (binary_primitive Leq v1 v2) (if PeanoNat.Nat.leb n1 n2 then ttrue else tfalse)
 | SPBetaGt: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive gt  v1 v2) (if PeanoNat.Nat.leb n1 n2 then tfalse else ttrue)
+    scbv_step (binary_primitive Gt  v1 v2) (if PeanoNat.Nat.leb n1 n2 then tfalse else ttrue)
 | SPBetaGeq: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
-    scbv_step (binary_primitive geq v1 v2) (if PeanoNat.Nat.ltb n1 n2 then tfalse else ttrue)
+    scbv_step (binary_primitive Geq v1 v2) (if PeanoNat.Nat.ltb n1 n2 then tfalse else ttrue)
 
 | SPBetaNot1: scbv_step (unary_primitive Not ttrue) tfalse
 | SPBetaNot2: scbv_step (unary_primitive Not tfalse) ttrue

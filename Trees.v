@@ -2,7 +2,7 @@ Require Export SystemFR.Tactics.
 
 Inductive fv_tag: Set := term_var | type_var.
 
-Inductive op: Set := plus | minus | mul | div | eq | neq | lt | leq | gt | geq | Not | And | Or | Cup | Nop .
+Inductive op: Set := Plus | Minus | Mul | Div | Eq | Neq | Lt | Leq | Gt | Geq | Not | And | Or | Cup | Nop .
 
 Ltac destruct_tag :=
   match goal with
@@ -200,6 +200,9 @@ Fixpoint is_erased_term t :=
   | zero => True
   | succ t' => is_erased_term t'
   | tmatch t' t0 ts => is_erased_term t' /\ is_erased_term t0 /\ is_erased_term ts
+
+  | unary_primitive _ t => is_erased_term t
+  | binary_primitive _ t1 t2 => is_erased_term t1 /\ is_erased_term t2
 
   | notype_tfix t' => is_erased_term t'
 
