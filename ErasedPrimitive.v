@@ -11,6 +11,21 @@ Hint Rewrite PeanoNat.Nat.ltb_ge: primitives.
 Opaque PeanoNat.Nat.leb.
 Opaque PeanoNat.Nat.ltb.
 
+Lemma last_step_unary_primitive:
+  forall v1 v o,
+    cbv_value v1 ->
+    cbv_value v ->
+    unary_primitive o v1 ~>* v ->
+    unary_primitive o v1 ~> v.
+Proof.
+  intros.
+  inversion H1; clear H1.
+  destruct v; steps; step_inversion cbv_value.
+  force_invert scbv_step;
+    repeat star_smallstep_value || steps || constructor || no_step ; eauto with values smallstep ;
+      try solve [eapply scbv_step_same; [constructor |]; steps].
+Qed.
+
 Lemma last_step_binary_primitive:
   forall v1 v2 v o,
     cbv_value v1 ->
@@ -46,18 +61,33 @@ Ltac reducible_primitive f :=
     try apply star_smallstep_binary_primitive; eauto ;
     repeat steps || list_utils || simp_red || apply f || eauto with values cbvlemmas ; t_closer.
 
-(*
-Ltac equivalent_binary_primitive :=
-  lazymatch goal with
-  | H: binary_primitive ?o ?v1 ?v2 ~>* ?v |- _ =>
-    cbv_value v1 ; cbv_value v2 ;
-      inversion H; clear H; t_invert_step ;
-        try solve [exfalso; eauto with smallstep values ] ;
-        repeat build_nat_inj || subst ;
-        destruct_match; star_smallstep_value; try discriminate; eauto with values ;
-        repeat autorewrite with primitives in *
-  end.
-*)
+(* Not *)
+
+Lemma reducible_values_primitive_Not:
+  forall ρ v1,
+    [ ρ ⊨ v1 : T_bool ]v ->
+    [ ρ ⊨ unary_primitive Not v1 : T_bool ].
+Proof.
+  unfold reduces_to;
+    repeat steps || simp_red; t_closer ;
+      solve [
+          eexists ; split ; [idtac | (apply star_one ; constructor ; try reflexivity)] ;  steps ].
+  Qed.
+
+Lemma reducible_primitive_Not:
+  forall ρ t1,
+    valid_interpretation ρ ->
+    [ ρ ⊨ t1 : T_bool ] ->
+    [ ρ ⊨ unary_primitive Not t1 : T_bool ].
+Proof.
+  reducible_primitive reducible_values_primitive_Not.
+  Qed.
+
+Lemma open_reducible_primitive_Not:
+  forall Θ Γ t1,
+    [ Θ;Γ ⊨ t1 : T_bool ] ->
+    [ Θ;Γ ⊨ unary_primitive Not t1 : T_bool ].
+Proof. unfold open_reducible; steps;  eauto using reducible_primitive_Not. Qed.
 
 (* Plus *)
 
@@ -381,3 +411,4 @@ Hint Resolve open_reducible_primitive_Mul: primitives.
 Hint Resolve open_reducible_primitive_Neq: primitives.
 Hint Resolve open_reducible_primitive_Or: primitives.
 Hint Resolve open_reducible_primitive_Plus: primitives.
+Hint Resolve open_reducible_primitive_Not: primitives.

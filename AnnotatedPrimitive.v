@@ -1,6 +1,12 @@
 Require Export SystemFR.ErasedPrimitive.
 Require Export SystemFR.Judgments.
 
+Lemma annotated_reducible_primitive_Not:
+  forall Θ Γ t1,
+    [[ Θ; Γ ⊨ t1 : T_bool ]] ->
+    [[ Θ; Γ ⊨ unary_primitive Not t1 : T_bool]].
+Proof. steps; eauto with primitives. Qed.
+
 Lemma annotated_reducible_primitive_Plus:
   forall Θ Γ t1 t2,
     [[ Θ; Γ ⊨ t1 : T_nat ]] ->
