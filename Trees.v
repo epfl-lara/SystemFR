@@ -329,7 +329,18 @@ Proof.
   induction n1; destruct n2; steps.
 Qed.
 
+Lemma build_nat_zero:
+  forall n,
+    build_nat n = zero ->
+    n = 0.
+Proof.
+  destruct n; steps.
+Qed.
+
+
 Ltac build_nat_inj :=
   match goal with
   |H: build_nat ?n1 = build_nat ?n2 |- _ => apply build_nat_inj in H
+  |H: zero = build_nat ?n |-_ => apply eq_sym, build_nat_zero in H
+  |H: build_nat ?n = zero |-_ => apply build_nat_zero in H
   end.

@@ -133,3 +133,11 @@ Qed.
 
 Hint Resolve wf_subst: wf.
 
+Lemma wf_build_nat:
+  forall n k,
+    wf (build_nat n) k.
+Proof.
+  induction n; steps.
+Qed.
+
+Hint Resolve wf_build_nat: wf.

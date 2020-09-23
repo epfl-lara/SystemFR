@@ -142,12 +142,12 @@ Qed.
 
 Lemma star_smallstep_unary_primitive_inv:
   forall t v,
-    star scbv_step t v ->
+    t ~>* v ->
     cbv_value v ->
     forall t' o,
       t = unary_primitive o t' ->
       exists v1,
-        cbv_value v1 /\ star scbv_step t' v1.
+        cbv_value v1 /\ t' ~>* v1.
 Proof.
   induction 1; repeat step || step_inversion cbv_value || t_invert_step; eauto with cbvlemmas.
   exists ttrue; steps.
@@ -157,12 +157,12 @@ Qed.
 
 Lemma star_smallstep_binary_primitive_inv:
   forall t v,
-    star scbv_step t v ->
+    t ~>* v ->
     cbv_value v ->
     forall t1 t2 o,
       t = binary_primitive o t1 t2 ->
       exists v1 v2,
-        cbv_value v1 /\ star scbv_step t1 v1 /\ cbv_value v2 /\ star scbv_step t2 v2.
+        cbv_value v1 /\ t1 ~>* v1 /\ cbv_value v2 /\ t2 ~>* v2.
 Proof.
   induction 1; repeat steps || step_inversion cbv_value || t_invert_step; eauto with cbvlemmas star smallstep.
   all: try solve [exists (build_nat n1), (build_nat n2); steps; eauto with values smallstep star cbvlemmas].
@@ -454,6 +454,12 @@ Ltac t_invert_star :=
     (not_cbv_value t1 || not_cbv_value t2);
     poseNew (Mark H2 "inv pair");
     unshelve epose proof (star_smallstep_pp_inv _ v H2 _ t1 t2 eq_refl)
+
+  | H2: binary_primitive ?o ?t1 ?t2 ~>* ?v |- _ =>
+    cbv_value v;
+    (not_cbv_value t1 || not_cbv_value t2);
+    poseNew (Mark H2 "inv binary primitive");
+    unshelve epose proof (star_smallstep_binary_primitive_inv _ v H2 _ t1 t2 o eq_refl)
 
   | H2: pi1 ?t ~>* ?v |- _ =>
     cbv_value v;

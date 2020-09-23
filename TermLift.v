@@ -80,6 +80,17 @@ Inductive term_lift (rel: tree -> tree -> Prop): tree -> tree -> Prop :=
       term_lift rel t t' ->
       term_lift rel (pi2 t) (pi2 t')
 
+| LiUnaryPrimitive:
+    forall o t t',
+      term_lift rel t t' ->
+      term_lift rel (unary_primitive o t) (unary_primitive o t')
+
+| LiBinaryPrimitive:
+    forall o t1 t2 t1' t2',
+      term_lift rel t1 t1' ->
+      term_lift rel t2 t2' ->
+      term_lift rel (binary_primitive o t1 t2) (binary_primitive o t1' t2')
+
 | LiBecause:
     forall t1 t1' t2 t2',
       term_lift rel t1 t1' ->
