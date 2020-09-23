@@ -37,6 +37,9 @@ Fixpoint erase_term (t: tree): tree :=
   | succ t' => succ (erase_term t')
   | tmatch t' t0 ts => tmatch (erase_term t') (erase_term t0) (erase_term ts)
 
+  | unary_primitive o t => unary_primitive o (erase_term t)
+  | binary_primitive o t1 t2 => binary_primitive o (erase_term t1) (erase_term t2)
+
   | notype_tlet t1 t2 => app (notype_lambda (erase_term t2)) (erase_term t1)
   | tlet t1 A t2 => app (notype_lambda (erase_term t2)) (erase_term t1)
   | trefl t1 t2 => uu
