@@ -3,7 +3,6 @@ Require Import Coq.Lists.List.
 Require Export SystemFR.ErasedRec.
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.Judgments.
-Require Export SystemFR.NatLessThanErase.
 
 Opaque reducible_values.
 
@@ -152,7 +151,7 @@ Lemma annnotated_reducible_unfold_pos_in:
     subset (fv T0) (support Γ) ->
     subset (fv Ts) (support Γ) ->
     [[ Θ; Γ ⊨ t1 : T_rec n T0 Ts ]] ->
-    [[ Θ; Γ ⊨ annotated_tlt zero n ≡ ttrue ]] ->
+    [[ Θ; Γ ⊨ binary_primitive Lt zero n ≡ ttrue ]] ->
     [[ Θ; (p1, T_equiv t1 (tfold (T_rec n T0 Ts) (fvar y term_var))) ::
               (y, topen 0 Ts (T_rec (tpred n) T0 Ts)) ::
               Γ  ⊨

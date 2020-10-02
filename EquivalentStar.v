@@ -210,6 +210,14 @@ Proof.
     eauto using term_lift_refl.
 Qed.
 
+Lemma term_lift_inter_reducible_sym:
+  forall t1 t2,
+    term_lift inter_reducible t1 t2 ->
+    term_lift inter_reducible t2 t1.
+Proof.
+  intros; eauto using term_lift_sym, inter_reducible_sym.
+Qed.
+
 Lemma term_lift_inter_reducible_pair:
   forall t v,
     term_lift inter_reducible t v ->
@@ -291,6 +299,39 @@ Proof.
   eexists; steps;
     try solve [ constructor; unfold inter_reducible; steps; eauto with fv ].
 Qed.
+
+Lemma term_lift_inter_reducible_build_nat:
+  forall v t,
+    term_lift inter_reducible t v ->
+    forall n, (
+        t = build_nat n ->
+        cbv_value v ->
+        v = build_nat n).
+Proof.
+  intros v t H.
+  induction H; steps; try solve [destruct n; discriminate].
+  + apply inter_reducible_value in H; try star_smallstep_value; eauto with values.
+  + destruct n; steps. inversion H1; steps.
+Qed.
+
+Lemma term_lift_inter_reducible_build_nat2:
+  forall v n,
+    term_lift inter_reducible (build_nat n) v ->
+    cbv_value v ->
+    v = build_nat n.
+Proof.
+  eauto using term_lift_inter_reducible_build_nat.
+Qed.
+
+Ltac term_lift_inter_reducible_build_nat :=
+  match goal with
+  | H1: term_lift inter_reducible (build_nat ?n) ?t, H2: cbv_value ?t |- _ =>
+    pose proof (term_lift_inter_reducible_build_nat2 t n H1 H2); subst; clear H1
+  | H1: term_lift inter_reducible ?t (build_nat ?n), H2: cbv_value ?t |- _ =>
+    apply term_lift_inter_reducible_sym in H1;
+    pose proof (term_lift_inter_reducible_build_nat2 t n H1 H2); subst; clear H1
+  end.
+
 
 Lemma term_lift_inter_reducible_left:
   forall t v,
@@ -413,6 +454,7 @@ Proof.
     repeat step || t_invert_star.
 Qed.
 
+
 Lemma term_lift_inter_reducible_top_level_var:
   forall v1 v2,
     term_lift inter_reducible v1 v2 ->
@@ -439,6 +481,9 @@ Proof.
     try solve [ apply_anywhere inter_reducible_values; steps ].
 Qed.
 
+Opaque PeanoNat.Nat.leb.
+Opaque PeanoNat.Nat.ltb.
+
 Lemma term_lift_inter_reducible_step:
   forall t1 t2,
     term_lift inter_reducible t1 t2 ->
@@ -455,6 +500,29 @@ Proof.
     repeat step || t_invert_step || instantiate_any || list_utils;
     eauto using inter_reducible_step with star smallstep term_lift;
     eauto with cbvlemmas term_lift.
+  all: try solve [
+
+   repeat term_lift_inter_reducible_value; steps;
+   repeat term_lift_inter_reducible_build_nat; steps;
+   repeat match goal with
+          | H1: term_lift inter_reducible ttrue ?v, H2: cbv_value ?v |- _ =>
+            pose proof (term_lift_inter_reducible_true ttrue v H1 eq_refl H2); subst; clear H1
+          | H1: term_lift inter_reducible tfalse ?v, H2: cbv_value ?v |- _ =>
+            pose proof (term_lift_inter_reducible_false tfalse v H1 eq_refl H2); subst; clear H1
+          end;
+        eauto with values;
+        eauto using term_lift_sym, inter_reducible_sym;
+    eexists; split; [
+      apply term_lift_refl; steps; eauto with erased
+    | eapply star_trans;
+      try eapply star_smallstep_binary_primitive; try eassumption;
+      apply star_one; eapply scbv_step_same; eauto with smallstep erased; steps]
+].
+
+
+
+
+
 
   - eexists; steps; eauto using term_lift_inter_reducible_tsize, term_lift_sym, inter_reducible_sym.
     apply term_lift_refl; eauto with erased.
@@ -494,6 +562,26 @@ Proof.
     eapply term_lift_inter_reducible_pair in H13; repeat step || list_utils || step_inversion cbv_value;
       eauto with fv; eauto with wf; eauto with erased;
       eauto 7 using star_trans with cbvlemmas smallstep.
+
+  - repeat term_lift_inter_reducible_value; steps;
+      eauto with values;
+      eauto using term_lift_sym, inter_reducible_sym.
+    apply_anywhere term_lift_inter_reducible_true; eauto with values; subst.
+    eexists; split; eauto using star_trans, star_one, star_smallstep_unary_primitive, term_lift_refl with smallstep.
+
+  - repeat term_lift_inter_reducible_value; steps;
+      eauto with values;
+      eauto using term_lift_sym, inter_reducible_sym.
+    apply_anywhere term_lift_inter_reducible_false; eauto with values; subst.
+    eexists; split; eauto using star_trans, star_one, star_smallstep_unary_primitive, term_lift_refl with smallstep.
+
+  - repeat term_lift_inter_reducible_value; steps;
+      eauto with values;
+      eauto using term_lift_sym, inter_reducible_sym.
+    eexists; split.
+    apply LiBinaryPrimitive ; try eassumption.
+    eauto using star_trans, star_smallstep_binary_primitive_l, star_smallstep_binary_primitive_r.
+
 
   - repeat term_lift_inter_reducible_value; steps;
       eauto with values;

@@ -3,6 +3,7 @@ Require Import PeanoNat.
 
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.StarLemmas.
+Require Export SystemFR.FVLemmasEval.
 
 Open Scope list_scope.
 
@@ -103,6 +104,17 @@ Inductive equal_with_relation tag rel: tree -> tree -> Prop :=
       equal_with_relation tag rel t2 t2' ->
       equal_with_relation tag rel t3 t3' ->
       equal_with_relation tag rel (tmatch t1 t2 t3) (tmatch t1' t2' t3')
+
+| EWRUnaryPrimitive:
+    forall o t1 t1',
+      equal_with_relation tag rel t1 t1' ->
+      equal_with_relation tag rel (unary_primitive o t1) (unary_primitive o t1')
+| EWRBinaryPrimitive:
+    forall o t1 t1' t2 t2',
+      equal_with_relation tag rel t1 t1' ->
+      equal_with_relation tag rel t2 t2' ->
+      equal_with_relation tag rel (binary_primitive o t1 t2) (binary_primitive o t1' t2')
+
 | EWRNoTypeLet:
     forall t1 t1' t2 t2',
       equal_with_relation tag rel t1 t1' ->
@@ -484,6 +496,27 @@ Proof.
     eauto with values.
 Qed.
 
+Lemma equal_with_relation_build_nat:
+  forall n t rel tag,
+    equal_with_relation tag rel t (build_nat n) ->
+    t = build_nat n.
+Proof.
+  induction n;
+    repeat steps || step_inversion equal_with_relation.
+  apply IHn in H2; steps.
+Qed.
+
+Lemma equal_with_relation_build_nat2:
+  forall n t rel tag,
+    equal_with_relation tag rel (build_nat n) t ->
+    t = build_nat n.
+Proof.
+  induction n;
+    repeat steps || step_inversion equal_with_relation.
+  apply IHn in H1; steps.
+Qed.
+
+
 Ltac t_ewr_value :=
   match goal with
   | H1: equal_with_relation _ _ ?v ?v2, H2: cbv_value ?v |- _ =>
@@ -607,6 +640,7 @@ Proof.
     repeat step || t_ewr_nil || t_ewr_value || instantiate_any ||
       step_inversion equal_with_relation ||
       apply equal_with_relation_open2 ||
+      eapply_anywhere equal_with_relation_build_nat2 ||
       (erewrite equal_with_relation_tsize by eauto) ||
       (erewrite equal_with_relation_lambda by eauto) ||
       (erewrite equal_with_relation_succ by eauto) ||
@@ -618,6 +652,7 @@ Proof.
       eauto using equal_with_relation_top_level_var3, equal_with_relation_lambda_refl with smallstep;
       eauto using equal_with_relation_top_level_var3, equal_with_relation_succ_refl with smallstep.
 Qed.
+
 
 Ltac equal_with_relation_scbv_step :=
   match goal with

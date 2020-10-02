@@ -219,7 +219,7 @@ Inductive scbv_step: tree -> tree -> Prop :=
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->
     n2 > 0 ->
-    scbv_step (binary_primitive Div v1 v2) (build_nat (PeanoNat.Nat.div n1 (S n2)))
+    scbv_step (binary_primitive Div v1 v2) (build_nat (PeanoNat.Nat.div n1 n2))
 | SPBetaEq: forall v1 v2 n1 n2,
     v1 = build_nat n1 ->
     v2 = build_nat n2 ->

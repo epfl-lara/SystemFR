@@ -1,5 +1,4 @@
 Require Export SystemFR.RedTactics.
-Require Export SystemFR.NatLessThan.
 
 Lemma open_reducible_err:
   forall Θ Γ T,

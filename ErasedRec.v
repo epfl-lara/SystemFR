@@ -5,7 +5,7 @@ Require Import Coq.Lists.List.
 
 Require Export SystemFR.ReducibilitySubst.
 Require Export SystemFR.SomeTerms.
-Require Export SystemFR.NatLessThan.
+Require Export SystemFR.ErasedPrimitive.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -623,17 +623,16 @@ Proof.
       t_closer.
 Qed.
 
+
 Lemma equivalent_zero_contradiction:
   forall n,
-    [ tlt zero n ≡ ttrue ] ->
+    [ binary_primitive Lt zero n ≡ ttrue ] ->
     n ~>* zero ->
     False.
 Proof.
   intros.
-  apply (equivalent_tlt_terms_trans _ _ zero zero) in H;
-    steps.
-  apply equivalent_true in H.
-  apply tlt_sound in H; steps; eauto with lia.
+  apply_anywhere equivalent_true.
+  repeat steps || t_deterministic_star || t_invert_star; eauto with values.
 Qed.
 
 Lemma reducible_unfold_pos_in:
@@ -656,7 +655,7 @@ Lemma reducible_unfold_pos_in:
     pfv n term_var = nil ->
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
-    [ tlt zero n ≡ ttrue ] ->
+    [ binary_primitive Lt zero n ≡ ttrue ] ->
     (forall v,
         [ ρ ⊨ v : topen 0 Ts (T_rec (notype_tpred n) T0 Ts) ]v ->
         [ t1 ≡ v ] ->
@@ -739,7 +738,7 @@ Lemma open_reducible_unfold_pos_in:
       valid_interpretation ρ ->
       satisfies (reducible_values ρ) Γ l ->
       support ρ = Θ ->
-      [ substitute (tlt zero n) l ≡ ttrue ]) ->
+      [ substitute (binary_primitive Lt zero n) l ≡ ttrue ]) ->
     [ Θ;
         (p1, T_equiv t1 (fvar y term_var)) ::
         (y, topen 0 Ts (T_rec (notype_tpred n) T0 Ts)) ::

@@ -1,11 +1,8 @@
 Require Export SystemFR.Judgments.
 Require Export SystemFR.AnnotatedTactics.
-Require Export SystemFR.NatLessThanErase.
 Require Export SystemFR.PolarityErase.
 Require Export SystemFR.ErasedRecPos.
 
-Opaque tlt.
-Opaque annotated_tlt.
 Opaque reducible_values.
 
 Lemma annotated_subtype_rec:
@@ -32,7 +29,7 @@ Lemma annotated_subtype_rec_pos:
     ~(X ∈ pfv Ts type_var) ->
     ~(X ∈ Θ) ->
     has_polarities (topen 0 Ts (fvar X type_var)) ((X, Positive) :: nil) ->
-    [[ Θ; Γ ⊨ annotated_tlt n1 (succ n2) ≡ ttrue ]] ->
+    [[ Θ; Γ ⊨ binary_primitive Lt n1 (succ n2) ≡ ttrue ]] ->
     [[ Θ; Γ ⊨ n1 : T_nat ]] ->
     [[ Θ; Γ ⊨ topen 0 Ts (T_rec zero T0 Ts) <: T0 ]] ->
     [[ Θ; Γ ⊨ T_rec n2 T0 Ts <: T_rec n1 T0 Ts ]].

@@ -6,6 +6,7 @@ Require Import Coq.Lists.List.
 
 Require Export SystemFR.ErasedRec.
 Require Export SystemFR.PolarityLemma.
+Require Export SystemFR.ErasedEquivalentPrimitive.
 
 Opaque reducible_values.
 Opaque makeFresh.
@@ -25,7 +26,7 @@ Lemma reducible_values_rec_pos_induction:
       pfv Ts term_var = nil ->
       valid_interpretation ρ ->
       [ ρ ⊨ t : T_rec v2 T0 Ts ]v ->
-      [ tlt v1 (succ v2) ≡ ttrue ] ->
+      [ binary_primitive Lt v1 (succ v2) ≡ ttrue ] ->
        ~(X ∈ pfv T0 type_var) ->
        ~(X ∈ pfv Ts type_var) ->
        ~(X ∈ support ρ) ->
@@ -35,7 +36,7 @@ Lemma reducible_values_rec_pos_induction:
       has_polarities (topen 0 Ts (fvar X type_var)) ((X, Positive) :: nil) ->
       [ ρ ⊨ t : T_rec v1 T0 Ts ]v.
 Proof.
-  induction 1; destruct 1 as [ | v1' V1Succ ]; repeat step || tlt_sound;
+  induction 1; destruct 1 as [ | v1' V1Succ ]; repeat step || reducible_values_primitive_Lt_sound;
     eauto 2 using equivalent_true;
     eauto with values;
     eauto with wf;
@@ -58,6 +59,8 @@ Proof.
       eauto using INVSucc;
       eauto with lia;
       t_closer.
+    repeat is_nat_value_buildable || steps.
+    apply star_one. eapply scbv_step_same; try eapply (SPBetaLt _ _ 0 (S n)) ; eauto with values ; steps.
 
   - repeat step || simp_red_goal ||  simp_red_top_level_hyp || star_smallstep_value;
       eauto 2 with erased;
@@ -76,6 +79,9 @@ Proof.
       eauto with fv;
       eauto using INVSucc;
       eauto with lia.
+    repeat is_nat_value_buildable || steps.
+    apply star_one. eapply scbv_step_same; try eapply (SPBetaLt _ _ n0 (S n)) ; eauto with values ; steps.
+    repeat rewrite tree_size_build_nat in *. rewrite PeanoNat.Nat.leb_nle in *. lia.
 Qed.
 
 Lemma reducible_values_rec_nat_value:
@@ -105,7 +111,7 @@ Lemma reducible_values_rec_pos:
     pfv T0 term_var = nil ->
     pfv Ts term_var = nil ->
     [ ρ ⊨ t : T_rec t2 T0 Ts ]v ->
-    [ tlt t1 (succ t2) ≡ ttrue ] ->
+    [ binary_primitive Lt t1 (succ t2) ≡ ttrue ] ->
      ~(X ∈ pfv T0 type_var) ->
      ~(X ∈ pfv Ts type_var) ->
      ~(X ∈ support ρ) ->
@@ -121,5 +127,9 @@ Proof.
   apply reducible_values_rec_backstep with v; t_closer.
   eapply reducible_values_rec_pos_induction; eauto 1; steps;
     eauto using reducible_values_rec_step.
-  eapply equivalent_tlt_terms_trans; eauto 1; steps; eauto with cbvlemmas; eauto with is_nat_value.
+  equivalent_star. eapply_anywhere equivalent_true.
+  eapply star_smallstep_binary_primitive_inv in H9 ; steps.
+  assert (v = v1). eapply star_smallstep_deterministic; eauto with values.
+  assert (succ n = v2). eapply star_smallstep_deterministic; eauto using star_smallstep_succ with values.
+  apply star_one ; steps.
 Qed.

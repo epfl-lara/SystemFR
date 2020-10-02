@@ -155,6 +155,44 @@ Proof.
   exists v1; steps; eauto with values smallstep star cbvlemmas.
 Qed.
 
+
+Lemma star_smallstep_value:
+  forall v1 v2,
+    v1 ~>* v2 ->
+    cbv_value v1 ->
+    v1 = v2.
+Proof.
+  induction 1; repeat step || no_step.
+Qed.
+
+Ltac star_smallstep_value :=
+  match goal with
+  | H: ?v1 ~>* ?v2 |- _ =>
+    cbv_value v1;
+    unshelve epose proof (star_smallstep_value v1 v2 H _); clear H
+  end.
+
+Lemma star_smallstep_build_nat:
+  forall n v,
+    build_nat n ~>* v ->
+    cbv_value v ->
+    v = build_nat n.
+Proof.
+  intros.
+  apply star_smallstep_value in H; steps; eauto with values.
+Qed.
+
+Ltac star_smallstep_build_nat :=
+  match goal with
+  |H1: build_nat ?n ~>* ?v, H2: cbv_value ?v |- _ =>
+   pose proof (star_smallstep_build_nat n v H1 H2); clear H1; subst
+  end.
+
+
+
+Opaque PeanoNat.Nat.leb.
+Opaque PeanoNat.Nat.ltb.
+
 Lemma star_smallstep_binary_primitive_inv:
   forall t v,
     t ~>* v ->
@@ -162,19 +200,21 @@ Lemma star_smallstep_binary_primitive_inv:
     forall t1 t2 o,
       t = binary_primitive o t1 t2 ->
       exists v1 v2,
-        cbv_value v1 /\ t1 ~>* v1 /\ cbv_value v2 /\ t2 ~>* v2.
+        cbv_value v1 /\ t1 ~>* v1 /\ cbv_value v2 /\ t2 ~>* v2 /\ binary_primitive o v1 v2 ~> v.
 Proof.
-  induction 1; repeat steps || step_inversion cbv_value || t_invert_step; eauto with cbvlemmas star smallstep.
-  all: try solve [exists (build_nat n1), (build_nat n2); steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists (build_nat n1), (succ (build_nat n2)); steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists (build_nat n2), (build_nat n2); steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists (build_nat n1), (succ (build_nat n)); steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists (build_nat n1), zero; steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists ttrue, ttrue; steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists ttrue, tfalse; steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists tfalse, ttrue; steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists tfalse, tfalse; steps; eauto with values smallstep star cbvlemmas].
-  all: try solve [exists v1, v2; steps; eauto with values smallstep star cbvlemmas].
+  induction 1; repeat steps || step_inversion cbv_value || t_invert_step || star_smallstep_value;
+    eauto with cbvlemmas star smallstep values.
+    all: try solve [eexists; eexists;
+      repeat steps ||
+             (match goal with
+             | H: ?t ~>* ?v |- ?t ~>* _ => eassumption
+             | H1: ?t1 ~> ?t2, H2: ?t2 ~>* ?v |- _ =>
+               cbv_value v ; apply (Relation_Operators.rt1n_trans _ _ _ _ _ H1) in H2
+             | H: _ |- ?v ~>* ?v' => cbv_value v ; apply Relation_Operators.rt1n_refl
+             | H:_ |- binary_primitive _ _ _ ~> _  =>  eapply scbv_step_same; try constructor
+              end);
+      try solve [ apply cbv_value_build_nat];
+      eauto using Relation_Operators.rt1n_refl, Relation_Operators.rt1n_trans with values; steps].
 Qed.
 
 
@@ -355,21 +395,6 @@ Proof.
   inversion 1; repeat step || step_inversion cbv_value || t_invert_step.
 Qed.
 
-Lemma star_smallstep_value:
-  forall v1 v2,
-    v1 ~>* v2 ->
-    cbv_value v1 ->
-    v1 = v2.
-Proof.
-  induction 1; repeat step || no_step.
-Qed.
-
-Ltac star_smallstep_value :=
-  match goal with
-  | H: ?v1 ~>* ?v2 |- _ =>
-    cbv_value v1;
-    unshelve epose proof (star_smallstep_value v1 v2 H _); clear H
-  end.
 
 Lemma star_smallstep_tsize_inv:
   forall t v,

@@ -3,17 +3,17 @@ Require Import Coq.Lists.List.
 Require Import Coq.Arith.PeanoNat.
 
 Require Export SystemFR.ReducibilityEquivalent.
-Require Export SystemFR.NatLessThan.
 Require Export SystemFR.ErasedArrow.
 Require Export SystemFR.ErasedPair.
 Require Export SystemFR.ErasedQuant.
 Require Export SystemFR.ErasedNat.
+Require Export SystemFR.ErasedPrimitive.
 
 Require Import Psatz.
 
 Opaque reducible_values.
 Opaque makeFresh.
-Opaque tlt.
+
 
 Lemma reducible_fix_zero:
   forall ρ T ts v,
@@ -28,7 +28,7 @@ Lemma reducible_fix_zero:
     cbv_value v ->
     (forall tx n,
       [ ρ ⊨ n : T_nat ]v ->
-      [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+      [ ρ ⊨ tx : T_forall (T_refine T_nat (binary_primitive Lt (lvar 0 term_var) n)) T ]v ->
       [ tx ≡ notype_tfix ts ] ->
       [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
     [ ρ ⊨ notype_tfix ts : open 0 T zero ].
@@ -40,11 +40,11 @@ Proof.
 
   apply reducibility_equivalent2 with (open 0 (open 1 ts zero) v);
     repeat step || apply equivalent_context || simp_red_goal || simp_red_top_level_hyp ||
-           rewrite open_tlt in * || apply_any ||
+           apply_any ||
            rewrite (open_none ts) by (steps; unshelve eauto with wf; auto);
     try solve [ apply equivalent_sym; equivalent_star ];
-    eauto 2 with wf fv erased step_tactic;
-    eauto using tlt_a_zero with exfalso.
+    try solve [ last_step_binary_primitive ];
+    eauto 2 with wf fv erased step_tactic.
 
   unfold closed_value, closed_term; steps;
     eauto using wf_star_smallstep with fv wf erased step_tactic.
@@ -75,7 +75,7 @@ Lemma reducible_fix_strong_induction_aux:
     cbv_value tsv ->
     (forall tx n,
        [ ρ ⊨ n : T_nat ]v ->
-       [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+       [ ρ ⊨ tx : T_forall (T_refine T_nat (binary_primitive Lt (lvar 0 term_var) n)) T ]v ->
        [ tx ≡ notype_tfix ts ] ->
        [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
     [ ρ ⊨ notype_tfix ts : open 0 T v ].
@@ -102,8 +102,10 @@ Proof.
       eauto 2 with wf fv erased step_tactic.
 
     apply IHn with tsv;
-      repeat step || simp_red_goal || simp_red_top_level_hyp || rewrite open_tlt in * || tlt_sound ||
-      rewrite open_none in * by t_closer;
+      repeat step || simp_red_goal || (rewrite tree_size_build_nat in *)
+                  || simp_red_top_level_hyp
+                  || last_step_binary_primitive
+                  || rewrite open_none in * by t_closer;
       try solve [ unshelve t_closer; auto ];
       try lia.
 Qed.
@@ -122,7 +124,7 @@ Lemma reducible_fix_strong_induction:
     cbv_value tsv ->
     (forall tx n,
        [ ρ ⊨ n : T_nat ]v ->
-       [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+       [ ρ ⊨ tx : T_forall (T_refine T_nat (binary_primitive Lt (lvar 0 term_var) n)) T ]v ->
        [ tx ≡ notype_tfix ts ] ->
        [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
     [ ρ ⊨ notype_tfix ts : open 0 T v ].
@@ -143,7 +145,7 @@ Lemma reducible_fix_strong_induction_forall:
     cbv_value tsv ->
     (forall tx n,
        [ ρ ⊨ n : T_nat ]v ->
-       [ ρ ⊨ tx : T_forall (T_refine T_nat (tlt (lvar 0 term_var) n)) T ]v ->
+       [ ρ ⊨ tx : T_forall (T_refine T_nat (binary_primitive Lt (lvar 0 term_var) n)) T ]v ->
        [ tx ≡ notype_tfix ts ] ->
        [ ρ ⊨ open 0 ts tx : open 0 T n ]) ->
     [ ρ ⊨ notype_tfix ts : T_forall T_nat T ].
@@ -179,7 +181,7 @@ Lemma open_reducible_fix_strong_induction:
         (p, T_equiv (fvar y term_var) (notype_tfix ts)) ::
         (y,
           (T_forall
-             (T_refine T_nat (tlt (lvar 0 term_var) (fvar n term_var)))
+             (T_refine T_nat (binary_primitive Lt (lvar 0 term_var) (fvar n term_var)))
              T)
         ) ::
         (n, T_nat) ::

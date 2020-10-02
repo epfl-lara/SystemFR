@@ -151,13 +151,16 @@ Qed.
 
 Lemma star_smallstep_binary_primitive:
   forall t1 v1 t2 v2 o,
-    cbv_value v1 ->
-    cbv_value v2 ->
     t1 ~>* v1 ->
     t2 ~>* v2 ->
+    cbv_value v1 ->
+    cbv_value v2 ->
     binary_primitive o t1 t2 ~>* binary_primitive o v1 v2.
 Proof.
-  steps; eauto using star_trans with cbvlemmas.
+  steps;
+    eauto using star_trans,
+    star_smallstep_binary_primitive_l,
+    star_smallstep_binary_primitive_r with cbvlemmas.
 Qed.
 
 Hint Resolve star_smallstep_binary_primitive: cbvlemmas.
