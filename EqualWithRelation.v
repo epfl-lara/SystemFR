@@ -587,46 +587,6 @@ Proof.
   destruct t; repeat step.
 Qed.
 
-Lemma equal_with_relation_top_level_var:
-  forall tag rel t1 t2,
-    equal_with_relation tag rel t1 t2 ->
-    top_level_var t1 ->
-    top_level_var t2.
-Proof.
-  induction 1;
-    repeat step.
-Qed.
-
-Lemma equal_with_relation_top_level_var2:
-  forall tag rel t1 t2,
-    equal_with_relation tag rel t1 t2 ->
-    top_level_var t2 ->
-    top_level_var t1.
-Proof.
-  induction 1;
-    repeat step.
-Qed.
-
-Lemma equal_with_relation_top_level_var3:
-  forall tag rel t1 t2,
-    equal_with_relation tag rel t1 t2 ->
-    ~ top_level_var t1 ->
-    ~ top_level_var t2.
-Proof.
-  induction 1;
-    repeat step.
-Qed.
-
-Lemma equal_with_relation_top_level_var4:
-  forall tag rel t1 t2,
-    equal_with_relation tag rel t1 t2 ->
-    ~ top_level_var t2 ->
-    ~ top_level_var t1.
-Proof.
-  induction 1;
-    repeat step.
-Qed.
-
 Lemma equal_with_relation_scbv_step:
   forall tag rel t1 t2,
     equal_with_relation tag rel t1 t2 ->
@@ -647,10 +607,10 @@ Proof.
       (erewrite equal_with_relation_pair by eauto) ||
       (eexists; split; [ solve [ eauto with smallstep ] | idtac ]);
       eauto with equal_with_relation;
-      eauto using equal_with_relation_top_level_var3, equal_with_relation_nat with smallstep;
-      eauto using equal_with_relation_top_level_var3, equal_with_relation_pair_refl with smallstep;
-      eauto using equal_with_relation_top_level_var3, equal_with_relation_lambda_refl with smallstep;
-      eauto using equal_with_relation_top_level_var3, equal_with_relation_succ_refl with smallstep.
+      eauto using equal_with_relation_nat with smallstep;
+      eauto using equal_with_relation_pair_refl with smallstep;
+      eauto using equal_with_relation_lambda_refl with smallstep;
+      eauto using equal_with_relation_succ_refl with smallstep.
 Qed.
 
 

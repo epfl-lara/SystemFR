@@ -422,7 +422,6 @@ Lemma star_smallstep_tsize_inv2:
       exists v',
         t' ~>* v' /\
         cbv_value v' /\
-        ~ top_level_var v' /\
         v = build_nat (tsize_semantics v').
 Proof.
   induction 1;

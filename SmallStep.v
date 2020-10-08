@@ -113,30 +113,6 @@ Hint Immediate cbv_value_is_pair: values.
 Hint Immediate cbv_value_is_succ: values.
 Hint Immediate cbv_value_is_lambda: values.
 
-Fixpoint top_level_var (t: tree): Prop :=
-  match t with
-  | fvar _ term_var => True
-  | uu => False
-  | zero => False
-  | succ v => top_level_var v
-  | tfalse => False
-  | ttrue => False
-  | pp v1 v2 => top_level_var v1 \/ top_level_var v2
-  | notype_lambda t => False
-  | tleft v => top_level_var v
-  | tright v => top_level_var v
-  | _ => False
-  end.
-
-Lemma fv_nil_top_level_var:
-  forall t,
-    pfv t term_var = nil ->
-    ~ top_level_var t.
-Proof.
-  induction t;
-    repeat step || list_utils || unfold singleton, add in *.
-Qed.
-
 Reserved Notation "t1 '~>' t2" (at level 20).
 
 Inductive scbv_step: tree -> tree -> Prop :=
@@ -182,23 +158,19 @@ Inductive scbv_step: tree -> tree -> Prop :=
 | SPBetaSize:
     forall v,
       cbv_value v ->
-      ~ top_level_var v ->
       tsize v ~> build_nat (tsize_semantics v)
 
 | SPBetaIsPair:
     forall v,
       cbv_value v ->
-      ~ top_level_var v ->
       boolean_recognizer 0 v ~> is_pair v
 | SPBetaIsSucc:
     forall v,
       cbv_value v ->
-      ~ top_level_var v ->
       boolean_recognizer 1 v ~> is_succ v
 | SPBetaIsLambda:
     forall v,
       cbv_value v ->
-      ~ top_level_var v ->
       boolean_recognizer 2 v ~> is_lambda v
 
 (* Primitive beta reduction *)
@@ -452,8 +424,9 @@ Lemma deterministic_step:
       t1 ~> t3 ->
       t2 = t3.
 Proof.
-  induction 1; repeat step || t_equality;
-    try solve [ repeat step || t_invert_step || no_step || t_equality || build_nat_inj ].
+  induction 1; repeat light || t_equality;
+    try solve [ t_invert_step; repeat light || no_step || t_equality || build_nat_inj ];
+    try solve [ t_invert_step; repeat light; try t_invert_step; repeat light || no_step || t_equality ].
 Qed.
 
 Ltac deterministic_step :=

@@ -98,7 +98,6 @@ Qed.
 Lemma term_lift_inter_reducible_tsize:
   forall t v,
     term_lift inter_reducible t v ->
-    ~ top_level_var v ->
     cbv_value v ->
     tsize t ~>* build_nat (tsize_semantics v).
 Proof.
@@ -300,18 +299,23 @@ Proof.
     try solve [ constructor; unfold inter_reducible; steps; eauto with fv ].
 Qed.
 
+Ltac succ_build_nat :=
+  match goal with
+  | H: succ _ = build_nat ?n |- _ => is_var n; destruct n
+  end.
+
 Lemma term_lift_inter_reducible_build_nat:
   forall v t,
     term_lift inter_reducible t v ->
-    forall n, (
-        t = build_nat n ->
-        cbv_value v ->
-        v = build_nat n).
+    cbv_value v ->
+    forall n,
+      t = build_nat n ->
+      v = build_nat n.
 Proof.
-  intros v t H.
-  induction H; steps; try solve [destruct n; discriminate].
-  + apply inter_reducible_value in H; try star_smallstep_value; eauto with values.
-  + destruct n; steps. inversion H1; steps.
+  induction 1;
+    repeat step || apply_anywhere inter_reducible_value || star_smallstep_value || succ_build_nat || step_inversion cbv_value;
+    try solve [destruct n; discriminate];
+    eauto with values.
 Qed.
 
 Lemma term_lift_inter_reducible_build_nat2:
@@ -454,33 +458,6 @@ Proof.
     repeat step || t_invert_star.
 Qed.
 
-
-Lemma term_lift_inter_reducible_top_level_var:
-  forall v1 v2,
-    term_lift inter_reducible v1 v2 ->
-    cbv_value v1 ->
-    cbv_value v2 ->
-    top_level_var v1 ->
-    top_level_var v2.
-Proof.
-  induction 1;
-    repeat step || step_inversion cbv_value;
-    try solve [ apply_anywhere inter_reducible_values; steps ].
-Qed.
-
-Lemma term_lift_inter_reducible_top_level_var2:
-  forall v1 v2,
-    term_lift inter_reducible v1 v2 ->
-    cbv_value v1 ->
-    cbv_value v2 ->
-    top_level_var v2 ->
-    top_level_var v1.
-Proof.
-  induction 1;
-    repeat step || step_inversion cbv_value;
-    try solve [ apply_anywhere inter_reducible_values; steps ].
-Qed.
-
 Opaque PeanoNat.Nat.leb.
 Opaque PeanoNat.Nat.ltb.
 
@@ -518,11 +495,6 @@ Proof.
       try eapply star_smallstep_binary_primitive; try eassumption;
       apply star_one; eapply scbv_step_same; eauto with smallstep erased; steps]
 ].
-
-
-
-
-
 
   - eexists; steps; eauto using term_lift_inter_reducible_tsize, term_lift_sym, inter_reducible_sym.
     apply term_lift_refl; eauto with erased.
@@ -605,7 +577,7 @@ Proof.
 
     erewrite term_lift_inter_reducible_is_pair by eauto.
     eapply star_trans; eauto with cbvlemmas.
-    apply star_one; constructor; steps; eauto using term_lift_inter_reducible_top_level_var2.
+    apply star_one; constructor; steps.
 
   - repeat term_lift_inter_reducible_value; steps;
       eauto with values;
@@ -615,7 +587,7 @@ Proof.
 
     erewrite term_lift_inter_reducible_is_succ by eauto.
     eapply star_trans; eauto with cbvlemmas.
-    apply star_one; constructor; steps; eauto using term_lift_inter_reducible_top_level_var2.
+    apply star_one; constructor; steps.
 
   - repeat term_lift_inter_reducible_value; steps;
       eauto with values;
@@ -625,7 +597,7 @@ Proof.
 
     erewrite term_lift_inter_reducible_is_lambda by eauto.
     eapply star_trans; eauto with cbvlemmas.
-    apply star_one; constructor; steps; eauto using term_lift_inter_reducible_top_level_var2.
+    apply star_one; constructor; steps.
 
   - repeat term_lift_inter_reducible_value; steps;
       eauto with values;

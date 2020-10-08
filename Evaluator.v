@@ -1,7 +1,6 @@
 Require Export SystemFR.TypeErasure.
 Require Export SystemFR.Freshness.
 Require Export SystemFR.Notations.
-Export Notations.UnTyped.
 
 Require Export SystemFR.SmallStep.
 
@@ -13,7 +12,7 @@ Open Scope bool_scope.
 Fixpoint is_nat (t : tree) : bool :=
   match t with
     | zero => true
-    | succ t1 => (is_nat t1)
+    | succ t1 => is_nat t1
     | _ => false
 end.
 
@@ -323,7 +322,7 @@ Proof.
       || (rewrite is_value_correct in *)
          || destruct_sig || congruence
          ||  step_inversion cbv_value || destruct_match ;
-         eauto using ss_eval_binary_primitive_prop2, ss_eval_step, fv_nil_top_level_var with smallstep values.
+         eauto using ss_eval_binary_primitive_prop2, ss_eval_step with smallstep values.
          all: try solve [
                     apply ss_eval_binary_primitive_prop; eauto ].
 Qed.
