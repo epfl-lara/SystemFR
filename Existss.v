@@ -73,12 +73,12 @@ Lemma reducible_exists_vars:
     wf T2 0 ->
     is_erased_type T1 ->
     is_erased_type T2 ->
-    List.Forall (fun v => [ ρ | v : T1 ]v) vs ->
+    List.Forall (fun v => [ ρ ⊨ v : T1 ]v) vs ->
     List.length xs = List.length vs ->
     valid_interpretation ρ ->
     (forall z v', z ∈ xs -> v' ∈ vs -> z ∈ fv v' -> False) ->
-    [ ρ | v : psubstitute T2 (List.combine xs vs) term_var ]v ->
-    [ ρ | v : T_exists_vars xs T1 T2 ]v.
+    [ ρ ⊨ v : psubstitute T2 (List.combine xs vs) term_var ]v ->
+    [ ρ ⊨ v : T_exists_vars xs T1 T2 ]v.
 Proof.
   induction xs; repeat step || t_substitutions.
   unshelve epose proof
@@ -103,11 +103,11 @@ Lemma reducible_exists_vars2_helper:
     is_erased_type T1 ->
     is_erased_type T2 ->
     valid_interpretation ρ ->
-    [ ρ | v : T_exists_vars xs T1 T2 ]v ->
+    [ ρ ⊨ v : T_exists_vars xs T1 T2 ]v ->
     (exists vs,
-      List.Forall (fun v => [ ρ | v : T1 ]v) vs /\
+      List.Forall (fun v => [ ρ ⊨ v : T1 ]v) vs /\
       length vs = length xs /\
-      [ ρ | v : psubstitute T2 (combine xs vs) term_var ]v).
+      [ ρ ⊨ v : psubstitute T2 (combine xs vs) term_var ]v).
 Proof.
   induction xs; repeat step || t_substitutions || simp_red_top_level_hyp;
     eauto 2 with step_tactic.
@@ -132,12 +132,12 @@ Lemma reducible_exists_vars2:
     is_erased_type T1 ->
     is_erased_type T2 ->
     valid_interpretation ρ ->
-    [ ρ | v : T_exists_vars xs T1 T2 ]v ->
+    [ ρ ⊨ v : T_exists_vars xs T1 T2 ]v ->
     (exists vs,
-      List.Forall (fun v => [ ρ | v : T1 ]v) vs /\
+      List.Forall (fun v => [ ρ ⊨ v : T1 ]v) vs /\
       functional (combine xs vs) /\
       length vs = length xs /\
-      [ ρ | v : psubstitute T2 (combine xs vs) term_var ]v).
+      [ ρ ⊨ v : psubstitute T2 (combine xs vs) term_var ]v).
 Proof.
   intros.
   apply_anywhere reducible_exists_vars2_helper; steps.

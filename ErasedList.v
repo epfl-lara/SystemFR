@@ -45,7 +45,7 @@ Proof.
 Qed.
 
 Lemma open_tnil:
-  forall Γ, [ Γ ⊨ tnil : T_singleton List tnil ].
+  forall Γ, [ Γ ⊫ tnil : T_singleton List tnil ].
 Proof.
   eauto using open_tnil_helper.
 Qed.
@@ -123,10 +123,10 @@ Lemma open_tcons:
     is_erased_term t ->
     wf t 0 ->
     subset (fv t) (support Γ) ->
-    [ Γ ⊨ h : H ] ->
-    [ Γ ⊨ t : T ] ->
-    [ Γ ⊨ T <: List ] ->
-    [ Γ ⊨ tcons h t : T_singleton (Cons H T) (tcons h t) ].
+    [ Γ ⊫ h : H ] ->
+    [ Γ ⊫ t : T ] ->
+    [ Γ ⊫ T <: List ] ->
+    [ Γ ⊫ tcons h t : T_singleton (Cons H T) (tcons h t) ].
 Proof.
   intros; apply open_reducible_singleton; repeat step || sets;
     eauto using open_tcons_helper.
@@ -138,7 +138,7 @@ Opaque List.
 Lemma reducible_nil:
   forall ρ,
     valid_interpretation ρ ->
-    [ ρ | tnil : List ]v.
+    [ ρ ⊨ tnil : List ]v.
 Proof.
   unshelve epose proof (open_reducible_nil nil nil); steps.
   rewrite (List.app_nil_end ρ).

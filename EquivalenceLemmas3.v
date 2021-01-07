@@ -4,41 +4,41 @@ Require Export SystemFR.EquivalentContext.
 
 Lemma pp_pp_star_helper1:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     forall t1' t1'' t2' t2'',
       t1 = pp t1' t1'' ->
       t2 = pp t2' t2'' ->
-      star scbv_step t1' t2'.
+      t1' ~>* t2'.
 Proof.
   induction 1; repeat step || t_invert_step; eauto with star.
 Qed.
 
 Lemma pp_pp_star_1:
   forall t1 t1' t2 t2',
-    star scbv_step (pp t1 t1') (pp t2 t2') ->
-    star scbv_step t1 t2.
+    pp t1 t1' ~>* pp t2 t2' ->
+    t1 ~>* t2.
 Proof. eauto using pp_pp_star_helper1. Qed.
 
 Lemma pp_pp_star_helper2:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     forall t1' t1'' t2' t2'',
       t1 = pp t1' t1'' ->
       t2 = pp t2' t2'' ->
-      star scbv_step t1'' t2''.
+      t1'' ~>* t2''.
 Proof.
   induction 1; repeat step || t_invert_step; eauto with star.
 Qed.
 
 Lemma pp_pp_star_2:
   forall t1 t1' t2 t2',
-    star scbv_step (pp t1 t1') (pp t2 t2') ->
-    star scbv_step t1' t2'.
+    pp t1 t1' ~>* pp t2 t2' ->
+    t1' ~>* t2'.
 Proof. eauto using pp_pp_star_helper2. Qed.
 
 Lemma right_left_star_helper:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     forall t1' t2',
       t1 = tright t1' ->
       t2 = tleft t2' ->
@@ -49,7 +49,7 @@ Qed.
 
 Lemma right_left_star:
   forall t1 t2,
-    star scbv_step (tright t1) (tleft t2) ->
+    tright t1 ~>* tleft t2 ->
     False.
 Proof.
   eauto using right_left_star_helper.
@@ -57,38 +57,38 @@ Qed.
 
 Lemma right_right_star_helper:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     forall t1' t2',
       t1 = tright t1' ->
       t2 = tright t2' ->
-      star scbv_step t1' t2'.
+      t1' ~>* t2'.
 Proof.
   induction 1; repeat step || t_invert_step; eauto with star.
 Qed.
 
 Lemma right_right_star:
   forall t1 t2,
-    star scbv_step (tright t1) (tright t2) ->
-    star scbv_step t1 t2.
+    tright t1 ~>* tright t2 ->
+    t1 ~>* t2.
 Proof.
   eauto using right_right_star_helper.
 Qed.
 
 Lemma left_left_star_helper:
   forall t1 t2,
-    star scbv_step t1 t2 ->
+    t1 ~>* t2 ->
     forall t1' t2',
       t1 = tleft t1' ->
       t2 = tleft t2' ->
-      star scbv_step t1' t2'.
+      t1' ~>* t2'.
 Proof.
   induction 1; repeat step || t_invert_step; eauto with star.
 Qed.
 
 Lemma left_left_star:
   forall t1 t2,
-    star scbv_step (tleft t1) (tleft t2) ->
-    star scbv_step t1 t2.
+    tleft t1 ~>* tleft t2 ->
+    t1 ~>* t2.
 Proof.
   eauto using left_left_star_helper.
 Qed.

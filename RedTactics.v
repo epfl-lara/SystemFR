@@ -86,6 +86,19 @@ Ltac t_instantiate_sat3 :=
 
 Ltac t_instantiate_sat3_nil :=
   match goal with
+  | H0: forall theta lterms,
+      valid_interpretation theta ->
+      satisfies (reducible_values theta) ?gamma lterms ->
+      support theta = nil ->
+      _,
+    H2: satisfies (reducible_values ?ρ) ?gamma ?lterms0
+    |- _ =>
+      poseNew (Mark (H0, ρ, gamma, lterms0) "instantiate_open_reducible");
+      unshelve epose proof (H0 ρ lterms0 _ H2 _)
+  end.
+
+Ltac t_instantiate_sat4 :=
+  match goal with
   | H0: forall ρ lterms,
       valid_interpretation ρ ->
       satisfies (reducible_values ρ) ?Γ lterms ->
@@ -96,19 +109,6 @@ Ltac t_instantiate_sat3_nil :=
     |- _ =>
       poseNew (Mark (H0, ρ0, Γ, lterms0) "instantiate_sat4");
       unshelve epose proof (H0 _ _ H1 H2 _)
-  end.
-
-Ltac t_instantiate_sat4 :=
-  match goal with
-  | H0: forall lterms ρ,
-      valid_interpretation ρ ->
-      satisfies (reducible_values ρ) ?Γ lterms ->
-      _,
-    H1: valid_interpretation ?ρ0,
-    H2: satisfies (reducible_values ?ρ0) ?Γ ?lterms0
-    |- _ =>
-      poseNew (Mark (H0, ρ0, Γ, lterms0) "instantiate_open_reducible");
-      pose proof (H0 lterms0 ρ0 H1 H2)
   end.
 
 Ltac t_reduces_to :=

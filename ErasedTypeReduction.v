@@ -61,14 +61,14 @@ Definition sub_singleton tvars gamma v T : Prop :=
     equivalent_terms v' (psubstitute v l term_var).
 
 Lemma reducibility_open_equivalent2:
-  forall T t1 t2 theta t,
-    reducible theta t (open 0 T t1) ->
-    valid_interpretation theta ->
+  forall T t1 t2 ρ t,
+    [ ρ ⊨ t : open 0 T t1 ] ->
+    valid_interpretation ρ ->
     is_erased_type T ->
     wf T 1 ->
     pfv T term_var = nil ->
-    equivalent_terms t1 t2 ->
-    reducible theta t (open 0 T t2).
+    [ t1 ≡ t2 ] ->
+    [ ρ ⊨ t : open 0 T t2 ].
 Proof.
   eauto using reducibility_open_equivalent, reducible_values_exprs.
 Qed.
@@ -91,7 +91,7 @@ Lemma open_subtype_type_application:
     [ tvars; gamma ⊨ C <: A ] ->
     [ tvars; gamma ⊨ type_application (T_arrow A B) C <: open 0 B c ].
 Proof.
-  unfold open_subtype, subtype;
+  unfold open_subtype;
     repeat step || simp_red ||
            (rewrite open_none in * by eauto with wf) ||
            (rewrite (open_none v) in * by t_closer) ||

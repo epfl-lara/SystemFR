@@ -14,17 +14,17 @@ Lemma nexists_1: forall ρ s S S' T T',
   wf T' 0 ->
   pfv T term_var = nil ->
   pfv T' term_var = nil ->
-  [ ρ | s : S ] ->
-  [ ρ | S = S' ] ->
-  (forall a, [ ρ | a : S' ]v -> [ ρ | open 0 T a = T' ]) ->
-  [ ρ | T_exists S T = T' ].
+  [ ρ ⊨ s : S ] ->
+  [ ρ ⊨ S = S' ] ->
+  (forall a, [ ρ ⊨ a : S' ]v -> [ ρ ⊨ open 0 T a = T' ]) ->
+  [ ρ ⊨ T_exists S T = T' ].
 Proof.
   intros; unfold equivalent_types;
     repeat step || simp_red || rewrite reducibility_rewrite;
     t_closer;
     eauto using equivalent_types_reducible_values.
 
- unfold reducible, reduces_to in H6; steps.
+ unfold reduces_to in H6; steps.
  exists v0; steps; eauto with wf fv erased;
    eauto using equivalent_types_reducible_values, equivalent_types_reducible_values_back.
 Qed.
@@ -60,10 +60,10 @@ Lemma open_nexists_1: forall Γ s S S' T T' x,
   ~ x ∈ pfv S' term_var ->
   ~ x ∈ pfv T' term_var ->
   ~ x ∈ pfv_context Γ term_var ->
-  [ Γ ⊨ s : S ] -> (* algorithm invariant: every type is inhabited *)
-  [ Γ ⊨ S = S' ] ->
-  [ (x, S') :: Γ ⊨ open 0 T (fvar x term_var) = T' ] ->
-  [ Γ ⊨ T_exists S T = T' ].
+  [ Γ ⊫ s : S ] -> (* algorithm invariant: every type is inhabited *)
+  [ Γ ⊫ S = S' ] ->
+  [ (x, S') :: Γ ⊫ open 0 T (fvar x term_var) = T' ] ->
+  [ Γ ⊫ T_exists S T = T' ].
 Proof.
   eauto using open_nexists_1_helper.
 Qed.
@@ -76,9 +76,9 @@ Lemma nexists_2: forall ρ S S' T T',
   wf T' 1 ->
   pfv T term_var = nil ->
   pfv T' term_var = nil ->
-  [ ρ | S = S' ] ->
-  (forall a, [ ρ | a : S' ]v -> [ ρ | open 0 T a = open 0 T' a ]) ->
-  [ ρ | T_exists S T = T_exists S' T' ].
+  [ ρ ⊨ S = S' ] ->
+  (forall a, [ ρ ⊨ a : S' ]v -> [ ρ ⊨ open 0 T a = open 0 T' a ]) ->
+  [ ρ ⊨ T_exists S T = T_exists S' T' ].
 Proof.
   intros; unfold equivalent_types;
     repeat step || simp_red || rewrite reducibility_rewrite;
@@ -116,9 +116,9 @@ Lemma open_nexists_2: forall Γ S S' T T' x,
   subset (fv T') (support Γ) ->
   ~ x ∈ pfv S' term_var ->
   ~ x ∈ pfv_context Γ term_var ->
-  [ Γ ⊨ S = S' ] ->
-  [ (x, S') :: Γ ⊨ open 0 T (fvar x term_var) = open 0 T' (fvar x term_var) ] ->
-  [ Γ ⊨ T_exists S T = T_exists S' T' ].
+  [ Γ ⊫ S = S' ] ->
+  [ (x, S') :: Γ ⊫ open 0 T (fvar x term_var) = open 0 T' (fvar x term_var) ] ->
+  [ Γ ⊫ T_exists S T = T_exists S' T' ].
 Proof.
   eauto using open_nexists_2_helper.
 Qed.

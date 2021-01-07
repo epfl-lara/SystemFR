@@ -24,9 +24,9 @@ Inductive widen: tree -> tree -> Prop :=
 Lemma reducible_equiv:
   forall ρ t1 t2,
     [ t1 ≡ t2 ] ->
-    [ ρ | uu : T_equiv t1 t2 ].
+    [ ρ ⊨ uu : T_equiv t1 t2 ].
 Proof.
-  intros; unfold reducible, reduces_to; repeat step || exists uu || simp_red; t_closer.
+  intros; unfold reduces_to; repeat step || exists uu || simp_red; t_closer.
 Qed.
 
 Lemma widen_singleton_arrow:
@@ -37,7 +37,7 @@ Lemma widen_singleton_arrow:
     [Θ; Γ ⊨ T_singleton (T_arrow ty1 ty2) f <:
             T_arrow ty1 (T_singleton ty2 (app f (lvar 0 term_var))) ].
 Proof.
-  unfold open_subtype, subtype;
+  unfold open_subtype;
     repeat step || simp_red || open_none || apply reducible_type_refine with uu ||
            (rewrite shift_nothing2 in * by eauto with wf) || list_utils ||
            apply reducible_equiv || t_instantiate_reducible ||
@@ -52,7 +52,7 @@ Lemma singleton_subtype:
   forall Θ Γ ty f,
     [ Θ; Γ ⊨ T_singleton ty f <: ty ].
 Proof.
-  unfold open_subtype, subtype; repeat step || simp_red.
+  unfold open_subtype; repeat step || simp_red.
 Qed.
 
 Lemma widen_singleton:
@@ -92,10 +92,10 @@ Lemma open_tapp:
     is_erased_type T ->
     wf T 1 ->
     subset (fv T) (support Γ) ->
-    [ Γ ⊨ t1 : U ] ->
+    [ Γ ⊫ t1 : U ] ->
     widen U (T_arrow S T) ->
-    [ Γ ⊨ t2 : S ] ->
-    [ Γ ⊨ app t1 t2 : open 0 T t2 ].
+    [ Γ ⊫ t2 : S ] ->
+    [ Γ ⊫ app t1 t2 : open 0 T t2 ].
 Proof.
   eauto using open_tapp_helper.
 Qed.
@@ -136,9 +136,9 @@ Lemma open_tlet:
     subset (fv t2) (support Γ) ->
     subset (pfv_context Γ term_var) (support Γ) ->
     ~ x ∈ support Γ ->
-    [ Γ ⊨ t1 : T1 ] ->
-    [ (x, T1) :: Γ ⊨ open 0 t2 (fvar x term_var) : open 0 T2 (fvar x term_var) ] ->
-    [ Γ ⊨ let' t1 t2 : T_singleton (open 0 T2 t1) (let' t1 t2) ].
+    [ Γ ⊫ t1 : T1 ] ->
+    [ (x, T1) :: Γ ⊫ open 0 t2 (fvar x term_var) : open 0 T2 (fvar x term_var) ] ->
+    [ Γ ⊫ let' t1 t2 : T_singleton (open 0 T2 t1) (let' t1 t2) ].
 Proof.
   intros.
   apply open_reducible_singleton; repeat step || sets || simp_red;

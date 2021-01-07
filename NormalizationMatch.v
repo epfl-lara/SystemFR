@@ -15,14 +15,14 @@ Lemma open_nmatch_3: forall Γ T2 T3 t t',
   subset (fv T2) (support Γ) ->
   subset (fv T3) (support Γ) ->
   [ Γ ⊨ t ⤳* t' ] ->
-  [ Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
+  [ Γ ⊫ List_Match t T2 T3 = List_Match t' T2 T3 ].
 Proof.
   eauto using open_sub_list_match_scrut, delta_beta_obs_equiv.
 Qed.
 
 Lemma nmatch_nil: forall ρ T2 T3,
   valid_interpretation ρ ->
-  [ ρ | List_Match tnil T2 T3 = T2 ].
+  [ ρ ⊨ List_Match tnil T2 T3 = T2 ].
 Proof.
   unfold equivalent_types, List_Match;
     repeat step || simp_red_top_level_goal || simp_red_top_level_hyp || open_none;
@@ -36,14 +36,14 @@ Qed.
 
 Lemma reducibility_open_equivalent2:
   forall T t1 t2 t1' t2' ρ v,
-    [ ρ | v : open 0 (open 1 T t1) t2 ]v  ->
+    [ ρ ⊨ v : open 0 (open 1 T t1) t2 ]v  ->
     valid_interpretation ρ ->
     is_erased_type T ->
     wf T 2 ->
     pfv T term_var = nil ->
     [ t1 ≡ t1' ] ->
     [ t2 ≡ t2' ] ->
-    [ ρ | v : open 0 (open 1 T t1') t2' ]v.
+    [ ρ ⊨ v : open 0 (open 1 T t1') t2' ]v.
 Proof.
   intros.
   eapply reducibility_open_equivalent; eauto; steps; eauto with erased wf fv.
@@ -66,9 +66,9 @@ Lemma nmatch_cons: forall ρ t ts T2 T3,
   wf T3 2 ->
   pfv T3 term_var = nil ->
   is_erased_type T3 ->
-  [ ρ | t : T_top ] ->
-  [ ρ | ts : List ] ->
-  [ ρ | List_Match (tcons t ts) T2 T3 = open 0 (open 1 T3 t) ts ].
+  [ ρ ⊨ t : T_top ] ->
+  [ ρ ⊨ ts : List ] ->
+  [ ρ ⊨ List_Match (tcons t ts) T2 T3 = open 0 (open 1 T3 t) ts ].
 Proof.
   unfold equivalent_types, List_Match;
     repeat step || simp_red_top_level_goal || simp_red_top_level_hyp || open_none;
@@ -110,8 +110,8 @@ Lemma open_nmatch_1: forall Γ T2 T2' T3 t,
   subset (fv T2) (support Γ) ->
   subset (fv T3) (support Γ) ->
   [ Γ ⊨ t ⤳* tnil ] ->
-  [ Γ ⊨ T2 = T2' ] ->
-  [ Γ ⊨ List_Match t T2 T3 = T2' ].
+  [ Γ ⊫ T2 = T2' ] ->
+  [ Γ ⊫ List_Match t T2 T3 = T2' ].
 Proof.
   intros.
   eapply open_equivalent_types_trans; try apply open_nmatch_3;
@@ -140,13 +140,13 @@ Qed.
 
 Lemma reducibility_subst_equiv:
   forall ρ v T x t1 t2,
-    [ ρ | v : psubstitute T ((x, t1) :: nil) term_var ]v ->
+    [ ρ ⊨ v : psubstitute T ((x, t1) :: nil) term_var ]v ->
     valid_interpretation ρ ->
     wf T 0 ->
     is_erased_type T ->
     subset (fv T) (x :: nil) ->
     [ t1 ≡ t2 ] ->
-    [ ρ | v : psubstitute T ((x, t2) :: nil) term_var ]v.
+    [ ρ ⊨ v : psubstitute T ((x, t2) :: nil) term_var ]v.
 Proof.
   intros; repeat rewrite <- (open_close _ _ _ 0) in * by auto.
   rewrite <- (open_close _ _ _ 0) in H by auto.
@@ -162,7 +162,7 @@ Lemma reducibility_subst_equiv2:
     is_erased_type T ->
     subset (fv T) (x :: nil) ->
     [ t1 ≡ t2 ] ->
-    [ ρ | psubstitute T ((x, t1) :: nil) term_var = psubstitute T ((x, t2) :: nil) term_var ].
+    [ ρ ⊨ psubstitute T ((x, t1) :: nil) term_var = psubstitute T ((x, t2) :: nil) term_var ].
 Proof.
   unfold equivalent_types; steps;
     eauto using reducibility_subst_equiv, equivalent_sym.
@@ -205,7 +205,7 @@ Lemma reducibility_subst_equiv3:
     pclosed_mapping l term_var ->
     subset (fv T) (x :: support l) ->
     [ t1 ≡ t2 ] ->
-    [ ρ | psubstitute T ((x, t1) :: l) term_var = psubstitute T ((x, t2) :: l) term_var ].
+    [ ρ ⊨ psubstitute T ((x, t1) :: l) term_var = psubstitute T ((x, t2) :: l) term_var ].
 Proof.
   intros.
   repeat rewrite (substitute_cons4 _ T); steps.
@@ -240,7 +240,7 @@ Lemma open_instantiate:
     [ Θ; Γ ⊨ psubstitute T1 ((x, t) :: nil) term_var = psubstitute T2 ((x, t) :: nil) term_var ].
 Proof.
   unfold open_equivalent_types, open_reducible; repeat step || t_instantiate_sat3.
-  top_level_unfold reducible; top_level_unfold reduces_to; steps.
+  top_level_unfold reduces_to; steps.
   unshelve epose proof (H8 ρ ((x, v) :: l) _ _);
     repeat step || apply SatCons || (rewrite <- substitute_cons3 by steps);
     eauto with fv wf twf erased.
@@ -297,12 +297,12 @@ Lemma open_nmatch_2: forall Γ T2 T3 T3' t t1 t2 x y,
   ~ y ∈ fv T3' ->
   ~ y ∈ fv_context Γ ->
   x <> y ->
-  [ Γ ⊨ t1 : T_top ] ->
-  [ Γ ⊨ t2 : List ] ->
+  [ Γ ⊫ t1 : T_top ] ->
+  [ Γ ⊫ t2 : List ] ->
   [ Γ ⊨ t ⤳* tcons t1 t2 ] ->
-  [ (x, T_singleton T_top t1) :: (y, T_singleton List t2) :: Γ ⊨
+  [ (x, T_singleton T_top t1) :: (y, T_singleton List t2) :: Γ ⊫
     open 0 (open 1 T3 (fvar x term_var)) (fvar y term_var) = T3' ] ->
-  [ Γ ⊨ List_Match t T2 T3 = T3' ].
+  [ Γ ⊫ List_Match t T2 T3 = T3' ].
 Proof.
   intros.
   eapply open_equivalent_types_trans; try apply open_nmatch_3; try eassumption; steps.

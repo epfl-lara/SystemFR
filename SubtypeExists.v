@@ -5,10 +5,10 @@ Opaque reducible_values.
 Lemma sub_exists_left:
   forall ρ S T U,
     valid_interpretation ρ ->
-    (forall a, [ ρ | a : S ]v -> [ ρ | open 0 T a <: U ]) ->
-    [ ρ | T_exists S T <: U ].
+    (forall a, [ ρ ⊨ a : S ]v -> [ ρ ⊨ open 0 T a <: U ]) ->
+    [ ρ ⊨ T_exists S T <: U ].
 Proof.
-  unfold subtype; repeat step || simp_red; eauto.
+  repeat step || simp_red; eauto.
 Qed.
 
 Lemma open_sub_exists_left_helper: forall Θ Γ S T U x,
@@ -20,6 +20,9 @@ Lemma open_sub_exists_left_helper: forall Θ Γ S T U x,
   [ Θ; Γ ⊨ T_exists S T <: U ].
 Proof.
   unfold open_subtype; repeat step || apply sub_exists_left.
+
+  eapply sub_exists_left; repeat step; eauto.
+
   unshelve epose proof (H3 ρ ((x, a) :: l) _ _ _);
     repeat step || apply SatCons || t_substitutions;
     t_closer.
@@ -30,8 +33,8 @@ Lemma open_sub_exists_left: forall Γ S T U x,
   ~ x ∈ pfv U term_var ->
   ~ x ∈ pfv T term_var ->
   ~ x ∈ pfv_context Γ term_var ->
-  [ (x, S) :: Γ ⊨ open 0 T (fvar x term_var) <: U ] ->
-  [ Γ ⊨ T_exists S T <: U ].
+  [ (x, S) :: Γ ⊫ open 0 T (fvar x term_var) <: U ] ->
+  [ Γ ⊫ T_exists S T <: U ].
 Proof.
   eauto using open_sub_exists_left_helper.
 Qed.
@@ -39,13 +42,13 @@ Qed.
 Lemma sub_exists_right: forall ρ S T1 T2 t U,
   valid_interpretation ρ ->
   is_erased_type T2 ->
-  [ ρ | t : U ] ->
-  [ ρ | T_singleton U t <: S ] ->
-  (forall a, [ ρ | a : S ]v -> [ ρ | T1 <: open 0 T2 a ]) ->
-  [ ρ | T1 <: T_exists S T2 ].
+  [ ρ ⊨ t : U ] ->
+  [ ρ ⊨ T_singleton U t <: S ] ->
+  (forall a, [ ρ ⊨ a : S ]v -> [ ρ ⊨ T1 <: open 0 T2 a ]) ->
+  [ ρ ⊨ T1 <: T_exists S T2 ].
 Proof.
-  unfold subtype; repeat step || simp_red; t_closer.
-  unfold reducible, reduces_to in H1; repeat step.
+  repeat step || simp_red; t_closer.
+  unfold reduces_to in H1; repeat step.
   exists v0; repeat step || apply_any || apply reducible_expr_value ||
                apply reducible_singleton2; t_closer;
     eauto using reducible_value_expr;
@@ -82,10 +85,10 @@ Lemma open_sub_exists_right: forall Γ S T1 T2 t U x,
   ~ x ∈ pfv T2 term_var ->
   ~ x ∈ pfv_context Γ term_var ->
   is_erased_type T2 ->
-  [ Γ ⊨ t : U ] ->
-  [ Γ ⊨ T_singleton U t <: S ] ->
-  [ (x, S) :: Γ ⊨ T1 <: open 0 T2 (fvar x term_var) ] ->
-  [ Γ ⊨ T1 <: T_exists S T2 ].
+  [ Γ ⊫ t : U ] ->
+  [ Γ ⊫ T_singleton U t <: S ] ->
+  [ (x, S) :: Γ ⊫ T1 <: open 0 T2 (fvar x term_var) ] ->
+  [ Γ ⊫ T1 <: T_exists S T2 ].
 Proof.
   eauto using open_sub_exists_right_helper.
 Qed.
@@ -93,12 +96,12 @@ Qed.
 Lemma sub_exists_right2: forall ρ S T1 T2 t,
   valid_interpretation ρ ->
   is_erased_type T2 ->
-  [ ρ | t : S ] ->
-  (forall a, [ ρ | a : S ]v -> [ ρ | T1 <: open 0 T2 a ]) ->
-  [ ρ | T1 <: T_exists S T2 ].
+  [ ρ ⊨ t : S ] ->
+  (forall a, [ ρ ⊨ a : S ]v -> [ ρ ⊨ T1 <: open 0 T2 a ]) ->
+  [ ρ ⊨ T1 <: T_exists S T2 ].
 Proof.
-  unfold subtype; repeat step || simp_red; t_closer.
-  unfold reducible, reduces_to in H1; repeat step.
+  repeat step || simp_red; t_closer.
+  unfold reduces_to in H1; repeat step.
   exists v0; repeat step || apply_any || apply reducible_expr_value ||
                apply reducible_singleton2; t_closer;
     eauto using reducible_value_expr;
@@ -130,9 +133,9 @@ Lemma open_sub_exists_right2: forall Γ S T1 T2 t x,
   ~ x ∈ pfv T2 term_var ->
   ~ x ∈ pfv_context Γ term_var ->
   is_erased_type T2 ->
-  [ Γ ⊨ t : S ] ->
-  [ (x, S) :: Γ ⊨ T1 <: open 0 T2 (fvar x term_var) ] ->
-  [ Γ ⊨ T1 <: T_exists S T2 ].
+  [ Γ ⊫ t : S ] ->
+  [ (x, S) :: Γ ⊫ T1 <: open 0 T2 (fvar x term_var) ] ->
+  [ Γ ⊫ T1 <: T_exists S T2 ].
 Proof.
   eauto using open_sub_exists_right2_helper.
 Qed.

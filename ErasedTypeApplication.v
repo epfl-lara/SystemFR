@@ -31,12 +31,12 @@ Lemma reducible_type_application:
     pfv A term_var = nil ->
     pfv B term_var = nil ->
     pfv C term_var = nil ->
-    reducible ρ f (T_arrow A B) ->
-    reducible ρ t C ->
-    [ ρ | C <: A ] ->
-    reducible ρ (app f t) (type_application (T_arrow A B) C).
+    [ ρ ⊨ f : T_arrow A B ] ->
+    [ ρ ⊨ t : C ] ->
+    [ ρ ⊨ C <: A ] ->
+    [ ρ ⊨ app f t : type_application (T_arrow A B) C ].
 Proof.
-  unfold subtype, type_application; intros.
+  unfold type_application; intros.
   apply reducible_type_refine with uu;
     repeat step || list_utils;
     eauto with wf.
@@ -56,7 +56,7 @@ Proof.
       repeat step || simp_red_top_level_goal;
       t_closer.
 
-    unfold reducible, reduces_to in *; steps.
+    unfold reduces_to in *; steps.
 
     exists v0; repeat step; t_closer.
     repeat rewrite open_none by t_closer.
@@ -89,7 +89,7 @@ Lemma open_reducible_type_application:
     [ tvars; gamma ⊨ C <: A ] ->
     [ tvars; gamma ⊨ app f t : type_application (T_arrow A B) C ].
 Proof.
-  unfold open_reducible, open_subtype, subtype.
+  unfold open_reducible, open_subtype.
   intros.
   unfold substitute; steps.
   apply reducible_type_application;

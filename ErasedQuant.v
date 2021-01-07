@@ -10,11 +10,11 @@ Lemma reducible_exists:
     is_erased_type T2 ->
     wf T2 1 ->
     pfv T2 term_var = nil ->
-    [ ρ | t' : T1 ] ->
-    [ ρ | t : open 0 T2 t' ] ->
-    [ ρ | t : T_exists T1 T2 ].
+    [ ρ ⊨ t' : T1 ] ->
+    [ ρ ⊨ t : open 0 T2 t' ] ->
+    [ ρ ⊨ t : T_exists T1 T2 ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat step.
   exists v; repeat step || simp_red; eauto using reducible_values_closed.
   exists v0; repeat step; t_closer.
@@ -111,11 +111,11 @@ Lemma reducible_forall_inst:
     wf V 1 ->
     pfv V term_var = nil ->
     valid_interpretation ρ ->
-    [ ρ | t1 : T_forall U V ] ->
-    [ ρ | t2 : U ] ->
-    [ ρ | t1 : open 0 V t2 ].
+    [ ρ ⊨ t1 : T_forall U V ] ->
+    [ ρ ⊨ t2 : U ] ->
+    [ ρ ⊨ t1 : open 0 V t2 ].
 Proof.
-  unfold reducible, reduces_to;
+  unfold reduces_to;
     repeat step || simp_red || find_smallstep_value.
   eapply reducibility_values_rtl; eauto; steps; t_closer.
   apply_any; steps; t_closer.
@@ -157,13 +157,13 @@ Proof.
   unfold open_reducible;
     repeat step || t_instantiate_sat3.
 
-  unfold reducible, reduces_to; steps; t_closer.
+  unfold reduces_to; steps; t_closer.
 
-  unfold reducible, reduces_to in H7; steps.
+  unfold reduces_to in H7; steps.
 
   exists v; repeat step || simp_red; t_closer.
 
-  unfold reducible, reduces_to in H6; steps.
+  unfold reduces_to in H6; steps.
 
   exists v0; repeat step || t_substitutions; t_closer.
 

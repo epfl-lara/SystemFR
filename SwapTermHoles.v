@@ -186,7 +186,7 @@ Lemma wf_swap_term_holes_3:
     wf t k ->
     wf (swap_term_holes t i j) k.
 Proof.
-  induction t; repeat step || unshelve eauto with wf omega.
+  induction t; repeat step || unshelve eauto with wf lia.
 Qed.
 
 Hint Resolve wf_swap_term_holes_3: wf.

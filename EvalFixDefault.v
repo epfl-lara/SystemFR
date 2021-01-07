@@ -15,8 +15,8 @@ Lemma fix_default_equivalent_fuel_fuel:
     pfv fuel term_var = nil ->
     pfv default term_var = nil ->
     pfv t term_var = nil ->
-    equivalent_terms fuel fuel' ->
-    equivalent_terms (fix_default' t default fuel) (fix_default' t default fuel').
+    [ fuel ≡ fuel' ] ->
+    [ fix_default' t default fuel ≡ fix_default' t default fuel' ].
 Proof.
   unfold fix_default;
     repeat step.
@@ -37,9 +37,9 @@ Lemma evaluate_fix_default:
     is_nat_value fuel ->
     wf default 0 ->
     wf t 1 ->
-    (fuel = zero /\ star scbv_step (fix_default' t default fuel) default) \/
+    (fuel = zero /\ fix_default' t default fuel ~>* default) \/
     (exists fuel', fuel = succ fuel' /\
-              star scbv_step (fix_default' t default fuel) (open 0 t (fix_default' t default fuel'))).
+               fix_default' t default fuel ~>* open 0 t (fix_default' t default fuel')).
 Proof.
   unfold fix_default'; inversion 1; steps.
   - left; steps.

@@ -7,7 +7,7 @@ Lemma nil_subtype_list:
   forall Θ Γ,
     [ Θ; Γ ⊨ Nil <: List ].
 Proof.
-  unfold open_subtype, subtype;
+  unfold open_subtype;
     repeat step || rewrite subst_list || simp_red_top_level_hyp.
 Qed.
 
@@ -15,13 +15,13 @@ Lemma open_subcons_helper:
   forall Θ Γ H T,
     [ Θ; Γ ⊨ Cons H T <: List ].
 Proof.
-  unfold open_subtype, subtype;
+  unfold open_subtype;
     repeat step || rewrite subst_list || simp_red_top_level_hyp || open_none.
 Qed.
 
 Lemma open_subcons1:
   forall Γ H T,
-    [ Γ ⊨ Cons H T <: List ].
+    [ Γ ⊫ Cons H T <: List ].
 Proof.
   eauto using open_subcons_helper.
 Qed.
@@ -37,7 +37,7 @@ Lemma open_subcons2_helper:
     [ Θ; Γ ⊨ T <: T' ] ->
     [ Θ; Γ ⊨ Cons H T <: Cons H' T' ].
 Proof.
-  unfold open_subtype, subtype;
+  unfold open_subtype;
     repeat step || simp_red_top_level_hyp || simp_red_top_level_goal || open_none;
     eauto 2 with erased.
 
@@ -50,9 +50,9 @@ Lemma open_subcons2:
     is_erased_type T' ->
     wf T 0 ->
     wf T' 0 ->
-    [ Γ ⊨ H <: H' ] ->
-    [ Γ ⊨ T <: T' ] ->
-    [ Γ ⊨ Cons H T <: Cons H' T' ].
+    [ Γ ⊫ H <: H' ] ->
+    [ Γ ⊫ T <: T' ] ->
+    [ Γ ⊫ Cons H T <: Cons H' T' ].
 Proof.
   eauto using open_subcons2_helper.
 Qed.
@@ -67,9 +67,9 @@ Lemma subtype_list_match_scrut:
     pfv T2 term_var = nil ->
     pfv T3 term_var = nil ->
     [ t ≡ t' ] ->
-    [ ρ | List_Match t T2 T3 <: List_Match t' T2 T3 ].
+    [ ρ ⊨ List_Match t T2 T3 <: List_Match t' T2 T3 ].
 Proof.
-  unfold List_Match, subtype; intros.
+  unfold List_Match; intros.
   unshelve epose proof (reducibility_open_equivalent
    (T_union
       (T_type_refine T2 (T_equiv (lvar 1 term_var) tnil))
@@ -110,8 +110,8 @@ Lemma open_sub_list_match_scrut:
     wf T3 2 ->
     subset (fv T2) (support Γ) ->
     subset (fv T3) (support Γ) ->
-    [ Γ ⊨ t ≡ t' ] ->
-    [ Γ ⊨ List_Match t T2 T3 = List_Match t' T2 T3 ].
+    [ Γ ⊫ t ≡ t' ] ->
+    [ Γ ⊫ List_Match t T2 T3 = List_Match t' T2 T3 ].
 Proof.
   eauto using open_sub_list_match_scrut_helper.
 Qed.

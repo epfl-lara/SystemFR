@@ -11,9 +11,9 @@ Lemma npi: forall ρ S S' T T',
   wf T' 1 ->
   pfv T term_var = nil ->
   pfv T' term_var = nil ->
-  [ ρ | S = S' ] ->
-  (forall a, [ ρ | a : S' ]v -> [ ρ | open 0 T a = open 0 T' a ]) ->
-  [ ρ | T_arrow S T = T_arrow S' T' ].
+  [ ρ ⊨ S = S' ] ->
+  (forall a, [ ρ ⊨ a : S' ]v -> [ ρ ⊨ open 0 T a = open 0 T' a ]) ->
+  [ ρ ⊨ T_arrow S T = T_arrow S' T' ].
 Proof.
   intros.
   unfold equivalent_types;
@@ -59,9 +59,9 @@ Lemma open_npi: forall Γ S S' T T' x,
   ~ x ∈ pfv S term_var ->
   ~ x ∈ pfv S' term_var ->
   ~ x ∈ pfv_context Γ term_var ->
-  [ Γ ⊨ S = S' ] ->
-  [ (x, S') :: Γ ⊨ open 0 T (fvar x term_var) = open 0 T' (fvar x term_var) ] ->
-  [ Γ ⊨ T_arrow S T = T_arrow S' T' ].
+  [ Γ ⊫ S = S' ] ->
+  [ (x, S') :: Γ ⊫ open 0 T (fvar x term_var) = open 0 T' (fvar x term_var) ] ->
+  [ Γ ⊫ T_arrow S T = T_arrow S' T' ].
 Proof.
   eauto using open_npi_helper.
 Qed.

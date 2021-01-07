@@ -29,8 +29,8 @@ Lemma open_tabs:
     ~(x ∈ fv V) ->
     is_erased_term t ->
     is_erased_type V ->
-    [ (x, U) :: Γ ⊨ open 0 t (fvar x term_var) : open 0 V (fvar x term_var) ] ->
-    [ Γ ⊨ notype_lambda t : T_singleton (T_arrow U V) (notype_lambda t) ].
+    [ (x, U) :: Γ ⊫ open 0 t (fvar x term_var) : open 0 V (fvar x term_var) ] ->
+    [ Γ ⊫ notype_lambda t : T_singleton (T_arrow U V) (notype_lambda t) ].
 Proof.
   eauto using open_reducible_singleton, open_reducible_lambda.
 Qed.

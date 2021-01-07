@@ -101,8 +101,8 @@ Axiom select_type:
 
 Axiom evaluate_select:
   forall key trail1 trail2,
-    star scbv_step trail1 trail2 ->
-    star scbv_step (select key trail1) (select key trail2).
+    trail1 ~>* trail2 ->
+    select key trail1 ~>* select key trail2.
 
 Axiom wf_select:
   forall k t1 t2,
@@ -135,14 +135,14 @@ Hint Resolve is_erased_term_select: erased.
 Lemma open_tdots:
   forall Γ key tree,
     [ key : T_key ]v ->
-    [ Γ ⊨ tree : T_tree ] ->
-    [ Γ ⊨ select key tree : T_tree ].
+    [ Γ ⊫ tree : T_tree ] ->
+    [ Γ ⊫ select key tree : T_tree ].
 Proof.
   unfold open_reducible;
     repeat step || rewrite psubstitute_select ||
            t_instantiate_sat3_nil || rewrite substitute_tree.
 
-  top_level_unfold reducible; top_level_unfold reduces_to; steps.
+  top_level_unfold reduces_to; steps.
   eapply star_backstep_reducible; try apply evaluate_select; eauto;
     repeat step || rewrite pfv_select || list_utils || rewrite substitute_tree in * ||
            apply wf_select || apply is_erased_term_select ||

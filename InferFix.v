@@ -21,9 +21,9 @@ Lemma tfix_fuel_induction:
       is_erased_type T ->
       wf T 0 ->
       pfv T term_var = nil ->
-      [ ρ | default : T ] ->
-      (forall v, [ ρ | v : T ]v -> [ ρ | open 0 t v : T ]) ->
-      [ ρ | fix_default' t default fuel : T ].
+      [ ρ ⊨ default : T ] ->
+      (forall v, [ ρ ⊨ v : T ]v -> [ ρ ⊨ open 0 t v : T ]) ->
+      [ ρ ⊨ fix_default' t default fuel : T ].
 Proof.
   induction 1; intros; evaluate_fix_default; steps; eauto with is_nat_value.
   - eapply star_backstep_reducible;
@@ -37,7 +37,7 @@ Proof.
     unshelve epose proof (IHis_nat_value ρ t default T _ _ _ _ _ _ _ _ _ _ _ _) as HH;
       steps.
 
-    unfold reducible, reduces_to in HH; steps.
+    unfold reduces_to in HH; steps.
     apply reducibility_equivalent2 with (open 0 t v); steps;
       eauto with wf fv erased; eauto using reducible_value_expr.
     apply equivalent_sym.
@@ -56,13 +56,13 @@ Lemma tfix_fuel:
     is_erased_type T ->
     wf T 0 ->
     pfv T term_var = nil ->
-    [ ρ | fuel : T_nat ] ->
-    [ ρ | default : T ] ->
-    (forall v, [ ρ | v : T ]v -> [ ρ | open 0 t v : T ]) ->
-    [ ρ | fix_default' t default fuel : T ].
+    [ ρ ⊨ fuel : T_nat ] ->
+    [ ρ ⊨ default : T ] ->
+    (forall v, [ ρ ⊨ v : T ]v -> [ ρ ⊨ open 0 t v : T ]) ->
+    [ ρ ⊨ fix_default' t default fuel : T ].
 Proof.
   intros.
-  unfold reducible, reduces_to in H9; steps.
+  unfold reduces_to in H9; steps.
   apply reducibility_equivalent2 with (fix_default' t default v);
     repeat step || apply tfix_fuel_induction ||
            apply fix_default_equivalent_fuel_fuel ||
@@ -105,10 +105,10 @@ Lemma open_tfix_helper2:
     subset (fv T) (support Γ) ->
     ~ x ∈ fv T ->
     ~ x ∈ pfv_context Γ term_var ->
-    [ Γ ⊨ fuel : T_nat ] ->
-    [ Γ ⊨ default : T ] ->
-    [ (x, T) :: Γ ⊨ open 0 t (fvar x term_var) : T ] ->
-    [ Γ ⊨ fix_default' t default fuel : T ].
+    [ Γ ⊫ fuel : T_nat ] ->
+    [ Γ ⊫ default : T ] ->
+    [ (x, T) :: Γ ⊫ open 0 t (fvar x term_var) : T ] ->
+    [ Γ ⊫ fix_default' t default fuel : T ].
 Proof.
   eauto using open_tfix_helper.
 Qed.
@@ -135,9 +135,9 @@ Lemma open_tfix:
     subset (fv default) (support Γ) ->
     ~ x ∈ fv T ->
     ~ x ∈ pfv_context Γ term_var ->
-    [ Γ ⊨ default : T ] ->
-    [ (x, T) :: Γ ⊨ open 0 t (fvar x term_var) : T ] ->
-    [ Γ ⊨ fix_default t default : T_singleton T (fix_default t default) ].
+    [ Γ ⊫ default : T ] ->
+    [ (x, T) :: Γ ⊫ open 0 t (fvar x term_var) : T ] ->
+    [ Γ ⊫ fix_default t default : T_singleton T (fix_default t default) ].
 Proof.
   unfold fix_default; intros.
   apply open_reducible_singleton;

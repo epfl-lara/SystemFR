@@ -2,6 +2,7 @@ Require Import Coq.Strings.String.
 
 Require Export SystemFR.ScalaDepSugar.
 Require Export SystemFR.ErasedRecGen.
+Require Export SystemFR.StepTactics.
 
 Opaque reducible_values.
 
@@ -14,14 +15,14 @@ Lemma evaluate_list_match:
     is_erased_term t3 ->
     pfv t2 term_var = nil ->
     pfv t3 term_var = nil ->
-    [ ρ | v : List ]v -> (
-      (v = tnil /\ star scbv_step (list_match v t2 t3) t2) \/
+    [ ρ ⊨ v : List ]v -> (
+      (v = tnil /\ list_match v t2 t3 ~>* t2) \/
       (exists h l,
          closed_value h /\
          closed_value l /\
          v = tcons h l /\
-         [ ρ | h : T_top ] /\
-         [ ρ | l : List ] /\
+         [ ρ ⊨ h : T_top ] /\
+         [ ρ ⊨ l : List ] /\
          [ list_match v t2 t3 ≡ open 0 (open 1 t3 h) l ]
       )
     ).
@@ -81,8 +82,8 @@ Ltac evaluate_list_match :=
 
 Lemma evaluate_list_match_scrut:
   forall t t' t2 t3,
-    star scbv_step t t' ->
-    star scbv_step (list_match t t2 t3) (list_match t' t2 t3).
+    t ~>* t' ->
+    list_match t t2 t3 ~>* list_match t' t2 t3.
 Proof.
   unfold list_match; steps; eauto with cbvlemmas.
 Qed.
@@ -96,20 +97,20 @@ Lemma evaluate_list_match2:
     is_erased_term t3 ->
     pfv t2 term_var = nil ->
     pfv t3 term_var = nil ->
-    [ ρ | t : List ] -> (
-      (star scbv_step t tnil /\ star scbv_step (list_match t t2 t3) t2) \/
+    [ ρ ⊨ t : List ] -> (
+      (t ~>* tnil /\ list_match t t2 t3 ~>* t2) \/
       (exists h l,
          closed_value h /\
          closed_value l /\
-         star scbv_step t (tcons h l) /\
-         [ ρ | h : T_top ] /\
-         [ ρ | l : List ] /\
+         t ~>* tcons h l /\
+         [ ρ ⊨ h : T_top ] /\
+         [ ρ ⊨ l : List ] /\
          [ list_match t t2 t3 ≡ open 0 (open 1 t3 h) l ]
       )
     ).
 Proof.
   intros.
-  unfold reducible, reduces_to in * |-; steps.
+  unfold reduces_to in * |-; steps.
   unshelve epose proof (evaluate_list_match ρ v t2 t3 _ _ _ _ _ _ _ _); steps.
   - left; steps; eauto using star_trans, evaluate_list_match_scrut.
   - right; exists h, l; steps.

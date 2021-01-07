@@ -430,7 +430,7 @@ Lemma shift_open_nothing:
     wf t k ->
     shift_open k t i = t.
 Proof.
-  induction t; repeat step || t_equality; eauto with omega.
+  induction t; repeat step || t_equality; eauto with lia.
 Qed.
 
 Lemma open_shift_open3:

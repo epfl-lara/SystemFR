@@ -13,20 +13,20 @@ Opaque list_match.
 Lemma reducible_union_left:
   forall ρ t T1 T2,
     valid_interpretation ρ ->
-    [ ρ | t : T1 ] ->
-    [ ρ | t : T_union T1 T2 ].
+    [ ρ ⊨ t : T1 ] ->
+    [ ρ ⊨ t : T_union T1 T2 ].
 Proof.
-  unfold reducible, reduces_to; steps.
+  unfold reduces_to; steps.
   eexists; repeat step || simp_red; eauto using reducible_values_closed.
 Qed.
 
 Lemma reducible_union_right:
   forall ρ t T1 T2,
     valid_interpretation ρ ->
-    [ ρ | t : T2 ] ->
-    [ ρ | t : T_union T1 T2 ].
+    [ ρ ⊨ t : T2 ] ->
+    [ ρ ⊨ t : T_union T1 T2 ].
 Proof.
-  unfold reducible, reduces_to; steps.
+  unfold reduces_to; steps.
   eexists; repeat step || simp_red; eauto using reducible_values_closed.
 Qed.
 
@@ -44,11 +44,11 @@ Lemma tmatch_value:
     pfv t3 term_var = nil ->
     pfv T2 term_var = nil ->
     pfv T3 term_var = nil ->
-    [ ρ | v : List ]v ->
-    [ ρ | t2 : T2 ] ->
-    (forall h t, [ ρ | h : T_top ] -> [ ρ | t : List ] ->
-            [ ρ | open 0 (open 1 t3 h) t : open 0 (open 1 T3 h) t ]) ->
-    [ ρ | list_match v t2 t3 : List_Match v T2 T3 ].
+    [ ρ ⊨ v : List ]v ->
+    [ ρ ⊨ t2 : T2 ] ->
+    (forall h t, [ ρ ⊨ h : T_top ] -> [ ρ ⊨ t : List ] ->
+            [ ρ ⊨ open 0 (open 1 t3 h) t : open 0 (open 1 T3 h) t ]) ->
+    [ ρ ⊨ list_match v t2 t3 : List_Match v T2 T3 ].
 Proof.
   intros; evaluate_list_match; steps;
     eauto with wf.
@@ -87,14 +87,14 @@ Lemma tmatch:
     pfv t3 term_var = nil ->
     pfv T2 term_var = nil ->
     pfv T3 term_var = nil ->
-    [ ρ | t : List ] ->
-    [ ρ | t2 : T2 ] ->
-    (forall h t, [ ρ | h : T_top ]v -> [ ρ | t : List ]v ->
-            [ ρ | open 0 (open 1 t3 h) t : open 0 (open 1 T3 h) t ]) ->
-    [ ρ | list_match t t2 t3 : List_Match t T2 T3 ].
+    [ ρ ⊨ t : List ] ->
+    [ ρ ⊨ t2 : T2 ] ->
+    (forall h t, [ ρ ⊨ h : T_top ]v -> [ ρ ⊨ t : List ]v ->
+            [ ρ ⊨ open 0 (open 1 t3 h) t : open 0 (open 1 T3 h) t ]) ->
+    [ ρ ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
 Proof.
   intros.
-  unfold reducible, reduces_to in H11; steps.
+  unfold reduces_to in H11; steps.
   apply reducibility_equivalent2 with (list_match v t2 t3); steps; t_closer.
   - apply equivalent_sym.
     equivalent_star;
@@ -104,15 +104,15 @@ Proof.
 
   - apply subtype_reducible with (List_Match v T2 T3).
     + apply tmatch_value; steps.
-      unfold reducible, reduces_to in H11; steps.
-      unfold reducible, reduces_to in H17; steps.
+      unfold reduces_to in H11; steps.
+      unfold reduces_to in H17; steps.
       eapply reducibility_equivalent2 with (open 0 (open 1 t3 h) v1);
         repeat step || apply is_erased_type_open || apply equivalent_context ||
                apply wf_open || apply fv_nils_open;
         t_closer;
         try solve [ apply equivalent_sym; equivalent_star ].
       eapply reducibility_rtl; steps; eauto; t_closer.
-      rewrite swap_term_holes_open; steps; t_closer.
+      rewrite (swap_term_holes_open t3); steps; t_closer.
       eapply reducibility_equivalent2 with (open 0 (open 1 (swap_term_holes t3 0 1) v1) v0);
         repeat step ||
                apply is_erased_type_open || apply is_erased_open ||
@@ -120,6 +120,7 @@ Proof.
                apply wf_open || apply fv_nils_open;
         t_closer;
         try solve [ apply equivalent_sym; equivalent_star ].
+
       rewrite (swap_term_holes_open T3); steps; t_closer.
       eapply reducibility_rtl; eauto;
       repeat step || apply is_erased_type_open || apply fv_nils_open; eauto; t_closer.
@@ -182,12 +183,12 @@ Lemma open_tmatch:
     subset (fv t3) (support Γ) ->
     subset (fv T2) (support Γ) ->
     subset (fv T3) (support Γ) ->
-    [ Γ ⊨ t : List ] ->
-    [ Γ ⊨ t2 : T2 ] ->
-    [ (x1, T_top) :: (x2, List) :: Γ ⊨
+    [ Γ ⊫ t : List ] ->
+    [ Γ ⊫ t2 : T2 ] ->
+    [ (x1, T_top) :: (x2, List) :: Γ ⊫
         open 0 (open 1 t3 (fvar x1 term_var)) (fvar x2 term_var) :
         open 0 (open 1 T3 (fvar x1 term_var)) (fvar x2 term_var) ] ->
-    [ Γ ⊨ list_match t t2 t3 : T_singleton (List_Match t T2 T3) (list_match t t2 t3) ].
+    [ Γ ⊫ list_match t t2 t3 : T_singleton (List_Match t T2 T3) (list_match t t2 t3) ].
 Proof.
   repeat step || apply open_reducible_singleton ||
          apply is_erased_term_list_match || apply wf_list_match;

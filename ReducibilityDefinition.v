@@ -159,17 +159,17 @@ Fail Next Obligation. (* no more obligations for reducible_values *)
 Notation "'[' ρ '⊨' T1 '<:' T2 ']'" := (forall v, [ ρ ⊨ v : T1 ]v -> [ ρ ⊨ v : T2 ]v)
   (at level 60, ρ at level 60, T1 at level 60).
 
-Notation "'[' t ':' T ']v'" := (reducible_values nil t T)
-  (t at level 60).
+Notation "'[' v ':' T ']v'" := ([ nil ⊨ v : T ]v)
+  (at level 60, v at level 60).
 
-Notation "'[' t ':' T ']'" := (reducible nil t T)
-  (t at level 60).
+Notation "'[' t ':' T ']'" := ([ nil ⊨ t : T ])
+  (at level 60, t at level 60).
 
 Definition equivalent_types ρ T1 T2 :=
   forall v, [ ρ ⊨ v : T1 ]v <-> [ ρ ⊨ v : T2 ]v.
 
 Notation "'[' ρ ⊨ T1 '=' T2 ']'" := (equivalent_types ρ T1 T2)
-  (ρ at level 60, T1 at level 60, T2 at level 60).
+  (ρ at level 60, T1 at level 60, T2 at level 60, at level 60).
 
 Definition open_reducible (Θ: tvar_list) (Γ: context) t T : Prop :=
   forall ρ lterms,
@@ -180,17 +180,17 @@ Definition open_reducible (Θ: tvar_list) (Γ: context) t T : Prop :=
 
 Definition open_subtype (Θ: tvar_list) (Γ: context) T1 T2 : Prop :=
   forall ρ l,
-   valid_interpretation ρ ->
-   satisfies (reducible_values ρ) Γ l ->
-   support ρ = Θ ->
-   [ ρ ⊨ substitute T1 l <: substitute T2 l ].
+    valid_interpretation ρ ->
+    satisfies (reducible_values ρ) Γ l ->
+    support ρ = Θ ->
+    [ ρ ⊨ substitute T1 l <: substitute T2 l ].
 
 Definition open_equivalent_types (Θ: tvar_list) (Γ: context) T1 T2 : Prop :=
   forall ρ l,
-   valid_interpretation ρ ->
-   satisfies (reducible_values ρ) Γ l ->
-   support ρ = Θ ->
-   [ ρ ⊨ substitute T1 l = substitute T2 l ].
+    valid_interpretation ρ ->
+    satisfies (reducible_values ρ) Γ l ->
+    support ρ = Θ ->
+    [ ρ ⊨ substitute T1 l = substitute T2 l ].
 
 Definition open_equivalent (Θ: tvar_list) (Γ: context) t1 t2 : Prop :=
   forall ρ l,
@@ -212,21 +212,21 @@ Notation "'[' Θ ';' Γ '⊨' T1 '=' T2 ']'" :=
   (open_equivalent_types Θ Γ T1 T2)
   (at level 60, Θ at level 60, Γ at level 60, T1 at level 60, T2 at level 60).
 
-Notation "'[' Γ '⊩' t ':' T ']'" :=
+Notation "'[' Γ '⊫' t ':' T ']'" :=
   (open_reducible nil Γ t T)
-  (Γ at level 60, t at level 60, T at level 60).
+  (at level 60, Γ at level 60, t at level 60, T at level 60).
 
-Notation "'[' Γ '⊩' T1 '<:' T2 ']'" :=
+Notation "'[' Γ '⊫' T1 '<:' T2 ']'" :=
   (open_subtype nil Γ T1 T2)
-  (Γ at level 60, T1 at level 60, T2 at level 60).
+  (at level 60, Γ at level 60, T1 at level 60, T2 at level 60).
 
-Notation "'[' Γ '⊩' T1 '=' T2 ']'" :=
+Notation "'[' Γ '⊫' T1 '=' T2 ']'" :=
   (open_equivalent_types nil Γ T1 T2)
-  (Γ at level 60, T1 at level 60, T2 at level 60).
+  (at level 60, Γ at level 60, T1 at level 60, T2 at level 60).
 
-Notation "'[' Γ '⊩' t1 '≡' t2 ']'" :=
+Notation "'[' Γ '⊫' t1 '≡' t2 ']'" :=
   (open_equivalent nil Γ t1 t2)
-  (Γ at level 60, t1 at level 60, t2 at level 60).
+  (at level 60, Γ at level 60, t1 at level 60, t2 at level 60).
 
 Lemma reducibility_rewrite:
   forall ρ t T,

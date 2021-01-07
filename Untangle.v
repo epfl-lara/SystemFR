@@ -63,7 +63,7 @@ Inductive untangle: context -> tree -> tree -> Prop :=
       subset (fv T) (support Γ) ->
       subset (fv T0) (support Γ) ->
       ~ x ∈ fv_context Γ ->
-      [ Γ ⊨ tnil : A ] ->
+      [ Γ ⊫ tnil : A ] ->
       untangle ((x, T_tree) :: Γ)
         (open 0 T0 (fvar x term_var))
         (open 0 (shift_open 0 T (tlookup A (lvar 0 term_var))) (fvar x term_var)) ->
@@ -227,7 +227,7 @@ Qed.
 
 Lemma reducibility_equivalent_substititions_helper:
   forall xs T ρ v ts1 ts2,
-    [ ρ | v : psubstitute T (combine xs ts1) term_var ]v ->
+    [ ρ ⊨ v : psubstitute T (combine xs ts1) term_var ]v ->
     valid_interpretation ρ ->
     length ts1 = length xs ->
     length ts2 = length xs ->
@@ -241,7 +241,7 @@ Lemma reducibility_equivalent_substititions_helper:
     Forall is_erased_term ts1 ->
     Forall is_erased_term ts2 ->
     (forall x, x ∈ fv T -> x ∈ xs) ->
-    [ ρ | v : psubstitute T (combine xs ts2) term_var ]v.
+    [ ρ ⊨ v : psubstitute T (combine xs ts2) term_var ]v.
 Proof.
   induction xs; repeat step || t_substitutions.
   rewrite <- (open_close2 T a 0) by auto.
@@ -274,7 +274,7 @@ Qed.
 
 Lemma reducibility_equivalent_substititions:
   forall xs T ρ v ts1 ts2,
-    [ ρ | v : psubstitute T (combine xs ts1) term_var ]v ->
+    [ ρ ⊨ v : psubstitute T (combine xs ts1) term_var ]v ->
     valid_interpretation ρ ->
     length ts1 = length xs ->
     length ts2 = length xs ->
@@ -282,7 +282,7 @@ Lemma reducibility_equivalent_substititions:
     wf T 0 ->
     (forall t1 t2, (t1, t2) ∈ combine ts1 ts2 -> [ t1 ≡ t2 ]) ->
     (forall x, x ∈ fv T -> x ∈ xs) ->
-    [ ρ | v : psubstitute T (combine xs ts2) term_var ]v.
+    [ ρ ⊨ v : psubstitute T (combine xs ts2) term_var ]v.
 Proof.
   intros; eapply reducibility_equivalent_substititions_helper; try eassumption;
     repeat step || rewrite Forall_forall || find_fst || find_snd;
@@ -546,7 +546,7 @@ Qed.
 Lemma typed_erased_terms:
   forall ρ T l,
     valid_interpretation ρ ->
-    Forall (fun v => [ ρ | v : T ]v) l ->
+    Forall (fun v => [ ρ ⊨ v : T ]v) l ->
     Forall is_erased_term l.
 Proof.
   induction l; repeat step || constructor;
@@ -564,7 +564,7 @@ Qed.
 Lemma typed_wfs:
   forall ρ T l,
     valid_interpretation ρ ->
-    Forall (fun v => [ ρ | v : T ]v) l ->
+    Forall (fun v => [ ρ ⊨ v : T ]v) l ->
     Forall (fun v => wf v 0) l.
 Proof.
   induction l; repeat step || constructor;
@@ -582,7 +582,7 @@ Qed.
 Lemma typed_fv:
   forall ρ T l tag,
     valid_interpretation ρ ->
-    Forall (fun v => [ ρ | v : T ]v) l ->
+    Forall (fun v => [ ρ ⊨ v : T ]v) l ->
     Forall (fun v => pfv v tag = nil) l.
 Proof.
   induction l; repeat step || constructor;
@@ -716,7 +716,7 @@ Lemma untangle_freshen:
       (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
     T' = substitute template
       (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
-    [ Γ ⊨ T_exists T_tree (close 0 T m) = T_exists_vars ys T_tree T' ].
+    [ Γ ⊫ T_exists T_tree (close 0 T m) = T_exists_vars ys T_tree T' ].
 Proof.
   unfold open_equivalent_types, equivalent_types; intros;
     repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_tree in *.
@@ -866,10 +866,10 @@ Lemma untangle_freshen2:
       (List.combine xs (List.map (fun key => select key (fvar m term_var)) keys)) ->
     T' = substitute template
       (List.combine xs (List.map (fun y => fvar y term_var) ys)) ->
-    [ (x, T_tree) :: Γ ⊨
+    [ (x, T_tree) :: Γ ⊫
          open 0 T0 (fvar x term_var) =
          open 0 (close 0 T m) (fvar x term_var) ] ->
-    [ Γ ⊨ T_exists T_tree T0 = T_exists_vars ys T_tree T' ].
+    [ Γ ⊫ T_exists T_tree T0 = T_exists_vars ys T_tree T' ].
 Proof.
   intros; eapply open_equivalent_types_trans; eauto using untangle_freshen.
   apply open_nexists_2 with x;
@@ -895,8 +895,8 @@ Lemma untangle_abstract:
     wf A 0 ->
     subset (fv A) (support Γ) ->
     subset (fv T) (support Γ) ->
-    [ Γ ⊨ tnil : A ] ->
-    [ Γ ⊨ T_exists T_tree (shift_open 0 T (tlookup A (lvar 0 term_var))) = T_exists A T ].
+    [ Γ ⊫ tnil : A ] ->
+    [ Γ ⊫ T_exists T_tree (shift_open 0 T (tlookup A (lvar 0 term_var))) = T_exists A T ].
 Proof.
   unfold open_equivalent_types, equivalent_types; intros;
     repeat step || list_utils || list_utils2 || simp_red_top_level_hyp || rewrite substitute_tree in *.
@@ -959,11 +959,11 @@ Lemma untangle_abstract2:
     subset (fv T) (support Γ) ->
     subset (fv T0) (support Γ) ->
     ~ x ∈ fv_context Γ ->
-    [ Γ ⊨ tnil : A ] ->
-    [ (x, T_tree) :: Γ ⊨
+    [ Γ ⊫ tnil : A ] ->
+    [ (x, T_tree) :: Γ ⊫
          open 0 T0 (fvar x term_var) =
          open 0 (shift_open 0 T (tlookup A (lvar 0 term_var))) (fvar x term_var) ] ->
-    [ Γ ⊨ T_exists T_tree T0 = T_exists A T ].
+    [ Γ ⊫ T_exists T_tree T0 = T_exists A T ].
 Proof.
   intros; eapply open_equivalent_types_trans; eauto using untangle_abstract.
   apply open_nexists_2 with x;
@@ -1005,13 +1005,13 @@ Lemma untangle_list_match_1:
      ~ x ∈ fv T2' ->
      ~ y ∈ fv T2 ->
      ~ y ∈ fv T2' ->
-     [ Γ ⊨ T1 = T1' ] ->
-     [ (x, T_top) :: (y, List) :: Γ ⊨
+     [ Γ ⊫ T1 = T1' ] ->
+     [ (x, T_top) :: (y, List) :: Γ ⊫
          open 0 (open 1 T2 (fvar x term_var)) (fvar y term_var) =
          open 0 (open 1 T2' (fvar x term_var)) (fvar y term_var) ] ->
-     [ Γ ⊨ List_Match t T1 T2 <: List_Match t T1' T2' ].
+     [ Γ ⊫ List_Match t T1 T2 <: List_Match t T1' T2' ].
 Proof.
-  unfold open_equivalent_types, open_subtype, subtype;
+  unfold open_equivalent_types, open_subtype;
     repeat step || simp_red_top_level_goal || simp_red_top_level_hyp.
 
   - left; repeat step || simp_red_top_level_goal || exists uu;
@@ -1062,11 +1062,11 @@ Lemma untangle_list_match:
      ~ x ∈ fv T2' ->
      ~ y ∈ fv T2 ->
      ~ y ∈ fv T2' ->
-     [ Γ ⊨ T1 = T1' ] ->
-     [ (x, T_top) :: (y, List) :: Γ ⊨
+     [ Γ ⊫ T1 = T1' ] ->
+     [ (x, T_top) :: (y, List) :: Γ ⊫
          open 0 (open 1 T2 (fvar x term_var)) (fvar y term_var) =
          open 0 (open 1 T2' (fvar x term_var)) (fvar y term_var) ] ->
-     [ Γ ⊨ List_Match t T1 T2 = List_Match t T1' T2' ].
+     [ Γ ⊫ List_Match t T1 T2 = List_Match t T1' T2' ].
 Proof.
   intros; apply open_subtype_antisym;
     eauto using untangle_list_match_1, open_equivalent_types_sym.
@@ -1075,7 +1075,7 @@ Qed.
 Lemma untangle_open_equivalent_types:
   forall Γ T1 T2,
     untangle Γ T1 T2 ->
-    [ Γ ⊨ T1 = T2 ].
+    [ Γ ⊫ T1 = T2 ].
 Proof.
   induction 1; steps;
     eauto using open_equivalent_types_refl;

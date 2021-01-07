@@ -12,9 +12,9 @@ Lemma ncons: forall ρ T1 T2 T1' T2',
   is_erased_type T2' ->
   wf T2 0 ->
   wf T2' 0 ->
-  [ ρ | T1 = T1' ] ->
-  [ ρ | T2 = T2' ] ->
-  [ ρ | Cons T1 T2 = Cons T1' T2' ].
+  [ ρ ⊨ T1 = T1' ] ->
+  [ ρ ⊨ T2 = T2' ] ->
+  [ ρ ⊨ Cons T1 T2 = Cons T1' T2' ].
 Proof.
   intros; unfold equivalent_types, Cons;
     repeat step || simp_red_top_level_goal || simp_red_top_level_hyp;
@@ -53,9 +53,9 @@ Lemma open_ncons: forall Γ T1 T2 T1' T2',
   is_erased_type T2' ->
   wf T2 0 ->
   wf T2' 0 ->
-  [ Γ ⊨ T1 = T1' ] ->
-  [ Γ ⊨ T2 = T2' ] ->
-  [ Γ ⊨ Cons T1 T2 = Cons T1' T2' ].
+  [ Γ ⊫ T1 = T1' ] ->
+  [ Γ ⊫ T2 = T2' ] ->
+  [ Γ ⊫ Cons T1 T2 = Cons T1' T2' ].
 Proof.
   eauto using open_ncons_helper.
 Qed.

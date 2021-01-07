@@ -18,9 +18,6 @@ Lemma annotated_type_application:
     [[ tvars; gamma ⊨ C <: A ]] ->
     [[ tvars; gamma ⊨ app f t : type_application (T_arrow A B) C ]].
 Proof.
-  unfold annotated_reducible, annotated_subtype;
-    repeat step.
-
-  apply open_reducible_type_application;
+  repeat step; apply open_reducible_type_application;
     side_conditions.
 Qed.

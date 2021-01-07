@@ -13,16 +13,15 @@ Lemma subtype_pi: forall ρ S S' T T',
   wf T' 1 ->
   pfv T term_var = nil ->
   pfv T' term_var = nil ->
-  [ ρ | S' <: S ] ->
-  (forall a, [ ρ | a : S' ]v -> [ ρ | open 0 T a <: open 0 T' a ]) ->
-  [ ρ | T_arrow S T <: T_arrow S' T' ].
+  [ ρ ⊨ S' <: S ] ->
+  (forall a, [ ρ ⊨ a : S' ]v -> [ ρ ⊨ open 0 T a <: open 0 T' a ]) ->
+  [ ρ ⊨ T_arrow S T <: T_arrow S' T' ].
 Proof.
-  intros.
-  unfold subtype;
+  intros;
     repeat step || simp_red_goal || rewrite reducibility_rewrite;
     t_closer.
 
-  eapply subtype_reducible; eauto.
+  apply subtype_reducible with (open 0 T a); eauto.
   eapply reducible_app; eauto using reducible_value_expr; steps.
 Qed.
 
@@ -39,7 +38,9 @@ Lemma open_subpi_helper: forall Θ Γ S S' T T' x,
   [ Θ; (x, S') :: Γ ⊨ open 0 T (fvar x term_var) <: open 0 T' (fvar x term_var) ] ->
   [ Θ; Γ ⊨ T_arrow S T <: T_arrow S' T' ].
 Proof.
-  unfold open_subtype; repeat step || apply subtype_pi; t_closer.
+  unfold open_subtype; repeat step; t_closer.
+  apply subtype_pi with (psubstitute S l term_var) (psubstitute T l term_var);
+    repeat step; t_closer.
 
   unshelve epose proof (H8 ρ ((x, a) :: l) _ _ _);
     repeat step || apply SatCons || t_substitutions; t_closer.
@@ -54,9 +55,9 @@ Lemma open_subpi: forall Γ S S' T T' x,
   subset (fv T') (support Γ) ->
   ~ x ∈ pfv S' term_var ->
   ~ x ∈ pfv_context Γ term_var ->
-  [ Γ ⊨ S' <: S ] ->
-  [ (x, S') :: Γ ⊨ open 0 T (fvar x term_var) <: open 0 T' (fvar x term_var) ] ->
-  [ Γ ⊨ T_arrow S T <: T_arrow S' T' ].
+  [ Γ ⊫ S' <: S ] ->
+  [ (x, S') :: Γ ⊫ open 0 T (fvar x term_var) <: open 0 T' (fvar x term_var) ] ->
+  [ Γ ⊫ T_arrow S T <: T_arrow S' T' ].
 Proof.
   eauto using open_subpi_helper.
 Qed.

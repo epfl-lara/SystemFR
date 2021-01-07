@@ -10,7 +10,7 @@ Require Export SystemFR.EvalFixDefault.
 
 Opaque reducible_values.
 
-Reserved Notation "'[' Γ ⊨ t1 '⤳*' t2 ']'" (Γ at level 60, t1 at level 60).
+Reserved Notation "'[' Γ ⊨ t1 '⤳*' t2 ']'" (at level 60, Γ at level 60, t1 at level 60).
 
 Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
 | DBVar:
@@ -34,8 +34,8 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
       wf v2 0 ->
       subset (fv v1) (support Γ) ->
       subset (fv v2) (support Γ) ->
-      [ Γ ⊨ v1 : T_top ] ->
-      [ Γ ⊨ v2 : T_top ] ->
+      [ Γ ⊫ v1 : T_top ] ->
+      [ Γ ⊫ v2 : T_top ] ->
       [ Γ ⊨ t ⤳* pp v1 v2 ] ->
       [ Γ ⊨ pi1 t ⤳* v1 ]
 
@@ -47,8 +47,8 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
       wf v2 0 ->
       subset (fv v1) (support Γ) ->
       subset (fv v2) (support Γ) ->
-      [ Γ ⊨ v1 : T_top ] ->
-      [ Γ ⊨ v2 : T_top ] ->
+      [ Γ ⊫ v1 : T_top ] ->
+      [ Γ ⊫ v2 : T_top ] ->
       [ Γ ⊨ t ⤳* pp v1 v2 ] ->
       [ Γ ⊨ pi2 t ⤳* v2 ]
 
@@ -60,7 +60,7 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
       pfv body term_var = nil ->
       wf t' 0 ->
       wf body 0 ->
-      [ Γ ⊨ t' : T_top ] ->
+      [ Γ ⊫ t' : T_top ] ->
       [ Γ ⊨ t ⤳* t' ] ->
       [ Γ ⊨ f ⤳* notype_lambda body ] ->
       [ Γ ⊨ open 0 body t' ⤳* v ] ->
@@ -91,7 +91,7 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
       subset (fv t0) (support Γ) ->
       subset (fv ts) (support Γ) ->
       subset (fv v) (support Γ) ->
-      [ Γ ⊨ t' : T_top ] ->
+      [ Γ ⊫ t' : T_top ] ->
       [ Γ ⊨ t ⤳* succ t' ] ->
       [ Γ ⊨ open 0 ts t' ⤳* v ] ->
       [ Γ ⊨ tmatch t t0 ts ⤳* v ]
@@ -124,7 +124,7 @@ Inductive delta_beta_reduction: context -> tree -> tree -> Prop :=
       is_erased_term t2 ->
       subset (fv t1) (support Γ) ->
       subset (fv t2) (support Γ) ->
-      [ Γ ⊨ t : List ] ->
+      [ Γ ⊫ t : List ] ->
       [ Γ ⊨ t ⤳* tcons h t ] ->
       [ Γ ⊨ open 0 (open 1 t2 h) t ⤳* v ] ->
       [ Γ ⊨ list_match t t1 t2 ⤳* v ]
@@ -284,7 +284,7 @@ Lemma typable_normalizing:
     Θ = support ρ ->
     scbv_normalizing (psubstitute t l term_var).
 Proof.
-  unfold scbv_normalizing, open_reducible, reducible, reduces_to;
+  unfold scbv_normalizing, open_reducible, reduces_to;
     repeat step || t_instantiate_sat3; eauto with values.
 Qed.
 
@@ -296,10 +296,10 @@ Lemma delta_beta_first:
     wf t2 0 ->
     subset (fv t1) (support Γ) ->
     subset (fv t2) (support Γ) ->
-    [ Γ ⊨ t1 : T_top ] ->
-    [ Γ ⊨ t2 : T_top ] ->
-    [ Γ ⊨ t ≡ pp t1 t2 ] ->
-    [ Γ ⊨ pi1 t ≡ t1 ].
+    [ Γ ⊫ t1 : T_top ] ->
+    [ Γ ⊫ t2 : T_top ] ->
+    [ Γ ⊫ t ≡ pp t1 t2 ] ->
+    [ Γ ⊫ pi1 t ≡ t1 ].
 Proof.
   unfold open_equivalent; repeat step; eauto.
   eapply equivalent_trans; eauto using equivalent_pi1.
@@ -315,10 +315,10 @@ Lemma delta_beta_second:
     wf t2 0 ->
     subset (fv t1) (support Γ) ->
     subset (fv t2) (support Γ) ->
-    [ Γ ⊨ t1 : T_top ] ->
-    [ Γ ⊨ t2 : T_top ] ->
-    [ Γ ⊨ t ≡ pp t1 t2 ] ->
-    [ Γ ⊨ pi2 t ≡ t2 ].
+    [ Γ ⊫ t1 : T_top ] ->
+    [ Γ ⊫ t2 : T_top ] ->
+    [ Γ ⊫ t ≡ pp t1 t2 ] ->
+    [ Γ ⊫ pi2 t ≡ t2 ].
 Proof.
   unfold open_equivalent; repeat step; eauto.
   eapply equivalent_trans; eauto using equivalent_pi2.
@@ -348,11 +348,11 @@ Lemma delta_beta_app1:
     pfv body term_var = nil ->
     wf t' 0 ->
     wf body 0 ->
-    [ Γ ⊨ t' : T_top ] ->
-    [ Γ ⊨ t ≡ t' ] ->
-    [ Γ ⊨ f ≡ notype_lambda body ] ->
-    [ Γ ⊨ open 0 body t' ≡ v ] ->
-    [ Γ ⊨ app f t ≡ v ].
+    [ Γ ⊫ t' : T_top ] ->
+    [ Γ ⊫ t ≡ t' ] ->
+    [ Γ ⊫ f ≡ notype_lambda body ] ->
+    [ Γ ⊫ open 0 body t' ≡ v ] ->
+    [ Γ ⊫ app f t ≡ v ].
 Proof.
   unfold open_equivalent; repeat step || t_instantiate_sat3 || t_substitutions.
   eapply equivalent_trans; eauto using equivalent_app.
@@ -432,17 +432,17 @@ Lemma delta_beta_match_succ:
     subset (fv t0) (support Γ) ->
     subset (fv ts) (support Γ) ->
     subset (fv v) (support Γ) ->
-    [ Γ ⊨ t' : T_top ] ->
-    [ Γ ⊨ t ≡ succ t' ] ->
-    [ Γ ⊨ open 0 ts t' ≡ v ] ->
-    [ Γ ⊨ tmatch t t0 ts ≡ v ].
+    [ Γ ⊫ t' : T_top ] ->
+    [ Γ ⊫ t ≡ succ t' ] ->
+    [ Γ ⊫ open 0 ts t' ≡ v ] ->
+    [ Γ ⊫ tmatch t t0 ts ≡ v ].
 Proof.
   unfold open_equivalent, open_reducible;
     repeat step || t_instantiate_sat3_nil || t_substitutions.
   eapply equivalent_trans; eauto; repeat step || t_substitutions.
   eapply equivalent_trans; try apply equivalent_match_scrut;
     eauto with erased fv wf.
-  top_level_unfold reducible; top_level_unfold reduces_to; steps.
+  top_level_unfold reduces_to; steps.
   eapply equivalent_trans; try apply equivalent_match_scrut;
     eauto with erased fv wf;
     try solve [ apply equivalent_succ; equivalent_star ].
@@ -497,7 +497,7 @@ Lemma equivalent_right_eval_left:
   forall t t' v,
     cbv_value v  ->
     [ t ≡ tright t' ] ->
-    star scbv_step t (tleft v) ->
+    t ~>* tleft v ->
     False.
 Proof.
   intros.
@@ -508,7 +508,7 @@ Qed.
 Lemma equivalent_right_eval_nil:
   forall t t',
     [ t ≡ tright t' ] ->
-    star scbv_step t tnil ->
+    t ~>* tnil ->
     False.
 Proof.
   intros.
@@ -538,10 +538,10 @@ Lemma delta_beta_list_match_cons:
     is_erased_term t2 ->
     subset (fv t1) (support Γ) ->
     subset (fv t2) (support Γ) ->
-    [ Γ ⊨ t : List ] ->
-    [ Γ ⊨ t ≡ tcons h t ] ->
-    [ Γ ⊨ open 0 (open 1 t2 h) t ≡ v ] ->
-    [ Γ ⊨ list_match t t1 t2 ≡ v ].
+    [ Γ ⊫ t : List ] ->
+    [ Γ ⊫ t ≡ tcons h t ] ->
+    [ Γ ⊫ open 0 (open 1 t2 h) t ≡ v ] ->
+    [ Γ ⊫ list_match t t1 t2 ≡ v ].
 Proof.
   unfold open_equivalent, open_reducible;
     repeat step || t_instantiate_sat3_nil || t_substitutions || rewrite substitute_list_match;
@@ -623,8 +623,8 @@ Lemma delta_beta_fix_zero:
     is_erased_term t ->
     subset (fv default) (support Γ) ->
     subset (fv t) (support Γ) ->
-    [ Γ ⊨ default ≡ v ] ->
-    [ Γ ⊨ fix_default' t default zero ≡ v ].
+    [ Γ ⊫ default ≡ v ] ->
+    [ Γ ⊫ fix_default' t default zero ≡ v ].
 Proof.
   unfold open_equivalent; repeat step || rewrite subst_fix_default; eauto with wf.
 
@@ -643,8 +643,8 @@ Lemma delta_beta_fix_succ:
     is_erased_term t ->
     subset (fv default) (support Γ) ->
     subset (fv t) (support Γ) ->
-    [ Γ ⊨ open 0 t (fix_default' t default fuel) ≡ v ] ->
-    [ Γ ⊨ fix_default' t default (succ fuel) ≡ v ].
+    [ Γ ⊫ open 0 t (fix_default' t default fuel) ≡ v ] ->
+    [ Γ ⊫ fix_default' t default (succ fuel) ≡ v ].
 Proof.
   unfold open_equivalent; repeat step || t_instantiate_sat3_nil || t_substitutions ||
                                  rewrite subst_fix_default in * by eauto with wf.
@@ -657,7 +657,7 @@ Qed.
 Lemma delta_beta_obs_equiv:
   forall Γ t1 t2,
     [ Γ ⊨ t1 ⤳* t2 ] ->
-    [ Γ ⊨ t1 ≡ t2 ].
+    [ Γ ⊫ t1 ≡ t2 ].
 Proof.
   induction 1; repeat step;
     eauto using delta_beta_var;

@@ -51,7 +51,7 @@ Proof.
       t_closer.
 
   - eexists; steps.
-    unfold reducible, reduces_to in H22; repeat step || simp_red || open_none.
+    unfold reduces_to in H22; repeat step || simp_red || open_none.
     eapply equivalent_trans; eauto.
     eapply equivalent_trans; eauto.
     eapply equivalent_trans; eauto; equivalent_star.
@@ -59,13 +59,13 @@ Proof.
   - apply reducible_expr_value; eauto with values.
     eapply reducibility_equivalent2; eauto using equivalent_sym; steps; t_closer.
 
-    unfold reducible, reduces_to in H22; repeat step || simp_red || open_none.
+    unfold reduces_to in H22; repeat step || simp_red || open_none.
     eapply reducibility_equivalent2; eauto; steps; t_closer.
     eapply reducibility_equivalent2; eauto; steps; t_closer.
     eapply equivalent_trans; eauto; equivalent_star.
 
   - eexists; steps.
-    unfold reducible, reduces_to in H22; repeat step || simp_red || open_none.
+    unfold reduces_to in H22; repeat step || simp_red || open_none.
     eapply equivalent_trans; eauto.
     eapply equivalent_trans; eauto using equivalent_sym.
     apply equivalent_trans with (psubstitute t' l term_var);
@@ -87,9 +87,9 @@ Lemma open_nsing:
     subset (fv U) (support Γ) ->
     subset (fv T) (support Γ) ->
     [ Γ ⊨ t ⤳* t' ] ->
-    [ Γ ⊨ t : U ] ->
-    [ Γ ⊨ t' : T_singleton T t'' ] ->
-    [ Γ ⊨ T_singleton U t = T_singleton T t'' ].
+    [ Γ ⊫ t : U ] ->
+    [ Γ ⊫ t' : T_singleton T t'' ] ->
+    [ Γ ⊫ T_singleton U t = T_singleton T t'' ].
 Proof.
   eauto using open_nsing_helper, delta_beta_obs_equiv.
 Qed.
