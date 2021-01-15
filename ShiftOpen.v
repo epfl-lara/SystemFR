@@ -181,6 +181,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve is_erased_term_shift: erased.
 
 Lemma is_erased_term_shift_open:
@@ -193,6 +194,7 @@ Proof.
     repeat step; eauto with erased.
 Qed.
 
+#[global]
 Hint Resolve is_erased_term_shift_open: erased.
 
 Lemma is_erased_type_shift:
@@ -203,6 +205,7 @@ Proof.
   induction T; steps; eauto with erased.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_shift: erased.
 
 Lemma is_erased_type_shift_open:
@@ -215,6 +218,7 @@ Proof.
     repeat step; eauto with erased.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_shift_open: erased.
 
 Lemma wf_shift:
@@ -227,6 +231,7 @@ Proof.
     repeat step; eauto with lia.
 Qed.
 
+#[global]
 Hint Resolve wf_shift: wf.
 
 Lemma wf_shift_open:
@@ -239,6 +244,7 @@ Proof.
     try solve [ repeat step; eauto with wf lia ].
 Qed.
 
+#[global]
 Hint Resolve wf_shift_open: wf.
 
 Lemma wf_shift_open2:
@@ -252,6 +258,7 @@ Proof.
     try solve [ repeat step; eauto with wf lia ].
 Qed.
 
+#[global]
 Hint Resolve wf_shift_open2: wf.
 
 Lemma wf_shift_open3:
@@ -264,6 +271,7 @@ Proof.
     try solve [ repeat step; eauto with wf lia ].
 Qed.
 
+#[global]
 Hint Resolve wf_shift_open3: wf.
 
 Lemma pfv_shift:
@@ -275,6 +283,7 @@ Proof.
     repeat step || list_utils.
 Qed.
 
+#[global]
 Hint Resolve pfv_shift: fv.
 
 Lemma pfv_shift2:
@@ -296,6 +305,7 @@ Proof.
     eauto using pfv_shift.
 Qed.
 
+#[global]
 Hint Resolve pfv_shift_open: fv.
 
 Lemma pfv_shift_open2:

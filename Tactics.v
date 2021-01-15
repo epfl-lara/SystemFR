@@ -4,8 +4,11 @@ Require Import Psatz.
 
 Open Scope string.
 
+#[global]
 Hint Extern 50 => lia: lia.
+#[global]
 Hint Extern 50 => cbn: cbn.
+#[global]
 Hint Extern 50 => intuition auto: intuition.
 
 Ltac destruct_refinement :=
@@ -201,6 +204,7 @@ Ltac define3 m t :=
   pose t as m;
   assert (m = t) as M; auto.
 
+#[global]
 Hint Extern 50 => apply False_ind: exfalso.
 (** Useful shorthands that work on any hypothesis in the the context *)
 
@@ -262,9 +266,13 @@ Ltac instantiate_any :=
     pose proof (H1 _ _ _ H2)
   end.
 
+#[global]
 Hint Extern 50 => apply_any: apply_any.
+#[global]
 Hint Extern 50 => eapply_any: eapply_any.
+#[global]
 Hint Extern 50 => congruence: bcongruence.
+#[global]
 Hint Extern 50 => steps: step_tactic.
 
 Ltac top_level_unfold F :=

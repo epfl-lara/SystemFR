@@ -49,6 +49,7 @@ Proof.
            end.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_fvar: b_push.
 
 Lemma sp_push_forall_prop_inst:
@@ -158,6 +159,7 @@ Proof.
   exists v1; steps.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_arrow: b_push.
 
 Lemma sp_push_forall_prod:
@@ -180,6 +182,7 @@ Proof.
     repeat step || t_instantiate_reducible || t_instantiate_reducible2 || simp_red.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_prod: b_push.
 
 Lemma sp_push_forall_sum:
@@ -197,6 +200,7 @@ Proof.
     repeat step || t_instantiate_reducible || t_instantiate_reducible2 || simp_red.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_sum: b_push.
 
 Lemma sp_push_forall_refine:
@@ -209,6 +213,7 @@ Proof.
   repeat step || t_instantiate_reducible || t_instantiate_reducible2 || simp_red.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_refine: b_push.
 
 Lemma reducible_unused_many_push_one2:
@@ -237,6 +242,7 @@ Proof.
   apply no_type_fvar_open; t_closer.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_type_refine: b_push.
 
 Lemma sp_push_forall_intersection:
@@ -252,6 +258,7 @@ Proof.
     repeat step || t_instantiate_reducible || t_instantiate_reducible2 || simp_red.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_intersection: b_push.
 
 Lemma sp_push_forall_union:
@@ -264,6 +271,7 @@ Proof.
     eauto using reducible_unused_many_push_one2.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_union: b_push.
 
 Lemma sp_push_forall_forall:
@@ -280,6 +288,7 @@ Proof.
     eauto using reducible_unused_many_push_one.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_forall: b_push.
 
 Lemma sp_push_forall_exists:
@@ -294,6 +303,7 @@ Proof.
   apply no_type_fvar_open; t_closer.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_exists: b_push.
 
 Lemma sp_push_forall_abs:
@@ -361,6 +371,7 @@ Proof.
   + apply reducible_unused3 in H25; steps; try finisher; eauto with apply_any.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_abs: b_push.
 
 Lemma sp_push_forall_rec:
@@ -471,6 +482,7 @@ Proof.
           eauto with wf twf fv erased.
 Qed.
 
+#[global]
 Hint Immediate sp_push_forall_rec: b_push.
 
 Lemma strictly_positive_push_forall_aux: forall (m: measure_domain) T, prop_at sp_push_forall_prop m T.

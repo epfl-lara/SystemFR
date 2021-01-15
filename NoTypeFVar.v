@@ -40,7 +40,9 @@ Proof.
   unfold no_type_fvar; repeat step; eauto.
 Qed.
 
+#[global]
 Hint Immediate no_type_fvar_head: b_no_type_fvar.
+#[global]
 Hint Resolve no_type_fvar_tail: b_no_type_fvar.
 
 Lemma no_type_fvar_in_topen:

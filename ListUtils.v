@@ -29,6 +29,7 @@ Lemma add_mem: forall {T} (s: list T) x, x ∈ (add s x).
   steps.
 Qed.
 
+#[global]
 Hint Resolve add_mem: sets.
 
 Lemma add_more: forall {T} (s: list T) x y,
@@ -38,6 +39,7 @@ Proof.
   steps.
 Qed.
 
+#[global]
 Hint Resolve add_more: sets.
 
 Definition subset {T} (l1 l2: list T) :=
@@ -108,8 +110,10 @@ Proof.
   destruct l; steps; eauto with exfalso.
 Qed.
 
+#[global]
 Hint Resolve empty_list: list_utils.
 
+#[global]
 Hint Extern 50 => list_utils: list_utils.
 
 Lemma empty_list_rewrite:

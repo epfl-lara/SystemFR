@@ -125,6 +125,7 @@ Ltac t_red_is_val :=
     eauto with b_valid_interp; steps;
     eauto with apply_any.
 
+#[global]
 Hint Extern 50 => solve [ t_red_is_val ]: b_red_is_val.
 
 Lemma strictly_positive_rename_aux:

@@ -34,6 +34,7 @@ Proof.
   steps; eauto with erased.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_singleton: erased.
 
 Lemma wf_singleton:
@@ -45,6 +46,7 @@ Proof.
   steps; eauto with wf.
 Qed.
 
+#[global]
 Hint Resolve wf_singleton: wf.
 
 Lemma fv_singleton:
@@ -102,6 +104,7 @@ Proof.
   repeat step; eauto 3 with wf step_tactic.
 Qed.
 
+#[global]
 Hint Resolve wf_list_match: wf.
 
 Lemma pfv_list_match:
@@ -114,6 +117,7 @@ Proof.
   repeat step || list_utils; eauto with fv.
 Qed.
 
+#[global]
 Hint Resolve pfv_list_match: fv.
 
 Lemma pfv_list_match2:
@@ -135,6 +139,7 @@ Proof.
   repeat step || apply is_erased_term_shift_open.
 Qed.
 
+#[global]
 Hint Resolve is_erased_term_list_match: erased.
 
 Lemma substitute_list_match:
@@ -156,6 +161,7 @@ Proof.
   repeat step; eauto 3 with wf step_tactic.
 Qed.
 
+#[global]
 Hint Resolve wf_List_Match: wf.
 
 Lemma pfv_List_Match:
@@ -168,6 +174,7 @@ Proof.
   repeat step || list_utils; eauto with fv.
 Qed.
 
+#[global]
 Hint Resolve pfv_List_Match: fv.
 
 Lemma is_erased_type_List_Match:
@@ -180,6 +187,7 @@ Proof.
   steps.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_List_Match: erased.
 
 Lemma substitute_List_Match:
@@ -237,6 +245,7 @@ Proof.
     eauto using wf_shift_open2 with wf step_tactic.
 Qed.
 
+#[global]
 Hint Resolve wf_fix_default: wf.
 
 Lemma subst_fix_default:
@@ -258,6 +267,7 @@ Proof.
   repeat step || list_utils || rewrite pfv_shift_open.
 Qed.
 
+#[global]
 Hint Resolve pfv_fix_default: fv.
 
 Lemma pfv_fix_default2:
@@ -280,16 +290,19 @@ Proof.
   repeat step || apply is_erased_term_shift_open.
 Qed.
 
+#[global]
 Hint Resolve is_erased_term_fix_default: erased.
 
 Lemma is_erased_list: is_erased_type List.
 Proof. steps. Qed.
 
+#[global]
 Hint Resolve is_erased_list: erased.
 
 Lemma wf_list: forall k, wf List k.
 Proof. steps; eauto with lia. Qed.
 
+#[global]
 Hint Resolve wf_list: wf.
 
 Lemma open_list: forall k rep, open k List rep = List.

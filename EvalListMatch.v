@@ -21,8 +21,8 @@ Lemma evaluate_list_match:
          closed_value h /\
          closed_value l /\
          v = tcons h l /\
-         [ ρ ⊨ h : T_top ] /\
-         [ ρ ⊨ l : List ] /\
+         [ ρ ⊨ h : T_top ]v /\
+         [ ρ ⊨ l : List ]v /\
          [ list_match v t2 t3 ≡ open 0 (open 1 t3 h) l ]
       )
     ).
@@ -78,6 +78,12 @@ Ltac evaluate_list_match :=
   | H: valid_interpretation ?ρ |- context[list_match ?v ?t2 ?t3] =>
     poseNew (Mark (v, t2, t3) "evaluate_list_match");
     unshelve epose proof (evaluate_list_match ρ v t2 t3 _ _ _ _ _ _ _ _)
+  | H: valid_interpretation ?ρ, H2: context[list_match ?v ?t2 ?t3] |- _ =>
+    poseNew (Mark (v, t2, t3) "evaluate_list_match");
+    unshelve epose proof (evaluate_list_match ρ v t2 t3 _ _ _ _ _ _ _ _)
+  | H: context[list_match ?v ?t2 ?t3] |- _ =>
+    poseNew (Mark (v, t2, t3) "evaluate_list_match");
+    unshelve epose proof (evaluate_list_match nil v t2 t3 _ _ _ _ _ _ _ _)
   end.
 
 Lemma evaluate_list_match_scrut:
@@ -103,8 +109,8 @@ Lemma evaluate_list_match2:
          closed_value h /\
          closed_value l /\
          t ~>* tcons h l /\
-         [ ρ ⊨ h : T_top ] /\
-         [ ρ ⊨ l : List ] /\
+         [ ρ ⊨ h : T_top ]v /\
+         [ ρ ⊨ l : List ]v /\
          [ list_match t t2 t3 ≡ open 0 (open 1 t3 h) l ]
       )
     ).
@@ -122,4 +128,10 @@ Ltac evaluate_list_match2 :=
   | H: valid_interpretation ?ρ |- context[list_match ?t ?t2 ?t3] =>
     poseNew (Mark (t, t2, t3) "evaluate_list_match2");
     unshelve epose proof (evaluate_list_match2 ρ t t2 t3 _ _ _ _ _ _ _ _)
+  | H: valid_interpretation ?ρ, _: context[list_match ?t ?t2 ?t3] |- _ =>
+    poseNew (Mark (t, t2, t3) "evaluate_list_match2");
+    unshelve epose proof (evaluate_list_match2 ρ t t2 t3 _ _ _ _ _ _ _ _)
+  | _: context[list_match ?t ?t2 ?t3] |- _ =>
+    poseNew (Mark (t, t2, t3) "evaluate_list_match2");
+    unshelve epose proof (evaluate_list_match2 nil t t2 t3 _ _ _ _ _ _ _ _)
   end.

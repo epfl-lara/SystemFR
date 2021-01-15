@@ -275,6 +275,7 @@ Inductive equal_with_relation tag rel: tree -> tree -> Prop :=
       equal_with_relation tag rel (T_rec n T0 Ts) (T_rec n' T0' Ts')
 .
 
+#[global]
 Hint Constructors equal_with_relation: equal_with_relation.
 
 Lemma equal_with_relation_deterministic:
@@ -719,6 +720,9 @@ Proof.
   eauto using equal_with_relation_swap, equal_with_relation_erased_type.
 Qed.
 
+#[global]
 Hint Immediate equal_with_relation_erased_term: erased.
+#[global]
 Hint Immediate equal_with_relation_erased_type: erased.
+#[global]
 Hint Immediate equal_with_relation_erased_type_back: erased.

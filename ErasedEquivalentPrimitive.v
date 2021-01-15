@@ -47,6 +47,7 @@ Proof. unfold open_reducible, open_equivalent; steps;
          eauto using reducible_primitive_EqEquiv1.
 Qed.
 
+#[global]
 Hint Resolve open_reducible_primitive_EqEquiv1: primitives.
 
 Lemma equivalent_build_nat:
@@ -114,6 +115,7 @@ Lemma open_reducible_primitive_EqEquiv2:
 Proof. unfold open_reducible, open_equivalent; steps;
          eauto using reducible_primitive_EqEquiv2.
 Qed.
+#[global]
 Hint Resolve open_reducible_primitive_EqEquiv2: primitives.
 
 Lemma open_reducible_primitive_Eq_args:
@@ -147,6 +149,7 @@ Proof.
   assert ([Θ; Γ ⊨ t1 ≡ t2]). apply open_reducible_primitive_EqEquiv1; eauto.
   unfold open_equivalent in * ; steps ; eauto using equivalent_sym.
 Qed.
+#[global]
 Hint Resolve open_reducible_primitive_EqSym: primitives.
 
 Lemma reducible_values_primitive_Lt_sound:

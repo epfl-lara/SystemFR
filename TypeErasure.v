@@ -107,5 +107,7 @@ Fixpoint erase_context (l: list (nat * tree)): list (nat * tree) :=
   | (x, T) :: l' => (x, erase_type T) :: erase_context l'
   end.
 
+#[global]
 Hint Resolve erase_term_erased: erased.
+#[global]
 Hint Resolve erase_type_erased: erased.

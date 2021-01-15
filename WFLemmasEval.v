@@ -9,6 +9,7 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate wf_nat_value: wf.
 
 Lemma twf_nat_value:
@@ -17,6 +18,7 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate twf_nat_value: twf.
 
 Lemma wf_is_pair:
@@ -25,6 +27,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate wf_is_pair: wf.
 
 Lemma wf_is_succ:
@@ -33,6 +36,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate wf_is_succ: wf.
 
 Lemma wf_is_lambda:
@@ -41,6 +45,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate wf_is_lambda: wf.
 
 Lemma wf_smallstep:
@@ -52,6 +57,7 @@ Proof.
   induction 1; steps; eauto using is_nat_value_build_nat with step_tactic wf.
 Qed.
 
+#[global]
 Hint Immediate wf_smallstep: wf.
 
 Lemma wf_star_smallstep:
@@ -63,6 +69,7 @@ Proof.
   induction 1; steps; eauto using wf_smallstep.
 Qed.
 
+#[global]
 Hint Immediate wf_star_smallstep: wf.
 
 Lemma open_is_nat_value_wf:
@@ -74,4 +81,5 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate open_is_nat_value_wf: wf.

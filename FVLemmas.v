@@ -13,6 +13,7 @@ Proof.
   induction Γ; repeat step || list_utils.
 Qed.
 
+#[global]
 Hint Immediate fv_context_support: fv.
 
 Lemma fv_context_support2:
@@ -24,6 +25,7 @@ Proof.
   unfold subset; induction Γ; repeat step || list_utils || instantiate_any; eauto.
 Qed.
 
+#[global]
 Hint Immediate fv_context_support2: fv.
 
 Lemma fv_lookup:
@@ -35,6 +37,7 @@ Proof.
     repeat step || unfold subset in * || list_utils; eauto.
 Qed.
 
+#[global]
 Hint Immediate fv_lookup: fv.
 
 Lemma fv_lookup2:
@@ -46,6 +49,7 @@ Proof.
   induction Γ; repeat step || sets || unfold subset in * || list_utils; eauto.
 Qed.
 
+#[global]
 Hint Immediate fv_lookup2: fv.
 
 Lemma fv_lookup3:
@@ -56,6 +60,7 @@ Proof.
   induction Γ; repeat step || list_utils; eauto.
 Qed.
 
+#[global]
 Hint Immediate fv_lookup3: fv.
 
 Lemma fv_lookup4:
@@ -67,6 +72,7 @@ Proof.
   induction l; repeat step || list_utils || unfold subset in *; eauto.
 Qed.
 
+#[global]
 Hint Immediate fv_lookup4: fv.
 
 Lemma fv_in_open:
@@ -77,6 +83,7 @@ Proof.
   induction t; repeat light || t_fair_split.
 Qed.
 
+#[global]
 Hint Immediate fv_in_open: fv.
 
 Lemma fv_in_topen:
@@ -87,6 +94,7 @@ Proof.
   induction t; repeat light || t_fair_split.
 Qed.
 
+#[global]
 Hint Immediate fv_in_topen: fv.
 
 Lemma fv_open2:
@@ -150,6 +158,7 @@ Proof.
     repeat step || list_utils || fv_open; eauto.
 Qed.
 
+#[global]
 Hint Resolve fv_nils_open: fv.
 
 Lemma fv_nils_topen:
@@ -163,6 +172,7 @@ Proof.
     repeat step || list_utils || fv_open; eauto.
 Qed.
 
+#[global]
 Hint Resolve fv_nils_topen: fv.
 
 Lemma fv_subst_lemma:
@@ -223,6 +233,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
+#[global]
 Hint Immediate closed_mapping_lookup: fv.
 
 Lemma closed_mapping_range:
@@ -234,6 +245,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
+#[global]
 Hint Immediate closed_mapping_range: fv.
 
 Lemma fv_nils:
@@ -251,6 +263,7 @@ Proof.
     eauto 1 with fv.
 Qed.
 
+#[global]
 Hint Resolve fv_nils: fv.
 
 Lemma closed_mapping_fv:
@@ -288,4 +301,5 @@ Proof.
       try solve [ apply_any; eauto 2 with sets ].
 Qed.
 
+#[global]
 Hint Resolve fv_nils2: fv.

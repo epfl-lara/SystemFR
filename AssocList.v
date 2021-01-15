@@ -51,6 +51,7 @@ Proof.
     exists ((x0,y0) :: m'); steps.
 Qed.
 
+#[global]
 Hint Immediate lookupRestSuffix: blookup.
 
 Lemma lookupRestLookup:
@@ -61,6 +62,7 @@ Proof.
   induction m; repeat step; eauto.
 Qed.
 
+#[global]
 Hint Immediate lookupRestLookup: blookup.
 
 Lemma lookupLookupRest:
@@ -75,6 +77,7 @@ Qed.
 
 (* fresh s Γ holds if variable x does not appear in the context Γ *)
 Definition fresh { X Y } (m: map X Y) x := ~(x ∈ support m).
+#[global]
 Hint Unfold fresh: core.
 
 Lemma lookupSupport:
@@ -106,6 +109,7 @@ Proof.
   induction m; repeat step.
 Qed.
 
+#[global]
 Hint Immediate lookupNoneSupport: blookup.
 
 Lemma lookupNoneSupport2:
@@ -117,6 +121,7 @@ Proof.
   induction m; repeat step; eauto.
 Qed.
 
+#[global]
 Hint Immediate lookupNoneSupport2: blookup.
 
 Lemma lookupSomeSupport:
@@ -127,6 +132,7 @@ Proof.
   induction m; repeat step || unfold fv_context in * || sets; eauto.
 Qed.
 
+#[global]
 Hint Immediate lookupSomeSupport: blookup.
 
 Lemma lookupRange:
@@ -162,6 +168,7 @@ Proof.
   induction l1; repeat step || sets || unfold fv_context in *.
 Qed.
 
+#[global]
 Hint Resolve lookupAppendNoDup: blookup.
 
 Lemma lookupAppendOr:
@@ -183,6 +190,7 @@ Proof.
   induction l1; steps.
 Qed.
 
+#[global]
 Hint Resolve lookupWeaken: blookup.
 
 Lemma lookupAppendNone:
@@ -194,6 +202,7 @@ Proof.
   induction l1; steps.
 Qed.
 
+#[global]
 Hint Resolve lookupAppendNone: blookup.
 
 Lemma lookupRight:
@@ -204,6 +213,7 @@ Proof.
   induction l1; steps.
 Qed.
 
+#[global]
 Hint Resolve lookupRight: blookup.
 
 Lemma lookupRight2:
@@ -281,6 +291,7 @@ Proof.
   induction Γ1; steps; eauto.
 Qed.
 
+#[global]
 Hint Immediate lookup_remove: blookup.
 
 Lemma lookup_remove2:

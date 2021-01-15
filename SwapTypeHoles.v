@@ -126,6 +126,7 @@ Proof.
     eauto with lia twf.
 Qed.
 
+#[global]
 Hint Resolve is_erased_swap: erased.
 
 Lemma twf_swap:
@@ -137,6 +138,7 @@ Proof.
   induction T; steps; eauto with twf lia.
 Qed.
 
+#[global]
 Hint Resolve twf_swap: twf.
 
 Lemma twf_swap2:
@@ -148,6 +150,7 @@ Proof.
   induction T; repeat step || unshelve eauto with twf lia.
 Qed.
 
+#[global]
 Hint Resolve twf_swap2: twf.
 
 Lemma wf_swap:
@@ -158,6 +161,7 @@ Proof.
   induction T; steps.
 Qed.
 
+#[global]
 Hint Resolve wf_swap: wf.
 
 Lemma swap_type_holes_twice:
@@ -173,6 +177,7 @@ Proof.
   induction T; steps.
 Qed.
 
+#[global]
 Hint Extern 1 => rewrite pfv_swap_type_holes: fv.
 
 Lemma topen_swap:

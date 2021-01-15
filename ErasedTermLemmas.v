@@ -11,6 +11,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Immediate is_erased_term_twf: twf.
 
 Lemma twf_open2:
@@ -22,6 +23,7 @@ Proof.
   unfold closed_value, closed_term; intros; apply twf_open; steps; eauto with twf.
 Qed.
 
+#[global]
 Hint Immediate twf_open2: twf.
 
 Lemma is_erased_open:
@@ -33,6 +35,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve is_erased_open: erased.
 
 Lemma is_erased_type_open:
@@ -44,6 +47,7 @@ Proof.
   induction t; steps; eauto with erased.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_open: erased.
 
 Lemma is_erased_type_open2:
@@ -55,6 +59,7 @@ Proof.
   unfold closed_value, closed_term; intros; apply is_erased_type_open; steps.
 Qed.
 
+#[global]
 Hint Immediate is_erased_type_open2: erased.
 
 Lemma is_erased_type_topen:
@@ -66,6 +71,7 @@ Proof.
   induction t; repeat step || rewrite topen_none by eauto with twf.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_topen: erased.
 
 Lemma is_erased_open2:
@@ -84,6 +90,7 @@ Proof.
   induction t; repeat step || list_utils.
 Qed.
 
+#[global]
 Hint Immediate is_erased_term_tfv: fv.
 
 Lemma is_erased_topen:
@@ -95,6 +102,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve is_erased_topen: erased.
 
 Lemma is_erased_topen2:
@@ -112,6 +120,7 @@ Proof.
   eauto using is_nat_value_erased, is_nat_value_build_nat.
 Qed.
 
+#[global]
 Hint Immediate is_erased_term_tsize: erased.
 
 Lemma is_erased_is_pair:
@@ -120,6 +129,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate is_erased_is_pair: erased.
 
 Lemma is_erased_is_succ:
@@ -128,6 +138,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate is_erased_is_succ: erased.
 
 Lemma is_erased_is_lambda:
@@ -136,6 +147,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate is_erased_is_lambda: erased.
 
 Lemma erase_scbv_step:
@@ -148,6 +160,7 @@ Proof.
     eauto with erased.
 Qed.
 
+#[global]
 Hint Immediate erase_scbv_step: erased.
 
 Lemma erase_star_scbv_step:
@@ -159,6 +172,7 @@ Proof.
   induction 1; steps; eauto using erase_scbv_step.
 Qed.
 
+#[global]
 Hint Immediate erase_star_scbv_step: erased.
 
 Lemma is_erased_subst:

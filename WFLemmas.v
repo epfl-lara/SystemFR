@@ -11,6 +11,7 @@ Lemma wf_var:
   forall n k, wf (fvar n term_var) k.
 Proof. steps. Qed.
 
+#[global]
 Hint Resolve wf_var: wf.
 
 Lemma wf_monotone:
@@ -21,6 +22,7 @@ Proof.
     try lia.
 Qed.
 
+#[global]
 Hint Extern 1 => solve [ eapply wf_monotone; try eassumption; try lia ]: wf.
 
 Lemma wf_monotone2: forall t k, wf t k -> wf t (S k).
@@ -28,6 +30,7 @@ Proof.
   intros; eauto 1 with wf.
 Qed.
 
+#[global]
 Hint Immediate wf_monotone2: wf.
 
 Lemma wf_monotone3: forall t k, wf t 0 -> wf t k.
@@ -35,6 +38,7 @@ Proof.
   eauto with wf.
 Qed.
 
+#[global]
 Hint Resolve wf_monotone3: wf.
 
 Lemma open_none:
@@ -79,6 +83,7 @@ Proof.
   induction l; steps; eauto 2 with wf.
 Qed.
 
+#[global]
 Hint Extern 1 => solve [ eapply wfs_monotone; try eassumption; try lia ]: wf.
 
 Lemma wfs_monotone2: forall l k,
@@ -88,6 +93,7 @@ Proof.
   intros; eauto 1 with wf.
 Qed.
 
+#[global]
 Hint Immediate wfs_monotone2: wf.
 
 Lemma wfs_lookup:
@@ -99,6 +105,7 @@ Proof.
   induction Γ; steps; eauto.
 Qed.
 
+#[global]
 Hint Immediate wfs_lookup: wf.
 
 Lemma wfs_lookup2:
@@ -110,6 +117,7 @@ Proof.
   intros; eauto using wfs_lookup with wf.
 Qed.
 
+#[global]
 Hint Immediate wfs_lookup2: wf.
 
 Lemma wfs_append:
@@ -121,6 +129,7 @@ Proof.
   induction l1; steps; eauto.
 Qed.
 
+#[global]
 Hint Resolve wfs_append: wf.
 
 Lemma wf_open_rev:
@@ -129,6 +138,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
+#[global]
 Hint Immediate wf_open_rev: wf.
 
 Lemma wf_topen_rev:
@@ -137,6 +147,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
+#[global]
 Hint Immediate wf_topen_rev: wf.
 
 Lemma wf_open:
@@ -145,6 +156,7 @@ Proof.
   induction t; repeat step || apply_any; try lia; eauto 1 with wf.
 Qed.
 
+#[global]
 Hint Resolve wf_open: wf.
 
 Lemma wf_topen:
@@ -153,6 +165,7 @@ Proof.
   induction t; repeat step || apply_any; try lia; eauto 1 with wf.
 Qed.
 
+#[global]
 Hint Resolve wf_topen: wf.
 
 Lemma wf_subst:
@@ -164,6 +177,7 @@ Proof.
   induction t; repeat step || apply_any; eauto with wf.
 Qed.
 
+#[global]
 Hint Resolve wf_subst: wf.
 
 Lemma wf_build_nat:
@@ -173,4 +187,5 @@ Proof.
   induction n; steps.
 Qed.
 
+#[global]
 Hint Resolve wf_build_nat: wf.

@@ -143,6 +143,7 @@ Equations (noind) reducible_values (ρ: interpretation) (v: tree) (T: tree): Pro
   where "[ ρ ⊨ t : T ]" := (reduces_to (fun v => [ ρ ⊨ v : T ]v) t)
 .
 
+#[global]
 Hint Transparent lt_measure: core.
 
 Ltac reducibility_definition :=
@@ -160,10 +161,10 @@ Notation "'[' ρ '⊨' T1 '<:' T2 ']'" := (forall v, [ ρ ⊨ v : T1 ]v -> [ ρ 
   (at level 60, ρ at level 60, T1 at level 60).
 
 Notation "'[' v ':' T ']v'" := ([ nil ⊨ v : T ]v)
-  (at level 60, v at level 60).
+  (at level 60, v at level 60, format "[  v  :  T  ]v").
 
 Notation "'[' t ':' T ']'" := ([ nil ⊨ t : T ])
-  (at level 60, t at level 60).
+  (at level 60, t at level 60, format "[  t  :  T  ]").
 
 Definition equivalent_types ρ T1 T2 :=
   forall v, [ ρ ⊨ v : T1 ]v <-> [ ρ ⊨ v : T2 ]v.

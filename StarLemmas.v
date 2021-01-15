@@ -4,6 +4,7 @@ Require Import Coq.Relations.Relation_Operators.
 Require Export SystemFR.SmallStep.
 Require Export SystemFR.ListUtils.
 
+#[global]
 Hint Constructors clos_refl_trans_1n: star.
 
 Lemma star_trans: forall A (R: relation A) t1 t2 t3,
@@ -57,6 +58,7 @@ Proof.
     eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve values_normalizing: norm.
 
 Lemma lambda_normalizing:
@@ -70,6 +72,7 @@ Proof.
     eauto with values.
 Qed.
 
+#[global]
 Hint Resolve lambda_normalizing: cbvlemmas.
 
 Lemma smallstep_star:
@@ -80,6 +83,7 @@ Proof.
   steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve smallstep_star: cbvlemmas.
 
 Lemma star_smallstep_app_l:
@@ -163,9 +167,13 @@ Proof.
     star_smallstep_binary_primitive_r with cbvlemmas.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_binary_primitive: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_unary_primitive: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_binary_primitive_l: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_binary_primitive_r: cbvlemmas.
 
 Lemma star_smallstep_err:
@@ -186,10 +194,15 @@ Ltac error_to_value :=
     apply (star_smallstep_err _ _ H1 eq_refl H2)
   end.
 
+#[global]
 Hint Extern 50 => error_to_value: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_app_l: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_app_r: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_pp_l: cbvlemmas.
+#[global]
 Hint Resolve star_smallstep_pp_r: cbvlemmas.
 
 
@@ -203,6 +216,7 @@ Proof.
   steps; eauto using star_trans with cbvlemmas.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_pp: cbvlemmas.
 
 Lemma star_smallstep_pi1:
@@ -213,6 +227,7 @@ Proof.
   induction 1; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_pi1: cbvlemmas.
 
 Lemma star_smallstep_pi2:
@@ -223,6 +238,7 @@ Proof.
   induction 1; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_pi2: cbvlemmas.
 
 Lemma star_smallstep_ite_cond:
@@ -234,6 +250,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_ite_cond: cbvlemmas.
 
 Lemma star_smallstep_match:
@@ -245,6 +262,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_match: cbvlemmas.
 
 Lemma star_smallstep_succ:
@@ -255,6 +273,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_succ: cbvlemmas.
 
 Lemma star_smallstep_tleft:
@@ -265,6 +284,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_tleft: cbvlemmas.
 
 Lemma star_smallstep_tright:
@@ -275,6 +295,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_tright: cbvlemmas.
 
 Lemma star_smallstep_sum_match:
@@ -285,6 +306,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_sum_match: cbvlemmas.
 
 Lemma star_smallstep_tsize:
@@ -295,6 +317,7 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_tsize: cbvlemmas.
 
 Lemma star_smallstep_recognizer:
@@ -305,4 +328,5 @@ Proof.
   induction 1; steps; eauto with smallstep star.
 Qed.
 
+#[global]
 Hint Resolve star_smallstep_recognizer: cbvlemmas.

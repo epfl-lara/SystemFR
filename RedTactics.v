@@ -211,9 +211,13 @@ Proof.
   repeat step || t_substitutions.
 Qed.
 
+#[global]
 Hint Resolve equivalent_cons: b_equiv_subst.
+#[global]
 Hint Resolve equivalent_cons_succ: b_equiv_subst.
+#[global]
 Hint Resolve equivalent_insert: b_equiv_subst.
+#[global]
 Hint Resolve equivalent_insert2: b_equiv_subst.
 
 Ltac t_sat_cons_equal_smallstep :=

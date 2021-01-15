@@ -18,6 +18,7 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate wf_base_type: wf.
 
 Ltac t_wf_base_type :=
@@ -25,6 +26,7 @@ Ltac t_wf_base_type :=
   | H: base_type ?X ?A ?B |- wf ?B ?k => apply wf_base_type with X A
   end.
 
+#[global]
 Hint Extern 50 => t_wf_base_type: wf.
 
 Lemma twf_base_type:
@@ -37,6 +39,7 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate twf_base_type: twf.
 
 Ltac t_twf_base_type :=
@@ -44,6 +47,7 @@ Ltac t_twf_base_type :=
   | H: base_type ?X ?A ?B |- twf ?B ?k => apply twf_base_type with X A
   end.
 
+#[global]
 Hint Extern 50 => t_twf_base_type: twf.
 
 Lemma annotated_base_type:
@@ -60,6 +64,7 @@ Ltac t_annotated_base_type :=
   | H: base_type ?X ?A ?B |- is_annotated_type ?B => apply annotated_base_type with X A
   end.
 
+#[global]
 Hint Extern 50 => t_annotated_base_type: annot.
 
 Lemma pfv_base_type:
@@ -77,6 +82,7 @@ Ltac t_pfv_base_type :=
   | H1: base_type ?X ?A ?B, H2: ?Y ∈ pfv ?B ?tag |- _ => apply (pfv_base_type _ _ _ H1) in H2
   end.
 
+#[global]
 Hint Extern 50 => t_pfv_base_type: fv.
 
 Lemma pfv_base_type_subset:
@@ -104,4 +110,5 @@ Proof.
   induction 1; repeat step || list_utils.
 Qed.
 
+#[global]
 Hint Extern 1000 => apply False_ind; eapply pfv_base_type2; eassumption: fv.

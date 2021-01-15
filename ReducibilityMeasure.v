@@ -184,10 +184,12 @@ Proof.
   unfold get_measure; intros; apply left_lex; auto.
 Qed.
 
+#[global]
 Hint Extern 1 => solve [
   apply left_lex; repeat step || autorewrite with bsize; eauto 2 with lia; t_closer
 ]: measure.
 
+#[global]
 Hint Extern 1 => solve [
   apply right_lex; steps; eauto using lt_index_step
 ]: measure.
@@ -207,4 +209,5 @@ Proof.
     steps; eauto.
 Qed.
 
+#[global]
 Hint Extern 1 => solve [ eapply prop_until_at; eauto with measure ]: prop_until.

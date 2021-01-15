@@ -14,6 +14,7 @@ Proof.
   induction t; steps; eauto using erased_term_in_list.
 Qed.
 
+#[global]
 Hint Resolve subst_erased: erased.
 
 Lemma subst_erased_type:
@@ -27,6 +28,7 @@ Proof.
     eauto using erased_term_in_list.
 Qed.
 
+#[global]
 Hint Resolve subst_erased_type: erased.
 
 Lemma subst_erased_type2:
@@ -39,4 +41,5 @@ Proof.
     eauto using subst_erased.
 Qed.
 
+#[global]
 Hint Resolve subst_erased_type2: erased.

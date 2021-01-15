@@ -15,6 +15,7 @@ Proof.
     repeat step || list_utils.
 Qed.
 
+#[global]
 Hint Immediate nat_value_fv: fv.
 
 Lemma pfv_build_nat:
@@ -24,6 +25,7 @@ Proof.
   induction n; steps.
 Qed.
 
+#[global]
 Hint Immediate pfv_build_nat: fv.
 
 Lemma is_pair_fv:
@@ -33,6 +35,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate is_pair_fv: fv.
 Hint Rewrite is_pair_fv: rfv.
 
@@ -43,6 +46,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate is_succ_fv: fv.
 Hint Rewrite is_succ_fv: rfv.
 
@@ -53,6 +57,7 @@ Proof.
   destruct v; steps.
 Qed.
 
+#[global]
 Hint Immediate is_lambda_fv: fv.
 Hint Rewrite is_lambda_fv: rfv.
 
@@ -70,6 +75,7 @@ Proof.
     eauto with fv list_utils.
 Qed.
 
+#[global]
 Hint Immediate fv_smallstep: fv.
 
 Lemma fv_smallstep_subset:
@@ -80,6 +86,7 @@ Proof.
   unfold subset; intros; eauto using fv_smallstep.
 Qed.
 
+#[global]
 Hint Resolve fv_smallstep_subset: fv.
 
 Lemma fv_smallstep_subset2:
@@ -91,6 +98,7 @@ Proof.
   intros; eauto using subset_transitive with fv.
 Qed.
 
+#[global]
 Hint Immediate fv_smallstep_subset2: fv.
 
 Lemma fv_smallstep_nil:
@@ -102,6 +110,7 @@ Proof.
   repeat step || rewrite <- empty_list_rewrite in *; eauto with fv.
 Qed.
 
+#[global]
 Hint Immediate fv_smallstep_nil: fv.
 
 Lemma fv_star_smallstep:
@@ -114,6 +123,7 @@ Proof.
   induction 1; eauto using fv_smallstep.
 Qed.
 
+#[global]
 Hint Immediate fv_star_smallstep: fv.
 
 Lemma fv_star_smallstep_nil:
@@ -125,4 +135,5 @@ Proof.
   repeat step || rewrite <- empty_list_rewrite in *; eauto with fv.
 Qed.
 
+#[global]
 Hint Immediate fv_star_smallstep_nil: fv.

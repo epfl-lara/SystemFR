@@ -34,25 +34,6 @@ Proof.
       eauto using equivalent_refl.
 Qed.
 
-Lemma reducibility_open_equivalent2:
-  forall T t1 t2 t1' t2' ρ v,
-    [ ρ ⊨ v : open 0 (open 1 T t1) t2 ]v  ->
-    valid_interpretation ρ ->
-    is_erased_type T ->
-    wf T 2 ->
-    pfv T term_var = nil ->
-    [ t1 ≡ t1' ] ->
-    [ t2 ≡ t2' ] ->
-    [ ρ ⊨ v : open 0 (open 1 T t1') t2' ]v.
-Proof.
-  intros.
-  eapply reducibility_open_equivalent; eauto; steps; eauto with erased wf fv.
-  rewrite swap_term_holes_open in * by (
-    unfold equivalent_terms; repeat step || destruct_and; t_closer
-  ).
-  eapply reducibility_open_equivalent; eauto; steps; eauto with erased wf fv.
-Qed.
-
 Opaque List.
 
 Lemma nmatch_cons: forall ρ t ts T2 T3,

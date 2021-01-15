@@ -44,7 +44,11 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve wf_close: wf.
+#[global]
 Hint Resolve twf_tclose: twf.
+#[global]
 Hint Resolve wf_tclose: wf.
+#[global]
 Hint Resolve twf_close: twf.

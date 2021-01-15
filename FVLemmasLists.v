@@ -15,6 +15,7 @@ Proof.
            unfold closed_term in *; eauto.
 Qed.
 
+#[global]
 Hint Extern 50 => solve [ eapply satisfies_closed_mapping; eassumption ]: fv.
 
 Lemma closed_mapping_append1:
@@ -33,7 +34,9 @@ Proof.
   induction l1; steps.
 Qed.
 
+#[global]
 Hint Extern 50 => solve [ eapply closed_mapping_append1; eauto 1 ]: b_cmap.
+#[global]
 Hint Extern 50 => solve [ eapply closed_mapping_append2; eauto 1 ]: b_cmap.
 
 Lemma closed_mapping_append:
@@ -45,6 +48,7 @@ Proof.
   induction l1; steps.
 Qed.
 
+#[global]
 Hint Extern 50 => eapply closed_mapping_append: b_cmap.
 
 Lemma satisfies_fv_nil:
@@ -59,6 +63,7 @@ Proof.
   eapply satisfies_closed_mapping; eauto.
 Qed.
 
+#[global]
 Hint Extern 50 => eapply satisfies_fv_nil: fv.
 
 Lemma fv_satisfies_nil:
@@ -71,6 +76,7 @@ Proof.
     eauto with fv b_cmap.
 Qed.
 
+#[global]
 Hint Extern 50 => eapply fv_satisfies_nil: fv.
 
 Lemma subset_same_support:
@@ -82,6 +88,7 @@ Proof.
   repeat step || t_termlist || rewrite_any.
 Qed.
 
+#[global]
 Hint Immediate subset_same_support: fv.
 
 Lemma fv_nils3:
@@ -97,6 +104,7 @@ Proof.
     repeat step || t_subset_erase || rewrite erased_context_support.
 Qed.
 
+#[global]
 Hint Immediate fv_nils3: fv.
 
 Lemma fv_subst_different_tag:

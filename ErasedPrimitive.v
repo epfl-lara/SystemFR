@@ -399,16 +399,29 @@ Lemma open_reducible_primitive_Or:
 Proof. unfold open_reducible; steps ; eauto using reducible_primitive_Or. Qed.
 
 
+#[global]
 Hint Resolve open_reducible_primitive_And: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Div: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Eq: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Geq: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Gt: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Leq: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Lt: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Minus: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Mul: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Neq: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Or: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Plus: primitives.
+#[global]
 Hint Resolve open_reducible_primitive_Not: primitives.

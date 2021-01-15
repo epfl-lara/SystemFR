@@ -34,6 +34,22 @@ Proof.
       try solve [ apply equivalent_refl; steps; t_closer ].
 Qed.
 
+Lemma reducible_values_singleton:
+  forall ρ v t T,
+    valid_interpretation ρ ->
+    wf t 0 ->
+    [ t ≡ v ] ->
+    [ ρ ⊨ v : T ]v ->
+    [ ρ ⊨ v : T_singleton T t ]v.
+Proof.
+  unfold T_singleton;
+    repeat step || simp_red || exists uu ||
+           (rewrite (open_none t) by auto) ||
+           (rewrite shift_nothing2 by auto);
+    t_closer;
+    eauto using equivalent_sym.
+Qed.
+
 Lemma open_reducible_singleton:
   forall Θ Γ t T,
     is_erased_term t ->

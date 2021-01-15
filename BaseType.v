@@ -32,4 +32,5 @@ Inductive base_type: nat -> tree -> tree -> Prop :=
          not needed for the BaseTypeLemmas proofs *)
       base_type X A T_top.
 
+#[global]
 Hint Constructors base_type: c_base_type.

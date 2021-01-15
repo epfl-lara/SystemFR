@@ -37,4 +37,5 @@ Ltac t_closing :=
 
 Ltac t_closer := try solve [ t_closing ].
 
+#[global]
 Hint Extern 1 => t_closing: closing.

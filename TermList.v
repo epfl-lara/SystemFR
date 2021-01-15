@@ -38,6 +38,7 @@ Proof.
   induction 1; repeat step; eauto with fv.
 Qed.
 
+#[global]
 Hint Immediate satisfies_nodup: btermlist.
 
 Ltac t_satisfies_nodup :=
@@ -80,6 +81,7 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate satisfies_same_support: btermlist.
 
 Ltac t_instantiate_sat :=
@@ -180,6 +182,7 @@ Proof.
     eauto using NoDup_append with step_tactic.
 Qed.
 
+#[global]
 Hint Immediate x_not_in_support: fv.
 
 Lemma x_not_in_support2:
@@ -193,6 +196,7 @@ Proof.
     eauto using x_not_in_support.
 Qed.
 
+#[global]
 Hint Immediate x_not_in_support2: fv.
 
 Lemma satisfies_y_in_support:
@@ -205,5 +209,6 @@ Proof.
   erewrite satisfies_fair_split; eauto.
 Qed.
 
+#[global]
 Hint Immediate satisfies_y_in_support: fv.
 

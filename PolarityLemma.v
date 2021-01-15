@@ -103,6 +103,7 @@ Proof.
   eapply use_respect_polarities; eauto 1; steps.
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_fvar: b_polarity_variance.
 
 Lemma polarity_variance_induction:
@@ -176,6 +177,7 @@ Proof.
     try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with lia ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_arrow: b_polarity_variance.
 
 Lemma polarity_variance_prod:
@@ -188,6 +190,7 @@ Proof.
     try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with lia ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_prod: b_polarity_variance.
 
 Lemma polarity_variance_sum:
@@ -198,6 +201,7 @@ Proof.
     try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with lia ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_sum: b_polarity_variance.
 
 Lemma polarity_variance_refine:
@@ -208,6 +212,7 @@ Proof.
     try solve [ eapply polarity_variance_induction; try eassumption; steps; eauto with lia ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_refine: b_polarity_variance.
 
 Lemma polarity_variance_type_refine:
@@ -222,6 +227,7 @@ Proof.
                 eauto with lia erased fv wf ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_type_refine: b_polarity_variance.
 
 Lemma polarity_variance_intersection:
@@ -233,6 +239,7 @@ Proof.
                 eauto with lia erased fv wf ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_intersection: b_polarity_variance.
 
 Ltac reducibility_choice2 :=
@@ -250,6 +257,7 @@ Proof.
                 eauto with lia erased fv erased ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_union: b_polarity_variance.
 
 Lemma polarity_variance_forall:
@@ -264,6 +272,7 @@ Proof.
     try solve [ eapply polarity_variance_induction_invert; try eassumption; steps; eauto with lia erased ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_forall: b_polarity_variance.
 
 Lemma polarity_variance_exists:
@@ -275,6 +284,7 @@ Proof.
     try solve [ eapply polarity_variance_induction_open; try eassumption; steps; eauto with lia erased ].
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_exists: b_polarity_variance.
 
 Lemma respect_polarities_support:
@@ -311,6 +321,7 @@ Proof.
       eauto 2 with wf fv erased step_tactic.
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_abs: b_polarity_variance.
 
 Ltac t_dangerous_rec_choice :=
@@ -362,6 +373,7 @@ Proof.
     eauto 2 with erased fv wf.
 Qed.
 
+#[global]
 Hint Immediate polarity_variance_rec: b_polarity_variance.
 
 Lemma polarity_variance_aux: forall (m: measure_domain) T, prop_at polarity_variance_prop m T.

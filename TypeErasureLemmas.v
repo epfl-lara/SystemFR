@@ -42,6 +42,7 @@ Proof.
   induction t; repeat step || list_utils.
 Qed.
 
+#[global]
 Hint Immediate erase_term_term_var: fv.
 
 Lemma erase_term_type_var:
@@ -52,6 +53,7 @@ Proof.
   induction t; repeat step || list_utils; eauto.
 Qed.
 
+#[global]
 Hint Immediate erase_term_type_var: fv.
 
 Lemma erase_term_var:
@@ -62,6 +64,7 @@ Proof.
   destruct tag; intros; eauto with fv exfalso.
 Qed.
 
+#[global]
 Hint Immediate erase_term_var: fv.
 
 Lemma erase_type_var:
@@ -73,6 +76,7 @@ Proof.
     eauto using erase_term_term_var, erase_term_type_var with exfalso.
 Qed.
 
+#[global]
 Hint Immediate erase_type_var: fv.
 
 Lemma erase_context_var:
@@ -83,6 +87,7 @@ Proof.
   induction Γ; repeat step || list_utils; eauto with fv.
 Qed.
 
+#[global]
 Hint Immediate erase_context_var: fv.
 
 Ltac t_fv_erase :=
@@ -100,6 +105,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve erase_term_wf: wf.
 
 Lemma erase_type_wf:
@@ -110,6 +116,7 @@ Proof.
   induction T; steps; eauto using erase_term_wf.
 Qed.
 
+#[global]
 Hint Resolve erase_type_wf: wf.
 
 Lemma erase_term_twf:
@@ -119,6 +126,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve erase_term_twf: twf.
 
 Lemma erase_type_twf:
@@ -129,6 +137,7 @@ Proof.
   induction T; steps; eauto using erase_term_twf.
 Qed.
 
+#[global]
 Hint Resolve erase_type_twf: twf.
 
 Lemma pfv_erase_context_subst:

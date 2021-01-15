@@ -17,6 +17,7 @@ Inductive cbv_value: tree -> Prop :=
 | IVRight: forall v, cbv_value v -> cbv_value (tright v)
 .
 
+#[global]
 Hint Constructors cbv_value: values.
 
 Inductive is_nat_value: tree -> Prop :=
@@ -24,6 +25,7 @@ Inductive is_nat_value: tree -> Prop :=
 | INVSucc: forall v, is_nat_value v -> is_nat_value (succ v)
 .
 
+#[global]
 Hint Constructors is_nat_value: is_nat_value.
 
 Ltac cbv_value t :=
@@ -107,10 +109,15 @@ Proof.
 Qed.
 
 
+#[global]
 Hint Immediate is_nat_value_build_nat: values.
+#[global]
 Hint Immediate cbv_value_build_nat: values.
+#[global]
 Hint Immediate cbv_value_is_pair: values.
+#[global]
 Hint Immediate cbv_value_is_succ: values.
+#[global]
 Hint Immediate cbv_value_is_lambda: values.
 
 Reserved Notation "t1 '~>' t2" (at level 20).
@@ -295,6 +302,7 @@ Inductive scbv_step: tree -> tree -> Prop :=
 
 Notation "t1 ~>* t2" := (Relation_Operators.clos_refl_trans_1n _ scbv_step t1 t2) (at level 20).
 
+#[global]
 Hint Constructors scbv_step: smallstep.
 
 Lemma scbv_step_same:
@@ -374,6 +382,7 @@ Proof.
   induction 1; steps; eauto with values.
 Qed.
 
+#[global]
 Hint Immediate is_nat_value_value: values.
 
 Lemma evaluate_step_build_nat:
@@ -382,6 +391,7 @@ Lemma evaluate_step_build_nat:
 Proof.
   eauto using evaluate_step2 with values.
 Qed.
+#[global]
 Hint Immediate evaluate_step_build_nat: smallstep.
 
 Lemma is_nat_value_erased:
@@ -392,6 +402,7 @@ Proof.
   induction 1; steps.
 Qed.
 
+#[global]
 Hint Immediate is_nat_value_erased: erased.
 
 Ltac no_step :=
@@ -414,7 +425,9 @@ Ltac no_step :=
   | _ => t_invert_step; fail
   end.
 
+#[global]
 Hint Immediate evaluate_step2: smallstep.
+#[global]
 Hint Immediate evaluate_step3: smallstep.
 
 Lemma deterministic_step:
@@ -436,6 +449,7 @@ Ltac deterministic_step :=
     pose proof (deterministic_step _ _ H1 _ H2); clear H2
   end.
 
+#[global]
 Hint Extern 1 => deterministic_step: smallstep.
 
 Definition closed_term t :=

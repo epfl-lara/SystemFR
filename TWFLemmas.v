@@ -15,6 +15,7 @@ Proof.
     try lia.
 Qed.
 
+#[global]
 Hint Extern 1 => solve [ eapply twf_monotone; try eassumption; try lia ]: twf.
 
 Lemma twf_monotone2: forall t, forall k, twf t k -> twf t (S k).
@@ -22,6 +23,7 @@ Proof.
   intros; eauto 1 with twf.
 Qed.
 
+#[global]
 Hint Immediate twf_monotone2: twf.
 
 Lemma topen_none:
@@ -40,6 +42,7 @@ Proof.
   induction Γ; steps; eauto.
 Qed.
 
+#[global]
 Hint Immediate twfs_lookup: twf.
 
 Lemma twfs_monotone:
@@ -48,6 +51,7 @@ Proof.
   induction l; steps; eauto 2 with twf.
 Qed.
 
+#[global]
 Hint Extern 1 => solve [ eapply twfs_monotone; try eassumption; try lia ]: twf.
 
 Lemma twfs_monotone2: forall l k,
@@ -57,6 +61,7 @@ Proof.
   intros; eauto 1 with twf.
 Qed.
 
+#[global]
 Hint Immediate twfs_monotone2: twf.
 
 Lemma twfs_append:
@@ -68,6 +73,7 @@ Proof.
   induction l1; steps; eauto.
 Qed.
 
+#[global]
 Hint Resolve twfs_append: twf.
 
 Lemma twf_topen_rev:
@@ -76,6 +82,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
+#[global]
 Hint Immediate twf_topen_rev: twf.
 
 Lemma twf_open_rev:
@@ -84,6 +91,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
+#[global]
 Hint Immediate twf_open_rev: twf.
 
 Lemma twf_topen:
@@ -92,6 +100,7 @@ Proof.
   induction t; repeat step || apply_any; try lia; eauto 1 with twf.
 Qed.
 
+#[global]
 Hint Resolve twf_topen: twf.
 
 Lemma twf_open:
@@ -100,6 +109,7 @@ Proof.
   induction t; repeat step || apply_any; try lia; eauto 1 with twf.
 Qed.
 
+#[global]
 Hint Resolve twf_open: twf.
 
 Lemma twf_subst:
@@ -111,6 +121,7 @@ Proof.
   induction t; repeat step || apply_any; eauto with twf.
 Qed.
 
+#[global]
 Hint Resolve twf_subst: twf.
 
 Ltac topen_none :=

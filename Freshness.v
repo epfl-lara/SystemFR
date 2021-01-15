@@ -40,6 +40,7 @@ Proof.
   repeat step || t_list_smaller; lia.
 Qed.
 
+#[global]
 Hint Immediate freshMakeFresh freshMakeFresh2: fresh.
 
 Fixpoint makeFresh (ll: list (list nat)): nat :=

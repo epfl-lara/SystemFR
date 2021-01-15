@@ -30,6 +30,7 @@ Ltac t_is_annotated_type_ite :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- is_annotated_type ?T => apply is_annotated_type_ite with b T1 T2
   end.
 
+#[global]
 Hint Extern 50 => t_is_annotated_type_ite: annot.
 
 Lemma wf_ite:
@@ -49,6 +50,7 @@ Ltac t_wf_ite :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- wf ?T _ => apply wf_ite with b T1 T2
   end.
 
+#[global]
 Hint Extern 50 => t_wf_ite: wf.
 
 Lemma twf_ite:
@@ -68,6 +70,7 @@ Ltac t_twf_ite :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- twf ?T _ => apply twf_ite with b T1 T2
   end.
 
+#[global]
 Hint Extern 50 => t_twf_ite: twf.
 
 Lemma pfv_ite:
@@ -91,6 +94,7 @@ Ltac t_pfv_ite :=
     pose proof (pfv_ite _ _ _ _ H1 _ _ H2)
   end.
 
+#[global]
 Hint Extern 50 => t_pfv_ite: fv.
 
 Lemma pfv_ite2:
@@ -109,4 +113,5 @@ Ltac t_pfv_ite2 :=
   | H: T_ite_push ?b ?T1 ?T2 ?T |- subset (pfv ?T _) _ => apply pfv_ite2 with b T1 T2
   end.
 
+#[global]
 Hint Extern 50 => t_pfv_ite2: fv.

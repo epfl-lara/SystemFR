@@ -144,6 +144,7 @@ Proof.
   induction t; repeat step || apply_any || rewrite (swap_nothing _ 0).
 Qed.
 
+#[global]
 Hint Resolve is_erased_swap_term_holes: erased.
 
 Lemma is_erased_type_swap_term_holes:
@@ -155,6 +156,7 @@ Proof.
     eauto with erased.
 Qed.
 
+#[global]
 Hint Resolve is_erased_type_swap_term_holes: erased.
 
 Lemma wf_swap_term_holes:
@@ -166,6 +168,7 @@ Proof.
   induction t; steps; eauto with wf lia.
 Qed.
 
+#[global]
 Hint Resolve wf_swap_term_holes: wf.
 
 Lemma wf_swap_term_holes_2:
@@ -177,6 +180,7 @@ Proof.
   induction t; repeat step || unshelve eauto with wf lia.
 Qed.
 
+#[global]
 Hint Resolve wf_swap_term_holes_2: wf.
 
 Lemma wf_swap_term_holes_3:
@@ -189,6 +193,7 @@ Proof.
   induction t; repeat step || unshelve eauto with wf lia.
 Qed.
 
+#[global]
 Hint Resolve wf_swap_term_holes_3: wf.
 
 Lemma twf_swap_term_holes:
@@ -199,6 +204,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Resolve twf_swap_term_holes: twf.
 
 Lemma swap_term_holes_twice:
@@ -214,6 +220,7 @@ Proof.
   induction t; steps.
 Qed.
 
+#[global]
 Hint Extern 1 => rewrite pfv_swap_term_holes: fv.
 
 Lemma swap_term_holes_open_2:

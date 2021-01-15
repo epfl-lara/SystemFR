@@ -9,6 +9,7 @@ Proof.
   induction lterms; repeat step || step_inversion satisfies; eauto with wf lia.
 Qed.
 
+#[global]
 Hint Immediate satisfies_wfs: wf.
 
 Lemma satisfies_twfs:
@@ -19,4 +20,5 @@ Proof.
   induction lterms; repeat step || step_inversion satisfies; eauto with twf lia.
 Qed.
 
+#[global]
 Hint Immediate satisfies_twfs: twf.
