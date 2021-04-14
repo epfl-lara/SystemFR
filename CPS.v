@@ -232,12 +232,90 @@ Proof.
   repeat split; simpl.
 Admitted. *)
 
-Lemma cps_rec_keeps_closed_terms_closed: forall t nf fvs cps_t, 
-  wf t nf -> is_erased_term t -> pfv t term_var = fvs -> 
-    cps_rec t nf = Some cps_t -> 
-      wf cps_t nf /\ is_erased_term cps_t /\ pfv cps_t term_var = fvs.
+Lemma open_keeps_wf: forall t i n nf, wf t n -> wf (open i t (fvar nf term_var)) n.
 Proof.
-  intro t; induction (tree_size t) eqn:E; 
+  induction t; light; steps.
+Qed.
+
+Lemma open_keeps_is_erased: forall t i n, 
+  is_erased_term t -> is_erased_term (open i t (fvar n term_var)).
+Proof.
+  induction t; light; steps. 
+Qed.
+
+(* Lemma open_adds_to_fvs: forall t i fvs n,
+  pfv t term_var = fvs -> pfv (open i t (fvar n term_var)) term_var = n :: fvs.
+Proof.
+  
+Qed. *)
+
+Lemma close_keeps_wf: forall t nf i n, 
+  wf t n -> i < n -> wf (close i t nf) n.
+Proof.
+  induction t; light; steps;
+  auto with lia.
+Qed.
+
+Lemma close_keeps_is_erased: forall t n i,
+  is_erased_term t -> is_erased_term (close i t n).
+Proof.
+  induction t; light; steps.
+Qed.
+
+Lemma wf_S: forall t n,
+  wf t n -> wf t (S n).
+Proof.
+  induction t; light; steps.
+Qed.
+
+Lemma cps_rec_outputs_erased_terms: forall t nf cps_t,
+  cps_rec t nf = Some cps_t -> is_erased_term cps_t.
+Proof.
+  induction t; light; simp cps_rec in H;
+  repeat destruct_match; inversion H; simpl; step.
+  
+Admitted.
+
+
+Lemma cps_rec_keeps_closed_terms_closed: forall size_t t nf fvs cps_t, 
+  tree_size t <= size_t ->
+    wf t nf -> is_erased_term t -> pfv t term_var = fvs -> 
+      cps_rec t nf = Some cps_t -> 
+        wf cps_t nf /\ is_erased_term cps_t /\ pfv cps_t term_var = fvs.
+Proof.
+  induction size_t; light;
+  destruct t; try solve [inversion H;
+  repeat destruct_match || simp cps_rec in H3 || simpl in *;
+  repeat t_equality || step || simpl || lia];
+  simpl in H.
+
+  simp cps_rec in H3.
+  destruct_match;
+  inversion H3; 
+  clear H3.
+  simpl in *.
+  step.
+  lia.
+  apply (open_keeps_wf _ 0 _ nf) in H0.
+  apply le_S_n in H.
+  apply (open_keeps_is_erased _ 0 nf) in H1.
+  rewrite <- (open_t_size _ 0 nf) in H.
+  eapply (IHsize_t (open 0 t (fvar nf term_var)) (S nf) _ t0) in H as [H [H' H'']]; 
+  try assumption.
+  apply wf_S, (close_keeps_wf _ nf 1 _) in H. assumption.
+  lia.
+  auto.
+  apply close_keeps_is_erased.
+  apply cps_rec_outputs_erased_terms in matched. assumption.
+  
+
+  
+
+
+  (* destruct t; repeat destruct_match || simpl in *.
+
+
+  intro t; induction (tree_size t) eqn:E;
   try solve [light; destruct t; 
   repeat destruct_match || simp cps_rec in H2 || simpl in *;
   repeat t_equality || step || simpl || lia].
@@ -247,7 +325,7 @@ Proof.
   repeat destruct_match || simp cps_rec in H2; inversion H2; step; simpl; step;
   try solve [auto; step; try lia; rewrite matched; auto].
   eapply IHt in H.
-  step.
+  step. *)
 Admitted.
 
 Lemma cps_keeps_closed_terms_closed: forall t cps_t, 
