@@ -268,11 +268,38 @@ Proof.
   induction t; light; steps.
 Qed.
 
-Lemma cps_rec_outputs_erased_terms: forall t nf cps_t,
-  cps_rec t nf = Some cps_t -> is_erased_term cps_t.
+Lemma le_add_l: forall n m o, n + m <= o -> n <= o.
 Proof.
-  induction t; light; simp cps_rec in H;
-  repeat destruct_match; inversion H; simpl; step.
+  lia.
+Qed.
+
+Lemma le_add_r: forall n m o, n + m <= o -> m <= o.
+Proof.
+  lia.
+Qed.
+
+Lemma cps_rec_outputs_erased_terms: forall size_t t nf cps_t,
+  tree_size t <= size_t -> cps_rec t nf = Some cps_t -> is_erased_term cps_t.
+Proof.
+  induction size_t; light; destruct t; step; simp cps_rec in H0;
+  repeat destruct_match; inversion H0; simpl; step; try lia; apply le_S_n in H.
+  rewrite <- (open_t_size _ 0 nf) in H.
+  apply (IHsize_t _ (S nf) t0) in H; try assumption.
+  apply close_keeps_is_erased.
+  assumption.
+  remember H as H'.
+  clear HeqH'.
+  apply le_add_l in H.
+  eapply IHsize_t; eassumption.
+  apply le_add_r in H.
+  eapply IHsize_t; eassumption.
+Qed.
+
+Lemma cps_rec_pfv_open_close: forall size_t t fvs nf t',
+  tree_size t <= size_t -> pfv t term_var = fvs -> 
+    cps_rec (open 0 t (fvar nf term_var)) (S nf) = Some t' ->
+      pfv (close 1 t' nf) term_var = fvs.
+Proof.
   
 Admitted.
 
@@ -286,8 +313,8 @@ Proof.
   induction size_t; light;
   destruct t; try solve [inversion H;
   repeat destruct_match || simp cps_rec in H3 || simpl in *;
-  repeat t_equality || step || simpl || lia];
-  simpl in H.
+  repeat t_equality || step || simpl || lia].
+  simpl in *.
 
   simp cps_rec in H3.
   destruct_match;
@@ -306,14 +333,14 @@ Proof.
   lia.
   auto.
   apply close_keeps_is_erased.
-  apply cps_rec_outputs_erased_terms in matched. assumption.
+  eapply cps_rec_outputs_erased_terms in matched; auto.
+  eapply (cps_rec_pfv_open_close _ t); auto.
   
-
+  
   
 
 
   (* destruct t; repeat destruct_match || simpl in *.
-
 
   intro t; induction (tree_size t) eqn:E;
   try solve [light; destruct t; 
