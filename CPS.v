@@ -6,6 +6,11 @@ Require Import SystemFR.FVLemmas.
 Require Import SystemFR.FVLemmasClose.
 Require Import SystemFR.ListUtils.
 Require Import SystemFR.BigStep.
+Require Import SystemFR.TOpenTClose.
+Require Import SystemFR.RewriteTactics.
+Require Import SystemFR.CloseLemmas.
+Require Import SystemFR.WFLemmasClose.
+Require Import SystemFR.WFLemmas.
 
 Require Import Program.
 Require Import Equations.Equations.
@@ -227,6 +232,16 @@ Proof.
   repeat invert_constructor_equalities || step || options; eauto.
 Qed.
 
+Lemma cps_of_value': forall v cps_value_v, 
+  closed_value v -> cps_value v = Some cps_value_v -> 
+    cps v = Some (notype_lambda (app (lvar 0 term_var) cps_value_v)).
+Proof.
+Admitted.
+  (* intros v cps_v [Hvclosed Hvvalue]. generalize dependent cps_v.
+  induction Hvvalue; light; unfold cps in *; simp cps_rec in H; 
+  repeat invert_constructor_equalities || step || options; eauto.
+Qed. *)
+
 Lemma cps_outputs_lambdas: forall p cps_p,
   cps p = Some cps_p -> exists b, cps_p = notype_lambda b.
 Proof.
@@ -234,24 +249,32 @@ Proof.
   repeat light || destruct_match || invert_constructor_equalities; eauto.
 Qed.
 
+Lemma cps_rec_nf: forall t nf nf', 
+  (forall n, List.In n (pfv t term_var) -> n < nf) -> 
+  (forall n, List.In n (pfv t term_var) -> n < nf') -> 
+    cps_rec t nf = cps_rec t nf'.
+Proof.
+  
+Admitted.
+
 
 (* Lemma cps_of_value_is_value_for_lambda: forall t t', 
   closed_term (notype_lambda t) -> cps_value (notype_lambda t) = Some (notype_lambda).
 Proof.
   
 Qed.
-
+*)
 
 Lemma cps_of_value_is_value: forall v cps_v,
   closed_value v -> cps_value v = Some cps_v -> closed_value cps_v.
 Proof.
-  intros v cps_v [Hvclosed Hvvalue] H.
+  (* intros v cps_v [Hvclosed Hvvalue] H.
   induction Hvvalue; simpl in H; split;
   try solve [inversion H; repeat assumption || constructor];
   destruct (cps_rec (open 0 t (fvar 0 term_var)) 1) eqn:E; inversion H;
   try solve [constructor].
-  repeat split; simpl.
-Admitted. *)
+  repeat split; simpl. *)
+Admitted. 
 
 Lemma open_keeps_wf: forall t i n nf, wf t n -> wf (open i t (fvar nf term_var)) n.
 Proof.
@@ -340,9 +363,6 @@ Ltac apply_IH_wf IH :=
     unshelve epose proof IH t _ t' _ _ H; clear H
   end.
 
-Require Import SystemFR.WFLemmasClose.
-Require Import SystemFR.WFLemmas.
-
 Lemma cps_rec_wf: forall size_t t nf cps_t,
   tree_size t < size_t -> 
     wf t nf -> cps_rec t nf = Some cps_t ->
@@ -398,6 +418,18 @@ Proof.
   repeat light.
 Qed.
 
+Lemma cps_value_pfv_nill: forall t cps_t,
+    pfv t term_var = nil -> cps_value t = Some cps_t -> pfv cps_t term_var = nil.
+Proof.
+  light.
+  destruct t; 
+  repeat light || invert_constructor_equalities || options || destruct_match.
+  unshelve epose proof cps_rec_pfv 
+    (S (tree_size t)) (open 0 t (fvar 0 term_var)) (0::nil) 1 t1 0 _ _ _ _; 
+  auto; repeat light; try lia.
+  rewrite open_t_size; lia.
+Admitted.
+
 Lemma cps_keeps_closed_terms_closed: forall t cps_t, 
   closed_term t -> cps t = Some cps_t -> closed_term cps_t.
 Proof.
@@ -405,7 +437,7 @@ Proof.
   eauto using cps_rec_wf, cps_rec_outputs_erased_terms, cps_rec_pfv_nill.
 Qed.
 
-Lemma cps_rec_correct: 
+(* Lemma cps_rec_correct: 
   forall p v, p ~~>* v -> wf p 0 -> is_erased_term p -> 
     forall cps_p nf,
       cps_rec p nf = Some cps_p -> 
@@ -420,9 +452,76 @@ Proof.
   destruct_match; light.
   invert_constructor_equalities.
   eexists; light.
+Admitted. *)
+
+Lemma open_closed_term: forall b v, 
+  closed_term (notype_lambda b) -> 
+  closed_term v -> 
+    closed_term (open 0 b v).
+Proof.
+  induction b; light; t_closing. lia.
+Qed.
+
+Lemma cps_rec_subst: forall v cps_v x, 
+  closed_value v -> cps_value v = Some cps_v -> forall p_size p nf,
+  tree_size p < p_size -> x < nf ->
+  (forall n, List.In n (pfv p term_var) -> n < nf) ->
+    cps_rec (substitute p ((x, v)::nil)) nf = 
+    option_map (fun cps_p => substitute cps_p ((x, cps_v)::nil)) (cps_rec p nf).
+Proof.
+  induction p_size; try lia; light; destruct p;
+  try solve [
+    repeat light || simp cps_rec in * || destruct_match
+      || invert_constructor_equalities || t_equality].
+  - repeat light || simp cps_rec in * || destruct_match
+      || invert_constructor_equalities || t_equality.
+    rewrite (cps_rec_nf _ _ 0); try t_closer.
+    eauto using cps_of_value'.
+  - repeat light || simp cps_rec in *
+    || invert_constructor_equalities || t_equality.
+    unshelve epose proof IHp_size (open 0 p (fvar nf term_var)) (S nf) _ _ _;
+    repeat light || fv_open || list_utils || rewrite open_t_size ||
+      invert_constructor_equalities;
+    try lia.
+    try solve [repeat destruct_match || light].
+    rewrite substitute_open2 in *; repeat light || t_closer 
+      || invert_constructor_equalities || t_equality; try lia;
+    try solve [repeat destruct_match || light; lia].
+    repeat light || destruct_match || invert_constructor_equalities || t_equality.
+    rewrite substitute_close; repeat light; try lia.
+    eapply cps_value_pfv_nill; eauto.
+    t_closer.
+  - repeat light || simp cps_rec in *
+    || invert_constructor_equalities || t_equality || list_utils.
+    unshelve epose proof IHp_size p1 nf _ _ _; 
+    unshelve epose proof IHp_size p2 nf _ _ _;
+    repeat light || list_utils || rewrite open_t_size ||
+      invert_constructor_equalities;
+    try lia;
+    try solve [apply_any; repeat light || list_utils].
+    repeat light || destruct_match || invert_constructor_equalities.
+Qed.
+
+Lemma cps_subst: forall v cps_v x nf, 
+  closed_value v -> cps_value v = Some cps_v -> forall p, x < nf ->
+  (forall n, List.In n (pfv p term_var) -> n < nf) ->
+    cps_rec (substitute p ((x, v)::nil)) nf = 
+    option_map (fun cps_p => substitute cps_p ((x, cps_v)::nil)) (cps_rec p nf).
+Proof.
+  eauto using cps_rec_subst.
+Qed.
+
+Lemma cps_rec_defined_for_erased_wf_terms: forall t nf, 
+  wf t 0 -> is_erased_term t -> exists cps_t, cps_rec t nf = Some cps_t.
+Proof.
 Admitted.
 
-Require Import SystemFR.RewriteTactics.
+Lemma cps_defined_for_erased_wf_terms: forall t, 
+  wf t 0 -> is_erased_term t -> exists cps_t, cps t = Some cps_t.
+Proof.
+Admitted.
+
+Hint Resolve cps_defined_for_erased_wf_terms cps_rec_defined_for_erased_wf_terms: cps.
 
 Theorem cps_eval: 
   forall p v, p ~~>* v -> closed_term p ->
@@ -434,9 +533,10 @@ Theorem cps_eval:
       ).
 Proof.
   induction 1; light; unfold cps in *; simp cps_rec in *;
-  repeat invert_constructor_equalities || destruct_match || light || options;
-  try solve [eexists; repeat light; econstructor; t_closer; auto].
+  try solve [repeat invert_constructor_equalities || destruct_match || light || options;
+  eexists; repeat light; econstructor; t_closer; auto].
   - (* lambda *)
+    repeat invert_constructor_equalities || destruct_match || light || options.
     eexists; repeat light.
     econstructor; repeat light; try solve [eapply value_bs; t_closer]. light.
     rewrite open_none; auto with bcbv_step.
@@ -444,30 +544,58 @@ Proof.
     eapply cps_rec_wf; eauto. apply wf_monotone2, wf_open; repeat light.
     t_closing.
   - (* app *)
-    unshelve epose proof IHbcbv_step1 _ _ eq_refl; repeat step;
-    t_closer; try solve [
-      unfold closed_value; light; eauto with values; eapply bs_closed_term; eauto;
-    t_closer].
-    unshelve epose proof cps_outputs_lambdas t1 t _; eauto; step.
+    unshelve epose proof bs_closed_term t2 v2 _ _;
+    unshelve epose proof bs_closed_term t1 (notype_lambda b1) _ _; t_closer.
+    unshelve epose proof cps_rec_defined_for_erased_wf_terms (open 0 b1 (fvar 0 term_var)) 1 _ _.
+    apply wf_open; t_closer.
+    apply is_erased_open; t_closer.
+    repeat invert_constructor_equalities || destruct_match || light || options || step.
     unshelve epose proof IHbcbv_step2 _ _ eq_refl; repeat step; try solve [
-      unfold closed_value; light; eauto with values; eapply bs_closed_term; eauto;
+    unfold closed_value; light; eauto with values; eapply bs_closed_term; eauto;
       t_closer
-    ]; t_closer;
-    eexists. light.
-    2: {
+    ]; t_closer.
+    unshelve epose proof IHbcbv_step3 _ (substitute cps_t ((0, cps_v)::nil)) _; eauto.
+    + t_closer.
+    + unshelve epose proof cps_subst _ _ 0 1 _ H6 (open 0 b1 (fvar 0 term_var)) _ _; 
+      repeat light; try lia.
+      * unshelve epose proof bs_value t2 v2 _; t_closer.
+      * repeat light || list_utils || fv_open; t_closer.
+      * rewrite substitute_open3 in *; t_closer.
+        t_substitutions.
+        rewrite matched2 in *; repeat light.
+        rewrite (cps_rec_nf _ _ 0) in H3; repeat light || fv_open; t_closer.
+    + repeat step.
+      eexists; light; eauto.
       econstructor; eauto with bcbv_step; repeat light;
       try solve [eapply value_bs; t_closer].
-      repeat rewrite open_none; try solve [
-        t_closing; eauto using cps_rec_wf, wf_monotone2;
-        eapply cps_rec_wf in matched; eauto;
-        t_closer
-      ].
-      econstructor; eauto with bcbv_step.
-      
-    }
-    admit.
+      rewrite open_none; [idtac | admit].
+      rewrite open_none; [idtac | admit].
+      unshelve epose proof IHbcbv_step1 _ _ eq_refl; repeat step;
+      t_closer; try solve [
+        unfold closed_value; light; eauto with values; eapply bs_closed_term; eauto;
+      t_closer].
+      apply_any. (* From IHbcbv_step1 *)
+      * admit.  
+      * econstructor; eauto with bcbv_step; repeat light;
+        try solve [eapply value_bs; t_closer].
+        rewrite open_none; [idtac | admit].
+        rewrite open_none; [idtac | admit].
+        apply_any. (* From IHbcbv_step2 *)
+        -- admit.
+        -- econstructor; eauto with bcbv_step; repeat light;
+          try solve [eapply value_bs; t_closer].
+          eapply value_bs. 
+          apply cps_of_value_is_value with v2; eauto.
+          t_closer.
+          rewrite (open_none k); t_closer.
+          rewrite open_none; [idtac | admit].
+          apply ss_bs with (app (psubstitute cps_t ((0, cps_v) :: nil) term_var) k);
+          auto. (* From IHbcbv_step3 *)
+          constructor.
+          rewrite <- open_close with (k := 0); [idtac | admit].
+          constructor.
+          admit.
 Qed.
-
 
 Theorem cps_correct: 
   forall p v, p ~~>* v -> closed_value v ->

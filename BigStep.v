@@ -39,3 +39,12 @@ Proof.
 Admitted.
 
 Hint Immediate bs_value value_bs : values.
+
+
+(* Equivalance small step*)
+
+Lemma ss_bs: forall t1 t2, t1 ~> t2 -> 
+  forall v, t2 ~~>* v -> t1 ~~>* v.
+Proof.
+  induction 1; repeat light.
+Admitted.
