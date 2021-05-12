@@ -48,3 +48,5 @@ Lemma ss_bs: forall t1 t2, t1 ~> t2 ->
 Proof.
   induction 1; repeat light.
 Admitted.
+
+

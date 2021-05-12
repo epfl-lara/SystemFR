@@ -12,6 +12,9 @@ Require Import SystemFR.CloseLemmas.
 Require Import SystemFR.WFLemmasClose.
 Require Import SystemFR.WFLemmas.
 
+Require Import Coq.Strings.String.
+Require Import Coq.Arith.Compare_dec.
+
 Require Import Program.
 Require Import Equations.Equations.
 (* Require Import Equations.Prop.Subterm. *)
@@ -249,14 +252,46 @@ Proof.
   repeat light || destruct_match || invert_constructor_equalities; eauto.
 Qed.
 
-Lemma cps_rec_nf: forall t nf nf', 
-  (forall n, List.In n (pfv t term_var) -> n < nf) -> 
-  (forall n, List.In n (pfv t term_var) -> n < nf') -> 
-    cps_rec t nf = cps_rec t nf'.
-Proof.
-  
-Admitted.
+Definition is_variable (t : tree) nf : Prop := 
+  match t with
+  | fvar i term_var => i < nf
+  | _ => False
+  end.
 
+Lemma sub_wfs: forall sub nf, 
+  (forall s, List.In s (range sub) -> is_variable s nf) -> 
+    wfs sub 0.
+Proof.
+  induction sub;
+  repeat light || destruct_match || unfold is_variable in *.
+  - unshelve epose proof H t _; repeat light || destruct_match.
+  - eapply_any; repeat light.
+    unshelve epose proof H s _; repeat light. eauto.
+Qed.
+
+Hint Resolve sub_wfs: wf.
+
+Ltac rewrite_IH_subst_nf IHsize_t nf :=
+  match goal with 
+  | H : cps_rec (psubstitute ?t ?sub term_var) ?nf' = Some ?t' |- _ => 
+    poseNew (Mark (sub, t) "subst"); rewrite (IHsize_t _ _ nf) in H
+  end.
+
+Lemma substitute_close2: forall t k nf nf' sub, nf < nf' ->
+  (forall s, List.In s (range sub) -> is_variable s nf') ->
+  (forall x, List.In x (support sub) -> x < nf) ->
+  (forall n, List.In n (pfv t term_var) -> n < nf') ->
+    close k (psubstitute t ((nf, fvar nf' term_var) :: sub) term_var) nf' =
+    psubstitute (close k t nf) sub term_var.
+Proof.
+  induction t; 
+  repeat light || destruct_match || invert_constructor_equalities
+   || t_equality || t_lookup || unfold is_variable in *; try lia;
+  try solve [apply_any; auto; repeat light; apply_any; repeat list_utils; auto].
+  - instantiate_any.
+    repeat light || destruct_match; try lia.
+  - unshelve epose proof H2 n _; lia.
+Qed.
 
 (* Lemma cps_of_value_is_value_for_lambda: forall t t', 
   closed_term (notype_lambda t) -> cps_value (notype_lambda t) = Some (notype_lambda).
@@ -435,6 +470,79 @@ Lemma cps_keeps_closed_terms_closed: forall t cps_t,
 Proof.
   unfold closed_term. repeat light;
   eauto using cps_rec_wf, cps_rec_outputs_erased_terms, cps_rec_pfv_nill.
+Qed.
+
+Lemma cps_rec_subst_nf: forall size_t t sub nf nf', 
+  tree_size t < size_t -> nf < nf' ->
+  (forall n, List.In n (pfv t term_var) -> n < nf) -> 
+  (forall s, List.In s (range sub) -> is_variable s nf') ->
+  (forall x, List.In x (support sub) -> x < nf) ->
+    cps_rec (substitute t sub) nf' = 
+    option_map (fun res => substitute res sub)
+    (cps_rec t nf).
+Proof.
+  induction size_t; try lia; destruct t; 
+  repeat light || simp cps_rec in * || invert_constructor_equalities 
+  || t_equality.
+  - repeat light || simp cps_rec in * || invert_constructor_equalities 
+    || t_equality || destruct_match.
+    unfold is_variable in *.
+    repeat t_lookup.
+    instantiate_any.
+    destruct_match; repeat light.
+    repeat simp cps_rec in * || light || destruct_match.
+  - unshelve epose proof IHsize_t (open 0 t (fvar nf term_var)) 
+    ((nf, fvar nf' term_var)::sub) (S nf) (S nf') _ _ _ _ _; 
+    try solve [repeat light || rewrite open_t_size || options 
+    || destruct_match || invert_constructor_equalities || fv_open || list_utils || t_pfv_in_subst; try lia].
+    + repeat light.
+      instantiate_any.
+      unfold is_variable in *.
+      repeat destruct_match || light.
+    + rewrite substitute_open3 in *; t_rewrite;
+      try solve [repeat instantiate_any; lia].
+      repeat rewrite_any || light || invert_constructor_equalities || t_equality.
+      apply substitute_close2; try solve [repeat light].
+      repeat light.
+      unshelve epose proof cps_rec_pfv 
+        (S (tree_size (open 0 t (fvar nf term_var)))) 
+        _ _ _ _ n _ eq_refl _ matched0 _; try lia;
+      repeat light || fv_open || list_utils || destruct_match.
+      instantiate_any.
+      lia.
+  - unshelve epose proof IHsize_t t1 sub nf nf' _ _ _ _ _; 
+    unshelve epose proof IHsize_t t2 sub nf nf' _ _ _ _ _; 
+    repeat light || rewrite open_t_size || options 
+    || destruct_match || invert_constructor_equalities || fv_open
+    || list_utils || t_pfv_in_subst; try lia;
+    apply H1; repeat list_utils || light.
+Qed.
+
+Lemma cps_rec_subst_nf': forall t sub nf nf', 
+  nf < nf' ->
+  (forall n, List.In n (pfv t term_var) -> n < nf) -> 
+  (forall s, List.In s (range sub) -> is_variable s nf') ->
+  (forall x, List.In x (support sub) -> x < nf) ->
+    cps_rec (substitute t sub) nf' = 
+    option_map (fun res => substitute res sub)
+    (cps_rec t nf).
+Proof.
+  eauto using cps_rec_subst_nf.
+Qed.
+
+Lemma cps_rec_nf: forall t nf nf', 
+  (forall n, List.In n (pfv t term_var) -> n < nf) -> 
+  (forall n, List.In n (pfv t term_var) -> n < nf') -> 
+    cps_rec t nf = cps_rec t nf'.
+Proof.
+  light.
+  destruct (Compare_dec.lt_eq_lt_dec nf nf') as [[E | E] | E]; auto.
+  - (* nf < nf' *)
+    unshelve epose proof cps_rec_subst_nf' t nil nf nf' _ _ _ _; auto;
+    repeat light || options || destruct_match || rewrite substitute_nothing3 in *.
+  - (* nf > nf' *)
+    unshelve epose proof cps_rec_subst_nf' t nil nf' nf _ _ _ _; auto;
+    repeat light || options || destruct_match || rewrite substitute_nothing3 in *.
 Qed.
 
 (* Lemma cps_rec_correct: 
