@@ -16,7 +16,7 @@ Require Import Coq.Strings.String.
 Require Import Coq.Arith.Compare_dec.
 
 Require Import Program.
-Require Import Equations.Equations.
+Require Import Equations.Prop.Equations.
 Require Import Equations.Prop.Subterm.
 
 Require Import PeanoNat.
@@ -29,7 +29,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Equations (noind) cps_rec (t : tree) (next_fv : nat) : option tree by wf (tree_size t) lt := {
+Equations cps_rec (t : tree) (next_fv : nat) : option tree by wf (tree_size t) lt := {
   cps_rec (fvar i f) _ := 
     match f with 
     | term_var => Some (notype_lambda (app (lvar 0 term_var) (fvar i term_var)))
@@ -42,11 +42,9 @@ Equations (noind) cps_rec (t : tree) (next_fv : nat) : option tree by wf (tree_s
 
   cps_rec (succ t') nf := 
     if (is_value t') then 
-      match cps_rec t' nf with 
-      | Some (notype_lambda (app (lvar 0 term_var) cps_v)) => 
-          Some (notype_lambda (app (lvar 0 term_var) (succ (cps_v)))) 
-      | _ => None
-      end
+      option_map 
+        (fun cps_v => notype_lambda (app (lvar 0 term_var) (succ (cps_v))))
+        (cps_rec_value t' nf)
     else 
     (* option_map 
         (fun cps_t' => 
@@ -138,6 +136,21 @@ Equations (noind) cps_rec (t : tree) (next_fv : nat) : option tree by wf (tree_s
   cps_rec (tsize t) nf := None; (* I don't know how to handle it *) 
   
   cps_rec _ _ := None
+} where cps_rec_value (t : tree) (next_fv : nat): option tree by struct t := {
+  cps_rec_value uu nf := Some uu;
+  cps_rec_value ttrue nf := Some ttrue;
+  cps_rec_value tfalse nf := Some tfalse;
+  cps_rec_value (pp e1 e2) nf := None;
+  cps_rec_value (tleft e) nf := None;
+  cps_rec_value (tright e) nf := None;
+  cps_rec_value (succ e) nf := 
+    option_map succ (cps_rec_value e nf);
+  cps_rec_value (notype_lambda t') nf :=
+    let open_t : tree := open 0 t' (fvar nf term_var) in
+    let cps_t : option tree := cps_rec open_t (S nf) in
+    let close_t : option tree := option_map (fun cps_t => close 0 cps_t nf) cps_t in
+      option_map (fun close_t => notype_lambda (close_t)) close_t;
+  cps_rec_value _ nf := None
 }.
 
 Ltac cps_rec_def := 
