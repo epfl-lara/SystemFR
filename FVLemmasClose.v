@@ -90,3 +90,17 @@ Proof.
   induction t;
     repeat step || list_utils.
 Qed.
+
+Lemma fv_close_nil2:
+  forall t k x,
+    subset (pfv t term_var) (x :: nil) ->
+    pfv (close k t x) term_var = nil.
+Proof.
+  induction t; repeat step || list_utils || sets.
+Qed.
+
+Lemma pfv_close: forall x nf t tag i, 
+  x <> nf -> x ∈ (pfv t tag) -> x ∈ (pfv (close i t nf) tag).
+Proof.
+  induction t; repeat light || destruct_match || list_utils. 
+Qed.

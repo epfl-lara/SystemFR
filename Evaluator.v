@@ -16,6 +16,61 @@ Fixpoint is_nat (t : tree) : bool :=
     | _ => false
 end.
 
+Fixpoint is_open_value (t: tree) : bool :=
+  match t with
+    | fvar _ term_var => true
+    | uu => true
+    | ttrue => true
+    | tfalse => true
+    | pp e1 e2 => andb (is_open_value e1) (is_open_value e2)
+    | tleft e1 => (is_open_value e1)
+    | tright e1 => (is_open_value e1)
+    | zero => true
+    | succ e1 => (is_open_value e1)
+    | notype_lambda _ => true
+    | _ => false end.
+
+Ltac destruct_is_open_value := 
+  match goal with
+  | [ |- context[is_open_value ?t]] => 
+    let is_open_value_eqn := fresh "is_open_value_eqn" in
+    destruct (is_open_value t) eqn:is_open_value_eqn
+  | [H: context[is_open_value ?t] |- _] => 
+    let is_open_value_eqn := fresh "is_open_value_eqn" in
+    destruct (is_open_value t) eqn:is_open_value_eqn
+  end.
+
+Lemma no_free_var_open_value_is_value : forall v, 
+  is_open_value v = true ->
+  pfv v term_var = nil -> 
+    cbv_value v.
+Proof.
+  induction v;
+  repeat light || destruct_match || list_utils || bools; 
+  try discriminate;
+  eauto with values.
+Qed.
+
+Hint Resolve no_free_var_open_value_is_value : open_value.
+
+Lemma cbv_value_is_open_value_true: forall v,
+  cbv_value v -> is_open_value v = true.
+Proof.
+  induction 1; repeat light || bools.
+Qed.
+
+Hint Resolve cbv_value_is_open_value_true : open_value.
+
+Lemma cbv_value_is_open_value_false_contra: forall v,
+  cbv_value v -> 
+  is_open_value v = false -> 
+    False.
+Proof.
+  induction 1; repeat light || bools.
+Qed.
+
+Hint Immediate cbv_value_is_open_value_false_contra : open_value.
+
 Fixpoint is_value (t: tree) : bool :=
   match t with
     | uu => true

@@ -175,13 +175,15 @@ where "t '~~>*' v" := (bcbv_step t v).
 #[global]
 Hint Constructors bcbv_step : bcbv_step.
 
-Lemma bs_closed_term: forall t1 t2, t1 ~~>* t2 -> closed_term t1 -> closed_term t2.
+Lemma bs_closed_term: forall t1 t2, t1 ~~>* t2 -> closed_term t1 -> closed_value t2.
 Proof.
   induction 1; repeat light || apply_any; t_closing;
-  eauto with fv erased wf.
+  eauto with fv erased wf; try solve [inversion H4; eauto].
   repeat light || eapply wf_open; eauto with wf.
   repeat light || eapply is_erased_open; eauto with erased.
 Qed.
+
+Hint Resolve bs_closed_term : values.
 
 Lemma bs_value: forall t v, t ~~>* v -> cbv_value v.
 Proof.
