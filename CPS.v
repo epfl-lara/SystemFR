@@ -85,7 +85,30 @@ Equations cps_rec (value : bool) (t : tree) (next_fv : nat) : option tree by wf 
   cps_rec false (pi1 t) nf := None;
   cps_rec false (pi2 t) nf := None;
   
-  cps_rec false (tmatch t1 t0 ts) nf := None;
+  (* 
+    tmatch t t0 ts => 
+      λk. 
+        (cps_t (
+          λrt. tmatch rt 
+                  (cps_t0 k)
+                  ((close 0 cps_ts nf) k)
+        ))
+  *)
+  cps_rec false (tmatch t t0 ts) nf := 
+    match (cps_rec false t nf), 
+      (cps_rec false t0 nf),
+      (cps_rec false (open 0 ts (fvar nf term_var)) (S nf)) with
+    | Some cps_t, Some cps_t0, Some cps_ts => 
+      Some (notype_lambda (
+        app cps_t (notype_lambda (
+          tmatch (lvar 0 term_var)
+            (app cps_t0 (lvar 1 term_var))
+            (* because 0 is used by the free variable of the pattern *)
+            (app (close 0 cps_ts nf) (lvar 2 term_var))
+        ))
+      ))
+    | _, _, _ => None
+    end;
   cps_rec false (sum_match t tl tr) nf := None;
   cps_rec false (tleft t) nf := None;
   cps_rec false (tright t) nf := None;
@@ -127,29 +150,15 @@ Definition cps (t : tree) := cps_rec false t 0.
 
 Definition cps_value (t : tree) := cps_rec true t 0.
 
-(* Fixpoint cps_value (t : tree) : option tree := 
-  match t with 
-  | uu => Some uu
-  | ttrue => Some ttrue
-  | tfalse => Some tfalse 
-  (* | pp e1 e2 => Some (pp e1 e2)
-  | tleft e => Some (tleft e)
-  | tright e => Some (tright e) *)
-  | zero => Some zero 
-  | succ e => 
-    option_map 
-      succ 
-      (* (fun cps_e => app cps_e (notype_lambda (succ (lvar 0 term_var))))  *)
-      (cps_value e) (* need to convert e *)
-  | notype_lambda t' => 
-    let open_t : tree := open 0 t' (fvar 0 term_var) in
-    let cps_t : option tree := cps_rec open_t 1 in
-    let close_t : option tree := option_map (fun cps_t => close 0 cps_t 0) cps_t in
-      option_map (fun close_t => notype_lambda (close_t)) close_t
-  | _ => None
-  end.
+(* Eval compute in (cps_rec false (tmatch zero (succ zero) (lvar 0 term_var)) 0).
 
-Hint Unfold cps_value : cps. *)
+Eval compute in (
+  option_map 
+    option_map 
+  option_map 
+    (fun cps_t => eval (app cps_t (notype_lambda (lvar 0 term_var))) 2)
+    (cps (tmatch zero (succ zero) (lvar 0 term_var)))
+). *)
 
 (* Eval compute in cps (notype_lambda (lvar 0 term_var)).
 
@@ -224,14 +233,6 @@ Definition tree_eq t1 t2 : bool := if (tree_eq_dec t1 t2) then true else false. 
     end in
   (cps_t, cps_value_v, final_t)
 ). *)
-
-(* closed_value v -> cps_value v = Some cps_v -> forall p, x < nf ->
-  (forall n, n ∈ (pfv p term_var) -> n < nf) ->
-    cps_rec (substitute p ((x, v)::nil)) nf = 
-    option_map (fun cps_p => substitute cps_p ((x, cps_v)::nil)) (cps_rec p nf).
-     *)
-
-(* Transparent tag_eq_dec. *)
 
 (* Eval compute in (
   let v : tree := succ (zero) in
@@ -329,7 +330,7 @@ Ltac instantiate_cps_of_value :=
   end.
 
 Lemma cps_of_value_is_open_value : forall p cps_p nf,
-  cps_rec true p nf = Some cps_p -> is_open_value p = true.
+  cps_rec true p nf = Some cps_p -> is_open_value cps_p = true.
 Proof.
   induction p; try destruct_tag; 
   repeat light || simp_cps || options 
@@ -337,6 +338,7 @@ Proof.
   eauto.
 Qed.
 
+Hint Resolve cps_of_value_is_open_value : cps. 
 (* Lemma cps_of_value: forall v cps_v nf, 
   is_open_value v = true -> cps_rec false v nf = Some cps_v -> exists cps_value_v, 
     cps_rec true v nf = Some cps_value_v /\ 
@@ -451,6 +453,9 @@ Proof.
   - unshelve epose proof IHsize_t _ _ _ _ matched _.
     rewrite open_t_size; lia.
     auto with erased.
+  - unshelve epose proof IHsize_t _ _ _ _ matched1 _.
+    rewrite open_t_size; lia.
+    auto with erased.
 Qed.
 
 Lemma cps_rec_outputs_erased_terms: forall t nf cps_t value,
@@ -463,7 +468,8 @@ Ltac instantiate_cps_rec_erased :=
   match goal with
   | H: cps_rec _ _ _ = Some _ |- _ => 
     poseNew (Mark H "cps_rec_erased");
-    unshelve epose proof cps_rec_outputs_erased_terms _ _ _ _ H
+    unshelve epose proof cps_rec_outputs_erased_terms _ _ _ _ H;
+    t_closer
   end.
 
 Hint Resolve cps_rec_outputs_erased_terms : cps.
@@ -471,7 +477,7 @@ Hint Resolve cps_rec_outputs_erased_terms : cps.
 Ltac apply_IH_cps_rec_wf' IH :=
   match goal with 
   | H: cps_rec _ ?t ?nf = Some ?t' |- _ => 
-    unshelve epose proof IH t _ t' _ _ _ H; clear H
+    unshelve epose proof IH _ _ _ _ _ _ H; clear H
   end.
 
 Lemma cps_rec_wf': forall size_t t nf cps_t value,
@@ -482,8 +488,10 @@ Proof.
   induction size_t; repeat light; try lia;
   destruct t; destruct value; try destruct_tag; simp_cps; 
   repeat light || destruct_match 
+  || invert_constructor_equalities || apply_IH_cps_rec_wf' IHsize_t 
     || invert_constructor_equalities || apply_IH_cps_rec_wf' IHsize_t 
-    || rewrite open_t_size || options;
+  || invert_constructor_equalities || apply_IH_cps_rec_wf' IHsize_t 
+  || rewrite open_t_size || options;
   eauto with lia wf step_tactic.
 Qed.
 
@@ -496,17 +504,25 @@ Qed.
 
 Ltac instantiate_cps_rec_wf := 
   match goal with
-  | H: cps_rec _ ?t _ = Some _,
+  | H: cps_rec _ ?t _ = Some ?t',
     H': wf ?t 0 |- _ => 
-      poseNew (Mark (H, H') "cps_rec_wf");
+      poseNew (Mark H "cps_rec_wf");
       unshelve epose proof cps_rec_wf _ _ _ _ H H'
+  | H: cps_rec _ ?t _ = Some ?t',
+    H': closed_term ?t |- _ => 
+    poseNew (Mark H "cps_rec_wf");
+    unshelve epose proof cps_rec_wf _ _ _ _ H _; t_closer
+  | H: cps_rec _ ?t _ = Some ?t',
+    H': closed_value ?t |- _ => 
+    poseNew (Mark H "cps_rec_wf");
+    unshelve epose proof cps_rec_wf _ _ _ _ H _; t_closer    
   end.
 
 Ltac rewrite_open_none := 
   repeat rewrite open_none;
   try solve [
-    t_closing; repeat instantiate_cps_rec_wf; 
-    eauto using wf_monotone2
+    repeat instantiate_cps_rec_wf; 
+    eauto using wf_monotone2 with wf
   ].
 
 Hint Resolve cps_rec_wf : cps.
@@ -527,8 +543,9 @@ Proof.
   induction size_t; light; try lia.
   destruct t eqn:E; destruct value;
   repeat light || simp_cps_hyp || destruct_match || destruct_tag
-    || invert_constructor_equalities || list_utils || apply_IH_cps_rec_pfv' IHsize_t
-    || rewrite open_t_size || fv_close || fv_open || options;
+  || invert_constructor_equalities || list_utils 
+  || apply_IH_cps_rec_pfv' IHsize_t
+  || rewrite open_t_size || fv_close || fv_open || options;
   try lia.
 Qed.
 
@@ -775,19 +792,37 @@ Ltac apply_IH_cps_rec_subst_nf' IH :=
   | H: forall n, n ∈ pfv ?t term_var -> S n <= ?nf |- 
     context[cps_rec ?value (psubstitute ?t ?sub term_var) ?nf'] =>
       poseNew (Mark (H, t) "apply IH");
-      unshelve epose proof IH t sub (nf) (nf') value _ _ _ _ _
+      unshelve epose proof IH t sub (nf) (nf') value _ _ _ _ _;
+      repeat light || list_utils || rewrite open_t_size || fv_open
+      || destruct_match || invert_constructor_equalities || t_equality;
+      eauto using is_variable_monotonic with lia
   | H: forall n, n ∈ pfv _ term_var -> S n <= ?nf |- 
     context[cps_rec ?value (psubstitute ?t ?sub term_var) ?nf'] =>
       poseNew (Mark (H, t) "apply IH");
-      unshelve epose proof IH t sub (S nf) (nf') value _ _ _ _ _
+      unshelve epose proof IH t sub (S nf) (nf') value _ _ _ _ _;
+      repeat light || list_utils || rewrite open_t_size || fv_open
+      || destruct_match || invert_constructor_equalities || t_equality;
+      eauto using is_variable_monotonic with lia
   | H: forall n, n ∈ pfv ?t term_var ++ pfv ?t' term_var -> S n <= ?nf |- 
-    context[cps_rec ?value (psubstitute ?t ?sub term_var) ?nf'] =>
-      poseNew (Mark (H, t) "apply IH");
-      unshelve epose proof IH t sub (nf) (nf') value _ _ _ _ _
-  | H: forall n, n ∈ pfv ?t term_var ++ pfv ?t' term_var -> S n <= ?nf |- 
-    context[cps_rec ?value (psubstitute ?t' ?sub term_var) ?nf'] =>
-      poseNew (Mark (H, t') "apply IH");
-      unshelve epose proof IH t' sub (nf) (nf') value _ _ _ _ _
+    context[cps_rec ?value (psubstitute _ ?sub term_var) ?nf'] =>
+      poseNew (Mark (H) "apply IH");
+      unshelve epose proof IH t sub (nf) (nf') value _ _ _ _ _;
+      unshelve epose proof IH t' sub (nf) (nf') value _ _ _ _ _;
+      repeat light || list_utils || rewrite open_t_size || fv_open
+      || destruct_match || invert_constructor_equalities || t_equality;
+      eauto using is_variable_monotonic with lia
+  | H: forall n, n ∈ pfv ?t1 term_var ++ pfv ?t2 term_var ++ pfv ?t3 term_var -> 
+        S n <= ?nf |-
+    context[cps_rec ?value (psubstitute ?t1 ?sub term_var) ?nf'] => 
+      poseNew (Mark H "apply IH");
+      unshelve epose proof IH t1 sub (nf) (nf') value _ _ _ _ _;
+      unshelve epose proof IH t2 sub (nf) (nf') value _ _ _ _ _;
+      unshelve epose proof IH 
+        (open 0 t3 (fvar nf term_var)) ((nf, fvar nf' term_var) :: sub) 
+        (S nf) (S nf') value _ _ _ _ _;
+      repeat light || list_utils || rewrite open_t_size || fv_open
+      || destruct_match || invert_constructor_equalities || t_equality;
+      eauto using is_variable_monotonic with lia
   end.
 
 Lemma cps_rec_subst_nf': forall size_t t sub nf nf' value, 
@@ -809,31 +844,20 @@ Proof.
   try solve [try destruct_apply_subst_is_value;
   repeat apply_IH_cps_rec_subst_nf' IHsize_t; try lia; 
   repeat light || list_utils 
-  || destruct_match || invert_constructor_equalities || t_equality].
-  - (* lambda *)
+  || destruct_match || invert_constructor_equalities || t_equality];
+  try solve [
     erewrite <- substitute_open3 with (x := nf); 
-    eauto with wf; try solve [light; instantiate_any; lia].
+    eauto with wf; try solve [
+      repeat light || list_utils 
+      || instantiate_any;
+      lia
+    ];
     apply_IH_cps_rec_subst_nf' IHsize_t;
-    repeat light || rewrite open_t_size || fv_open 
-    || list_utils || destruct_match || invert_constructor_equalities
-    || t_equality;
-    eauto with lia open_value.
     apply substitute_close2; 
-    eauto with lia; light.
-    instantiate_cps_rec_pfv.
-    instantiate_any; lia.
-  - (* lambda *)
-    erewrite <- substitute_open3 with (x := nf); 
-    eauto with wf; try solve [light; instantiate_any; lia].
-    apply_IH_cps_rec_subst_nf' IHsize_t;
-    repeat light || rewrite open_t_size || fv_open 
-    || list_utils || destruct_match || invert_constructor_equalities
-    || t_equality;
-    eauto with lia open_value.
-    apply substitute_close2; 
-    eauto with lia; light.
-    instantiate_cps_rec_pfv.
-    instantiate_any; lia.
+    eauto with lia; light;
+    instantiate_cps_rec_pfv;
+    instantiate_any; lia
+  ].
 Qed.
 
 Lemma cps_rec_subst_nf: forall t value sub nf nf',
@@ -930,25 +954,16 @@ Proof.
     destruct_apply_subst_is_value; apply_IH_cps_rec_subst IHp_size;
     repeat light || options || simp_cps || invert_constructor_equalities 
     || t_equality || destruct_match
+  ]; try solve [
+    rewrite substitute_open2 in *; repeat light || t_closer 
+    || invert_constructor_equalities || t_equality;
+    try solve [repeat destruct_match || light; lia];
+    repeat apply_IH_cps_rec_subst IHp_size;
+    repeat light || options || destruct_match 
+    || invert_constructor_equalities || t_equality;
+    rewrite substitute_close; repeat light; try lia;
+    t_closing; eauto with cps
   ].
-  - (* lambda *)
-    rewrite substitute_open2 in *; repeat light || t_closer 
-    || invert_constructor_equalities || t_equality;
-    try solve [repeat destruct_match || light; lia].
-    apply_IH_cps_rec_subst IHp_size.
-    repeat light || options || destruct_match 
-    || invert_constructor_equalities || t_equality.
-    rewrite substitute_close; repeat light; try lia.
-    t_closing; eauto with cps.
-  - (* lambda *)
-    rewrite substitute_open2 in *; repeat light || t_closer 
-    || invert_constructor_equalities || t_equality;
-    try solve [repeat destruct_match || light; lia].
-    apply_IH_cps_rec_subst IHp_size.
-    repeat light || options || destruct_match 
-    || invert_constructor_equalities || t_equality.
-    rewrite substitute_close; repeat light; try lia.
-    t_closing; eauto with cps.
 Qed.
 
 Lemma cps_subst: forall v cps_v x nf, 
@@ -962,6 +977,11 @@ Qed.
 
 Hint Resolve cps_subst : cps.
 
+Lemma cps_value_def_for_values: forall v, 
+  cbv_value v -> exists cps_v, cps_value v = Some cps_v.
+Proof.
+Admitted.
+
 Lemma cps_rec_defined_for_erased_wf_terms: forall t nf, 
   wf t 0 -> is_erased_term t -> exists cps_t, cps_rec false t nf = Some cps_t.
 Proof.
@@ -970,19 +990,23 @@ Admitted.
 Lemma cps_defined_for_erased_wf_terms: forall t, 
   wf t 0 -> is_erased_term t -> exists cps_t, cps t = Some cps_t.
 Proof.
-Admitted.
+  eauto using cps_rec_defined_for_erased_wf_terms.
+Qed.
 
 #[global]
 Hint Resolve cps_defined_for_erased_wf_terms cps_rec_defined_for_erased_wf_terms: cps.
 
 Ltac solve_wf_cps_rec :=
-  try solve [try apply wf_monotone2; eapply cps_rec_wf; eauto; t_closer].
+  try solve [try apply wf_monotone2; eapply cps_rec_wf; eauto; t_closer];
+  try solve [t_closing; eauto using wf_monotone2 with cps wf].
 
 Ltac solve_pfv_nill_cps_rec :=
   try solve [eapply cps_rec_pfv_nil; eauto].
 
 Ltac solve_erased_terms_cps_rec :=
-  try solve [eapply cps_rec_outputs_erased_terms; eauto].
+  try solve [
+    try eapply is_erased_term_close;
+    eapply cps_rec_outputs_erased_terms; eauto].
 
 (* Ltac instantiate_IH_cps_eval IH := *)
 
@@ -1004,8 +1028,12 @@ Proof.
     options; destruct_is_open_value; 
     repeat light || invert_constructor_equalities.
     + unshelve epose proof bs_unique t v t _ _; 
+      try solve [
+        t_closing; 
       t_closing;
-      eauto using value_bs with values open_value.
+        t_closing; 
+        eauto using value_bs with values open_value
+      ].
       repeat light || rewrite_any 
       || destruct_match || invert_constructor_equalities.
       eexists; repeat light; t_closing.
@@ -1023,12 +1051,110 @@ Proof.
       remember H as H'; clear HeqH'.
       apply bs_closed_term in H; t_closing.
       apply bs_value in H'.
-      instantiate_cps_rec_pfv.
+      repeat instantiate_cps_rec_pfv.
       instantiate_cps_rec_open_value.
       eapply ss_bs; [econstructor | idtac];
-      eauto with open_value.
+      eauto with open_value cps.
       repeat light.
       rewrite_open_none.
+  - (* tmatch zero _ _ *)
+    repeat invert_constructor_equalities || destruct_match || light || options || step.
+    unshelve epose proof IHbcbv_step1 _ _ eq_refl; t_closer; steps.
+    unshelve epose proof IHbcbv_step2 _ _ eq_refl; t_closer; steps.
+    rewrite_any.
+    eexists; repeat light.
+    eapply ss_bs.
+    econstructor; t_closer.
+    repeat light.
+    rewrite_open_none; solve_wf_cps_rec.
+    apply_any. 
+    + t_closing; 
+      eauto with cps;
+      solve_wf_cps_rec;
+      eauto with cps erased.
+      eauto using fv_close_nil2, fv_close_cps_rec.
+    + eapply ss_bs.
+      econstructor; t_closer.
+      repeat light.
+      rewrite_open_none;
+      solve_wf_cps_rec.
+      econstructor; eauto with bcbv_step; repeat light.
+  - (* tmatch (succ v) _ _ *) 
+    unshelve epose proof cps_rec_defined_for_erased_wf_terms (open 0 ts (fvar 0 term_var)) 1 _ _.
+    apply wf_open; t_closer.
+    apply is_erased_open; t_closer.
+
+    apply bs_closed_term in H; t_closer.
+    apply bs_closed_term in H0; t_closer.
+
+    unshelve epose proof cps_value_def_for_values v' _; t_closer.
+
+    steps.
+    eexists; repeat light; eauto with cps.
+    eapply ss_bs.
+    econstructor; t_closer.
+    repeat light.
+    rewrite_open_none; solve_wf_cps_rec.
+
+    unshelve epose proof IHbcbv_step1 _ _ eq_refl; t_closer.
+    steps.
+    repeat light || options || destruct_match || invert_constructor_equalities.
+
+    unshelve epose proof cps_rec_closed_value_is_value _ _ _ _ _ matched2;
+    try solve [
+      t_closing; 
+      match goal with
+      | H: cbv_value (succ _) |- _ => inversion H
+      end;
+      eauto
+    ].
+
+    apply_any; try solve [
+      t_closing;
+      repeat instantiate_cps_rec_pfv;
+      repeat instantiate_cps_rec_wf;
+      eauto using fv_close_cps_rec, fv_close_nil2 with cps wf;
+      solve_wf_cps_rec;
+      solve_erased_terms_cps_rec
+    ].
+
+    eapply ss_bs.
+    econstructor; t_closer.
+    repeat light.
+
+    rewrite_open_none; solve_wf_cps_rec.
+
+    eapply BSmatchS.
+    + constructor.
+      apply value_bs.
+      t_closer.
+    + repeat light.
+      rewrite open_close; solve_wf_cps_rec.
+      rewrite_open_none; solve_wf_cps_rec.
+      unshelve epose proof cps_subst _ _ 0 1 _ matched2 
+        (open 0 ts (fvar 0 term_var)) false _ _;
+      t_closer;
+      repeat light || fv_open || list_utils || destruct_match;
+      try solve [
+        t_closing;
+        match goal with
+        | H: cbv_value (succ _) |- _ => inversion H
+        end;
+        eauto
+      ].
+
+      repeat light || options || destruct_match || invert_constructor_equalities.
+      rewrite substitute_open3 in *; t_closer.
+      t_substitutions.
+      
+      rewrite (cps_rec_nf (open 0 ts v) 1 0 false) in *;
+      repeat light || fv_open || list_utils || destruct_match; t_closer.
+
+      unshelve epose proof IHbcbv_step2 _ _ H6; t_closer; steps.
+
+      apply_any; t_closer.
+      unfold cps_value in *.
+      repeat light.
   - (* lambda *)
     repeat invert_constructor_equalities || destruct_match || light || options.
     eexists; repeat light; t_closing.
@@ -1046,7 +1172,7 @@ Proof.
     apply wf_open; t_closer.
     apply is_erased_open; t_closer.
 
-    repeat invert_constructor_equalities || destruct_match || light || options || step.
+    repeat invert_constructor_equalities|| destruct_match || light || options || step.
     unshelve epose proof IHbcbv_step2 _ _ eq_refl; repeat step; 
     try solve [
       unfold closed_value; light; eauto with values; 
@@ -1067,17 +1193,18 @@ Proof.
       eexists; light; eauto.
       econstructor; eauto with bcbv_step; repeat light;
       try solve [eapply value_bs; t_closer].
-      rewrite_open_none.
+      rewrite_open_none; solve_wf_cps_rec.
       unshelve epose proof IHbcbv_step1 _ _ eq_refl; repeat step;
       t_closer; try solve [
-        unfold closed_value; light; eauto with values; eapply bs_closed_term; eauto;
-      t_closer].
+        unfold closed_value; light; eauto with values; 
+        eapply bs_closed_term; eauto; t_closer
+      ].
       apply_any. (* From IHbcbv_step1 *)
       * t_closing;
         eauto using wf_monotone2 with cps.
       * econstructor; eauto with bcbv_step; repeat light;
         try solve [eapply value_bs; t_closer].
-        rewrite_open_none.
+        rewrite_open_none; solve_wf_cps_rec.
         apply_any. (* From IHbcbv_step2 *)
         -- t_closing;
           eauto using fv_close_nil2, fv_close_cps_rec;

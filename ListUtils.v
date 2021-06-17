@@ -87,9 +87,20 @@ Ltac list_utils :=
   | H: context[_ ∈ _ ++ _] |- _  => rewrite in_app_iff in H
   | |- context[_ ∈ _ ++ _] => rewrite in_app_iff
   | H: forall n, n ∈ (?s1 ++ ?s2) -> _, 
-    H': ?n ∈ ?s1 |- _ => unshelve epose proof H n _; repeat light || rewrite in_app_iff
+    H': ?n ∈ ?s1 |- _ => unshelve epose proof H n _; 
+      repeat light || rewrite in_app_iff; clear H'
   | H: forall n, n ∈ (?s1 ++ ?s2) -> _, 
-    H': ?n ∈ ?s2 |- _ => unshelve epose proof H n _; repeat light || rewrite in_app_iff
+    H': ?n ∈ ?s2 |- _ => unshelve epose proof H n _;
+      repeat light || rewrite in_app_iff; clear H'
+  | H: forall n, n ∈ (?s1 ++ ?s2 ++ ?s3) -> _, 
+    H': ?n ∈ ?s1 |- _ => unshelve epose proof H n _;
+      repeat light || rewrite in_app_iff; clear H'
+  | H: forall n, n ∈ (?s1 ++ ?s2 ++ ?s3) -> _, 
+    H': ?n ∈ ?s2 |- _ => unshelve epose proof H n _; 
+      repeat light || rewrite in_app_iff; clear H'
+  | H: forall n, n ∈ (?s1 ++ ?s2 ++ ?s3) -> _, 
+    H': ?n ∈ ?s3 |- _ => unshelve epose proof H n _;
+      repeat light || rewrite in_app_iff; clear H'
   | H: ?x ∈ ?l |- context[map ?f ?l] =>
     poseNew (Mark (f,l,x) "in_map");
     poseNew (in_map _ _ f l x)
