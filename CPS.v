@@ -78,7 +78,7 @@ Equations cps_rec (value : bool) (t : tree) (next_fv : nat) : option tree by wf 
 
   cps_rec false (notype_tfix t) nf := None;
 
-  cps_rec false notype_err nf := None;
+  cps_rec false notype_err nf := Some notype_err;
   cps_rec false (ite cond tthen telse) nf := None;
 
   cps_rec false (pp t1 t2) nf := None;
@@ -157,7 +157,7 @@ Equations cps_rec (value : bool) (t : tree) (next_fv : nat) : option tree by wf 
   cps_rec false (boolean_recognizer r t) nf := None;
   cps_rec false (unary_primitive o t) nf := None;
   cps_rec false (binary_primitive o t1 t2) nf := None;
-  cps_rec false (tsize t) nf := None; (* I don't know how to handle it *) 
+  cps_rec false (tsize t) nf := None;
   
   cps_rec false _ _ := None;
 
