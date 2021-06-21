@@ -57,7 +57,6 @@ Equations cps_rec (value : bool) (t : tree) (next_fv : nat) : option tree by wf 
       Some (notype_lambda (
         app (cps_t1) (notype_lambda (
           app (cps_t2) (notype_lambda (
-            (* need to check the indexes here between 0 and 2 *)
             app (app (lvar 1 term_var) (lvar 0 term_var)) (lvar 2 term_var)
           ))
         ))
@@ -192,98 +191,6 @@ Definition cps (t : tree) := cps_rec false t 0.
 
 Definition cps_value (t : tree) := cps_rec true t 0.
 
-(* Eval compute in (cps_rec false (tmatch zero (succ zero) (lvar 0 term_var)) 0).
-
-Eval compute in (
-  option_map 
-    option_map 
-  option_map 
-    (fun cps_t => eval (app cps_t (notype_lambda (lvar 0 term_var))) 2)
-    (cps (tmatch zero (succ zero) (lvar 0 term_var)))
-). *)
-
-(* Eval compute in cps (notype_lambda (lvar 0 term_var)).
-
-Eval compute in cps_value (notype_lambda (lvar 0 term_var)).
-
-Eval compute in (
-  match (cps (notype_lambda (lvar 0 term_var))) with 
-  | Some cps_t => eval (app cps_t (notype_lambda (lvar 0 term_var))) 1000
-  | None => None 
-  end
-). *)
-
-(* Eval compute in cps (app (notype_lambda (lvar 0 term_var)) uu).
-Eval compute in (
-  match (cps (app (notype_lambda (lvar 0 term_var)) uu)) with 
-  | None => None
-  | Some cps_t => (eval (app (cps_t) (notype_lambda (lvar 0 term_var))) 1000)
-  end).
-
-Eval compute in (
-  option_map 
-    (fun cps_t => eval (app cps_t (notype_lambda (lvar 0 term_var))) 1000)
-    (cps (app (notype_lambda (lvar 0 term_var)) uu))
-).
-
-Eval compute in (
-  let p : tree := app (app 
-    (notype_lambda (notype_lambda (app (lvar 1 term_var) (lvar 0 term_var))))
-    (notype_lambda (lvar 0 term_var))) uu
-  in 
-    option_map 
-      (fun cps_t => eval (app cps_t (notype_lambda (lvar 0 term_var))) 1000)
-      (cps p)
-).
-
-Eval compute in (
-  let p : tree := (app 
-    (notype_lambda (notype_lambda (app (lvar 1 term_var) (lvar 0 term_var))))
-    (notype_lambda (lvar 0 term_var)))
-  in 
-    option_map 
-      (fun cps_t => eval (app cps_t (notype_lambda (lvar 0 term_var))) 1000)
-      (cps p)
-).
-
-Eval compute in (
-  let t : tree := notype_lambda (lvar 0 term_var) in
-  (cps t, cps_value t)
-). *)
-
-(* Definition tree_eq_dec : forall (x y : tree), {x = y} + {x <> y}.
-Proof.
-  repeat decide equality || apply fv_tag_dec.
-Defined.
-Definition tree_eq t1 t2 : bool := if (tree_eq_dec t1 t2) then true else false. *)
-
-(* Definition tree_eq_dec : forall (x y : option tree), {x = y} + {x <> y}.
-Proof.
-  repeat decide equality || apply fv_tag_dec.
-Defined.
-Definition tree_eq t1 t2 : bool := if (tree_eq_dec t1 t2) then true else false. *)
-
-(* Eval compute in (
-  let t : tree := succ (app (notype_lambda (succ (lvar 0 term_var))) zero) in
-  let v : tree := succ (succ zero) in
-  let cps_t := cps t in
-  let cps_value_v := cps_value v in
-  let final_t := 
-    match cps_t with 
-    | None => None 
-    | Some t' => eval (app t' (notype_lambda (lvar 0 term_var))) 1000 
-    end in
-  (cps_t, cps_value_v, final_t)
-). *)
-
-(* Eval compute in (
-  let v : tree := succ (zero) in
-  let p : tree := fvar 0 term_var in 
-  let x := 0 in
-  (cps_rec false (v) 0,
-  option_map (fun cps_p => substitute cps_p ((x, v)::nil)) (cps_rec false p 1))
-). *)
-
 Opaque cps_rec.
 
 Require Import Coq.Classes.RelationClasses.
@@ -314,25 +221,6 @@ Ltac simp_cps_goal := rewrite_strat outermost hints cps_rec.
 Ltac simp_cps_top_level_goal := rewrite_strat hints cps_rec.
 
 Ltac simp_cps := simp_cps_hyp || simp_cps_goal.
-
-(* Lemma cps_of_value_lambda: forall t cps_t cps_value_t, 
-  cps (notype_lambda t) = Some cps_t ->
-    cps_value (notype_lambda t) = Some cps_value_t ->
-      notype_lambda (app (lvar 0 term_var) cps_value_t) = cps_t.
-Proof.
-  light.
-  simpl in H0.
-  unfold cps in H.
-  simp cps_rec in H.
-  destruct (cps_rec (open 0 t (fvar 0 term_var)) 1) eqn:E; inversion H0.
-  inversion H.
-  reflexivity.
-Qed. *)
-
-(* Eval compute in (
-  eval (app (notype_lambda (app (lvar 0 term_var) uu))
-  (notype_lambda (app (zero) (succ (lvar 0 term_var))))) 10
-). *)
 
 Lemma cps_not_def_cps_value_not_def: forall t nf,
   cps_rec false t nf = None -> cps_rec true t nf = None.
@@ -381,27 +269,6 @@ Proof.
 Qed.
 
 Hint Resolve cps_of_value_is_open_value : cps. 
-(* Lemma cps_of_value: forall v cps_v nf, 
-  is_open_value v = true -> cps_rec false v nf = Some cps_v -> exists cps_value_v, 
-    cps_rec true v nf = Some cps_value_v /\ 
-    (notype_lambda (app (lvar 0 term_var) cps_value_v)) = cps_v.
-Proof.
-  induction v; 
-  repeat light || simp_cps || options  
-  || invert_constructor_equalities || destruct_match; 
-  eauto.
-Qed.
-
-Lemma cps_of_value': forall v cps_value_v nf, 
-  is_open_value v = true -> cps_rec true v nf = Some cps_value_v -> 
-    cps_rec false v nf = Some (notype_lambda (app (lvar 0 term_var) cps_value_v)).
-Proof.
-  induction v; 
-  repeat light || options || destruct_match || t_equality
-   || invert_constructor_equalities || simp_cps.
-Qed. *)
-
-(* Hint Resolve cps_of_value cps_of_value' : cps. *)
 
 Definition is_variable (t : tree) nf : Prop := 
   match t with
@@ -444,12 +311,6 @@ Proof.
 Qed.
 
 Hint Resolve is_variable_is_open_value is_variables_is_open_value : open_value.
-
-(* Ltac rewrite_IH_subst_nf IHsize_t nf :=
-  match goal with 
-  | H : cps_rec false (psubstitute ?t ?sub term_var) ?nf' = Some ?t' |- _ => 
-    poseNew (Mark (sub, t) "subst"); rewrite (IHsize_t _ _ nf) in H
-  end. *)
 
 Lemma substitute_close2: forall t k nf nf' sub, nf < nf' ->
   (forall s, s ∈ (range sub) -> is_variable s nf') ->
@@ -628,32 +489,6 @@ Ltac instantiate_cps_rec_pfv :=
       eauto with cps; try lia
   end.
 
-(* Lemma cps_value_of_open_value: forall v cps_v, 
-  is_open_value v = true -> cps_value v = Some cps_v -> is_open_value cps_v = true.
-Proof.
-  unfold cps_value; light; generalize dependent cps_v; induction H;
-  repeat simp_cps || options || destruct_match || invert_constructor_equalities || light;
-  eauto with values.
-Qed. *)
-
-(* Lemma cps_value_wf: forall v cps_v,
-  wf v 0 -> cps_value v = Some cps_v -> wf cps_v 0.
-Proof.
-  eauto using cps_rec_wf.
-Qed. *)
-
-(* Lemma cps_value_pfv_nill: forall t cps_t,
-  pfv t term_var = nil -> cps_value t = Some cps_t -> pfv cps_t term_var = nil.
-Proof.
-  eauto using cps_rec_pfv_nil.
-Qed. *)
-
-(* Lemma cps_value_is_earased: forall v cps_v,
-  is_erased_term v -> cps_value v = Some cps_v -> is_erased_term cps_v.
-Proof.
-  eauto using cps_rec_outputs_erased_terms.
-Qed. *)
-
 Lemma cps_rec_open_value: forall v cps_v value nf,
   is_open_value v = true -> 
   cps_rec value v nf = Some cps_v -> 
@@ -699,69 +534,6 @@ Proof.
 Qed.
 
 Hint Resolve fv_close_cps_rec : cps.
-
-(* Lemma substitute_value: forall t sub tag,
-  cbv_value t -> cbv_value (psubstitute t sub tag).
-Proof.
-  induction 1; repeat light; eauto with values.
-Qed.
-
-Lemma substitute_is_value: forall t sub tag,
-  is_value t = true -> is_value (psubstitute t sub tag) = true.
-Proof.
-  repeat light.
-  apply is_value_correct in H. apply is_value_correct.
-  eauto using substitute_value.
-Qed.
-
-Lemma substitute_vars_not_value: forall t sub tag nf nf', nf < nf' ->
-  (forall n, n ∈ (pfv t term_var) -> n < nf) -> 
-  (forall s, s ∈ (range sub) -> is_variable s nf') ->
-  (forall x, x ∈ (support sub) -> x < nf) ->
-    cbv_value (psubstitute t sub tag) -> cbv_value t.
-Proof.
-  induction t; repeat light; eauto with values; inversion H3;
-  repeat light || destruct_match || destruct_tag || 
-  t_lookup || instantiate_any || constructor;
-  eapply_any; eauto; repeat light; apply H0; repeat light || list_utils.
-Qed.
-
-Lemma substitute_vars_not_is_value': forall t sub tag nf nf', nf < nf'->
-  (forall n, n ∈ (pfv t term_var) -> n < nf) -> 
-  (forall s, s ∈ (range sub) -> is_variable s nf') ->
-  (forall x, x ∈ (support sub) -> x < nf) ->
-    is_value (psubstitute t sub tag) = true -> is_value t = true.
-Proof.
-  repeat light;
-  apply is_value_correct in H3. apply is_value_correct.
-  eauto using substitute_vars_not_value.
-Qed.
-
-Lemma substitute_vars_not_is_value: forall t sub tag nf nf', 
-  is_value t = false -> 
-  nf < nf'->
-  (forall n, n ∈ (pfv t term_var) -> n < nf) -> 
-  (forall s, s ∈ (range sub) -> is_variable s nf') ->
-  (forall x, x ∈ (support sub) -> x < nf) ->
-    is_value (psubstitute t sub tag) = false.
-Proof.
-  repeat light.
-  destruct (is_value (psubstitute t sub tag)) eqn:E; auto.
-  eapply substitute_vars_not_is_value' in E; eauto.
-Qed.
-
-Ltac apply_subst_is_value sub tag nf nf' :=
-  match goal with 
-  | H: is_value ?t = true |- _ => apply (substitute_is_value t sub tag) in H
-  | H: is_value ?t = false |- _ => 
-    apply (substitute_vars_not_is_value t sub tag nf nf') in H; eauto
-  end. *)
-
-(* Lemma substitute_value: forall t sub tag,
-  cbv_value t -> cbv_value (psubstitute t sub tag).
-Proof.
-  induction 1; repeat light; eauto with values.
-Qed. *)
 
 Lemma substitute_is_open_value: forall t sub tag,
   (forall s, s ∈ (range sub) -> is_open_value s = true) ->
@@ -811,24 +583,6 @@ Ltac destruct_apply_subst_is_value :=
   end.
 
 Hint Resolve substitute_is_open_value substitute_is_not_open_value : open_value.
-
-(* Lemma substitute_vars_not_value: forall t sub nf,
-  (forall s, s ∈ (range sub) -> is_variable s nf) ->
-    is_open_value (psubstitute t sub term_var) = true -> is_open_value t = true.
-Proof.
-  induction t;
-  repeat light || destruct_match || bools || instantiate_any.
-Qed.
-
-Lemma substitute_vars_not_is_open_value: forall t sub nf, 
-  is_open_value t = false -> 
-  (forall s, s ∈ (range sub) -> is_variable s nf) ->
-    is_open_value (psubstitute t sub term_var) = false.
-Proof.
-  repeat light.
-  destruct (is_open_value (psubstitute t sub term_var)) eqn:E; auto.
-  eapply_anywhere substitute_vars_not_value; eauto.
-Qed. *)
 
 Ltac apply_IH_cps_rec_subst_nf' IH := 
   match goal with
@@ -957,31 +711,6 @@ Ltac rewrite_with_cps_rec_nf :=
       repeat light || list_utils
   end.
 
-(* Lemma cps_rec_closed_term_nf': forall size_t t,
-  tree_size t < size_t ->
-  forall value nf nf',
-  pfv t term_var = nil -> 
-    cps_rec value t nf = cps_rec value t nf'.
-Proof.
-  induction size_t; try lia; destruct t; destruct value; try destruct_tag;
-  repeat light || simp_cps || destruct_match || invert_constructor_equalities
-  || t_equality || options.
-
-  induction t; try destruct_tag; destruct value; 
-  repeat light || simp_cps || options || t_equality 
-  || destruct_match || invert_constructor_equalities.
-  repeat apply_anywhere cps_rec_pfv_nil.
-Qed. *)
-
-(* Lemma cps_rec_closed_term_nf: forall t value nf nf',
-  pfv t term_var = nil -> cps_rec value t nf = cps_rec value t nf'.
-Proof.
-  induction t; try destruct_tag; destruct value; 
-  repeat light || simp_cps || options || t_equality 
-  || destruct_match || invert_constructor_equalities.
-  repeat apply_anywhere cps_rec_pfv_nil. 
-Qed.*)
-
 Ltac apply_IH_cps_rec_subst IH := 
   match goal with
   | [|- context[cps_rec ?value (psubstitute ?t ((?x, ?v) :: nil) term_var) ?nf]] =>
@@ -1064,8 +793,6 @@ Ltac solve_erased_terms_cps_rec :=
   try solve [
     try eapply is_erased_term_close;
     eapply cps_rec_outputs_erased_terms; eauto].
-
-(* Ltac instantiate_IH_cps_eval IH := *)
 
 Theorem cps_eval: 
   forall p v, p ~~>* v -> closed_term p ->
