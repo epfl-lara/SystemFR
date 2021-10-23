@@ -16,8 +16,8 @@ Require Import Coq.Strings.String.
 Require Import Coq.Arith.Compare_dec.
 
 Require Import Program.
-Require Import Equations.Equations.
-Require Import Equations.Prop.Subterm.
+From Equations Require Import Equations.
+(* Require Import Equations.Prop.Subterm. *)
 
 Require Import PeanoNat.
 Require Import Relations.Relation_Operators.
@@ -78,8 +78,18 @@ Equations cps_rec (value : bool) (t : tree) (next_fv : nat) : option tree by wf 
   cps_rec false (notype_tfix t) nf := None;
 
   cps_rec false notype_err nf := Some notype_err;
-  cps_rec false (ite cond tthen telse) nf := None;
-
+  cps_rec false (ite cond tthen telse) nf := 
+  match (cps_rec false cond nf), (cps_rec false tthen nf), (cps_rec false telse nf) with 
+  | Some cps_cond, Some cps_tthen, Some cps_telse => 
+    Some (notype_lambda (
+      app (cps_cond) (notype_lambda (
+        ite (lvar 0 term_var) 
+            (app cps_tthen (notype_lambda (app (lvar 2 term_var) (lvar 0 term_var))))
+            (app cps_telse (notype_lambda (app (lvar 2 term_var) (lvar 0 term_var))))
+      ))
+    ))
+  | _, _, _ => None
+  end;
   cps_rec false (pp t1 t2) nf := None;
   cps_rec false (pi1 t) nf := None;
   cps_rec false (pi2 t) nf := None;
@@ -230,6 +240,7 @@ Proof.
   || destruct_tag || instantiate_any.
 Qed.
 
+#[global]
 Hint Resolve cps_not_def_cps_value_not_def : cps.
 
 Lemma cps_of_value: forall v nf, is_open_value v = true -> 
@@ -243,6 +254,7 @@ Proof.
   || invert_constructor_equalities || destruct_match.
 Qed.
 
+#[global]
 Hint Resolve cps_of_value : cps.
 
 Ltac instantiate_cps_of_value :=
@@ -268,6 +280,7 @@ Proof.
   eauto.
 Qed.
 
+#[global]
 Hint Resolve cps_of_value_is_open_value : cps. 
 
 Definition is_variable (t : tree) nf : Prop := 
@@ -287,6 +300,7 @@ Proof.
     unshelve epose proof H s _; repeat light. eauto.
 Qed.
 
+#[global]
 Hint Resolve sub_wfs: wf.
 
 Lemma is_variable_monotonic: forall t nf, 
@@ -295,6 +309,7 @@ Proof.
   unfold is_variable; repeat light || destruct_match.
 Qed.
 
+#[global]
 Hint Resolve is_variable_monotonic : open_value.
 
 Lemma is_variable_is_open_value: forall s nf,
@@ -310,6 +325,7 @@ Proof.
   eauto using is_variable_is_open_value.
 Qed.
 
+#[global]
 Hint Resolve is_variable_is_open_value is_variables_is_open_value : open_value.
 
 Lemma substitute_close2: forall t k nf nf' sub, nf < nf' ->
@@ -328,6 +344,7 @@ Proof.
   - unshelve epose proof H2 n _; lia.
 Qed.
 
+#[global]
 Hint Resolve substitute_close2 : close.
 
 Lemma open_keeps_wf: forall t i n nf, wf t n -> wf (open i t (fvar nf term_var)) n.
@@ -342,6 +359,7 @@ Proof.
   auto with step_tactic lia.
 Qed.
 
+#[global]
 Hint Resolve open_keeps_wf close_keeps_wf : wf.
 
 Ltac instantiate_IH_cps_rec_outputs_erased_terms' IH :=
@@ -378,6 +396,7 @@ Ltac instantiate_cps_rec_erased :=
     t_closer
   end.
 
+#[global]
 Hint Resolve cps_rec_outputs_erased_terms : cps.
 
 Ltac apply_IH_cps_rec_wf' IH :=
@@ -429,6 +448,7 @@ Ltac rewrite_open_none :=
     eauto using wf_monotone2 with wf
   ].
 
+#[global]
 Hint Resolve cps_rec_wf : cps.
 
 Ltac apply_IH_cps_rec_pfv' IH :=
@@ -473,6 +493,7 @@ Proof.
   repeat light.
 Qed.
 
+#[global]
 Hint Resolve cps_rec_pfv cps_rec_pfv_nil : cps.
 
 Ltac instantiate_cps_rec_pfv := 
@@ -500,6 +521,7 @@ Proof.
   eauto.
 Qed.
 
+#[global]
 Hint Resolve cps_rec_open_value : cps.
 
 Ltac instantiate_cps_rec_open_value := 
@@ -533,6 +555,7 @@ Proof.
   repeat light || fv_open || list_utils || destruct_match.
 Qed.
 
+#[global]
 Hint Resolve fv_close_cps_rec : cps.
 
 Lemma substitute_is_open_value: forall t sub tag,
@@ -582,6 +605,8 @@ Ltac destruct_apply_subst_is_value :=
     try solve [t_closing; eauto with lia open_value]
   end.
 
+
+#[global]
 Hint Resolve substitute_is_open_value substitute_is_not_open_value : open_value.
 
 Ltac apply_IH_cps_rec_subst_nf' IH := 
@@ -636,6 +661,18 @@ Ltac apply_IH_cps_rec_subst_nf' IH :=
         eauto using is_variable_monotonic with lia
   end.
 
+Ltac contains_lookup := 
+  match goal with
+  | |- context[lookup Nat.eq_dec _ _] => idtac
+  | |- _ => fail 2
+  end.
+
+Ltac contains_open := 
+  match goal with
+  | |- context[open _ _] => idtac
+  | |- _ => fail 2
+  end.
+
 Lemma cps_rec_subst_nf': forall size_t t sub nf nf' value, 
   tree_size t < size_t -> nf < nf' ->
   (forall n, n ∈ (pfv t term_var) -> n < nf) -> 
@@ -649,14 +686,11 @@ Proof.
   destruct t; destruct value;
   repeat light || simp_cps || invert_constructor_equalities 
   || t_equality || options || destruct_tag;
-  try solve [unfold is_variable in *; 
-  repeat light || simp_cps || invert_constructor_equalities 
-  || t_equality || destruct_match || t_lookup || instantiate_any];
-  try solve [try destruct_apply_subst_is_value;
-  repeat apply_IH_cps_rec_subst_nf' IHsize_t; try lia; 
-  repeat light || list_utils 
-  || destruct_match || invert_constructor_equalities || t_equality];
-  try solve [
+  try solve [contains_lookup; unfold is_variable in *; 
+    repeat light || simp_cps || invert_constructor_equalities 
+    || t_equality || destruct_match || t_lookup || instantiate_any
+  ];
+  try solve [contains_open;
     repeat erewrite <- substitute_open3 with (x := nf); 
     eauto with wf; try solve [
       repeat light || list_utils 
@@ -668,7 +702,19 @@ Proof.
     eauto with lia; light;
     instantiate_cps_rec_pfv;
     instantiate_any; lia
-  ].
+  ];
+  try solve [try destruct_apply_subst_is_value;
+  repeat apply_IH_cps_rec_subst_nf' IHsize_t; try lia; 
+  repeat light || list_utils 
+  || destruct_match || invert_constructor_equalities || t_equality].
+
+  (* if *)
+  unshelve epose proof IHsize_t t1 sub (nf) (nf') false _ _ _ _ _;
+  unshelve epose proof IHsize_t t2 sub (nf) (nf') false _ _ _ _ _;
+  unshelve epose proof IHsize_t t3 sub (nf) (nf') false _ _ _ _ _;
+  repeat light || list_utils || rewrite open_t_size || fv_open
+  || destruct_match || invert_constructor_equalities || t_equality;
+  eauto using is_variable_monotonic with lia.
 Qed.
 
 Lemma cps_rec_subst_nf: forall t value sub nf nf',
@@ -761,6 +807,7 @@ Proof.
   eauto using cps_rec_subst.
 Qed.
 
+#[global]
 Hint Resolve cps_subst : cps.
 
 Lemma cps_value_def_for_values: forall v, 
@@ -1005,6 +1052,50 @@ Proof.
           repeat instantiate_cps_rec_open_value;
           eapply no_free_var_open_value_is_value;
           eauto.
+  - (* if true _ _*)
+    repeat invert_constructor_equalities || destruct_match || light || options || step.
+    unshelve epose proof IHbcbv_step1 _ _ eq_refl;
+    unshelve epose proof IHbcbv_step2 _ _ eq_refl;
+    t_closer.
+    steps.
+    eexists; repeat light; t_closing.
+    eapply ss_bs; [econstructor | idtac]; 
+    repeat light.
+    rewrite_open_none.
+    apply H6; repeat light || list_utils || solve_wf_cps_rec; eauto with wf fv cps.
+    eapply ss_bs; [econstructor | idtac]; steps.
+    econstructor; eauto with values.
+    rewrite_open_none.
+    apply H5; repeat light || list_utils; eauto with wf values.
+    eapply ss_bs; [econstructor | idtac]; try solve [step; rewrite_open_none].
+    eapply no_free_var_open_value_is_value.
+    remember H0 as H'; clear HeqH'.
+    repeat apply_anywhere bs_value;
+    repeat instantiate_cps_rec_open_value.
+    apply bs_closed_term in H0; t_closing.
+    solve_pfv_nill_cps_rec.
+  - (* if false _ _*)
+    repeat invert_constructor_equalities || destruct_match || light || options || step.
+    unshelve epose proof IHbcbv_step1 _ _ eq_refl;
+    unshelve epose proof IHbcbv_step2 _ _ eq_refl;
+    t_closer.
+    steps.
+    eexists; repeat light; t_closing.
+    eapply ss_bs; [econstructor | idtac]; 
+    repeat light.
+    rewrite_open_none.
+    apply H6; repeat light || list_utils || solve_wf_cps_rec; eauto with wf fv cps.
+    eapply ss_bs; [econstructor | idtac]; steps.
+    apply BSitefalse; eauto with values.
+    rewrite_open_none.
+    apply H5; repeat light || list_utils; eauto with wf values.
+    eapply ss_bs; [econstructor | idtac]; try solve [step; rewrite_open_none].
+    eapply no_free_var_open_value_is_value.
+    remember H0 as H'; clear HeqH'.
+    repeat apply_anywhere bs_value;
+    repeat instantiate_cps_rec_open_value.
+    apply bs_closed_term in H0; t_closing.
+    solve_pfv_nill_cps_rec.
   - (* tleft *)
     options; destruct_is_open_value; 
     repeat light || invert_constructor_equalities.

@@ -1,5 +1,5 @@
 Require Import Coq.Strings.String.
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Export SystemFR.FVLemmas.
 Require Export SystemFR.SmallStep.
