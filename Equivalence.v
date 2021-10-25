@@ -44,9 +44,9 @@ Proof.
   unfold equivalent_terms; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate equivalent_terms_fv1: fv.
-#[global]
+#[export]
 Hint Immediate equivalent_terms_fv2: fv.
 
 Lemma equivalent_terms_erased1:
@@ -65,9 +65,9 @@ Proof.
   unfold equivalent_terms; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate equivalent_terms_erased1: erased.
-#[global]
+#[export]
 Hint Immediate equivalent_terms_erased2: erased.
 
 Lemma equivalent_terms_wf1:
@@ -86,9 +86,9 @@ Proof.
   unfold equivalent_terms; steps; eauto with wf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate equivalent_terms_wf1: wf.
-#[global]
+#[export]
 Hint Immediate equivalent_terms_wf2: wf.
 
 Lemma equivalent_terms_twf1:
@@ -107,7 +107,7 @@ Proof.
   unfold equivalent_terms; steps; eauto with twf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate equivalent_terms_twf1: twf.
-#[global]
+#[export]
 Hint Immediate equivalent_terms_twf2: twf.

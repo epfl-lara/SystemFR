@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
 Require Import Psatz.

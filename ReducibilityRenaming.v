@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
 Require Import Coq.Strings.String.
@@ -149,7 +149,7 @@ Proof.
       try solve [ eapply equivalent_rc_right; eauto 1 ].
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_fvar: b_rename.
 
 Lemma reducible_rename_arrow: forall m T1 T2, prop_until renamable_prop m -> prop_at renamable_prop m (T_arrow T1 T2).
@@ -161,7 +161,7 @@ Proof.
     eauto 2 with erased.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_arrow: b_rename.
 
 Lemma reducible_rename_prod: forall m T1 T2, prop_until renamable_prop m -> prop_at renamable_prop m (T_prod T1 T2).
@@ -171,7 +171,7 @@ Proof.
   eauto with erased.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_prod: b_rename.
 
 Lemma reducible_rename_sum:
@@ -183,7 +183,7 @@ Proof.
   repeat step || simp_red || step_inversion equal_with_relation || find_exists || t_induct_all.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_sum: b_rename.
 
 Lemma reducible_rename_refine: forall m T b, prop_until renamable_prop m -> prop_at renamable_prop m (T_refine T b).
@@ -192,7 +192,7 @@ Proof.
   repeat step || simp_red || step_inversion equal_with_relation || t_induct_all || equal_with_erased.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_refine: b_rename.
 
 Lemma reducible_rename_type_refine:
@@ -203,7 +203,7 @@ Proof.
   eauto 2 with erased.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_type_refine: b_rename.
 
 Lemma reducible_rename_intersection: forall m T1 T2, prop_until renamable_prop m -> prop_at renamable_prop m (T_intersection T1 T2).
@@ -212,7 +212,7 @@ Proof.
   repeat step || simp_red || step_inversion equal_with_relation || t_induct_all.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_intersection: b_rename.
 
 Lemma reducible_rename_union: forall m T1 T2, prop_until renamable_prop m -> prop_at renamable_prop m (T_union T1 T2).
@@ -231,7 +231,7 @@ Proof.
          end.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_union: b_rename.
 
 Lemma reducible_rename_equal: forall m t1 t2, prop_until renamable_prop m -> prop_at renamable_prop m (T_equiv t1 t2).
@@ -242,7 +242,7 @@ Proof.
   eauto with apply_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_equal: b_rename.
 
 Lemma reducible_rename_forall: forall m T1 T2, prop_until renamable_prop m -> prop_at renamable_prop m (T_forall T1 T2).
@@ -254,7 +254,7 @@ Proof.
   eauto 2 with wf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_forall: b_rename.
 
 Lemma reducible_rename_exists: forall m T1 T2, prop_until renamable_prop m -> prop_at renamable_prop m (T_exists T1 T2).
@@ -270,7 +270,7 @@ Proof.
   eauto 2 with erased.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_exists: b_rename.
 
 Lemma reducible_rename_type_abs: forall m T, prop_until renamable_prop m -> prop_at renamable_prop m (T_abs T).
@@ -299,7 +299,7 @@ Proof.
       try finisher.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_type_abs: b_rename.
 
 Lemma reducible_rename_rec: forall m n T0 Ts, prop_until renamable_prop m -> prop_at renamable_prop m (T_rec n T0 Ts).
@@ -351,7 +351,7 @@ Proof.
          eauto using equal_with_relation_refl with fv equal_with_relation.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_rename_rec: b_rename.
 
 Lemma reducible_rename_aux: forall (m: measure_domain) T, prop_at renamable_prop m T.

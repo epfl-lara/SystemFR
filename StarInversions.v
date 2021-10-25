@@ -267,7 +267,7 @@ Proof.
   - exists v'; steps; eauto with values smallstep star.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve scbv_normalizing_pair: cbvlemmas.
 
 Lemma smallstep_succ_zero:

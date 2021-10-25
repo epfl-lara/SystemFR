@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Export SystemFR.RedTactics.
 

@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Import Psatz.
 
@@ -101,5 +101,5 @@ Inductive has_polarities: tree -> list (nat * polarity) -> Prop :=
           has_polarities (topen 0 Ts (fvar X type_var)) ((X, Positive) :: pols)) ->
       has_polarities (T_rec n T0 Ts) pols.
 
-#[global]
+#[export]
 Hint Constructors has_polarities: b_polarity.

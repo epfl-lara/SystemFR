@@ -55,7 +55,7 @@ Proof.
   induction n; repeat step || apply_any.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve is_erased_type_existss: erased.
 
 Lemma open_existss:

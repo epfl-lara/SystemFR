@@ -26,7 +26,7 @@ Proof.
   induction 1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate base_type_erased: erased.
 
 Lemma base_type_approx_aux:

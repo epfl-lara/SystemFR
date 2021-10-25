@@ -16,7 +16,7 @@ Proof.
   steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve in_subset: sets.
 
 Lemma singleton_subset:
@@ -27,7 +27,7 @@ Proof.
   unfold subset; unfold singleton; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve singleton_subset: sets.
 
 Lemma singleton_subset2:
@@ -37,7 +37,7 @@ Proof.
   unfold subset; unfold singleton; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve singleton_subset2: sets.
 
 Lemma union_left:
@@ -63,7 +63,7 @@ Proof.
   induction l1; unfold subset in *; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve union_left union_right1 union_right2: sets.
 
 Lemma union_weaken1:
@@ -98,13 +98,13 @@ Proof.
   induction l1; unfold subset in *; repeat step || apply_any || list_utils.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate union_weaken1: sets.
-#[global]
+#[export]
 Hint Immediate union_weaken2: sets.
-#[global]
+#[export]
 Hint Immediate union_weaken3: sets.
-#[global]
+#[export]
 Hint Immediate union_weaken4: sets.
 
 Lemma empty_is_subset:
@@ -114,7 +114,7 @@ Proof.
   unfold subset; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate empty_is_subset: sets.
 
 Lemma subset_transitive:
@@ -126,7 +126,7 @@ Proof.
   unfold subset; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_transitive: sets.
 
 Lemma subset_union:
@@ -138,7 +138,7 @@ Proof.
   eauto with sets.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_union: sets.
 
 Lemma subset_union2:
@@ -150,7 +150,7 @@ Proof.
   eauto with sets.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve subset_union2: sets.
 
 Lemma subset_union3:
@@ -176,7 +176,7 @@ Proof.
   repeat step || unfold subset in *.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_add2: sets.
 
 Lemma subset_add3:
@@ -188,7 +188,7 @@ Proof.
   repeat step || unfold subset in * || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_add3: sets.
 
 Lemma subset_add4:
@@ -201,7 +201,7 @@ Proof.
   repeat step || unfold subset in * || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_add4: sets.
 
 Lemma subset_add5:
@@ -215,7 +215,7 @@ Proof.
   repeat step || unfold subset in * || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_add5: sets.
 
 Lemma subset_insert:
@@ -227,12 +227,12 @@ Proof.
     repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_insert: sets.
 
-Hint Rewrite <- (@subset_union3 nat): simp_set.
-Hint Rewrite (@subset_add nat): simp_set.
-Hint Rewrite (@singleton_subset nat): simp_set.
+#[export] Hint Rewrite <- (@subset_union3 nat): simp_set.
+#[export] Hint Rewrite (@subset_add nat): simp_set.
+#[export] Hint Rewrite (@singleton_subset nat): simp_set.
 
 Ltac sets :=
   match goal with
@@ -350,7 +350,7 @@ Proof.
   induction s1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate in_middle: sets.
 
 Lemma subset_left:
@@ -368,7 +368,7 @@ Proof.
   induction s1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate in_middle2: sets.
 
 Lemma subset_middle:
@@ -380,7 +380,7 @@ Proof.
   unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_middle: sets.
 
 Lemma subset_middle2:
@@ -431,7 +431,7 @@ Proof.
   unfold subset; induction s1; repeat step || list_utils || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_middle5: sets.
 
 Lemma subset_middle7:
@@ -450,7 +450,7 @@ Proof.
   intros; eauto with sets.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_middle_indirect: sets.
 
 Lemma subset_middle_indirect2:
@@ -460,7 +460,7 @@ Proof.
   intros; eauto with sets.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_middle_indirect2: sets.
 
 Lemma subset_right:
@@ -511,15 +511,15 @@ Proof.
   repeat step || list_utils || unfold subset in * || instantiate_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_right: sets.
-#[global]
+#[export]
 Hint Immediate subset_right2: sets.
-#[global]
+#[export]
 Hint Immediate subset_right3: sets.
-#[global]
+#[export]
 Hint Immediate subset_right4: sets.
-#[global]
+#[export]
 Hint Immediate subset_right5: sets.
-#[global]
+#[export]
 Hint Immediate subset_right6: sets.

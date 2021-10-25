@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
 Require Import Psatz.
@@ -83,11 +83,11 @@ Definition hp_rename_prop_aux n T := type_nodes T = n -> hp_rename_prop T.
 Definition hp_rename_until n :=
   forall n', n' < n -> forall T, hp_rename_prop_aux n' T.
 
-#[global]
+#[export]
 Hint Unfold hp_rename_prop: u_hprename.
-#[global]
+#[export]
 Hint Unfold hp_rename_prop_aux: u_hprename.
-#[global]
+#[export]
 Hint Unfold hp_rename_until: u_hprename.
 
 Lemma has_polarities_rename_fvar:
@@ -100,7 +100,7 @@ Proof.
     try solve [ constructor; eauto with lia; eauto using equivalent_pairs_same ].
 Qed.
 
-#[global]
+#[export]
 Hint Immediate has_polarities_rename_fvar: b_hp_rename.
 
 Lemma equivalent_with_pairs_invert:
@@ -166,7 +166,7 @@ Proof.
       try lia; try finisher.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate has_polarities_rename_rec: b_hp_rename.
 
 Lemma strong_induction_aux:

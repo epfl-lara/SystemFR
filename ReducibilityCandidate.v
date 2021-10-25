@@ -170,12 +170,12 @@ Proof.
   induction ρ1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve valid_interpretation_cons: b_valid_interp.
-#[global]
+#[export]
 Hint Resolve valid_interpretation_one: b_valid_interp.
 
-#[global]
+#[export]
 Hint Resolve valid_interpretation_append: b_valid_interp.
-#[global]
+#[export]
 Hint Extern 1 => eapply valid_interpretation_one; eauto: b_valid_interp.

@@ -1,5 +1,5 @@
 Require Import Coq.Strings.String.
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import PeanoNat.
 
 Require Export SystemFR.EquivalentContext.

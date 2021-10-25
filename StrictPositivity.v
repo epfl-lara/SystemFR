@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Coq.Classes.RelationClasses.
 
 Require Import Psatz.
@@ -50,11 +50,13 @@ Solve All Obligations with (repeat step || autorewrite with bsize in *; try lia;
 Fail Next Obligation.
 
 (* see https://github.com/coq/coq/issues/3814 *)
+#[export]
 Instance: subrelation eq Basics.impl.
 Proof.
   steps.
 Qed.
 
+#[export]
 Instance: subrelation eq (Basics.flip Basics.impl).
 Proof.
   steps.

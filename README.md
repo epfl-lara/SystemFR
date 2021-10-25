@@ -10,8 +10,8 @@ This project aims to formalize in Coq part of the [Stainless project](https://gi
 
 The proofs require Coq and Coq-Equations, which can be installed using `opam` with the `coq` and `coq-equations` packages. Some instructions are available [here](https://github.com/coq/coq/wiki/Installation-of-Coq-on-Linux) and [there](https://github.com/mattam82/Coq-Equations).
 
-* Coq 8.13.0
-* Coq-Equations 1.2.3+8.13
+* Coq 8.14.0
+* Coq-Equations 1.3.0+8.14
 
 ### Compiling the Proofs
 

@@ -1,5 +1,5 @@
 Require Import Coq.Strings.String.
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Export SystemFR.FVLemmas.
 Require Export SystemFR.SmallStep.
@@ -15,7 +15,7 @@ Proof.
     repeat step || list_utils.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate nat_value_fv: fv.
 
 Lemma pfv_build_nat:
@@ -25,7 +25,7 @@ Proof.
   induction n; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate pfv_build_nat: fv.
 
 Lemma is_pair_fv:
@@ -35,9 +35,9 @@ Proof.
   destruct v; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate is_pair_fv: fv.
-Hint Rewrite is_pair_fv: rfv.
+#[export] Hint Rewrite is_pair_fv: rfv.
 
 Lemma is_succ_fv:
   forall v tag,
@@ -46,9 +46,9 @@ Proof.
   destruct v; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate is_succ_fv: fv.
-Hint Rewrite is_succ_fv: rfv.
+#[export] Hint Rewrite is_succ_fv: rfv.
 
 Lemma is_lambda_fv:
   forall v tag,
@@ -57,9 +57,9 @@ Proof.
   destruct v; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate is_lambda_fv: fv.
-Hint Rewrite is_lambda_fv: rfv.
+#[export] Hint Rewrite is_lambda_fv: rfv.
 
 Lemma fv_smallstep:
   forall t t',
@@ -75,7 +75,7 @@ Proof.
     eauto with fv list_utils.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate fv_smallstep: fv.
 
 Lemma fv_smallstep_subset:
@@ -86,7 +86,7 @@ Proof.
   unfold subset; intros; eauto using fv_smallstep.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve fv_smallstep_subset: fv.
 
 Lemma fv_smallstep_subset2:
@@ -98,7 +98,7 @@ Proof.
   intros; eauto using subset_transitive with fv.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate fv_smallstep_subset2: fv.
 
 Lemma fv_smallstep_nil:
@@ -110,7 +110,7 @@ Proof.
   repeat step || rewrite <- empty_list_rewrite in *; eauto with fv.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate fv_smallstep_nil: fv.
 
 Lemma fv_star_smallstep:
@@ -123,7 +123,7 @@ Proof.
   induction 1; eauto using fv_smallstep.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate fv_star_smallstep: fv.
 
 Lemma fv_star_smallstep_nil:
@@ -135,5 +135,5 @@ Proof.
   repeat step || rewrite <- empty_list_rewrite in *; eauto with fv.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate fv_star_smallstep_nil: fv.

@@ -1,6 +1,6 @@
 Require Import Coq.Strings.String.
 
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Export SystemFR.StarLemmas.
 Require Export SystemFR.StarInversions.
@@ -61,7 +61,7 @@ Proof.
   pose proof (reducible_values_props ρ v T term_var H1 H2); steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_values_erased: erased.
 
 Lemma reducible_erased:
@@ -73,7 +73,7 @@ Proof.
   unfold reduces_to, closed_term; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_erased: erased.
 
 Lemma reducible_val_fv:
@@ -86,7 +86,7 @@ Proof.
   pose proof (reducible_values_props ρ v T tag H1 H2); steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_val_fv: fv.
 
 Lemma fv_red:
@@ -115,7 +115,7 @@ Proof.
   pose proof (reducible_values_props ρ v T term_var H1 H2); steps; eauto with wf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_val_wf: wf.
 
 Lemma reducible_val_twf:
@@ -129,7 +129,7 @@ Proof.
     eauto using is_erased_term_twf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_val_twf: twf.
 
 Lemma red_is_val:
@@ -142,7 +142,7 @@ Proof.
   pose proof (reducible_values_props ρ v T term_var H1 H2); steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate red_is_val: values.
 
 Lemma red_irred:
@@ -311,7 +311,7 @@ Proof.
   induction l; repeat step || step_inversion satisfies; eauto using red_is_val.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_values_list: values.
 
 Lemma reducible_expr_value:
@@ -330,7 +330,7 @@ Proof.
   unfold reduces_to, closed_term; steps; eauto with wf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_wf: wf.
 
 Lemma reducible_twf:
@@ -340,7 +340,7 @@ Proof.
   unfold reduces_to, closed_term; steps; eauto using is_erased_term_twf.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_twf: twf.
 
 Lemma reducible_fv:
@@ -349,7 +349,7 @@ Proof.
   destruct tag; unfold reduces_to, closed_term; steps; eauto using is_erased_term_tfv.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate reducible_fv: fv.
 
 Lemma reducible_value_expr:

@@ -40,7 +40,7 @@ Proof.
   induction t; steps.
 Qed.
 
-Hint Rewrite substitute_nothing3: bsubst.
+#[export] Hint Rewrite substitute_nothing3: bsubst.
 
 Lemma substitute_nothing_context:
   forall Γ tag, psubstitute_context Γ nil tag = Γ.
@@ -48,7 +48,7 @@ Proof.
   induction Γ; repeat step || autorewrite with bsubst in *.
 Qed.
 
-Hint Rewrite substitute_nothing_context: bsubst.
+#[export] Hint Rewrite substitute_nothing_context: bsubst.
 
 Lemma substitute_nothing4:
   forall t l tag,
@@ -217,7 +217,7 @@ Proof.
   induction Γ; steps.
 Qed.
 
-Hint Rewrite same_support_substitute: bsubst.
+#[export] Hint Rewrite same_support_substitute: bsubst.
 
 Lemma lookup_subst:
   forall Γ x T l tag,

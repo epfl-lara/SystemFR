@@ -189,3 +189,11 @@ Qed.
 
 #[global]
 Hint Resolve wf_build_nat: wf.
+
+Lemma wf_fvar: forall x tag k, wf (fvar x tag) k.
+Proof.
+  repeat light.
+Qed.
+
+#[export]
+Hint Resolve wf_fvar : wf.

@@ -275,7 +275,7 @@ Inductive equal_with_relation tag rel: tree -> tree -> Prop :=
       equal_with_relation tag rel (T_rec n T0 Ts) (T_rec n' T0' Ts')
 .
 
-#[global]
+#[export]
 Hint Constructors equal_with_relation: equal_with_relation.
 
 Lemma equal_with_relation_deterministic:
@@ -350,7 +350,8 @@ Lemma equal_with_relation_refl2:
     (forall x, x ∈ pfv t tag -> lookup PeanoNat.Nat.eq_dec (swap rel) x = Some x) ->
     equal_with_relation tag rel t t.
 Proof.
-  induction t; repeat step || list_utils || constructor || apply_any || destruct_tag.
+  induction t;
+    repeat light || destruct_match || constructor || list_utils || apply_any.
 Qed.
 
 Lemma equal_with_relation_topen:
@@ -720,9 +721,9 @@ Proof.
   eauto using equal_with_relation_swap, equal_with_relation_erased_type.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate equal_with_relation_erased_term: erased.
-#[global]
+#[export]
 Hint Immediate equal_with_relation_erased_type: erased.
-#[global]
+#[export]
 Hint Immediate equal_with_relation_erased_type_back: erased.

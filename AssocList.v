@@ -51,7 +51,7 @@ Proof.
     exists ((x0,y0) :: m'); steps.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate lookupRestSuffix: blookup.
 
 Lemma lookupRestLookup:
@@ -62,7 +62,7 @@ Proof.
   induction m; repeat step; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate lookupRestLookup: blookup.
 
 Lemma lookupLookupRest:
@@ -77,7 +77,7 @@ Qed.
 
 (* fresh s Γ holds if variable x does not appear in the context Γ *)
 Definition fresh { X Y } (m: map X Y) x := ~(x ∈ support m).
-#[global]
+#[export]
 Hint Unfold fresh: core.
 
 Lemma lookupSupport:
@@ -94,7 +94,7 @@ Proof.
   induction m1; steps.
 Qed.
 
-Hint Rewrite support_append: list_utils.
+#[export] Hint Rewrite support_append: list_utils.
 
 Fixpoint map_values {X Y Z} (f: Y -> Z) (l: map X Y) :=
   match l with
@@ -109,7 +109,7 @@ Proof.
   induction m; repeat step.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate lookupNoneSupport: blookup.
 
 Lemma lookupNoneSupport2:
@@ -121,7 +121,7 @@ Proof.
   induction m; repeat step; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate lookupNoneSupport2: blookup.
 
 Lemma lookupSomeSupport:
@@ -132,7 +132,7 @@ Proof.
   induction m; repeat step || unfold fv_context in * || sets; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate lookupSomeSupport: blookup.
 
 Lemma lookupRange:
@@ -168,7 +168,7 @@ Proof.
   induction l1; repeat step || sets || unfold fv_context in *.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve lookupAppendNoDup: blookup.
 
 Lemma lookupAppendOr:
@@ -190,7 +190,7 @@ Proof.
   induction l1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve lookupWeaken: blookup.
 
 Lemma lookupAppendNone:
@@ -202,7 +202,7 @@ Proof.
   induction l1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve lookupAppendNone: blookup.
 
 Lemma lookupRight:
@@ -213,7 +213,7 @@ Proof.
   induction l1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve lookupRight: blookup.
 
 Lemma lookupRight2:
@@ -231,7 +231,7 @@ Proof.
   steps.
 Qed.
 
-Hint Rewrite lookupNil: blookup.
+#[export] Hint Rewrite lookupNil: blookup.
 
 Lemma lookupMap:
   forall X Y Z
@@ -280,7 +280,7 @@ Proof.
            end.
 Qed.
 
-Hint Rewrite obvious_lookup using assumption: blookup.
+#[export] Hint Rewrite obvious_lookup using assumption: blookup.
 
 Lemma lookup_remove:
   forall {A B} Γ1 (x y: A) U Γ2 y (T: B) dec,
@@ -291,7 +291,7 @@ Proof.
   induction Γ1; steps; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate lookup_remove: blookup.
 
 Lemma lookup_remove2:

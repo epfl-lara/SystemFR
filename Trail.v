@@ -10,11 +10,11 @@ Parameter T_tree: tree.
 Axiom tree_fv: forall tag, pfv T_tree tag = nil.
 Axiom wf_tree: wf T_tree 0.
 Axiom is_erased_type_tree: is_erased_type T_tree.
-#[global]
+#[export]
 Hint Resolve tree_fv: fv.
-#[global]
+#[export]
 Hint Resolve wf_tree: wf.
-#[global]
+#[export]
 Hint Resolve is_erased_type_tree: erased.
 
 (* We assume we have an empty tree *)
@@ -26,11 +26,11 @@ Parameter T_key: tree.
 Axiom key_fv: forall tag, pfv T_key tag = nil.
 Axiom wf_key: wf T_key 0.
 Axiom is_erased_type_key: is_erased_type T_key.
-#[global]
+#[export]
 Hint Resolve key_fv: fv.
-#[global]
+#[export]
 Hint Resolve wf_key: wf.
-#[global]
+#[export]
 Hint Resolve is_erased_type_key: erased.
 
 (** These types have no free variables, so substitutions keep them unchanged *)
@@ -68,7 +68,7 @@ Axiom wf_lookup:
     wf A k ->
     wf t k ->
     wf (tlookup A t) k.
-#[global]
+#[export]
 Hint Resolve wf_lookup: wf.
 
 Axiom is_erased_term_lookup:
@@ -76,7 +76,7 @@ Axiom is_erased_term_lookup:
     is_erased_type A ->
     is_erased_term t ->
     is_erased_term (tlookup A t).
-#[global]
+#[export]
 Hint Resolve is_erased_term_lookup: erased.
 
 Axiom lookup_type:
@@ -137,9 +137,9 @@ Axiom is_erased_term_select:
     is_erased_term t2 ->
     is_erased_term (select t1 t2).
 
-#[global]
+#[export]
 Hint Resolve wf_select: wf.
-#[global]
+#[export]
 Hint Resolve is_erased_term_select: erased.
 
 Lemma open_tdots:
@@ -230,9 +230,9 @@ Axiom select_update:
   forall key old_tree tree,
     select key (update old_tree key tree) = tree.
 
-#[global]
+#[export]
 Hint Resolve pfv_update: pfv.
-#[global]
+#[export]
 Hint Resolve wf_update: wf.
-#[global]
+#[export]
 Hint Resolve is_erased_term_update: erased.

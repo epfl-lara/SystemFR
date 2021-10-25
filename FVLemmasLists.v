@@ -15,7 +15,7 @@ Proof.
            unfold closed_term in *; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => solve [ eapply satisfies_closed_mapping; eassumption ]: fv.
 
 Lemma closed_mapping_append1:
@@ -34,9 +34,9 @@ Proof.
   induction l1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => solve [ eapply closed_mapping_append1; eauto 1 ]: b_cmap.
-#[global]
+#[export]
 Hint Extern 50 => solve [ eapply closed_mapping_append2; eauto 1 ]: b_cmap.
 
 Lemma closed_mapping_append:
@@ -48,7 +48,7 @@ Proof.
   induction l1; steps.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => eapply closed_mapping_append: b_cmap.
 
 Lemma satisfies_fv_nil:
@@ -63,7 +63,7 @@ Proof.
   eapply satisfies_closed_mapping; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => eapply satisfies_fv_nil: fv.
 
 Lemma fv_satisfies_nil:
@@ -76,7 +76,7 @@ Proof.
     eauto with fv b_cmap.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => eapply fv_satisfies_nil: fv.
 
 Lemma subset_same_support:
@@ -88,7 +88,7 @@ Proof.
   repeat step || t_termlist || rewrite_any.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate subset_same_support: fv.
 
 Lemma fv_nils3:
@@ -104,7 +104,7 @@ Proof.
     repeat step || t_subset_erase || rewrite erased_context_support.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate fv_nils3: fv.
 
 Lemma fv_subst_different_tag:
@@ -146,7 +146,7 @@ Lemma subst_subst:
 Proof.
   induction t; repeat step || t_equality;
     eauto 4 using lookup_combine_some_none, List.map_length with exfalso;
-    try solve [ rewrite_any; steps; eapply_any; repeat step || list_utils; eauto ];
+    try solve [ rewrite_any; steps; eapply_any; eauto; repeat step || list_utils ];
     try solve [ eapply_anywhere lookup_combine_map; eauto ];
     try solve [ t_lookup; eauto with exfalso ].
 Qed.

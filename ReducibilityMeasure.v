@@ -4,7 +4,7 @@ Require Export SystemFR.StarInversions.
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.RewriteTactics.
 
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm. (* lexicographic ordering *)
 
 Require Import Coq.Program.Program.
@@ -92,6 +92,7 @@ Proof.
   destruct a; repeat step; eauto using acc_ind.
 Qed.
 
+#[export]
 Instance wellfounded_lt_index :
   WellFounded lt_index := wf_lt_index.
 
@@ -184,12 +185,12 @@ Proof.
   unfold get_measure; intros; apply left_lex; auto.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 1 => solve [
   apply left_lex; repeat step || autorewrite with bsize; eauto 2 with lia; t_closer
 ]: measure.
 
-#[global]
+#[export]
 Hint Extern 1 => solve [
   apply right_lex; steps; eauto using lt_index_step
 ]: measure.
@@ -209,5 +210,5 @@ Proof.
     steps; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 1 => solve [ eapply prop_until_at; eauto with measure ]: prop_until.

@@ -3,10 +3,10 @@ Require Export SystemFR.ReducibilityOpenEquivalent.
 Opaque reducible_values.
 Opaque makeFresh.
 
-Hint Rewrite PeanoNat.Nat.leb_le: primitives.
-Hint Rewrite PeanoNat.Nat.leb_gt: primitives.
-Hint Rewrite PeanoNat.Nat.ltb_lt: primitives.
-Hint Rewrite PeanoNat.Nat.ltb_ge: primitives.
+#[export] Hint Rewrite PeanoNat.Nat.leb_le: primitives.
+#[export] Hint Rewrite PeanoNat.Nat.leb_gt: primitives.
+#[export] Hint Rewrite PeanoNat.Nat.ltb_lt: primitives.
+#[export] Hint Rewrite PeanoNat.Nat.ltb_ge: primitives.
 
 Opaque PeanoNat.Nat.leb.
 Opaque PeanoNat.Nat.ltb.
@@ -399,29 +399,29 @@ Lemma open_reducible_primitive_Or:
 Proof. unfold open_reducible; steps ; eauto using reducible_primitive_Or. Qed.
 
 
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_And: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Div: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Eq: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Geq: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Gt: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Leq: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Lt: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Minus: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Mul: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Neq: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Or: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Plus: primitives.
-#[global]
+#[export]
 Hint Resolve open_reducible_primitive_Not: primitives.

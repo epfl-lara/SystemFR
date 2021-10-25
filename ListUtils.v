@@ -29,7 +29,7 @@ Lemma add_mem: forall {T} (s: list T) x, x ∈ (add s x).
   steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve add_mem: sets.
 
 Lemma add_more: forall {T} (s: list T) x y,
@@ -39,7 +39,7 @@ Proof.
   steps.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve add_more: sets.
 
 Definition subset {T} (l1 l2: list T) :=
@@ -62,7 +62,7 @@ Proof.
   induction S; repeat step || rewrite IHS in *.
 Qed.
 
-Hint Rewrite in_remove: list_utils.
+#[export] Hint Rewrite in_remove: list_utils.
 
 Lemma in_diff:
   forall S2 x S1,
@@ -71,7 +71,7 @@ Proof.
   induction S2; repeat step || rewrite IHS2 in * || autorewrite with list_utils in *.
 Qed.
 
-Hint Rewrite in_diff: list_utils.
+#[export] Hint Rewrite in_diff: list_utils.
 
 Lemma app_eq_nil_iff:
   forall A (l l': list A),
@@ -80,7 +80,7 @@ Proof.
   destruct l; steps.
 Qed.
 
-Hint Rewrite List.app_nil_r: list_utils.
+#[export] Hint Rewrite List.app_nil_r: list_utils.
 
 Ltac list_utils :=
   match goal with
@@ -88,6 +88,31 @@ Ltac list_utils :=
   | H: nil = _ ++ _ :: _ |- _ => apply False_ind; apply (app_cons_not_nil _ _ _ H)
   | H: context[_ ∈ _ ++ _] |- _  => rewrite in_app_iff in H
   | |- context[_ ∈ _ ++ _] => rewrite in_app_iff
+  | H: forall n, n ∈ (?s1 ++ ?s2) -> _, 
+    H': ?n ∈ ?s1 |- _ =>
+      poseNew (Mark (H, n) "list_utils1");
+      unshelve epose proof H n _; 
+      repeat light || rewrite in_app_iff
+  | H: forall n, n ∈ (?s1 ++ ?s2) -> _, 
+    H': ?n ∈ ?s2 |- _ =>
+      poseNew (Mark (H, n) "list_utils2");
+      unshelve epose proof H n _;
+      repeat light || rewrite in_app_iff
+  | H: forall n, n ∈ (?s1 ++ ?s2 ++ ?s3) -> _, 
+    H': ?n ∈ ?s1 |- _ =>
+      poseNew (Mark (H, n) "list_utils3");
+      unshelve epose proof H n _;
+      repeat light || rewrite in_app_iff
+  | H: forall n, n ∈ (?s1 ++ ?s2 ++ ?s3) -> _, 
+    H': ?n ∈ ?s2 |- _ =>
+      poseNew (Mark (H, n) "list_utils4");
+      unshelve epose proof H n _; 
+      repeat light || rewrite in_app_iff
+  | H: forall n, n ∈ (?s1 ++ ?s2 ++ ?s3) -> _, 
+    H': ?n ∈ ?s3 |- _ =>
+      poseNew (Mark (H, n) "list_utils5");
+      unshelve epose proof H n _;
+      repeat light || rewrite in_app_iff
   | H: ?x ∈ ?l |- context[map ?f ?l] =>
     poseNew (Mark (f,l,x) "in_map");
     poseNew (in_map _ _ f l x)
@@ -110,10 +135,10 @@ Proof.
   destruct l; steps; eauto with exfalso.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve empty_list: list_utils.
 
-#[global]
+#[export]
 Hint Extern 50 => list_utils: list_utils.
 
 Lemma empty_list_rewrite:

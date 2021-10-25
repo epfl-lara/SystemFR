@@ -176,7 +176,7 @@ with is_annotated_type T :=
 
 
 Fixpoint is_erased_term t :=
-    match t with
+  match t with
   | fvar y term_var => True
   | lvar _ term_var => True
   | notype_err => True

@@ -15,7 +15,7 @@ Proof.
     eauto with erased.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate satisfies_erased_terms: erased.
 
 Lemma satisfies_weaken:

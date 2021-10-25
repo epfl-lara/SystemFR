@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Import Coq.Strings.String.
 Require Import Coq.Arith.PeanoNat.

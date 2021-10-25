@@ -104,7 +104,7 @@ Proof.
   t_closer.
 Qed.
 
-#[global]
+#[export]
  Hint Resolve closed_value_is_value: values.
 
 Lemma reducible_list_match_nil:

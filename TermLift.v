@@ -206,7 +206,7 @@ Inductive term_lift (rel: tree -> tree -> Prop): tree -> tree -> Prop :=
       term_lift rel (typecheck t T) (typecheck t' T')
 .
 
-#[global]
+#[export]
 Hint Constructors term_lift: term_lift.
 
 Lemma term_lift_sym:

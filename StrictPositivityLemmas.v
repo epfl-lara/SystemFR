@@ -1,4 +1,4 @@
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
 Require Import Psatz.
@@ -125,7 +125,7 @@ Ltac t_red_is_val :=
     eauto with b_valid_interp; steps;
     eauto with apply_any.
 
-#[global]
+#[export]
 Hint Extern 50 => solve [ t_red_is_val ]: b_red_is_val.
 
 Lemma strictly_positive_rename_aux:

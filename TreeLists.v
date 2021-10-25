@@ -19,7 +19,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate erased_term_in_list: erased.
 
 Fixpoint annotated_types (l: list (nat * tree)) :=
@@ -37,7 +37,7 @@ Proof.
   induction l; steps; eauto.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate annotated_type_in_list: annot.
 
 Lemma annotated_types_append:

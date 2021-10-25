@@ -1,6 +1,6 @@
 Require Import Coq.Strings.String.
 Require Import Coq.Lists.List.
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 
 Require Export SystemFR.ErasedRec.
 Require Export SystemFR.ErasedNat.

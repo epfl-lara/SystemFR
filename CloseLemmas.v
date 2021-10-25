@@ -91,9 +91,9 @@ Proof.
   induction T; steps; eauto using is_erased_term_close.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve is_erased_term_close: erased.
-#[global]
+#[export]
 Hint Resolve is_erased_type_close: erased.
 
 Lemma is_erased_type_closes:
@@ -104,7 +104,7 @@ Proof.
   induction xs; steps; eauto with erased.
 Qed.
 
-#[global]
+#[export]
 Hint Resolve is_erased_type_closes: erased.
 
 Lemma open_closes:

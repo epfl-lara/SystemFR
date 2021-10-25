@@ -45,9 +45,9 @@ Proof.
   apply annotated_open.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate annotated_open_1: annot.
-#[global]
+#[export]
 Hint Immediate annotated_open_2: annot.
 
 Lemma annotated_topen:
@@ -77,9 +77,9 @@ Proof.
   apply annotated_topen.
 Qed.
 
-#[global]
+#[export]
 Hint Immediate annotated_topen_1: annot.
-#[global]
+#[export]
 Hint Immediate annotated_topen_2: annot.
 
 Lemma annotated_open_build:
@@ -90,7 +90,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => apply annotated_open_build; steps: annot.
 
 Lemma annotated_topen_build:
@@ -101,7 +101,7 @@ Proof.
   induction t; repeat step || eapply_any.
 Qed.
 
-#[global]
+#[export]
 Hint Extern 50 => apply annotated_topen_build; steps: annot.
 
 Ltac t_annotated_open :=

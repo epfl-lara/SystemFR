@@ -4,7 +4,7 @@ Require Export SystemFR.TermList.
 Require Export SystemFR.ReducibilityMeasure.
 Require Export SystemFR.ReducibilityCandidate.
 
-Require Import Equations.Equations.
+From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 Require Import Coq.Classes.RelationClasses.
 
@@ -143,7 +143,7 @@ Equations (noind) reducible_values (ρ: interpretation) (v: tree) (T: tree): Pro
   where "[ ρ ⊨ t : T ]" := (reduces_to (fun v => [ ρ ⊨ v : T ]v) t)
 .
 
-#[global]
+#[export]
 Hint Transparent lt_measure: core.
 
 Ltac reducibility_definition :=
@@ -238,11 +238,13 @@ Proof.
 Qed.
 
 (* see https://github.com/coq/coq/issues/3814 *)
+#[export]
 Instance: subrelation eq Basics.impl.
 Proof.
   steps.
 Qed.
 
+#[export]
 Instance: subrelation eq (Basics.flip Basics.impl).
 Proof.
   steps.

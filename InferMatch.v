@@ -30,6 +30,8 @@ Proof.
   eexists; repeat step || simp_red; eauto using reducible_values_closed.
 Qed.
 
+Opaque List.
+
 Lemma tmatch_value:
   forall ρ v t2 t3 T2 T3,
     valid_interpretation ρ ->
@@ -67,10 +69,13 @@ Proof.
     unfold List_Match.
     apply reducible_union_right; auto.
     apply reducible_exists with h; repeat step || open_none; t_closer.
-    apply reducible_exists with l; repeat step || open_none; t_closer.
-    apply reducible_type_refine with uu; repeat step || open_none; t_closer.
-    apply reducible_value_expr; repeat step || simp_red_goal.
-    apply equivalent_refl; steps; t_closer.
+    + apply reducible_value_expr; repeat step || simp_red_goal.
+    + apply reducible_exists with l; repeat step || open_none; t_closer;
+        eauto using reducible_value_expr.
+      apply reducible_type_refine with uu; repeat step || open_none; t_closer;
+      eauto using reducible_value_expr.
+      apply reducible_value_expr; repeat light || simp_red_goal.
+      apply equivalent_refl; steps; t_closer.
 Qed.
 
 Lemma tmatch:
@@ -154,7 +159,7 @@ Lemma open_tmatch_helper:
     [ Θ; Γ ⊨ list_match t t2 t3 : List_Match t T2 T3 ].
 Proof.
   unfold open_reducible;
-    repeat step || apply tmatch ||
+    repeat step || apply tmatch || t_instantiate_sat3 ||
            rewrite substitute_list_match || rewrite substitute_List_Match;
     t_closer.
 
