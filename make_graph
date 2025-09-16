@@ -1,6 +1,6 @@
 #! /bin/bash
 
-coqdep -Q . SystemFR *.v |
+rocq dep -Q . SystemFR *.v |
   sed '/^[^.]*.vio/d' |
   sed 's/\.vo//g' |
   sed 's/[A-Za-z0-9]\+\.\(glob\|v\.beautified\|required_vo\|v\)//g' |
