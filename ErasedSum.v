@@ -1,7 +1,7 @@
 From Equations Require Import Equations.
 
-Require Import Coq.Arith.PeanoNat.
-Require Import Coq.Lists.List.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ErasedLet2.
 Require Export SystemFR.ReducibilityOpenEquivalent.

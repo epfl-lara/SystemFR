@@ -1,7 +1,7 @@
 Require Export SystemFR.SwapTypeHoles.
 Require Export SystemFR.SwapTermHoles.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 (* measure for ensuring termination of reducible_values *)
 (* see file ReducibilityMeasure for the full measure *)

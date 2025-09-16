@@ -7,7 +7,7 @@ Require Export SystemFR.ListUtils.
 Require Export SystemFR.EqualWithRelation.
 Require Export SystemFR.EquivalentWithRelation.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Open Scope list_scope.
 

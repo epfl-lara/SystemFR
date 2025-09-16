@@ -1,7 +1,7 @@
 Require Export SystemFR.StarInversions.
 Require Export SystemFR.WFLemmas.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Definition loop: tree := notype_tfix (lvar 0 term_var).
 

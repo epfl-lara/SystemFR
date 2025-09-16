@@ -1,10 +1,10 @@
 From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
-Require Import PeanoNat.
-Require Import Psatz.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.IdRelation.
 Require Export SystemFR.RedTactics.

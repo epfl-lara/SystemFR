@@ -1,5 +1,5 @@
-Require Import Coq.Lists.List.
-Require Import Coq.Strings.String.
+From Stdlib Require Import List.
+From Stdlib Require Import String.
 
 Require Export SystemFR.Trees.
 Require Export SystemFR.Syntax.

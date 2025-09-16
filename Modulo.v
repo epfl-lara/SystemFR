@@ -1,6 +1,6 @@
 Require Export SystemFR.Syntax.
 Require Export SystemFR.WFLemmas.
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 Import ListNotations.
 Open Scope bool_scope.
 

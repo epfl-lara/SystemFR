@@ -1,4 +1,4 @@
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.ErasedTermLemmas.

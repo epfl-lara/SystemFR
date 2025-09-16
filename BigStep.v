@@ -9,7 +9,7 @@ Require Import SystemFR.WFLemmas.
 Require Import SystemFR.Evaluator.
 Require Import SystemFR.StarLemmas.
 
-Require Import String.
+From Stdlib Require Import String.
 
 Reserved Notation "t '~~>*' v" (at level 20).
 

@@ -1,11 +1,11 @@
 From Equations Require Import Equations.
 
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Require Export SystemFR.NoTypeFVar.
 Require Export SystemFR.ReducibilityRenaming.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Open Scope list_scope.
 

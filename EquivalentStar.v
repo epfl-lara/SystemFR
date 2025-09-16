@@ -6,9 +6,9 @@ Require Export SystemFR.EqualWithRelation.
 Require Export SystemFR.TermLift.
 Require Export SystemFR.EquivalenceLemmas.
 
-Require Import Coq.Strings.String.
-Require Import Psatz.
-Require Import PeanoNat.
+From Stdlib Require Import String.
+From Stdlib Require Import Psatz.
+From Stdlib Require Import PeanoNat.
 
 Opaque loop.
 Opaque makeFresh.

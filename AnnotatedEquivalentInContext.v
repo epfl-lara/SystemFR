@@ -1,4 +1,4 @@
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 
 Require Export SystemFR.AnnotatedTactics.
 Require Export SystemFR.Judgments.

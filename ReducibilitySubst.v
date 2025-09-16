@@ -1,8 +1,8 @@
 From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ReducibilityUnused.
 Require Export SystemFR.ReducibilityIsCandidate.
@@ -10,8 +10,8 @@ Require Export SystemFR.TOpenTClose.
 Require Export SystemFR.FVLemmasClose.
 Require Export SystemFR.WFLemmasClose.
 
-Require Import PeanoNat.
-Require Import Psatz.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Psatz.
 
 Open Scope list_scope.
 

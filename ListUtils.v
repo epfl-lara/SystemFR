@@ -1,9 +1,9 @@
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
-Require Import Coq.Lists.List.
-Require Import Coq.Strings.String.
+From Stdlib Require Import List.
+From Stdlib Require Import String.
 
-Require Import Coq.Arith.PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.Tactics.
 

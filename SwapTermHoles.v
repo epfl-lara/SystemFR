@@ -1,5 +1,5 @@
-Require Import PeanoNat.
-Require Import Psatz.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.TWFLemmas.
 Require Export SystemFR.ErasedTermLemmas.

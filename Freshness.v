@@ -1,5 +1,5 @@
-Require Import Coq.Lists.List.
-Require Import Psatz.
+From Stdlib Require Import List.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.Tactics.
 Require Export SystemFR.ListUtils.

@@ -1,6 +1,6 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 From Equations Require Import Equations.
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.EquivalentContext.
 Require Export SystemFR.ErasedList.

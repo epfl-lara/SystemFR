@@ -1,6 +1,6 @@
 From Equations Require Import Equations.
 
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 Import ListNotations.
 
 Require Export SystemFR.TypeSugar.

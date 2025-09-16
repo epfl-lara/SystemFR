@@ -1,7 +1,7 @@
 Require Export SystemFR.AssocList.
 Require Export SystemFR.Syntax.
 
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Open Scope list_scope.
 

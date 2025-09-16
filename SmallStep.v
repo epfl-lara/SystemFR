@@ -1,5 +1,5 @@
-Require Import String.
-Require Import Relations.
+From Stdlib Require Import String.
+From Stdlib Require Import Relations.
 
 Require Export SystemFR.PrimitiveSize.
 Require Export SystemFR.PrimitiveRecognizers.

@@ -1,6 +1,6 @@
 From Equations Require Import Equations.
-Require Import Coq.Lists.List.
-Require Import Coq.Arith.PeanoNat.
+From Stdlib Require Import List.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.ReducibilityEquivalent.
 Require Export SystemFR.ErasedArrow.
@@ -9,7 +9,7 @@ Require Export SystemFR.ErasedQuant.
 Require Export SystemFR.ErasedNat.
 Require Export SystemFR.ErasedPrimitive.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Opaque reducible_values.
 Opaque makeFresh.

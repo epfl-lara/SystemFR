@@ -1,9 +1,9 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ListSetLemmas.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Close Scope string_scope.
 
@@ -507,7 +507,7 @@ Proof.
 Qed.
 
 Ltac list_utils2 :=
-  rewrite map_length in * || rewrite support_nil in * || rewrite in_map_iff in * ||
+  rewrite length_map in * || rewrite support_nil in * || rewrite in_map_iff in * ||
   rewrite range_append in * || rewrite range_combine in * ||
   rewrite List.map_map in * || rewrite support_combine in * ||
   rewrite length_support in * || rewrite length_range in * ||

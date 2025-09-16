@@ -1,7 +1,7 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.AssocList.
 Require Export SystemFR.Trees.
@@ -127,7 +127,7 @@ Lemma fv_context_append:
   forall Γ1 Γ2 tag,
     pfv_context (Γ1 ++ Γ2) tag = pfv_context Γ1 tag ++ pfv_context Γ2 tag.
 Proof.
-  induction Γ1; repeat step || rewrite app_assoc_reverse.
+  induction Γ1; repeat step || rewrite <-app_assoc.
 Qed.
 
 #[export] Hint Rewrite fv_context_append: list_utils.

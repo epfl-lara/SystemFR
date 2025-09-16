@@ -1,6 +1,6 @@
 From Equations Require Import Equations.
-Require Import Coq.Lists.List.
-Require Import Coq.Arith.PeanoNat.
+From Stdlib Require Import List.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.ErasedArrow.
 

@@ -4,7 +4,7 @@ Require Export SystemFR.ErasedSetOps.
 
 Require Export SystemFR.TypeSugar.
 
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 
 Opaque reducible_values.
 

@@ -1,7 +1,7 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
-Require Import Coq.Init.Datatypes.
-Require Import Coq.Arith.PeanoNat.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
+From Stdlib Require Import Datatypes.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.Syntax.
 

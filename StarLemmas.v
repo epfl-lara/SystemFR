@@ -1,5 +1,5 @@
-Require Import Coq.Relations.Relations.
-Require Import Coq.Relations.Relation_Operators.
+From Stdlib Require Import Relations.
+From Stdlib Require Import Relation_Operators.
 
 Require Export SystemFR.SmallStep.
 Require Export SystemFR.ListUtils.

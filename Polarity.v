@@ -1,6 +1,6 @@
 From Equations Require Import Equations.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 
 Require Export SystemFR.Syntax.

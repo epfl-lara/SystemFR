@@ -1,5 +1,5 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 
 Require Export SystemFR.FVLemmas.
 Require Export SystemFR.TypeErasureLemmas.
@@ -145,7 +145,7 @@ Lemma subst_subst:
     psubstitute t (combine xs (List.map (fun t' => psubstitute t' l tag) ts)) tag.
 Proof.
   induction t; repeat step || t_equality;
-    eauto 4 using lookup_combine_some_none, List.map_length with exfalso;
+    eauto 4 using lookup_combine_some_none, length_map with exfalso;
     try solve [ rewrite_any; steps; eapply_any; eauto; repeat step || list_utils ];
     try solve [ eapply_anywhere lookup_combine_map; eauto ];
     try solve [ t_lookup; eauto with exfalso ].
@@ -161,7 +161,7 @@ Lemma subst_subst2:
                 (combine xs (List.map (fun t' => psubstitute t' l tag) ts)) tag.
 Proof.
   induction t; repeat step || t_equality;
-    eauto 4 using lookup_combine_some_none, List.map_length with exfalso;
+    eauto 4 using lookup_combine_some_none, length_map with exfalso;
     try solve [ eapply_anywhere lookup_combine_map; eauto ];
     try solve [ rewrite substitute_nothing5; eauto with fv ].
 

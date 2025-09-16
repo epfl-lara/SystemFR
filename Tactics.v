@@ -1,6 +1,6 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
-Require Import Psatz.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
+From Stdlib Require Import Psatz.
 
 Open Scope string.
 
