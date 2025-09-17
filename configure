@@ -1,1 +1,1 @@
-rocq makefile -Q . SystemFR *.v -o Makefile TIMED = true TIMEFMT = "\"\$*: %es\""
+rocq makefile -Q . SystemFR *.v -o Makefile
