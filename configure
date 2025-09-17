@@ -1,1 +1,1 @@
-rocq makefile -Q . SystemFR *.v -o Makefile
+rocq makefile -Q . SystemFR -arg -w -arg -notation-incompatible-prefix *.v -o Makefile
