@@ -18,6 +18,13 @@ opam install rocq-equations.1.3.1+9.0 -y
 
 See [“Installing the Rocq Prover and its packages”](https://rocq-prover.org/docs/using-opam) for more details.
 
+### Docker
+
+Alternatively, you can also use the provided [Dockerfile](./Dockerfile) to build a Docker image with all dependencies installed:
+
+```
+docker build -t systemfr .
+docker run -v "$(pwd)":/theories systemfr
 ```
 
 ### Compiling the Proofs
