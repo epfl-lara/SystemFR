@@ -12,16 +12,16 @@ Require Import SystemFR.CloseLemmas.
 Require Import SystemFR.WFLemmasClose.
 Require Import SystemFR.WFLemmas.
 
-Require Import Coq.Strings.String.
-Require Import Coq.Arith.Compare_dec.
+From Stdlib Require Import String.
+From Stdlib Require Import Compare_dec.
 
-Require Import Program.
+From Stdlib Require Import Program.
 From Equations Require Import Equations.
 (* Require Import Equations.Prop.Subterm. *)
 
-Require Import PeanoNat.
-Require Import Relations.Relation_Operators.
-Require Import Lia.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Relations.Relation_Operators.
+From Stdlib Require Import Lia.
 
 Lemma open_t_size: forall t i nf, tree_size (open i t (fvar nf term_var)) = tree_size t.
 Proof.
@@ -203,7 +203,7 @@ Definition cps_value (t : tree) := cps_rec true t 0.
 
 Opaque cps_rec.
 
-Require Import Coq.Classes.RelationClasses.
+From Stdlib Require Import RelationClasses.
 
 (* see https://github.com/coq/coq/issues/3814 *)
 #[export] Instance: subrelation eq Basics.impl.

@@ -1,4 +1,4 @@
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ReducibilityLemmas.
 Require Export SystemFR.CloseLemmas.
@@ -93,7 +93,7 @@ Proof.
   unfold T_exists_vars in *.
   simp_red_goal; steps; eauto 4 with erased; eauto using reducible_values_closed.
   exists t; repeat step || rewrite open_existss; eauto with erased fv wf.
-  rewrite <- rev_length at 2.
+  rewrite <- length_rev at 2.
   rewrite open_closes; steps; eauto with wf fv.
 Qed.
 
@@ -114,9 +114,9 @@ Proof.
     eauto 2 with step_tactic.
 
   rewrite open_existss in *; eauto with wf.
-  rewrite <- rev_length in * at 2.
+  rewrite <- length_rev in * at 2.
   rewrite open_closes in *; eauto with wf fv.
-  rewrite rev_length in *.
+  rewrite length_rev in *.
 
   unshelve epose proof (IHxs _ _ _ _ _ _ _ _ _ H9); steps;
     eauto 2 with wf step_tactic;

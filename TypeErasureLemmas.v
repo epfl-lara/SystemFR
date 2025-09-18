@@ -1,4 +1,4 @@
-Require Import Coq.Program.Tactics.
+From Stdlib Require Import Program.Tactics.
 
 Require Export SystemFR.Syntax.
 Require Export SystemFR.Tactics.

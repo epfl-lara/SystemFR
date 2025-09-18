@@ -1,5 +1,5 @@
-Require Import Coq.Strings.String.
-Require Import Psatz.
+From Stdlib Require Import String.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.TWFLemmas.

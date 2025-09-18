@@ -15,9 +15,9 @@ Require Export SystemFR.NoTypeFVarErased.
 
 Require Export SystemFR.AssocList.
 
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Opaque strictly_positive.
 

@@ -1,8 +1,8 @@
 From Equations Require Import Equations.
 
-Require Import Coq.Strings.String.
-Require Import Coq.Arith.PeanoNat.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ReducibilityOpenEquivalent.
 

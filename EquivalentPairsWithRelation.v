@@ -1,4 +1,4 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Require Export SystemFR.AssocList.
 Require Export SystemFR.Tactics.
@@ -7,7 +7,7 @@ Require Export SystemFR.Trees.
 Require Export SystemFR.Syntax.
 Require Export SystemFR.ListUtils.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Open Scope list_scope.
 

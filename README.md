@@ -4,22 +4,36 @@
 
 ### Description
 
-This project aims to formalize in Coq part of the [Stainless project](https://github.com/epfl-lara/stainless). It describes a call-by-value lambda-calculus and defines a rich type system (based on computations) that describes behaviors of lambda-calculus terms. Supported types include: System F polymorphism, recursive types, infinite intersections, refinement and dependent types, equality types.
+This project aims to formalize in the Rocq Prover part of the [Stainless project](https://github.com/epfl-lara/stainless). It describes a call-by-value lambda-calculus and defines a rich type system (based on computations) that describes behaviors of lambda-calculus terms. Supported types include: System F polymorphism, recursive types, infinite intersections, refinement and dependent types, equality types.
 
 ### Requirements
 
-The proofs require Coq and Coq-Equations, which can be installed using `opam` with the `coq` and `coq-equations` packages. Some instructions are available [here](https://github.com/coq/coq/wiki/Installation-of-Coq-on-Linux) and [there](https://github.com/mattam82/Coq-Equations).
+The proofs require [Rocq](https://rocq-prover.org) and [Rocq-Equations](https://github.com/mattam82/Coq-Equations), which can be installed using `opam`:
 
-* Coq 8.14.0
-* Coq-Equations 1.3.0+8.14
+```
+opam repo add rocq-released https://rocq-prover.org/opam/released
+opam pin add -yn rocq-prover 9.0.0
+opam install rocq-equations.1.3.1+9.0 -y
+```
+
+See [“Installing the Rocq Prover and its packages”](https://rocq-prover.org/docs/using-opam) for more details.
+
+### Docker
+
+Alternatively, you can also use the provided [Dockerfile](./Dockerfile) to build a Docker image with all dependencies installed:
+
+```
+docker build -t systemfr .
+docker run -v "$(pwd)":/theories systemfr
+```
 
 ### Compiling the Proofs
 
-After installing Coq, you can compile the proofs using:
+After installing Rocq, you can compile the proofs using:
 
 ```
 ./configure
-make -j4     # should take around 25 minutes
+make -j8     # should take around 10 minutes
 ```
 
 ### Overview of the proofs

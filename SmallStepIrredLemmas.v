@@ -1,6 +1,6 @@
 Require Export SystemFR.StarInversions.
 
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 (** Lemmas about operational semantics and stuck terms.              **)
 (** At the moment, this file is not used in the rest of the proofs . **)

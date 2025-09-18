@@ -1,5 +1,5 @@
-Require Import Coq.Strings.String.
-Require Import PeanoNat.
+From Stdlib Require Import String.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.StarLemmas.

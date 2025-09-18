@@ -1,4 +1,4 @@
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.StarInversions.
 Require Export SystemFR.SizeLemmas.
@@ -7,7 +7,7 @@ Require Export SystemFR.RewriteTactics.
 From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm. (* lexicographic ordering *)
 
-Require Import Coq.Program.Program.
+From Stdlib Require Import Program.Program.
 
 (* Lexicographic order used for the termination argument of reducibility *)
 (* Follows the lexicographic order definition given in Equations *)

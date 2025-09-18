@@ -1,4 +1,4 @@
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.WFLemmas.
 Require Export SystemFR.ErasedTermLemmas.
@@ -357,7 +357,7 @@ Lemma shift_twice:
     shift k (shift k C i) j = shift k C (i + j).
 Proof.
   induction C;
-    repeat step || rewrite Plus.plus_assoc_reverse; eauto with lia.
+    repeat step || rewrite <- Nat.add_assoc; eauto with lia.
 Qed.
 
 Lemma open_shift_open:

@@ -1,11 +1,11 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Require Export SystemFR.AssocList.
 Require Export SystemFR.Tactics.
 
 Require Export SystemFR.ReducibilityCandidate.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Open Scope list_scope.
 

@@ -1,10 +1,10 @@
 From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ReducibilityIsCandidate.
 Require Export SystemFR.StrictPositivityLemmas.

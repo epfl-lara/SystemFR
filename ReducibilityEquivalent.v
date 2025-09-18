@@ -1,6 +1,6 @@
 Require Import Equations.Prop.Subterm.
 
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Require Export SystemFR.ReducibilityOpenEquivalent.
 

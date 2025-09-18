@@ -1,6 +1,6 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 Require Import Equations.Prop.Subterm.
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.ReducibilityRenaming.
 Require Export SystemFR.EquivalenceLemmas2.

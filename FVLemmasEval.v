@@ -1,4 +1,4 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 From Equations Require Import Equations.
 
 Require Export SystemFR.FVLemmas.

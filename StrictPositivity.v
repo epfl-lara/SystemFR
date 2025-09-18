@@ -1,7 +1,7 @@
 From Equations Require Import Equations.
-Require Import Coq.Classes.RelationClasses.
+From Stdlib Require Import RelationClasses.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.SizeLemmas.
 Require Export SystemFR.NoTypeFVar.

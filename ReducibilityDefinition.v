@@ -1,4 +1,4 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Require Export SystemFR.TermList.
 Require Export SystemFR.ReducibilityMeasure.
@@ -6,9 +6,9 @@ Require Export SystemFR.ReducibilityCandidate.
 
 From Equations Require Import Equations.
 Require Import Equations.Prop.Subterm.
-Require Import Coq.Classes.RelationClasses.
+From Stdlib Require Import RelationClasses.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Definition reduces_to (P: tree -> Prop) (t: tree) :=
   closed_term t /\

@@ -1,6 +1,6 @@
-Require Import PeanoNat.
-Require Import Psatz.
-Require Import Coq.Lists.List.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Psatz.
+From Stdlib Require Import List.
 
 Require Export SystemFR.AssocList.
 Require Export SystemFR.SubstitutionLemmas.
@@ -62,7 +62,7 @@ Proof.
   - unfold functional, equivalent_subst; exists nil; steps.
   - unshelve epose proof (@exists_last _ l _);
       repeat step || destruct_refinement.
-    unshelve epose proof (IHn x _); repeat step || rewrite app_length in *; try lia.
+    unshelve epose proof (IHn x _); repeat step || rewrite length_app in *; try lia.
     exists (l' ++ (n0, get_or_else (lookup Nat.eq_dec l' n0) t) :: nil);
       repeat step || apply equivalent_subst_snoc || list_utils || list_utils2;
       eauto 2 using functional_get_or_else.

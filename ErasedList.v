@@ -141,7 +141,7 @@ Lemma reducible_nil:
     [ ρ ⊨ tnil : List ]v.
 Proof.
   unshelve epose proof (open_reducible_nil nil nil); steps.
-  rewrite (List.app_nil_end ρ).
+  rewrite <- (List.app_nil_r ρ).
   apply reducible_unused_many2; repeat step || apply reducible_expr_value;
     eauto using no_type_fvar_List;
     eauto using cbv_value_nil.

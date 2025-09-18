@@ -4,7 +4,7 @@ Require Export SystemFR.AssocList.
 Require Export SystemFR.NoTypeFVar.
 Require Export SystemFR.EqualWithRelation.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Definition similar_sets (rel: map nat nat) (vars vars': list nat): Prop :=
   forall x y,

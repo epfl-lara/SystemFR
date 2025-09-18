@@ -1,5 +1,5 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ListUtils.
 
@@ -249,7 +249,7 @@ Lemma subset_same:
     B = C ->
     subset A C.
 Proof.
-  intuition.
+  intros; subst; auto.
 Qed.
 
 Lemma subset_singleton:

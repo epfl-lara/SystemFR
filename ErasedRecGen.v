@@ -1,5 +1,5 @@
-Require Import Coq.Strings.String.
-Require Import Coq.Lists.List.
+From Stdlib Require Import String.
+From Stdlib Require Import List.
 From Equations Require Import Equations.
 
 Require Export SystemFR.ErasedRec.
@@ -15,7 +15,7 @@ Require Export SystemFR.StrictPositivitySubst.
 Require Export SystemFR.BaseTypeLemmas.
 Require Export SystemFR.BaseTypeSyntaxLemmas.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Opaque reducible_values.
 Opaque strictly_positive.

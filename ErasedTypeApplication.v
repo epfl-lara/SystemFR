@@ -1,5 +1,5 @@
 From Equations Require Import Equations.
-Require Import Coq.Lists.List.
+From Stdlib Require Import List.
 
 Require Export SystemFR.ReducibilityOpenEquivalent.
 Require Export SystemFR.ErasedTypeRefine.

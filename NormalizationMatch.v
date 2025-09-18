@@ -1,4 +1,4 @@
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Require Export SystemFR.NormalizationSing.
 Require Export SystemFR.SubtypeList.
@@ -130,7 +130,6 @@ Lemma reducibility_subst_equiv:
     [ ρ ⊨ v : psubstitute T ((x, t2) :: nil) term_var ]v.
 Proof.
   intros; repeat rewrite <- (open_close _ _ _ 0) in * by auto.
-  rewrite <- (open_close _ _ _ 0) in H by auto.
   eapply reducibility_open_equivalent; eauto; repeat step;
     eauto with erased wf;
     eauto using fv_close_nil2.

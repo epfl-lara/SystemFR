@@ -1,1 +1,1 @@
-coq_makefile -Q . SystemFR *.v -o Makefile TIMED = true TIMEFMT = "\"\$*: %es\""
+rocq makefile -Q . SystemFR -arg -w -arg -notation-incompatible-prefix *.v -o Makefile

@@ -1,4 +1,4 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 From Equations Require Import Equations.
 
@@ -12,7 +12,7 @@ Require Export SystemFR.TWFLemmas.
 
 Require Export SystemFR.ReducibilityDefinition.
 
-Require Import Psatz.
+From Stdlib Require Import Psatz.
 
 Opaque reducible_values. (* workaround for rewriting speed *)
 

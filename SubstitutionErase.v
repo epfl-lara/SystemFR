@@ -1,7 +1,7 @@
 Require Export SystemFR.TreeLists.
 Require Export SystemFR.ErasedTermLemmas.
 
-Require Import PeanoNat.
+From Stdlib Require Import PeanoNat.
 
 Open Scope list_scope.
 

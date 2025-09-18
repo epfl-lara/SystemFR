@@ -1,6 +1,6 @@
-Require Import Coq.Strings.String.
-Require Import PeanoNat.
-Require Import Psatz.
+From Stdlib Require Import String.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Psatz.
 
 Require Export SystemFR.Syntax.
 

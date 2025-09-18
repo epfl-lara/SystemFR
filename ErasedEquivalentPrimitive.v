@@ -1,5 +1,5 @@
 Require Export SystemFR.ErasedPrimitive.
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 
 Lemma reducible_values_primitive_EqEquiv1:
@@ -15,7 +15,7 @@ Proof.
   unfold equivalent_terms; steps; eauto with erased values wf fv.
 Qed.
 
-Opaque Coq.Init.Wf.Fix_F.
+Opaque Corelib.Init.Wf.Fix_F.
 Opaque  Subterm.FixWf.
 
 Lemma reducible_primitive_EqEquiv1:

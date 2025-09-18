@@ -4,7 +4,7 @@ Require Export SystemFR.Notations.
 
 Require Export SystemFR.SmallStep.
 
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 Open Scope bool_scope.
 
 (* Helpers *)

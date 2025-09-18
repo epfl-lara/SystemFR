@@ -1,8 +1,8 @@
 Require Export SystemFR.TWFLemmas.
 Require Export SystemFR.ErasedTermLemmas.
 
-Require Import PeanoNat.
-Require Import Psatz.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Import Psatz.
 
 Opaque PeanoNat.Nat.eq_dec.
 

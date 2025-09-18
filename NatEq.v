@@ -1,4 +1,4 @@
-Require Import Coq.Strings.String.
+From Stdlib Require Import String.
 
 Require Export SystemFR.EquivalentContext.
 Require Export SystemFR.StepTactics.
